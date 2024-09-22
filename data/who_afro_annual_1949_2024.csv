@@ -1,0 +1,1212 @@
+"country","iso_code","year","cases_total","deaths_total"
+"Algeria","DZA",1971,1332,110
+"Algeria","DZA",1972,646,71
+"Algeria","DZA",1973,605,74
+"Algeria","DZA",1974,738,50
+"Algeria","DZA",1975,1165,118
+"Algeria","DZA",1976,286,30
+"Algeria","DZA",1977,262,9
+"Algeria","DZA",1978,220,13
+"Algeria","DZA",1979,2513,94
+"Algeria","DZA",1980,614,18
+"Algeria","DZA",1983,218,9
+"Algeria","DZA",1984,45,0
+"Algeria","DZA",1987,1507,0
+"Algeria","DZA",1988,699,30
+"Algeria","DZA",1989,393,0
+"Algeria","DZA",1990,1299,20
+"Algeria","DZA",1992,69,0
+"Algeria","DZA",1994,118,4
+"Algeria","DZA",2005,0,0
+"Algeria","DZA",2006,0,0
+"Angola","AGO",1971,1,NA
+"Angola","AGO",1972,268,24
+"Angola","AGO",1973,263,9
+"Angola","AGO",1974,934,34
+"Angola","AGO",1975,88,4
+"Angola","AGO",1977,726,31
+"Angola","AGO",1987,16222,1403
+"Angola","AGO",1988,15500,1542
+"Angola","AGO",1989,17601,925
+"Angola","AGO",1990,9527,809
+"Angola","AGO",1991,8590,582
+"Angola","AGO",1992,3608,184
+"Angola","AGO",1994,3443,187
+"Angola","AGO",1995,3295,248
+"Angola","AGO",1996,1306,42
+"Angola","AGO",2005,0,0
+"Angola","AGO",2006,67257,2722
+"Angola","AGO",2007,18422,513
+"Angola","AGO",2008,10511,243
+"Angola","AGO",2009,2019,88
+"Angola","AGO",2010,1484,30
+"Angola","AGO",2011,1810,110
+"Angola","AGO",2012,1215,98
+"Angola","AGO",2013,6655,86
+"Angola","AGO",2014,213,3
+"Angola","AGO",2016,78,3
+"Angola","AGO",2017,828,43
+"Angola","AGO",2018,1546,25
+"Benin","BEN",1970,175,37
+"Benin","BEN",1971,2133,274
+"Benin","BEN",1972,250,29
+"Benin","BEN",1973,3,2
+"Benin","BEN",1974,73,4
+"Benin","BEN",1975,45,1
+"Benin","BEN",1976,146,14
+"Benin","BEN",1977,2,0
+"Benin","BEN",1978,27,0
+"Benin","BEN",1980,3,0
+"Benin","BEN",1981,2,0
+"Benin","BEN",1982,3,0
+"Benin","BEN",1983,1,0
+"Benin","BEN",1984,1,0
+"Benin","BEN",1986,243,13
+"Benin","BEN",1991,7474,259
+"Benin","BEN",1992,413,17
+"Benin","BEN",1993,10,2
+"Benin","BEN",1994,187,20
+"Benin","BEN",1995,203,12
+"Benin","BEN",1996,6190,203
+"Benin","BEN",1997,796,16
+"Benin","BEN",1998,206,1
+"Benin","BEN",1999,855,25
+"Benin","BEN",2000,468,11
+"Benin","BEN",2001,3943,71
+"Benin","BEN",2002,270,13
+"Benin","BEN",2003,434,11
+"Benin","BEN",2004,642,9
+"Benin","BEN",2005,749,11
+"Benin","BEN",2006,91,1
+"Benin","BEN",2008,985,5
+"Benin","BEN",2009,74,1
+"Benin","BEN",2010,983,8
+"Benin","BEN",2011,755,4
+"Benin","BEN",2012,625,3
+"Benin","BEN",2013,528,6
+"Benin","BEN",2014,832,12
+"Benin","BEN",2016,761,13
+"Benin","BEN",2017,11,0
+"Benin","BEN",2019,50,0
+"Benin","BEN",2020,232,6
+"Benin","BEN",2021,1298,23
+"Botswana","BWA",2005,0,0
+"Botswana","BWA",2006,0,0
+"Botswana","BWA",2008,8,1
+"Botswana","BWA",2009,15,2
+"Burkina Faso","BFA",1970,1,1
+"Burkina Faso","BFA",1971,1761,495
+"Burkina Faso","BFA",1972,1,0
+"Burkina Faso","BFA",1973,1118,249
+"Burkina Faso","BFA",1974,632,66
+"Burkina Faso","BFA",1975,3,3
+"Burkina Faso","BFA",1978,1,0
+"Burkina Faso","BFA",1984,2191,117
+"Burkina Faso","BFA",1985,1149,156
+"Burkina Faso","BFA",1991,537,61
+"Burkina Faso","BFA",1995,1451,113
+"Burkina Faso","BFA",1996,425,58
+"Burkina Faso","BFA",1998,1036,52
+"Burkina Faso","BFA",1999,93,7
+"Burkina Faso","BFA",2000,617,14
+"Burkina Faso","BFA",2001,477,7
+"Burkina Faso","BFA",2003,1,NA
+"Burkina Faso","BFA",2005,1050,16
+"Burkina Faso","BFA",2006,0,0
+"Burkina Faso","BFA",2008,0,0
+"Burkina Faso","BFA",2011,20,2
+"Burkina Faso","BFA",2012,143,7
+"Burkina Faso","BFA",2021,3,0
+"Burundi","BDI",1978,8297,248
+"Burundi","BDI",1979,915,31
+"Burundi","BDI",1980,2039,28
+"Burundi","BDI",1981,582,11
+"Burundi","BDI",1982,415,9
+"Burundi","BDI",1983,512,35
+"Burundi","BDI",1984,180,10
+"Burundi","BDI",1985,259,15
+"Burundi","BDI",1990,82,NA
+"Burundi","BDI",1991,3,NA
+"Burundi","BDI",1992,479,29
+"Burundi","BDI",1993,78,0
+"Burundi","BDI",1994,562,41
+"Burundi","BDI",1995,2297,NA
+"Burundi","BDI",1996,418,NA
+"Burundi","BDI",1997,1959,95
+"Burundi","BDI",1998,1067,26
+"Burundi","BDI",1999,3440,63
+"Burundi","BDI",2000,1021,16
+"Burundi","BDI",2001,1003,20
+"Burundi","BDI",2002,577,8
+"Burundi","BDI",2003,432,18
+"Burundi","BDI",2004,819,14
+"Burundi","BDI",2005,1309,18
+"Burundi","BDI",2006,886,7
+"Burundi","BDI",2007,365,2
+"Burundi","BDI",2008,234,4
+"Burundi","BDI",2009,355,0
+"Burundi","BDI",2010,333,1
+"Burundi","BDI",2011,1072,1
+"Burundi","BDI",2012,214,1
+"Burundi","BDI",2013,1557,17
+"Burundi","BDI",2014,582,9
+"Burundi","BDI",2015,442,0
+"Burundi","BDI",2016,434,5
+"Burundi","BDI",2017,399,0
+"Burundi","BDI",2018,92,1
+"Burundi","BDI",2019,1145,9
+"Burundi","BDI",2020,277,5
+"Burundi","BDI",2021,11,0
+"Cameroon","CMR",1971,2167,336
+"Cameroon","CMR",1972,362,27
+"Cameroon","CMR",1973,206,16
+"Cameroon","CMR",1974,83,16
+"Cameroon","CMR",1975,3,0
+"Cameroon","CMR",1976,135,27
+"Cameroon","CMR",1978,3,0
+"Cameroon","CMR",1979,16,4
+"Cameroon","CMR",1980,229,23
+"Cameroon","CMR",1981,243,17
+"Cameroon","CMR",1982,5,3
+"Cameroon","CMR",1983,55,18
+"Cameroon","CMR",1984,392,60
+"Cameroon","CMR",1985,1158,103
+"Cameroon","CMR",1986,165,12
+"Cameroon","CMR",1987,94,6
+"Cameroon","CMR",1988,4,0
+"Cameroon","CMR",1989,4,2
+"Cameroon","CMR",1990,16,0
+"Cameroon","CMR",1991,4026,491
+"Cameroon","CMR",1992,1268,66
+"Cameroon","CMR",1993,648,19
+"Cameroon","CMR",1994,527,61
+"Cameroon","CMR",1995,615,21
+"Cameroon","CMR",1996,5796,485
+"Cameroon","CMR",1997,1709,180
+"Cameroon","CMR",1998,4603,316
+"Cameroon","CMR",1999,1584,35
+"Cameroon","CMR",2000,123,29
+"Cameroon","CMR",2001,259,7
+"Cameroon","CMR",2002,66,8
+"Cameroon","CMR",2003,207,36
+"Cameroon","CMR",2004,8005,137
+"Cameroon","CMR",2005,2847,110
+"Cameroon","CMR",2006,922,35
+"Cameroon","CMR",2007,10,1
+"Cameroon","CMR",2008,0,0
+"Cameroon","CMR",2009,804,89
+"Cameroon","CMR",2010,10759,657
+"Cameroon","CMR",2011,22433,783
+"Cameroon","CMR",2012,363,5
+"Cameroon","CMR",2013,29,0
+"Cameroon","CMR",2014,3355,184
+"Cameroon","CMR",2015,124,6
+"Cameroon","CMR",2018,1052,58
+"Cameroon","CMR",2019,1840,93
+"Cameroon","CMR",2020,1890,73
+"Cameroon","CMR",2021,728,23
+"Cape Verde","CPV",1974,303,8
+"Cape Verde","CPV",1975,20,3
+"Cape Verde","CPV",1976,219,17
+"Cape Verde","CPV",1994,128,12
+"Cape Verde","CPV",1995,12913,240
+"Cape Verde","CPV",1996,428,3
+"Cape Verde","CPV",1998,133,1
+"Cape Verde","CPV",2005,0,0
+"Cape Verde","CPV",2006,0,0
+"Central African Republic","CAF",1997,443,75
+"Central African Republic","CAF",1998,22,3
+"Central African Republic","CAF",2004,320,48
+"Central African Republic","CAF",2005,0,0
+"Central African Republic","CAF",2006,0,0
+"Central African Republic","CAF",2011,117,15
+"Central African Republic","CAF",2012,21,0
+"Chad","TCD",1971,8230,2411
+"Chad","TCD",1972,9,3
+"Chad","TCD",1974,338,87
+"Chad","TCD",1991,13915,1344
+"Chad","TCD",1994,1094,43
+"Chad","TCD",1996,7830,448
+"Chad","TCD",1997,8801,443
+"Chad","TCD",1998,4095,144
+"Chad","TCD",1999,217,18
+"Chad","TCD",2001,5244,226
+"Chad","TCD",2003,55,7
+"Chad","TCD",2004,5531,272
+"Chad","TCD",2005,90,14
+"Chad","TCD",2006,1668,71
+"Chad","TCD",2007,0,0
+"Chad","TCD",2009,67,6
+"Chad","TCD",2010,6395,175
+"Chad","TCD",2011,17267,458
+"Chad","TCD",2017,1266,86
+"Chad","TCD",2019,93,4
+"Comoros","COM",1975,2675,238
+"Comoros","COM",1976,5,1
+"Comoros","COM",1998,7300,68
+"Comoros","COM",1999,1180,42
+"Comoros","COM",2000,3297,91
+"Comoros","COM",2001,226,4
+"Comoros","COM",2002,1567,46
+"Comoros","COM",2003,56,0
+"Comoros","COM",2004,1,0
+"Comoros","COM",2005,0,0
+"Comoros","COM",2006,0,0
+"Comoros","COM",2007,1555,29
+"Comoros","COM",2008,4,0
+"Congo","COG",1978,51,14
+"Congo","COG",1979,5,0
+"Congo","COG",1997,275,60
+"Congo","COG",1998,3222,22
+"Congo","COG",1999,4813,20
+"Congo","COG",2000,9,2
+"Congo","COG",2005,0,0
+"Congo","COG",2006,175,10
+"Congo","COG",2007,7785,133
+"Congo","COG",2008,156,4
+"Congo","COG",2009,93,0
+"Congo","COG",2011,762,NA
+"Congo","COG",2012,1181,37
+"Congo","COG",2013,1624,221
+"Congo","COG",2016,15,2
+"Congo","COG",2018,60,3
+"Cote d'Ivoire","CIV",1970,868,39
+"Cote d'Ivoire","CIV",1971,668,9
+"Cote d'Ivoire","CIV",1979,3,0
+"Cote d'Ivoire","CIV",1982,34,0
+"Cote d'Ivoire","CIV",1991,604,116
+"Cote d'Ivoire","CIV",1992,37,7
+"Cote d'Ivoire","CIV",1993,724,42
+"Cote d'Ivoire","CIV",1994,1108,55
+"Cote d'Ivoire","CIV",1995,4993,184
+"Cote d'Ivoire","CIV",1996,1345,22
+"Cote d'Ivoire","CIV",2001,5912,305
+"Cote d'Ivoire","CIV",2002,4188,143
+"Cote d'Ivoire","CIV",2003,1034,50
+"Cote d'Ivoire","CIV",2004,105,9
+"Cote d'Ivoire","CIV",2005,39,6
+"Cote d'Ivoire","CIV",2006,414,15
+"Cote d'Ivoire","CIV",2007,8,1
+"Cote d'Ivoire","CIV",2008,7,1
+"Cote d'Ivoire","CIV",2009,5,2
+"Cote d'Ivoire","CIV",2010,32,0
+"Cote d'Ivoire","CIV",2011,1261,24
+"Cote d'Ivoire","CIV",2012,424,19
+"Cote d'Ivoire","CIV",2013,56,2
+"Cote d'Ivoire","CIV",2014,235,12
+"Cote d'Ivoire","CIV",2015,199,6
+"Cote d'Ivoire","CIV",2021,12,0
+"Democratic Republic of Congo","COD",1978,3481,183
+"Democratic Republic of Congo","COD",1979,5515,511
+"Democratic Republic of Congo","COD",1980,1051,81
+"Democratic Republic of Congo","COD",1981,2379,800
+"Democratic Republic of Congo","COD",1982,10328,693
+"Democratic Republic of Congo","COD",1983,2977,245
+"Democratic Republic of Congo","COD",1984,162,3
+"Democratic Republic of Congo","COD",1985,740,30
+"Democratic Republic of Congo","COD",1986,1059,125
+"Democratic Republic of Congo","COD",1987,1150,218
+"Democratic Republic of Congo","COD",1988,295,32
+"Democratic Republic of Congo","COD",1989,99,6
+"Democratic Republic of Congo","COD",1990,468,61
+"Democratic Republic of Congo","COD",1991,4066,294
+"Democratic Republic of Congo","COD",1992,1949,59
+"Democratic Republic of Congo","COD",1993,986,175
+"Democratic Republic of Congo","COD",1994,58057,4181
+"Democratic Republic of Congo","COD",1995,553,22
+"Democratic Republic of Congo","COD",1996,7886,638
+"Democratic Republic of Congo","COD",1997,2421,326
+"Democratic Republic of Congo","COD",1998,34899,2926
+"Democratic Republic of Congo","COD",1999,12711,783
+"Democratic Republic of Congo","COD",2000,14995,941
+"Democratic Republic of Congo","COD",2001,5728,390
+"Democratic Republic of Congo","COD",2002,31658,1979
+"Democratic Republic of Congo","COD",2003,27272,989
+"Democratic Republic of Congo","COD",2004,7665,228
+"Democratic Republic of Congo","COD",2005,13430,244
+"Democratic Republic of Congo","COD",2006,20642,426
+"Democratic Republic of Congo","COD",2007,28269,600
+"Democratic Republic of Congo","COD",2008,30150,548
+"Democratic Republic of Congo","COD",2009,22899,237
+"Democratic Republic of Congo","COD",2010,13884,182
+"Democratic Republic of Congo","COD",2011,21700,584
+"Democratic Republic of Congo","COD",2012,33661,819
+"Democratic Republic of Congo","COD",2013,26944,491
+"Democratic Republic of Congo","COD",2014,22203,372
+"Democratic Republic of Congo","COD",2015,19182,276
+"Democratic Republic of Congo","COD",2016,28093,759
+"Democratic Republic of Congo","COD",2017,56190,1190
+"Democratic Republic of Congo","COD",2018,30768,972
+"Democratic Republic of Congo","COD",2019,30304,514
+"Democratic Republic of Congo","COD",2020,19789,354
+"Democratic Republic of Congo","COD",2021,12103,209
+"Equatorial Guinea","GNQ",1984,404,31
+"Equatorial Guinea","GNQ",1985,108,1
+"Equatorial Guinea","GNQ",2004,59,1
+"Equatorial Guinea","GNQ",2005,6391,33
+"Equatorial Guinea","GNQ",2006,0,0
+"Eritrea","ERI",2005,0,0
+"Eritrea","ERI",2006,0,0
+"Eritrea","ERI",2007,119,9
+"Eritrea","ERI",2008,1,0
+"Eswatini","SWZ",1978,2,NA
+"Eswatini","SWZ",1981,238,17
+"Eswatini","SWZ",1982,538,13
+"Eswatini","SWZ",1992,2281,30
+"Eswatini","SWZ",1996,2,0
+"Eswatini","SWZ",1998,7,0
+"Eswatini","SWZ",1999,7,0
+"Eswatini","SWZ",2000,141,16
+"Eswatini","SWZ",2001,5612,107
+"Eswatini","SWZ",2002,134,2
+"Eswatini","SWZ",2003,32,13
+"Eswatini","SWZ",2004,1075,16
+"Eswatini","SWZ",2005,0,0
+"Eswatini","SWZ",2006,18,0
+"Eswatini","SWZ",2007,0,0
+"Eswatini","SWZ",2008,1,0
+"Eswatini","SWZ",2009,19,0
+"Ethiopia","ETH",1970,850,72
+"Ethiopia","ETH",1971,2187,124
+"Ethiopia","ETH",1982,0,0
+"Ethiopia","ETH",2004,16,0
+"Ethiopia","ETH",2005,0,0
+"Ethiopia","ETH",2006,54070,575
+"Ethiopia","ETH",2007,24121,272
+"Ethiopia","ETH",2008,3862,23
+"Ethiopia","ETH",2009,31509,434
+"Ethiopia","ETH",2010,1682,21
+"Ethiopia","ETH",2019,2615,36
+"Ethiopia","ETH",2020,12226,176
+"Ethiopia","ETH",2021,674,7
+"Gabon","GAB",1979,5,2
+"Gabon","GAB",1981,7,0
+"Gabon","GAB",2002,6,NA
+"Gabon","GAB",2003,629,0
+"Gabon","GAB",2005,0,0
+"Gabon","GAB",2006,0,0
+"Gabon","GAB",2008,2,0
+"Gambia","GMB",1985,2,0
+"Gambia","GMB",1994,1,0
+"Gambia","GMB",1995,15,0
+"Gambia","GMB",1996,7,0
+"Gambia","GMB",2005,214,13
+"Gambia","GMB",2006,0,0
+"Gambia","GMB",2007,12,1
+"Gambia","GMB",2008,1,0
+"Ghana","GHA",1970,2733,180
+"Ghana","GHA",1971,13048,641
+"Ghana","GHA",1972,625,32
+"Ghana","GHA",1973,677,39
+"Ghana","GHA",1974,483,37
+"Ghana","GHA",1975,187,10
+"Ghana","GHA",1976,102,0
+"Ghana","GHA",1977,6565,353
+"Ghana","GHA",1978,1853,120
+"Ghana","GHA",1979,1783,113
+"Ghana","GHA",1980,260,21
+"Ghana","GHA",1981,943,62
+"Ghana","GHA",1982,11051,1225
+"Ghana","GHA",1983,14160,819
+"Ghana","GHA",1984,1015,92
+"Ghana","GHA",1985,60,0
+"Ghana","GHA",1990,2937,60
+"Ghana","GHA",1991,13172,409
+"Ghana","GHA",1992,228,23
+"Ghana","GHA",1993,1448,38
+"Ghana","GHA",1994,2267,54
+"Ghana","GHA",1995,4698,93
+"Ghana","GHA",1996,1665,70
+"Ghana","GHA",1997,379,12
+"Ghana","GHA",1998,3426,108
+"Ghana","GHA",1999,9432,260
+"Ghana","GHA",2000,3331,74
+"Ghana","GHA",2001,5487,160
+"Ghana","GHA",2002,3614,65
+"Ghana","GHA",2003,204,4
+"Ghana","GHA",2004,407,6
+"Ghana","GHA",2005,3166,51
+"Ghana","GHA",2006,3357,107
+"Ghana","GHA",2007,179,18
+"Ghana","GHA",2008,1223,25
+"Ghana","GHA",2009,1294,9
+"Ghana","GHA",2010,438,3
+"Ghana","GHA",2011,10628,105
+"Ghana","GHA",2012,9548,100
+"Ghana","GHA",2013,50,0
+"Ghana","GHA",2014,28944,243
+"Ghana","GHA",2015,692,8
+"Ghana","GHA",2016,175,0
+"Ghana","GHA",2019,1,0
+"Ghana","GHA",2021,2,0
+"Guinea","GIN",1970,2000,60
+"Guinea","GIN",1986,286,58
+"Guinea","GIN",1994,31415,671
+"Guinea","GIN",1995,6506,565
+"Guinea","GIN",1996,287,17
+"Guinea","GIN",1998,881,53
+"Guinea","GIN",1999,599,28
+"Guinea","GIN",2000,519,32
+"Guinea","GIN",2001,392,22
+"Guinea","GIN",2002,61,11
+"Guinea","GIN",2003,6,1
+"Guinea","GIN",2004,1516,117
+"Guinea","GIN",2005,3821,107
+"Guinea","GIN",2006,3242,219
+"Guinea","GIN",2007,8546,311
+"Guinea","GIN",2008,513,32
+"Guinea","GIN",2009,42,0
+"Guinea","GIN",2011,3,0
+"Guinea","GIN",2012,7350,133
+"Guinea","GIN",2013,319,32
+"Guinea","GIN",2014,1,0
+"Guinea-Bissau","GNB",1986,200,50
+"Guinea-Bissau","GNB",1987,6000,68
+"Guinea-Bissau","GNB",1994,15296,285
+"Guinea-Bissau","GNB",1995,119,0
+"Guinea-Bissau","GNB",1996,8397,84
+"Guinea-Bissau","GNB",1997,20555,905
+"Guinea-Bissau","GNB",1998,126,2
+"Guinea-Bissau","GNB",2002,842,6
+"Guinea-Bissau","GNB",2003,290,2
+"Guinea-Bissau","GNB",2004,155,3
+"Guinea-Bissau","GNB",2005,25111,399
+"Guinea-Bissau","GNB",2006,37,0
+"Guinea-Bissau","GNB",2007,153,8
+"Guinea-Bissau","GNB",2008,14323,225
+"Guinea-Bissau","GNB",2009,5,0
+"Guinea-Bissau","GNB",2012,3068,22
+"Guinea-Bissau","GNB",2013,969,28
+"Guinea-Bissau","GNB",2014,11,2
+"Kenya","KEN",1971,239,38
+"Kenya","KEN",1972,51,0
+"Kenya","KEN",1974,402,20
+"Kenya","KEN",1975,1093,74
+"Kenya","KEN",1976,1359,59
+"Kenya","KEN",1977,21,0
+"Kenya","KEN",1978,673,17
+"Kenya","KEN",1979,1070,2
+"Kenya","KEN",1980,2808,42
+"Kenya","KEN",1981,2424,108
+"Kenya","KEN",1982,3498,91
+"Kenya","KEN",1983,1049,53
+"Kenya","KEN",1984,14,0
+"Kenya","KEN",1985,1352,102
+"Kenya","KEN",1986,839,45
+"Kenya","KEN",1987,255,12
+"Kenya","KEN",1989,918,32
+"Kenya","KEN",1992,3388,100
+"Kenya","KEN",1994,880,28
+"Kenya","KEN",1995,1547,39
+"Kenya","KEN",1996,482,14
+"Kenya","KEN",1997,17200,555
+"Kenya","KEN",1998,22432,1237
+"Kenya","KEN",1999,11039,350
+"Kenya","KEN",2000,1157,78
+"Kenya","KEN",2001,1001,55
+"Kenya","KEN",2002,291,10
+"Kenya","KEN",2004,870,15
+"Kenya","KEN",2005,816,21
+"Kenya","KEN",2006,870,11
+"Kenya","KEN",2007,1206,67
+"Kenya","KEN",2008,3091,113
+"Kenya","KEN",2009,11425,264
+"Kenya","KEN",2010,3188,63
+"Kenya","KEN",2011,74,2
+"Kenya","KEN",2014,35,9
+"Kenya","KEN",2015,13291,67
+"Kenya","KEN",2016,5866,80
+"Kenya","KEN",2017,4288,82
+"Kenya","KEN",2018,5719,78
+"Kenya","KEN",2019,5208,141
+"Kenya","KEN",2020,447,12
+"Kenya","KEN",2021,38,0
+"Lesotho","LSO",2005,0,0
+"Lesotho","LSO",2006,0,0
+"Liberia","LBR",1970,168,27
+"Liberia","LBR",1971,606,106
+"Liberia","LBR",1972,947,28
+"Liberia","LBR",1973,1336,27
+"Liberia","LBR",1974,512,12
+"Liberia","LBR",1975,704,16
+"Liberia","LBR",1976,646,10
+"Liberia","LBR",1977,512,18
+"Liberia","LBR",1978,422,9
+"Liberia","LBR",1979,438,6
+"Liberia","LBR",1980,2690,55
+"Liberia","LBR",1981,1582,33
+"Liberia","LBR",1982,670,8
+"Liberia","LBR",1983,183,12
+"Liberia","LBR",1984,492,8
+"Liberia","LBR",1985,355,3
+"Liberia","LBR",1986,59,0
+"Liberia","LBR",1987,33,1
+"Liberia","LBR",1988,68,1
+"Liberia","LBR",1989,28,0
+"Liberia","LBR",1991,132,40
+"Liberia","LBR",1994,764,17
+"Liberia","LBR",1995,3420,126
+"Liberia","LBR",1996,8922,169
+"Liberia","LBR",1997,91,0
+"Liberia","LBR",1998,2123,17
+"Liberia","LBR",1999,215,0
+"Liberia","LBR",2000,365,10
+"Liberia","LBR",2001,1062,0
+"Liberia","LBR",2002,1115,0
+"Liberia","LBR",2003,34740,38
+"Liberia","LBR",2004,2786,4
+"Liberia","LBR",2005,3823,18
+"Liberia","LBR",2006,4929,17
+"Liberia","LBR",2007,3063,7
+"Liberia","LBR",2008,1236,3
+"Liberia","LBR",2009,1070,2
+"Liberia","LBR",2010,1546,0
+"Liberia","LBR",2011,1146,NA
+"Liberia","LBR",2012,219,0
+"Liberia","LBR",2013,92,0
+"Liberia","LBR",2014,44,0
+"Liberia","LBR",2018,2,0
+"Liberia","LBR",2021,167,0
+"Madagascar","MDG",1971,2,0
+"Madagascar","MDG",1996,0,0
+"Madagascar","MDG",1999,9973,549
+"Madagascar","MDG",2000,29305,1672
+"Madagascar","MDG",2001,7219,413
+"Madagascar","MDG",2002,27,0
+"Madagascar","MDG",2003,5,0
+"Madagascar","MDG",2005,0,0
+"Madagascar","MDG",2006,0,0
+"Malawi","MWI",1973,371,20
+"Malawi","MWI",1976,19,0
+"Malawi","MWI",1977,577,0
+"Malawi","MWI",1978,263,24
+"Malawi","MWI",1981,261,0
+"Malawi","MWI",1983,487,49
+"Malawi","MWI",1988,6,0
+"Malawi","MWI",1989,8351,16
+"Malawi","MWI",1990,13457,481
+"Malawi","MWI",1991,8088,245
+"Malawi","MWI",1992,298,8
+"Malawi","MWI",1993,25193,524
+"Malawi","MWI",1994,107,11
+"Malawi","MWI",1995,1,0
+"Malawi","MWI",1996,1,0
+"Malawi","MWI",1997,130,15
+"Malawi","MWI",1998,1745,74
+"Malawi","MWI",1999,26508,648
+"Malawi","MWI",2000,2391,56
+"Malawi","MWI",2001,2395,42
+"Malawi","MWI",2002,32618,911
+"Malawi","MWI",2003,2736,34
+"Malawi","MWI",2004,675,4
+"Malawi","MWI",2005,1105,11
+"Malawi","MWI",2006,4148,55
+"Malawi","MWI",2007,475,5
+"Malawi","MWI",2008,831,26
+"Malawi","MWI",2009,5751,125
+"Malawi","MWI",2010,1155,17
+"Malawi","MWI",2011,120,4
+"Malawi","MWI",2012,187,2
+"Malawi","MWI",2015,693,11
+"Malawi","MWI",2016,1792,46
+"Malawi","MWI",2017,344,5
+"Malawi","MWI",2018,812,27
+"Malawi","MWI",2019,23,0
+"Malawi","MWI",2020,3,0
+"Malawi","MWI",2021,2,0
+"Mali","MLI",1970,2665,201
+"Mali","MLI",1971,4792,1321
+"Mali","MLI",1972,2,0
+"Mali","MLI",1973,219,32
+"Mali","MLI",1974,130,21
+"Mali","MLI",1984,1795,406
+"Mali","MLI",1985,3759,838
+"Mali","MLI",1986,1916,151
+"Mali","MLI",1987,352,84
+"Mali","MLI",1995,2191,231
+"Mali","MLI",1996,5723,761
+"Mali","MLI",1997,6,3
+"Mali","MLI",1999,6,3
+"Mali","MLI",2000,1885,51
+"Mali","MLI",2001,67,9
+"Mali","MLI",2002,18,2
+"Mali","MLI",2003,1455,119
+"Mali","MLI",2004,2839,205
+"Mali","MLI",2005,1178,76
+"Mali","MLI",2006,7,0
+"Mali","MLI",2008,153,5
+"Mali","MLI",2011,2220,95
+"Mali","MLI",2012,219,19
+"Mali","MLI",2013,23,2
+"Mali","MLI",2021,12,4
+"Mauritania","MRT",1971,1139,53
+"Mauritania","MRT",1972,148,24
+"Mauritania","MRT",1973,150,22
+"Mauritania","MRT",1984,166,15
+"Mauritania","MRT",1985,259,20
+"Mauritania","MRT",1986,3734,113
+"Mauritania","MRT",1987,1578,101
+"Mauritania","MRT",1988,575,38
+"Mauritania","MRT",1989,700,27
+"Mauritania","MRT",1996,4534,148
+"Mauritania","MRT",1997,462,7
+"Mauritania","MRT",2002,80,0
+"Mauritania","MRT",2003,34,8
+"Mauritania","MRT",2005,4132,70
+"Mauritania","MRT",2006,25,0
+"Mauritania","MRT",2007,3,0
+"Mauritania","MRT",2011,46,3
+"Mauritius","MUS",2005,0,0
+"Mauritius","MUS",2006,0,0
+"Mozambique","MOZ",1973,453,87
+"Mozambique","MOZ",1974,1018,138
+"Mozambique","MOZ",1975,11,3
+"Mozambique","MOZ",1976,3,2
+"Mozambique","MOZ",1977,18,3
+"Mozambique","MOZ",1979,4564,547
+"Mozambique","MOZ",1980,1212,85
+"Mozambique","MOZ",1981,1753,132
+"Mozambique","MOZ",1982,2301,199
+"Mozambique","MOZ",1983,10745,447
+"Mozambique","MOZ",1984,521,11
+"Mozambique","MOZ",1985,3,0
+"Mozambique","MOZ",1986,1,0
+"Mozambique","MOZ",1989,371,12
+"Mozambique","MOZ",1990,4152,194
+"Mozambique","MOZ",1991,7847,328
+"Mozambique","MOZ",1992,30802,727
+"Mozambique","MOZ",1993,19803,507
+"Mozambique","MOZ",1994,692,27
+"Mozambique","MOZ",1996,0,0
+"Mozambique","MOZ",1997,8739,259
+"Mozambique","MOZ",1998,42672,1353
+"Mozambique","MOZ",1999,44329,1194
+"Mozambique","MOZ",2000,17649,238
+"Mozambique","MOZ",2001,8794,102
+"Mozambique","MOZ",2002,24375,342
+"Mozambique","MOZ",2003,13758,102
+"Mozambique","MOZ",2004,20080,110
+"Mozambique","MOZ",2005,2226,24
+"Mozambique","MOZ",2006,6306,29
+"Mozambique","MOZ",2007,2622,22
+"Mozambique","MOZ",2008,9087,102
+"Mozambique","MOZ",2009,19679,155
+"Mozambique","MOZ",2010,7430,117
+"Mozambique","MOZ",2011,1279,5
+"Mozambique","MOZ",2012,647,7
+"Mozambique","MOZ",2013,1869,19
+"Mozambique","MOZ",2014,480,1
+"Mozambique","MOZ",2015,8739,64
+"Mozambique","MOZ",2016,883,2
+"Mozambique","MOZ",2017,5892,10
+"Mozambique","MOZ",2018,910,0
+"Mozambique","MOZ",2019,7010,8
+"Mozambique","MOZ",2020,3787,4
+"Mozambique","MOZ",2021,5072,21
+"Namibia","NAM",2005,0,0
+"Namibia","NAM",2006,185,5
+"Namibia","NAM",2007,14,0
+"Namibia","NAM",2008,3496,38
+"Namibia","NAM",2009,159,3
+"Namibia","NAM",2013,3,0
+"Namibia","NAM",2014,485,13
+"Niger","NER",1970,16,8
+"Niger","NER",1971,9265,2344
+"Niger","NER",1972,51,12
+"Niger","NER",1973,121,16
+"Niger","NER",1974,286,75
+"Niger","NER",1981,7,0
+"Niger","NER",1984,3788,308
+"Niger","NER",1989,166,22
+"Niger","NER",1991,3238,367
+"Niger","NER",1994,732,83
+"Niger","NER",1995,264,15
+"Niger","NER",1996,3957,206
+"Niger","NER",1997,259,13
+"Niger","NER",1999,1186,85
+"Niger","NER",2000,225,38
+"Niger","NER",2001,81,1
+"Niger","NER",2002,236,12
+"Niger","NER",2003,292,11
+"Niger","NER",2004,2178,57
+"Niger","NER",2005,553,55
+"Niger","NER",2006,1232,81
+"Niger","NER",2007,24,2
+"Niger","NER",2008,972,70
+"Niger","NER",2010,1154,66
+"Niger","NER",2011,2324,60
+"Niger","NER",2012,5284,110
+"Niger","NER",2013,585,13
+"Niger","NER",2014,2059,80
+"Niger","NER",2015,51,4
+"Niger","NER",2016,38,6
+"Niger","NER",2018,3900,78
+"Niger","NER",2021,5591,166
+"Nigeria","NGA",1970,15,4
+"Nigeria","NGA",1971,22931,2945
+"Nigeria","NGA",1972,1363,96
+"Nigeria","NGA",1973,157,27
+"Nigeria","NGA",1975,38,1
+"Nigeria","NGA",1976,112,25
+"Nigeria","NGA",1977,376,10
+"Nigeria","NGA",1978,197,20
+"Nigeria","NGA",1979,293,4
+"Nigeria","NGA",1980,138,25
+"Nigeria","NGA",1981,107,18
+"Nigeria","NGA",1982,248,18
+"Nigeria","NGA",1983,178,2
+"Nigeria","NGA",1984,1667,185
+"Nigeria","NGA",1985,30,0
+"Nigeria","NGA",1986,91,23
+"Nigeria","NGA",1987,1290,111
+"Nigeria","NGA",1988,137,10
+"Nigeria","NGA",1989,1078,61
+"Nigeria","NGA",1991,59478,7654
+"Nigeria","NGA",1992,8687,686
+"Nigeria","NGA",1993,4160,266
+"Nigeria","NGA",1994,2859,313
+"Nigeria","NGA",1995,1059,87
+"Nigeria","NGA",1996,12374,1193
+"Nigeria","NGA",1997,1322,134
+"Nigeria","NGA",1998,3464,187
+"Nigeria","NGA",1999,26358,2085
+"Nigeria","NGA",2000,2799,43
+"Nigeria","NGA",2001,2312,119
+"Nigeria","NGA",2002,5429,154
+"Nigeria","NGA",2003,1933,87
+"Nigeria","NGA",2004,3186,185
+"Nigeria","NGA",2005,4477,174
+"Nigeria","NGA",2006,2028,127
+"Nigeria","NGA",2007,1661,48
+"Nigeria","NGA",2008,5410,247
+"Nigeria","NGA",2009,13691,431
+"Nigeria","NGA",2010,44456,1712
+"Nigeria","NGA",2011,23377,742
+"Nigeria","NGA",2012,597,18
+"Nigeria","NGA",2013,6600,229
+"Nigeria","NGA",2014,35996,755
+"Nigeria","NGA",2015,5290,186
+"Nigeria","NGA",2016,768,32
+"Nigeria","NGA",2017,12174,288
+"Nigeria","NGA",2018,45037,836
+"Nigeria","NGA",2019,2486,43
+"Nigeria","NGA",2020,596,47
+"Nigeria","NGA",2021,111062,3604
+"Rwanda","RWA",1978,838,48
+"Rwanda","RWA",1979,5,0
+"Rwanda","RWA",1980,30,4
+"Rwanda","RWA",1981,24,1
+"Rwanda","RWA",1982,201,2
+"Rwanda","RWA",1983,54,5
+"Rwanda","RWA",1984,161,13
+"Rwanda","RWA",1985,21,0
+"Rwanda","RWA",1986,226,7
+"Rwanda","RWA",1987,101,6
+"Rwanda","RWA",1988,70,3
+"Rwanda","RWA",1989,1,0
+"Rwanda","RWA",1991,679,35
+"Rwanda","RWA",1992,503,35
+"Rwanda","RWA",1993,568,34
+"Rwanda","RWA",1994,10,0
+"Rwanda","RWA",1995,3,0
+"Rwanda","RWA",1996,106,10
+"Rwanda","RWA",1997,274,16
+"Rwanda","RWA",1998,3220,74
+"Rwanda","RWA",1999,327,49
+"Rwanda","RWA",2000,1235,8
+"Rwanda","RWA",2001,157,2
+"Rwanda","RWA",2003,12,0
+"Rwanda","RWA",2004,586,0
+"Rwanda","RWA",2005,89,0
+"Rwanda","RWA",2006,405,21
+"Rwanda","RWA",2007,1453,21
+"Rwanda","RWA",2008,23,0
+"Rwanda","RWA",2009,67,0
+"Rwanda","RWA",2012,9,0
+"Rwanda","RWA",2016,355,0
+"Rwanda","RWA",2021,74,0
+"Sao Tome and Principe","STP",1989,3953,64
+"Sao Tome and Principe","STP",1990,804,9
+"Sao Tome and Principe","STP",1991,3,1
+"Sao Tome and Principe","STP",2005,1966,33
+"Sao Tome and Principe","STP",2006,926,9
+"Sao Tome and Principe","STP",2007,90,0
+"Sao Tome and Principe","STP",2008,119,4
+"Senegal","SEN",1971,265,60
+"Senegal","SEN",1972,379,37
+"Senegal","SEN",1978,315,8
+"Senegal","SEN",1979,103,3
+"Senegal","SEN",1981,428,0
+"Senegal","SEN",1984,728,94
+"Senegal","SEN",1985,2988,474
+"Senegal","SEN",1986,476,63
+"Senegal","SEN",1987,3150,288
+"Senegal","SEN",1988,390,1
+"Senegal","SEN",1995,3332,160
+"Senegal","SEN",1996,16107,765
+"Senegal","SEN",1997,371,11
+"Senegal","SEN",2004,1227,10
+"Senegal","SEN",2005,31719,458
+"Senegal","SEN",2006,365,10
+"Senegal","SEN",2007,3984,24
+"Senegal","SEN",2008,1283,20
+"Senegal","SEN",2009,4,0
+"Senegal","SEN",2010,3,0
+"Senegal","SEN",2011,5,NA
+"Senegal","SEN",2012,1,0
+"Seychelles","SYC",2005,0,0
+"Seychelles","SYC",2006,0,0
+"Seychelles","SYC",2007,178,1
+"Seychelles","SYC",2008,0,0
+"Sierra Leone","SLE",1970,293,74
+"Sierra Leone","SLE",1971,211,13
+"Sierra Leone","SLE",1977,12,0
+"Sierra Leone","SLE",1986,8957,669
+"Sierra Leone","SLE",1987,557,30
+"Sierra Leone","SLE",1994,9709,623
+"Sierra Leone","SLE",1995,10285,447
+"Sierra Leone","SLE",1998,2096,57
+"Sierra Leone","SLE",1999,863,5
+"Sierra Leone","SLE",2004,513,42
+"Sierra Leone","SLE",2005,6,0
+"Sierra Leone","SLE",2006,2560,99
+"Sierra Leone","SLE",2007,2219,84
+"Sierra Leone","SLE",2008,62,1
+"Sierra Leone","SLE",2012,23124,299
+"Sierra Leone","SLE",2013,377,32
+"Somalia","SOM",1970,43,10
+"Somalia","SOM",1971,89,10
+"Somalia","SOM",1985,10199,1589
+"Somalia","SOM",1986,15980,1945
+"Somalia","SOM",1994,28334,1206
+"Somalia","SOM",1995,9255,191
+"Somalia","SOM",1996,10274,464
+"Somalia","SOM",1997,6814,252
+"Somalia","SOM",1998,4417,196
+"Somalia","SOM",1999,17757,693
+"Somalia","SOM",2000,7496,563
+"Somalia","SOM",2001,2567,93
+"Somalia","SOM",2002,2775,159
+"Somalia","SOM",2003,11020,56
+"Somalia","SOM",2004,4490,26
+"Somalia","SOM",2007,41643,1182
+"Somalia","SOM",2008,1281,16
+"Somalia","SOM",2009,208,3
+"Somalia","SOM",2010,3510,103
+"Somalia","SOM",2011,77636,1130
+"Somalia","SOM",2012,22576,200
+"Somalia","SOM",2013,6864,140
+"Somalia","SOM",2014,2820,NA
+"Somalia","SOM",2015,7536,84
+"Somalia","SOM",2016,15619,548
+"Somalia","SOM",2017,75414,1004
+"Somalia","SOM",2018,6761,45
+"Somalia","SOM",2019,3100,4
+"Somalia","SOM",2020,6414,44
+"Somalia","SOM",2021,4342,32
+"South Africa","ZAF",1973,1,0
+"South Africa","ZAF",1974,37,0
+"South Africa","ZAF",1979,2,0
+"South Africa","ZAF",1980,859,16
+"South Africa","ZAF",1981,4180,52
+"South Africa","ZAF",1982,11968,224
+"South Africa","ZAF",1983,4715,63
+"South Africa","ZAF",1984,1182,20
+"South Africa","ZAF",1985,2742,4
+"South Africa","ZAF",1986,120,1
+"South Africa","ZAF",1987,37,0
+"South Africa","ZAF",1991,10,0
+"South Africa","ZAF",1992,11,0
+"South Africa","ZAF",1993,78,2
+"South Africa","ZAF",1994,4,0
+"South Africa","ZAF",1998,20,1
+"South Africa","ZAF",1999,68,2
+"South Africa","ZAF",2000,19667,68
+"South Africa","ZAF",2001,106159,232
+"South Africa","ZAF",2002,10004,32
+"South Africa","ZAF",2003,3901,45
+"South Africa","ZAF",2004,2767,35
+"South Africa","ZAF",2005,3503,28
+"South Africa","ZAF",2006,0,0
+"South Africa","ZAF",2008,3907,22
+"South Africa","ZAF",2009,10520,57
+"South Africa","ZAF",2013,1,0
+"South Sudan","SSD",2014,6421,167
+"South Sudan","SSD",2015,1818,47
+"South Sudan","SSD",2016,4295,82
+"South Sudan","SSD",2017,16088,353
+"Tanzania","TZA",1974,10,6
+"Tanzania","TZA",1977,297,26
+"Tanzania","TZA",1978,6608,733
+"Tanzania","TZA",1979,2559,305
+"Tanzania","TZA",1980,5196,587
+"Tanzania","TZA",1981,4241,330
+"Tanzania","TZA",1982,4071,324
+"Tanzania","TZA",1983,1816,127
+"Tanzania","TZA",1984,2600,338
+"Tanzania","TZA",1985,1984,250
+"Tanzania","TZA",1986,1231,215
+"Tanzania","TZA",1987,1892,232
+"Tanzania","TZA",1988,5267,580
+"Tanzania","TZA",1989,2150,232
+"Tanzania","TZA",1990,2230,81
+"Tanzania","TZA",1991,5676,572
+"Tanzania","TZA",1992,18526,2173
+"Tanzania","TZA",1993,792,74
+"Tanzania","TZA",1994,2240,155
+"Tanzania","TZA",1995,2957,96
+"Tanzania","TZA",1996,1464,36
+"Tanzania","TZA",1997,40249,2231
+"Tanzania","TZA",1998,14488,608
+"Tanzania","TZA",1999,12266,584
+"Tanzania","TZA",2000,4637,156
+"Tanzania","TZA",2001,1300,52
+"Tanzania","TZA",2002,11920,297
+"Tanzania","TZA",2003,710,32
+"Tanzania","TZA",2004,10319,272
+"Tanzania","TZA",2005,2945,94
+"Tanzania","TZA",2006,14297,254
+"Tanzania","TZA",2007,1609,65
+"Tanzania","TZA",2008,2911,88
+"Tanzania","TZA",2009,7700,113
+"Tanzania","TZA",2010,4469,59
+"Tanzania","TZA",2011,942,11
+"Tanzania","TZA",2012,286,4
+"Tanzania","TZA",2013,270,17
+"Tanzania","TZA",2015,11563,144
+"Tanzania","TZA",2016,11360,172
+"Tanzania","TZA",2017,4895,99
+"Tanzania","TZA",2018,4777,84
+"Tanzania","TZA",2021,54,0
+"Togo","TGO",1970,75,3
+"Togo","TGO",1971,335,26
+"Togo","TGO",1972,16,0
+"Togo","TGO",1974,58,8
+"Togo","TGO",1977,132,12
+"Togo","TGO",1978,6,6
+"Togo","TGO",1988,1,0
+"Togo","TGO",1991,2396,81
+"Togo","TGO",1992,753,53
+"Togo","TGO",1993,19,2
+"Togo","TGO",1994,47,5
+"Togo","TGO",1995,65,4
+"Togo","TGO",1996,146,17
+"Togo","TGO",1997,42,7
+"Togo","TGO",1998,3217,221
+"Togo","TGO",1999,667,31
+"Togo","TGO",2000,338,23
+"Togo","TGO",2001,2551,130
+"Togo","TGO",2002,257,14
+"Togo","TGO",2003,384,28
+"Togo","TGO",2004,1080,33
+"Togo","TGO",2005,1320,15
+"Togo","TGO",2006,1159,25
+"Togo","TGO",2007,65,1
+"Togo","TGO",2008,397,3
+"Togo","TGO",2009,218,1
+"Togo","TGO",2010,72,3
+"Togo","TGO",2011,4,0
+"Togo","TGO",2012,61,1
+"Togo","TGO",2013,166,4
+"Togo","TGO",2014,262,11
+"Togo","TGO",2015,35,1
+"Togo","TGO",2020,67,2
+"Togo","TGO",2021,40,5
+"Uganda","UGA",1971,757,30
+"Uganda","UGA",1975,3,0
+"Uganda","UGA",1978,1120,110
+"Uganda","UGA",1979,940,60
+"Uganda","UGA",1980,1539,181
+"Uganda","UGA",1982,190,48
+"Uganda","UGA",1987,140,50
+"Uganda","UGA",1991,279,28
+"Uganda","UGA",1992,5072,104
+"Uganda","UGA",1994,704,39
+"Uganda","UGA",1995,538,66
+"Uganda","UGA",1996,291,40
+"Uganda","UGA",1997,2610,188
+"Uganda","UGA",1998,49514,2064
+"Uganda","UGA",1999,5179,228
+"Uganda","UGA",2000,2807,172
+"Uganda","UGA",2001,247,4
+"Uganda","UGA",2002,2274,133
+"Uganda","UGA",2003,4377,129
+"Uganda","UGA",2004,3380,91
+"Uganda","UGA",2005,4924,98
+"Uganda","UGA",2006,5194,106
+"Uganda","UGA",2007,276,3
+"Uganda","UGA",2008,3726,120
+"Uganda","UGA",2009,1095,23
+"Uganda","UGA",2010,2341,78
+"Uganda","UGA",2012,6326,135
+"Uganda","UGA",2013,748,27
+"Uganda","UGA",2014,309,9
+"Uganda","UGA",2015,1461,33
+"Uganda","UGA",2016,516,11
+"Uganda","UGA",2017,252,0
+"Uganda","UGA",2018,4440,90
+"Uganda","UGA",2019,358,5
+"Uganda","UGA",2020,1521,18
+"Uganda","UGA",2021,173,0
+"Zambia","ZMB",1978,263,36
+"Zambia","ZMB",1979,12,11
+"Zambia","ZMB",1980,57,17
+"Zambia","ZMB",1981,14,0
+"Zambia","ZMB",1982,1403,131
+"Zambia","ZMB",1983,233,19
+"Zambia","ZMB",1989,44,44
+"Zambia","ZMB",1990,3717,315
+"Zambia","ZMB",1991,13154,1091
+"Zambia","ZMB",1992,11659,913
+"Zambia","ZMB",1993,6766,426
+"Zambia","ZMB",1996,2172,42
+"Zambia","ZMB",1997,36,0
+"Zambia","ZMB",1998,171,0
+"Zambia","ZMB",1999,13511,535
+"Zambia","ZMB",2000,4504,303
+"Zambia","ZMB",2001,3109,165
+"Zambia","ZMB",2002,339,12
+"Zambia","ZMB",2003,1049,29
+"Zambia","ZMB",2004,12149,373
+"Zambia","ZMB",2005,1503,7
+"Zambia","ZMB",2006,5360,183
+"Zambia","ZMB",2007,2286,35
+"Zambia","ZMB",2008,2061,39
+"Zambia","ZMB",2009,4712,80
+"Zambia","ZMB",2010,6794,62
+"Zambia","ZMB",2011,330,7
+"Zambia","ZMB",2012,198,2
+"Zambia","ZMB",2017,1794,57
+"Zambia","ZMB",2018,4082,74
+"Zambia","ZMB",2019,447,9
+"Zimbabwe","ZWE",1973,1,NA
+"Zimbabwe","ZWE",1974,37,0
+"Zimbabwe","ZWE",1975,615,33
+"Zimbabwe","ZWE",1976,144,9
+"Zimbabwe","ZWE",1985,144,6
+"Zimbabwe","ZWE",1986,2,NA
+"Zimbabwe","ZWE",1992,2048,105
+"Zimbabwe","ZWE",1993,5385,332
+"Zimbabwe","ZWE",1998,995,44
+"Zimbabwe","ZWE",1999,5637,385
+"Zimbabwe","ZWE",2000,1675,223
+"Zimbabwe","ZWE",2001,650,14
+"Zimbabwe","ZWE",2002,3125,192
+"Zimbabwe","ZWE",2003,1009,35
+"Zimbabwe","ZWE",2004,119,9
+"Zimbabwe","ZWE",2005,516,26
+"Zimbabwe","ZWE",2006,789,61
+"Zimbabwe","ZWE",2007,65,4
+"Zimbabwe","ZWE",2008,60055,2928
+"Zimbabwe","ZWE",2009,68153,2706
+"Zimbabwe","ZWE",2010,951,21
+"Zimbabwe","ZWE",2011,1220,2
+"Zimbabwe","ZWE",2012,23,1
+"Zimbabwe","ZWE",2015,60,0
+"Zimbabwe","ZWE",2016,10,1
+"Zimbabwe","ZWE",2018,10692,65
+"Zimbabwe","ZWE",2019,61,3
+"Benin","BEN",2022,433,2
+"Burkina Faso","BFA",2022,4,0
+"Burundi","BDI",2022,25,0
+"Cameroon","CMR",2022,14431,279
+"Democratic Republic of Congo","COD",2022,18961,298
+"Ethiopia","ETH",2022,846,27
+"Kenya","KEN",2022,3525,64
+"Liberia","LBR",2022,367,0
+"Malawi","MWI",2022,17488,576
+"Mozambique","MOZ",2022,4378,22
+"Nigeria","NGA",2022,23839,597
+"Rwanda","RWA",2022,24,0
+"Somalia","SOM",2022,15653,88
+"South Africa","ZAF",2022,1,0
+"South Sudan","SSD",2022,424,1
+"Zambia","ZMB",2022,34,0
+"Zimbabwe","ZWE",2022,4,1
+"Burundi","BDI",2023,1348,9
+"Cameroon","CMR",2023,6477,209
+"Congo","COG",2023,69,5
+"Democratic Republic of Congo","COD",2023,51970,437
+"Eswatini","SWZ",2023,2,0
+"Ethiopia","ETH",2023,30463,413
+"Kenya","KEN",2023,8926,145
+"Malawi","MWI",2023,41219,1179
+"Mozambique","MOZ",2023,39908,156
+"Nigeria","NGA",2023,3683,128
+"South Africa","ZAF",2023,1391,47
+"South Sudan","SSD",2023,1471,2
+"Togo","TGO",2023,1,0
+"Uganda","UGA",2023,80,10
+"Tanzania","TZA",2023,1068,23
+"Zambia","ZMB",2023,4095,117
+"Zimbabwe","ZWE",2023,14517,320
+"Burundi","BDI",2024,737,3
+"Cameroon","CMR",2024,49,0
+"Comoros","COM",2024,10342,149
+"Democratic Republic of Congo","COD",2024,20964,274
+"Ethiopia","ETH",2024,22889,205
+"Kenya","KEN",2024,432,4
+"Malawi","MWI",2024,252,1
+"Mozambique","MOZ",2024,8132,18
+"Nigeria","NGA",2024,6428,185
+"South Africa","ZAF",2024,11,0
+"Togo","TGO",2024,5,1
+"Uganda","UGA",2024,89,5
+"Tanzania","TZA",2024,4331,73
+"Zambia","ZMB",2024,20219,637
+"Zimbabwe","ZWE",2024,20033,399
+"AFRO Region","AFRO",1970,9902,716
+"AFRO Region","AFRO",1971,72157,11346
+"AFRO Region","AFRO",1972,5118,383
+"AFRO Region","AFRO",1973,5680,620
+"AFRO Region","AFRO",1974,6074,582
+"AFRO Region","AFRO",1975,6650,504
+"AFRO Region","AFRO",1976,3176,194
+"AFRO Region","AFRO",1977,9500,462
+"AFRO Region","AFRO",1978,24638,1589
+"AFRO Region","AFRO",1979,20741,1693
+"AFRO Region","AFRO",1980,18725,1183
+"AFRO Region","AFRO",1981,19415,1581
+"AFRO Region","AFRO",1982,46924,2988
+"AFRO Region","AFRO",1983,37383,1903
+"AFRO Region","AFRO",1984,17504,1711
+"AFRO Region","AFRO",1985,27312,3591
+"AFRO Region","AFRO",1986,35583,3490
+"AFRO Region","AFRO",1987,34358,2610
+"AFRO Region","AFRO",1988,23012,2237
+"AFRO Region","AFRO",1989,35857,1443
+"AFRO Region","AFRO",1990,38607,2030
+"AFRO Region","AFRO",1991,153364,13998
+"AFRO Region","AFRO",1992,92079,5319
+"AFRO Region","AFRO",1993,66658,2443
+"AFRO Region","AFRO",1994,161285,8121
+"AFRO Region","AFRO",1995,70278,2960
+"AFRO Region","AFRO",1996,108117,5935
+"AFRO Region","AFRO",1997,115943,5803
+"AFRO Region","AFRO",1998,211597,9855
+"AFRO Region","AFRO",1999,210820,8707
+"AFRO Region","AFRO",2000,122656,4928
+"AFRO Region","AFRO",2001,173954,2752
+"AFRO Region","AFRO",2002,137860,4551
+"AFRO Region","AFRO",2003,108066,1884
+"AFRO Region","AFRO",2004,95560,2331
+"AFRO Region","AFRO",2005,125018,2230
+"AFRO Region","AFRO",2006,203564,5281
+"AFRO Region","AFRO",2007,152480,3469
+"AFRO Region","AFRO",2008,162082,4956
+"AFRO Region","AFRO",2009,203652,4831
+"AFRO Region","AFRO",2010,113059,3378
+"AFRO Region","AFRO",2011,186638,4147
+"AFRO Region","AFRO",2012,117570,2042
+"AFRO Region","AFRO",2013,56329,1366
+"AFRO Region","AFRO",2014,102467,1882
+"AFRO Region","AFRO",2015,71176,937
+"AFRO Region","AFRO",2016,71058,1762
+"AFRO Region","AFRO",2017,179835,3217
+"AFRO Region","AFRO",2018,120650,2436
+"AFRO Region","AFRO",2019,54741,869
+"AFRO Region","AFRO",2020,47249,741
+"AFRO Region","AFRO",2021,141458,4094
+"AFRO Region","AFRO",2022,100437,1955
+"AFRO Region","AFRO",2023,206688,3200
+"AFRO Region","AFRO",2024,114913,1954

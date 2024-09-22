@@ -1,0 +1,61 @@
+\contentsline {chapter}{}{5}{chapter*.2}%
+\contentsline {section}{Welcome}{5}{section*.3}%
+\contentsline {section}{Contact}{5}{section*.4}%
+\contentsline {section}{Funding}{5}{section*.5}%
+\contentsline {chapter}{\numberline {1}Introduction}{7}{chapter.1}%
+\contentsline {section}{\numberline {1.1}History}{7}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Recent Surge}{7}{section.1.2}%
+\contentsline {section}{\numberline {1.3}GTFCC Goals}{7}{section.1.3}%
+\contentsline {section}{\numberline {1.4}OCV Stockpiles}{7}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Climate Change}{8}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Rationale}{9}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Data}{11}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Historical Incidence and Deaths}{11}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Recent Incidence and Deaths}{11}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Vaccinations}{12}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Human Mobility Data}{12}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Climate Data}{12}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Storms and Floods}{12}{subsection.3.5.1}%
+\contentsline {section}{\numberline {3.6}WASH (Water, Sanitation, and Hygiene)}{13}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Demographics}{13}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Model description}{15}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Transmission dynamics}{15}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Seasonality}{19}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Environmental transmission}{22}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Climate-driven transmission}{22}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Modeling suitability}{24}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Shedding}{26}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}WAter, Sanitation, and Hygiene (WASH)}{26}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Immune dynamics}{27}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Immunity from vaccination}{27}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Immunity from natural infection}{30}{subsection.4.4.2}%
+\contentsline {section}{\numberline {4.5}Spatial dynamics}{32}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Human mobility model}{33}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Estimating the departure process}{34}{subsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.5.3}Estimating the diffusion process}{34}{subsection.4.5.3}%
+\contentsline {subsection}{\numberline {4.5.4}The probability of spatial transmission}{35}{subsection.4.5.4}%
+\contentsline {subsection}{\numberline {4.5.5}The spatial hazard}{35}{subsection.4.5.5}%
+\contentsline {subsection}{\numberline {4.5.6}Coupling among locations}{35}{subsection.4.5.6}%
+\contentsline {section}{\numberline {4.6}The observation process}{38}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Rate of symptomatic infection}{38}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}Suspected cases}{40}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Case fatality rate}{40}{subsection.4.6.3}%
+\contentsline {section}{\numberline {4.7}Demographics}{42}{section.4.7}%
+\contentsline {section}{\numberline {4.8}The reproductive number}{42}{section.4.8}%
+\contentsline {subsection}{\numberline {4.8.1}The generation time distribution}{47}{subsection.4.8.1}%
+\contentsline {section}{\numberline {4.9}Initial conditions}{48}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Model calibration}{48}{section.4.10}%
+\contentsline {section}{\numberline {4.11}Caveats}{48}{section.4.11}%
+\contentsline {section}{\numberline {4.12}Table of parameters}{49}{section.4.12}%
+\contentsline {section}{\numberline {4.13}References}{49}{section.4.13}%
+\contentsline {chapter}{\numberline {5}Scenarios}{51}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Vaccination}{51}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Spatial and Temporal Strategies}{51}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Reactive Vaccination}{51}{subsection.5.1.2}%
+\contentsline {section}{\numberline {5.2}Impacts of Climate Change}{52}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Severe Weather Events}{52}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Long-Term Trends}{52}{subsection.5.2.2}%
+\contentsline {chapter}{\numberline {6}Usage}{53}{chapter.6}%
+\contentsline {chapter}{\numberline {7}News}{55}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Past versions of MOSAIC}{55}{section.7.1}%
+\contentsline {chapter}{\numberline {8}References}{57}{chapter.8}%
