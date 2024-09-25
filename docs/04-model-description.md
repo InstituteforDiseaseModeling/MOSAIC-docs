@@ -106,7 +106,7 @@ Using the model fitting methods described above, and the cluster-based approach 
 <p class="caption">(\#fig:seasonal-all)Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.</p>
 </div>
 
-<table class="table" style="font-size: 11.75px; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">(\#tab:seasonal-table)(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).</caption>
  <thead>
 <tr>
@@ -296,7 +296,7 @@ Since *V. cholerae* is transmitted through fecal contamination of water and othe
 
 To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$) in the environment-to-human force of infection ($\Psi_{jt}$). Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
 
-<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:wash-weights)(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.</caption>
  <thead>
   <tr>
@@ -372,13 +372,13 @@ The evidence for waning immunity comes from 4 cohort studies (Table \@ref(tab:ef
 
 Table: (\#tab:effectiveness-papers)Summary of Effectiveness Data
 
-| Effectiveness| Upper CI| Lower CI| Day (midpoint)| Day (min)| Day (max)|Source                                  |
-|-------------:|--------:|--------:|--------------:|---------:|---------:|:---------------------------------------|
-|         0.873|    0.990|    0.702|           60.0|        NA|        NA|[Azman et al (2016)](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext)|
-|         0.400|    0.600|    0.110|           93.5|         7|       180|[Qadri et al (2016)](https://www.nejm.org/doi/full/10.1056/NEJMoa1510330)|
-|         0.390|    0.520|    0.230|          368.5|         7|       730|[Qadri et al (2018)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(18)30108-7/fulltext)|
-|         0.527|    0.674|    0.314|          435.0|       360|       510|[Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)|
-|         0.447|    0.594|    0.248|          900.0|       720|      1080|[Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)|
+| Effectiveness| Upper CI| Lower CI| Day (midpoint)| Day (min)| Day (max)|Source                 |
+|-------------:|--------:|--------:|--------------:|---------:|---------:|:----------------------|
+|          60.0|    0.873|    0.990|          0.702|        NA|        NA|Azman et al (2016)     |
+|          93.5|    0.400|    0.600|          0.110|         7|       180|Qadri et al (2016)     |
+|         368.5|    0.390|    0.520|          0.230|         7|       730|Qadri et al (2018)     |
+|         435.0|    0.527|    0.674|          0.314|       360|       510|Malembaka et al (2024) |
+|         900.0|    0.447|    0.594|          0.248|       720|      1080|Malembaka et al (2024) |
 
 
 
@@ -433,7 +433,7 @@ $$
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/immune_durability.png" alt="The duration of immunity after natural infection with *V. cholerae*." width="100%" />
+<img src="figures/immune_decay.png" alt="The duration of immunity after natural infection with *V. cholerae*." width="100%" />
 <p class="caption">(\#fig:immune-decay)The duration of immunity after natural infection with *V. cholerae*.</p>
 </div>
 
@@ -448,6 +448,11 @@ The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt
 <img src="figures/mobility_flight_data.png" alt="The average number of air passengers per week in 2017 among all countries." width="100%" />
 <p class="caption">(\#fig:mobility-data)The average number of air passengers per week in 2017 among all countries.</p>
 </div>
+<div class="figure" style="text-align: center">
+<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per week in 2017." width="100%" />
+<p class="caption">(\#fig:mobility-network)A network map showing the average number of air passengers per week in 2017.</p>
+</div>
+
 
 
 ### Human mobility model
@@ -654,7 +659,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 \end{equation}
 
 
-<table class="table table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:cfr)(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
  <thead>
   <tr>
@@ -671,43 +676,93 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 <tbody>
   <tr>
    <td style="text-align:left;"> AFRO Region </td>
-   <td style="text-align:right;"> 563496 </td>
-   <td style="text-align:right;"> 11203 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 1219386 </td>
+   <td style="text-align:right;"> 23215 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.914 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Benin </td>
-   <td style="text-align:right;"> 1731 </td>
-   <td style="text-align:right;"> 25 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:left;"> Angola </td>
+   <td style="text-align:right;"> 2665 </td>
+   <td style="text-align:right;"> 74 </td>
+   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.022 </td>
+   <td style="text-align:right;"> 0.035 </td>
+   <td style="text-align:right;"> 0.010 </td>
    <td style="text-align:right;"> 1.918 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 2121 </td>
-   <td style="text-align:right;"> 12 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 5553 </td>
+   <td style="text-align:right;"> 41 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.010 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.926 </td>
+   <td style="text-align:right;"> 1.908 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Benin </td>
+   <td style="text-align:right;"> 3617 </td>
+   <td style="text-align:right;"> 56 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.906 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Burkina Faso </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.914 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Cote d'Ivoire </td>
+   <td style="text-align:right;"> 446 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 0.040 </td>
+   <td style="text-align:right;"> 0.024 </td>
+   <td style="text-align:right;"> 0.063 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 1.863 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 21685 </td>
-   <td style="text-align:right;"> 511 </td>
-   <td style="text-align:right;"> 0.024 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.905 </td>
+   <td style="text-align:right;"> 29946 </td>
+   <td style="text-align:right;"> 925 </td>
+   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 0.033 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 1.929 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Democratic Republic of Congo </td>
+   <td style="text-align:right;"> 314256 </td>
+   <td style="text-align:right;"> 5705 </td>
+   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.903 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Congo </td>
+   <td style="text-align:right;"> 144 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.914 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Comoros </td>
@@ -720,94 +775,214 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 1.913 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 103998 </td>
-   <td style="text-align:right;"> 1218 </td>
-   <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 0.011 </td>
-   <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.921 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:right;"> 54872 </td>
-   <td style="text-align:right;"> 652 </td>
+   <td style="text-align:right;"> 70755 </td>
+   <td style="text-align:right;"> 877 </td>
    <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 0.011 </td>
+   <td style="text-align:right;"> 0.012 </td>
    <td style="text-align:right;"> 0.013 </td>
    <td style="text-align:right;"> 0.007 </td>
    <td style="text-align:right;"> 1.921 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:right;"> 12921 </td>
-   <td style="text-align:right;"> 213 </td>
-   <td style="text-align:right;"> 0.016 </td>
-   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:left;"> Ghana </td>
+   <td style="text-align:right;"> 29816 </td>
+   <td style="text-align:right;"> 251 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 1.913 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Guinea </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.915 </td>
+   <td style="text-align:right;"> 1.914 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Guinea-Bissau </td>
+   <td style="text-align:right;"> 11 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.914 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kenya </td>
+   <td style="text-align:right;"> 47956 </td>
+   <td style="text-align:right;"> 683 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.925 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Liberia </td>
-   <td style="text-align:right;"> 534 </td>
+   <td style="text-align:right;"> 580 </td>
    <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 1.938 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 58961 </td>
-   <td style="text-align:right;"> 1756 </td>
-   <td style="text-align:right;"> 0.030 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.031 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.900 </td>
+   <td style="text-align:left;"> Mali </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.914 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 57490 </td>
-   <td style="text-align:right;"> 217 </td>
+   <td style="text-align:right;"> 85191 </td>
+   <td style="text-align:right;"> 306 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.003 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.887 </td>
+   <td style="text-align:right;"> 1.882 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Malawi </td>
+   <td style="text-align:right;"> 62654 </td>
+   <td style="text-align:right;"> 1846 </td>
+   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 1.881 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Namibia </td>
+   <td style="text-align:right;"> 485 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.045 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 2.021 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Niger </td>
-   <td style="text-align:right;"> 5591 </td>
-   <td style="text-align:right;"> 166 </td>
-   <td style="text-align:right;"> 0.030 </td>
-   <td style="text-align:right;"> 0.025 </td>
-   <td style="text-align:right;"> 0.034 </td>
+   <td style="text-align:right;"> 11959 </td>
+   <td style="text-align:right;"> 344 </td>
+   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 0.026 </td>
+   <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.892 </td>
+   <td style="text-align:right;"> 1.882 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 145012 </td>
-   <td style="text-align:right;"> 4514 </td>
-   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 249406 </td>
+   <td style="text-align:right;"> 6774 </td>
+   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.891 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rwanda </td>
+   <td style="text-align:right;"> 453 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 1.926 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sudan </td>
+   <td style="text-align:right;"> 362 </td>
+   <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 0.030 </td>
-   <td style="text-align:right;"> 0.032 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.901 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.054 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 1.855 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:right;"> 19995 </td>
-   <td style="text-align:right;"> 120 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 0.005 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 134839 </td>
+   <td style="text-align:right;"> 1849 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 1.906 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> South Sudan </td>
+   <td style="text-align:right;"> 30517 </td>
+   <td style="text-align:right;"> 652 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.913 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Eswatini </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.914 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chad </td>
+   <td style="text-align:right;"> 1359 </td>
+   <td style="text-align:right;"> 90 </td>
+   <td style="text-align:right;"> 0.066 </td>
+   <td style="text-align:right;"> 0.054 </td>
+   <td style="text-align:right;"> 0.081 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 1.857 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Togo </td>
+   <td style="text-align:right;"> 410 </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 0.049 </td>
+   <td style="text-align:right;"> 0.030 </td>
+   <td style="text-align:right;"> 0.074 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 1.855 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Tanzania </td>
+   <td style="text-align:right;"> 38992 </td>
+   <td style="text-align:right;"> 604 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.917 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Uganda </td>
+   <td style="text-align:right;"> 9199 </td>
+   <td style="text-align:right;"> 181 </td>
+   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> South Africa </td>
@@ -820,54 +995,24 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 2.008 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 1895 </td>
-   <td style="text-align:right;"> 3 </td>
-   <td style="text-align:right;"> 0.002 </td>
-   <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.005 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.894 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:right;"> 5453 </td>
-   <td style="text-align:right;"> 96 </td>
-   <td style="text-align:right;"> 0.018 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.914 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:right;"> 342 </td>
-   <td style="text-align:right;"> 15 </td>
-   <td style="text-align:right;"> 0.044 </td>
-   <td style="text-align:right;"> 0.025 </td>
-   <td style="text-align:right;"> 0.071 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 1.863 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 24348 </td>
-   <td style="text-align:right;"> 754 </td>
-   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 30671 </td>
+   <td style="text-align:right;"> 894 </td>
    <td style="text-align:right;"> 0.029 </td>
-   <td style="text-align:right;"> 0.033 </td>
+   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.923 </td>
+   <td style="text-align:right;"> 1.905 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:right;"> 34554 </td>
-   <td style="text-align:right;"> 720 </td>
-   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 45377 </td>
+   <td style="text-align:right;"> 789 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.906 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.903 </td>
   </tr>
 </tbody>
 </table>
@@ -894,7 +1039,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 
 The model includes basic demographic change by using reported birth and death rates for each of the $j$ countries, $b_j$ and $d_j$ respectively. These rates are static and defined by the United Nations Department of Economic and Social Affairs Population Division [World Population Prospects 2024](https://population.un.org/wpp/Download/Standard/CSV/). Values for $b_j$ and $d_j$ are derived from crude rates and converted to birth rate per day and death rate per day (shown in Table \@ref(tab:demographics)).
 
-<table class="table table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:demographics)(\#tab:demographics)Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.</caption>
  <thead>
   <tr>
@@ -1229,7 +1374,7 @@ Here, shape=0.5, rate=0.1, and the mean if given by shape/rate. Previous studies
 <p class="caption">(\#fig:generation)This is generation time</p>
 </div>
 
-<table class="table table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:unnamed-chunk-3)(\#tab:unnamed-chunk-3)Generation Time in Weeks</caption>
  <thead>
   <tr>

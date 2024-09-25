@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.8.31)  18 SEP 2024 10:55
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.8.31)  25 SEP 2024 13:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -982,7 +982,7 @@ File: figures/wash_index_by_country.png Graphic file (type bmp)
 [27]
 
 [28]
-Overfull \hbox (535.37997pt too wide) in paragraph at lines 548--563
+Overfull \hbox (143.90997pt too wide) in paragraph at lines 548--563
  [][] 
  []
 
@@ -992,7 +992,7 @@ Overfull \hbox (535.37997pt too wide) in paragraph at lines 548--563
 File: figures/vaccine_effectiveness.png Graphic file (type bmp)
 <figures/vaccine_effectiveness.png>
 
-Overfull \hbox (6.86914pt too wide) in paragraph at lines 583--584
+Overfull \hbox (6.89923pt too wide) in paragraph at lines 583--584
  [][] 
  []
 
@@ -1006,74 +1006,73 @@ Overfull \hbox (281.69998pt too wide) in paragraph at lines 603--614
 [30]
 
 [31]
-File: figures/immune_durability.png Graphic file (type bmp)
-<figures/immune_durability.png>
+File: figures/immune_decay.png Graphic file (type bmp)
+<figures/immune_decay.png>
 
 
 [32]
 File: figures/mobility_flight_data.png Graphic file (type bmp)
 <figures/mobility_flight_data.png>
+File: figures/mobility_network.png Graphic file (type bmp)
+<figures/mobility_network.png>
 
 
 [33]
 
 [34]
+
+[35]
 File: figures/mobility_travel_prob_tau.png Graphic file (type bmp)
 <figures/mobility_travel_prob_tau.png>
 File: figures/mobility_diffusion_pi.png Graphic file (type bmp)
 <figures/mobility_diffusion_pi.png>
 
 
-[35]
-
 [36]
 
 [37]
-Overfull \hbox (562.07999pt too wide) in paragraph at lines 783--806
+
+[38]
+Overfull \hbox (562.07999pt too wide) in paragraph at lines 791--814
  [][] 
  []
 
 File: figures/proportion_symptomatic.png Graphic file (type bmp)
 <figures/proportion_symptomatic.png>
 
-Overfull \hbox (10.3428pt too wide) in paragraph at lines 812--813
+Overfull \hbox (10.3428pt too wide) in paragraph at lines 820--821
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 812--813
+Underfull \hbox (badness 10000) in paragraph at lines 820--821
 
  []
 
 
 
-[38]
-
 [39]
+
+[40]
 File: figures/suspected_cases.png Graphic file (type bmp)
 <figures/suspected_cases.png>
 
 
-[40]
-
 [41]
-Overfull \hbox (287.62997pt too wide) in paragraph at lines 861--906
+
+[42]
+Overfull \hbox (287.62997pt too wide) in paragraph at lines 869--942
  [][] 
  []
 
 File: figures/case_fatality_ratio_and_cases_total_by_country.png Graphic file (type bmp)
 <figures/case_fatality_ratio_and_cases_total_by_country.png>
-
-LaTeX Warning: Float too large for page by 39.52542pt on input line 915.
-
 File: figures/case_fatality_ratio_beta_distributions.png Graphic file (type bmp)
 <figures/case_fatality_ratio_beta_distributions.png>
 
-LaTeX Warning: Float too large for page by 122.7597pt on input line 1035.
+LaTeX Warning: Float too large for page by 122.7597pt on input line 1071.
 
 
-
-[42]
 
 [43]
 
@@ -1082,70 +1081,74 @@ LaTeX Warning: Float too large for page by 122.7597pt on input line 1035.
 [45]
 
 [46]
+
+[47]
 File: figures/generation_time.png Graphic file (type bmp)
 <figures/generation_time.png>
 
 
-[47]
-
 [48]
-Overfull \hbox (873.49002pt too wide) in paragraph at lines 1142--1217
+
+[49]
+Overfull \hbox (873.49002pt too wide) in paragraph at lines 1178--1253
  [][] 
  []
 
 
 
-[49]
-
 [50]
+
+[51]
+
+[52
+
+]
 Chapter 5.
 
 
-[51
+[53]
 
-]
-
-[52]
+[54]
 Chapter 6.
 
 
-[53
+[55
 
 ]
 
-[54
+[56
 
 ]
 Chapter 7.
 
-Overfull \hbox (626.26004pt too wide) in paragraph at lines 1289--1302
+Overfull \hbox (626.26004pt too wide) in paragraph at lines 1325--1338
  [][] 
  []
 
 
 
-[55]
+[57]
 
-[56
+[58
 
 ]
 Chapter 8.
 No file MOSAIC-docs.bbl.
 
 
-[57] (./MOSAIC-docs.aux)
+[59] (./MOSAIC-docs.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-08-16>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 23386 strings out of 476173
- 448573 string characters out of 5783999
- 1956609 words of memory out of 5000000
- 45590 multiletter control sequences out of 15000+600000
+ 23406 strings out of 476173
+ 449120 string characters out of 5783999
+ 1962609 words of memory out of 5000000
+ 45609 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  90i,12n,123p,2001b,415s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on MOSAIC-docs.pdf (57 pages).
+Output written on MOSAIC-docs.pdf (59 pages).

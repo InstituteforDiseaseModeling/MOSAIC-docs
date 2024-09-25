@@ -204,7 +204,7 @@ To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variable
 ```{r wash-weights, echo=FALSE}
 library(kableExtra)
 
-df <- read.csv(file.path(getwd(), "figures/wash_table.csv"), stringsAsFactors = FALSE)
+df <- read.csv(file.path(getwd(), "tables/WASH_data_weights.csv"), stringsAsFactors = FALSE)
 
 knitr::kable(
      df, 
@@ -241,23 +241,7 @@ The evidence for waning immunity comes from 4 cohort studies (Table \@ref(tab:ef
 
 ```{r effectiveness-papers, echo=FALSE}
 
-df <- data.frame(
-     effectiveness = c(0.873, 0.4, 0.39, 0.527, 0.447),
-     effectiveness_hi = c(0.99, 0.6, 0.52, 0.674, 0.594),
-     effectiveness_lo = c(0.702, 0.11, 0.23, 0.314, 0.248),
-     day = c(60,              # Azman 2016
-             mean(c(7, 180)), # Qadri 2016
-             mean(c(7, 730)), # Qadri 2018
-             mean(c(30*12, 30*17)),  # Malembaka 2024
-             mean(c(30*24, 30*36))), # Malembaka 2024
-     day_min = c(NA, 7, 7, 30*12, 30*24),
-     day_max = c(NA, 180, 730, 30*17, 30*36),
-     source = c('[Azman et al (2016)](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext)', 
-                '[Qadri et al (2016)](https://www.nejm.org/doi/full/10.1056/NEJMoa1510330)', 
-                '[Qadri et al (2018)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(18)30108-7/fulltext)', 
-                '[Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)', 
-                '[Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)')
-)
+df <- read.csv(file.path(getwd(), "tables/vaccine_effectiveness_data.csv"), stringsAsFactors = FALSE)
 
 # Display the table using knitr::kable
 knitr::kable(
@@ -322,7 +306,7 @@ $$
 
 
 ```{r immune-decay, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The duration of immunity after natural infection with *V. cholerae*."}
-knitr::include_graphics("figures/immune_durability.png")
+knitr::include_graphics("figures/immune_decay.png")
 ```
 
 
@@ -335,6 +319,10 @@ The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt
 ```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of air passengers per week in 2017 among all countries."}
 knitr::include_graphics("figures/mobility_flight_data.png")
 ```
+```{r mobility-network, echo=FALSE, fig.align='center', out.width="100%", fig.cap="A network map showing the average number of air passengers per week in 2017."}
+knitr::include_graphics("figures/mobility_network.png")
+```
+
 
 
 ### Human mobility model
@@ -609,7 +597,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 
 library(kableExtra)
 
-cholera_data_recent <- read.csv(file.path(getwd(), "figures/case_fatality_ratio_2014_2024.csv"), stringsAsFactors = FALSE)
+cholera_data_recent <- read.csv(file.path(getwd(), "tables/case_fatality_ratio_2014_2024.csv"), stringsAsFactors = FALSE)
 
 filtered_data <- cholera_data_recent[!is.na(cholera_data_recent$cases_total), ]
 
@@ -700,7 +688,7 @@ knitr::include_graphics("figures/generation_time.png")
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 library(kableExtra)
-df <- read.csv("./figures/generation_time_weeks.csv")
+df <- read.csv("./tables/generation_time_weeks.csv")
 df$Probability <- round(df$Probability, 3)
 knitr::kable(df, caption = "Generation Time in Weeks") %>%
   kable_styling(full_width = FALSE,

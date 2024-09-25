@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2024-09-18 at 10:54 AM PDT.
+Website under development. Last compiled on 2024-09-25 at 01:28 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -428,7 +428,7 @@ Environmental transmission is a critical factor in cholera spread and consists o
 To capture the impacts of climate-drivers on cholera transmission, we have included the parameter \(\psi_{jt}\), which represents the current state of environmental suitability with respect to: \emph{i}) the survival time of \emph{V. cholerae} in the environment and, \emph{ii}) the rate of environment-to-human transmission which contributes to the overall force of infection.
 
 \begin{equation}
-\beta_{jt}^{\text{env}} = \beta_{j0}^{\text{env}} \Bigg(1 + \frac{\psi_{jt}-\bar\psi_{jt}}{\bar\psi_{jt}} \Bigg) \quad \text{and} \quad \bar\psi_{jt} = \frac{1}{T} \sum_{t=1}^{T} \psi_{jt}
+\beta_{jt}^{\text{env}} = \beta_{j0}^{\text{env}} \Bigg(1 + \frac{\psi_{jt}-\bar\psi_j}{\bar\psi_j} \Bigg) \quad \text{and} \quad \bar\psi_j = \frac{1}{T} \sum_{t=1}^{T} \psi_{jt}
 \label{eq:beta2}
 \end{equation}
 
@@ -549,15 +549,15 @@ The evidence for waning immunity comes from 4 cohort studies (Table \ref{tab:eff
 \hline
 Effectiveness & Upper CI & Lower CI & Day (midpoint) & Day (min) & Day (max) & Source\\
 \hline
-0.873 & 0.990 & 0.702 & 60.0 & NA & NA & [Azman et al (2016)](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext)\\
+60.0 & 0.873 & 0.990 & 0.702 & NA & NA & Azman et al (2016)\\
 \hline
-0.400 & 0.600 & 0.110 & 93.5 & 7 & 180 & [Qadri et al (2016)](https://www.nejm.org/doi/full/10.1056/NEJMoa1510330)\\
+93.5 & 0.400 & 0.600 & 0.110 & 7 & 180 & Qadri et al (2016)\\
 \hline
-0.390 & 0.520 & 0.230 & 368.5 & 7 & 730 & [Qadri et al (2018)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(18)30108-7/fulltext)\\
+368.5 & 0.390 & 0.520 & 0.230 & 7 & 730 & Qadri et al (2018)\\
 \hline
-0.527 & 0.674 & 0.314 & 435.0 & 360 & 510 & [Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)\\
+435.0 & 0.527 & 0.674 & 0.314 & 360 & 510 & Malembaka et al (2024)\\
 \hline
-0.447 & 0.594 & 0.248 & 900.0 & 720 & 1080 & [Malembaka et al (2024)](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)\\
+900.0 & 0.447 & 0.594 & 0.248 & 720 & 1080 & Malembaka et al (2024)\\
 \hline
 \end{tabular}
 \end{table}
@@ -621,7 +621,7 @@ We estimated the mean immune decay to be \(\bar\varepsilon = 3.9 \times 10^{-4}\
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{figures/immune_durability} 
+{\centering \includegraphics[width=1\linewidth]{figures/immune_decay} 
 
 }
 
@@ -639,6 +639,14 @@ The parameters in the model diagram in Figure \ref{fig:diagram} that have a \(jt
 }
 
 \caption{The average number of air passengers per week in 2017 among all countries.}\label{fig:mobility-data}
+\end{figure}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/mobility_network} 
+
+}
+
+\caption{A network map showing the average number of air passengers per week in 2017.}\label{fig:mobility-network}
 \end{figure}
 
 \subsection{Human mobility model}\label{human-mobility-model}
@@ -862,45 +870,73 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 \hline
 Country & Cases (2014-2024) & Deaths (2014-2024) & CFR & CFR Lower & CFR Upper & Beta Shape1 & Beta Shape2\\
 \hline
-AFRO Region & 563496 & 11203 & 0.020 & 0.020 & 0.020 & 0.008 & 1.911\\
+AFRO Region & 1219386 & 23215 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
 \hline
-Benin & 1731 & 25 & 0.014 & 0.009 & 0.021 & 0.009 & 1.918\\
+Angola & 2665 & 74 & 0.028 & 0.022 & 0.035 & 0.010 & 1.918\\
 \hline
-Burundi & 2121 & 12 & 0.006 & 0.003 & 0.010 & 0.007 & 1.926\\
+Burundi & 5553 & 41 & 0.007 & 0.005 & 0.010 & 0.007 & 1.908\\
 \hline
-Cameroon & 21685 & 511 & 0.024 & 0.022 & 0.026 & 0.009 & 1.905\\
+Benin & 3617 & 56 & 0.015 & 0.012 & 0.020 & 0.008 & 1.906\\
+\hline
+Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
+\hline
+Cote d'Ivoire & 446 & 18 & 0.040 & 0.024 & 0.063 & 0.013 & 1.863\\
+\hline
+Cameroon & 29946 & 925 & 0.031 & 0.029 & 0.033 & 0.010 & 1.929\\
+\hline
+Democratic Republic of Congo & 314256 & 5705 & 0.018 & 0.018 & 0.019 & 0.008 & 1.903\\
+\hline
+Congo & 144 & 10 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
 \hline
 Comoros & 10342 & 149 & 0.014 & 0.012 & 0.017 & 0.008 & 1.913\\
 \hline
-Democratic Republic of Congo & 103998 & 1218 & 0.012 & 0.011 & 0.012 & 0.007 & 1.921\\
+Ethiopia & 70755 & 877 & 0.012 & 0.012 & 0.013 & 0.007 & 1.921\\
 \hline
-Ethiopia & 54872 & 652 & 0.012 & 0.011 & 0.013 & 0.007 & 1.921\\
+Ghana & 29816 & 251 & 0.008 & 0.007 & 0.010 & 0.007 & 1.913\\
 \hline
-Kenya & 12921 & 213 & 0.016 & 0.014 & 0.019 & 0.008 & 1.915\\
+Guinea & 1 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
 \hline
-Liberia & 534 & 0 & 0.020 & 0.020 & 0.020 & 0.008 & 1.911\\
+Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
 \hline
-Malawi & 58961 & 1756 & 0.030 & 0.028 & 0.031 & 0.010 & 1.900\\
+Kenya & 47956 & 683 & 0.014 & 0.013 & 0.015 & 0.008 & 1.925\\
 \hline
-Mozambique & 57490 & 217 & 0.004 & 0.003 & 0.004 & 0.006 & 1.887\\
+Liberia & 580 & 0 & 0.000 & 0.000 & 0.006 & 0.006 & 1.938\\
 \hline
-Niger & 5591 & 166 & 0.030 & 0.025 & 0.034 & 0.010 & 1.892\\
+Mali & 12 & 4 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
 \hline
-Nigeria & 145012 & 4514 & 0.031 & 0.030 & 0.032 & 0.010 & 1.901\\
+Mozambique & 85191 & 306 & 0.004 & 0.003 & 0.004 & 0.006 & 1.882\\
 \hline
-Somalia & 19995 & 120 & 0.006 & 0.005 & 0.007 & 0.006 & 1.906\\
+Malawi & 62654 & 1846 & 0.029 & 0.028 & 0.031 & 0.010 & 1.881\\
+\hline
+Namibia & 485 & 13 & 0.027 & 0.014 & 0.045 & 0.012 & 2.021\\
+\hline
+Niger & 11959 & 344 & 0.029 & 0.026 & 0.032 & 0.010 & 1.882\\
+\hline
+Nigeria & 249406 & 6774 & 0.027 & 0.027 & 0.028 & 0.009 & 1.891\\
+\hline
+Rwanda & 453 & 0 & 0.000 & 0.000 & 0.008 & 0.007 & 1.926\\
+\hline
+Sudan & 362 & 11 & 0.030 & 0.015 & 0.054 & 0.012 & 1.855\\
+\hline
+Somalia & 134839 & 1849 & 0.014 & 0.013 & 0.014 & 0.008 & 1.906\\
+\hline
+South Sudan & 30517 & 652 & 0.021 & 0.020 & 0.023 & 0.009 & 1.913\\
+\hline
+Eswatini & 2 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.914\\
+\hline
+Chad & 1359 & 90 & 0.066 & 0.054 & 0.081 & 0.015 & 1.857\\
+\hline
+Togo & 410 & 20 & 0.049 & 0.030 & 0.074 & 0.014 & 1.855\\
+\hline
+Tanzania & 38992 & 604 & 0.015 & 0.014 & 0.017 & 0.008 & 1.917\\
+\hline
+Uganda & 9199 & 181 & 0.020 & 0.017 & 0.023 & 0.009 & 1.912\\
 \hline
 South Africa & 1403 & 47 & 0.033 & 0.025 & 0.044 & 0.012 & 2.008\\
 \hline
-South Sudan & 1895 & 3 & 0.002 & 0.000 & 0.005 & 0.006 & 1.894\\
+Zambia & 30671 & 894 & 0.029 & 0.027 & 0.031 & 0.010 & 1.905\\
 \hline
-Tanzania & 5453 & 96 & 0.018 & 0.014 & 0.021 & 0.009 & 1.914\\
-\hline
-Uganda & 342 & 15 & 0.044 & 0.025 & 0.071 & 0.014 & 1.863\\
-\hline
-Zambia & 24348 & 754 & 0.031 & 0.029 & 0.033 & 0.010 & 1.923\\
-\hline
-Zimbabwe & 34554 & 720 & 0.021 & 0.019 & 0.022 & 0.009 & 1.906\\
+Zimbabwe & 45377 & 789 & 0.017 & 0.016 & 0.019 & 0.008 & 1.903\\
 \hline
 \end{tabular}
 \end{table}

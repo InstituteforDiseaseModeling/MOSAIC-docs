@@ -23,6 +23,7 @@ fig:effectiveness
 tab:immunity-sources
 fig:immune-decay
 fig:mobility-data
+fig:mobility-network
 eq:M
 eq:gravity
 fig:mobility-departure
@@ -101,4 +102,3 @@ usage
 news
 past-versions-of-mosaic
 references-1
-url-your-book-url-like-httpsbookdown.orgyihuibookdown
