@@ -28,24 +28,24 @@
 \contentsline {subsection}{\numberline {4.3.4}WAter, Sanitation, and Hygiene (WASH)}{26}{subsection.4.3.4}%
 \contentsline {section}{\numberline {4.4}Immune dynamics}{27}{section.4.4}%
 \contentsline {subsection}{\numberline {4.4.1}Immunity from vaccination}{27}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Immunity from natural infection}{30}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.2}Immunity from natural infection}{31}{subsection.4.4.2}%
 \contentsline {section}{\numberline {4.5}Spatial dynamics}{32}{section.4.5}%
 \contentsline {subsection}{\numberline {4.5.1}Human mobility model}{33}{subsection.4.5.1}%
 \contentsline {subsection}{\numberline {4.5.2}Estimating the departure process}{35}{subsection.4.5.2}%
 \contentsline {subsection}{\numberline {4.5.3}Estimating the diffusion process}{35}{subsection.4.5.3}%
 \contentsline {subsection}{\numberline {4.5.4}The probability of spatial transmission}{36}{subsection.4.5.4}%
 \contentsline {subsection}{\numberline {4.5.5}The spatial hazard}{36}{subsection.4.5.5}%
-\contentsline {subsection}{\numberline {4.5.6}Coupling among locations}{36}{subsection.4.5.6}%
+\contentsline {subsection}{\numberline {4.5.6}Coupling among locations}{39}{subsection.4.5.6}%
 \contentsline {section}{\numberline {4.6}The observation process}{39}{section.4.6}%
 \contentsline {subsection}{\numberline {4.6.1}Rate of symptomatic infection}{39}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}Suspected cases}{41}{subsection.4.6.2}%
-\contentsline {subsection}{\numberline {4.6.3}Case fatality rate}{41}{subsection.4.6.3}%
+\contentsline {subsection}{\numberline {4.6.2}Suspected cases}{40}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Case fatality rate}{40}{subsection.4.6.3}%
 \contentsline {section}{\numberline {4.7}Demographics}{43}{section.4.7}%
 \contentsline {section}{\numberline {4.8}The reproductive number}{43}{section.4.8}%
 \contentsline {subsection}{\numberline {4.8.1}The generation time distribution}{48}{subsection.4.8.1}%
-\contentsline {section}{\numberline {4.9}Initial conditions}{49}{section.4.9}%
-\contentsline {section}{\numberline {4.10}Model calibration}{49}{section.4.10}%
-\contentsline {section}{\numberline {4.11}Caveats}{49}{section.4.11}%
+\contentsline {section}{\numberline {4.9}Initial conditions}{48}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Model calibration}{50}{section.4.10}%
+\contentsline {section}{\numberline {4.11}Caveats}{50}{section.4.11}%
 \contentsline {section}{\numberline {4.12}Table of parameters}{50}{section.4.12}%
 \contentsline {section}{\numberline {4.13}References}{50}{section.4.13}%
 \contentsline {chapter}{\numberline {5}Scenarios}{53}{chapter.5}%

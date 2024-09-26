@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2024-09-25 at 01:28 PM PDT.
+Website under development. Last compiled on 2024-09-25 at 10:27 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -470,7 +470,7 @@ Covariates will include both historical climate variables and those predicted un
 
 The rate at which infected individuals shed \emph{V. cholerae} into the environment (\(\zeta\)) is a critical factor influencing cholera transmission. Shedding rates can vary widely depending on the severity of the infection, the immune response of the individual, and environmental factors. According to \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung 2014}, the shedding rate is estimated to range from 0.01 to 10 cells per mL per person per day.
 
-Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al (2009)} note that during the, depending on the phase of infection, individuals can shed \(10^3\) (asymptomatic cases) to \(10^12\) (severe cases) \emph{V. cholerae} cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:
+Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al (2009)} note that during the, depending on the phase of infection, individuals can shed \(10^3\) (asymptomatic cases) to \(10^{12}\) (severe cases) \emph{V. cholerae} cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:
 
 \[
 \zeta \sim \text{Uniform}(0.01, 10).
@@ -524,7 +524,7 @@ Open Defecation & 0.126\\
 
 }
 
-\caption{The optimized weighted mean of WASH variables for AFRO countries}\label{fig:wash-country}
+\caption{The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries.}\label{fig:wash-country}
 \end{figure}
 
 \section{Immune dynamics}\label{immune-dynamics}

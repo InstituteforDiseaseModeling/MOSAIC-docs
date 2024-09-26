@@ -512,7 +512,7 @@ Figure 4.7: Relationship between environmental suitability (<span class="math in
 <span class="header-section-number">4.3.3</span> Shedding<a class="anchor" aria-label="anchor" href="#shedding"><i class="fas fa-link"></i></a>
 </h3>
 <p>The rate at which infected individuals shed <em>V. cholerae</em> into the environment (<span class="math inline">\(\zeta\)</span>) is a critical factor influencing cholera transmission. Shedding rates can vary widely depending on the severity of the infection, the immune response of the individual, and environmental factors. According to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/">Fung 2014</a>, the shedding rate is estimated to range from 0.01 to 10 cells per mL per person per day.</p>
-<p>Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al (2009)</a> note that during the, depending on the phase of infection, individuals can shed <span class="math inline">\(10^3\)</span> (asymptomatic cases) to <span class="math inline">\(10^12\)</span> (severe cases) <em>V. cholerae</em> cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:</p>
+<p>Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al (2009)</a> note that during the, depending on the phase of infection, individuals can shed <span class="math inline">\(10^3\)</span> (asymptomatic cases) to <span class="math inline">\(10^{12}\)</span> (severe cases) <em>V. cholerae</em> cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:</p>
 <p><span class="math display">\[
 \zeta \sim \text{Uniform}(0.01, 10).
 \]</span></p>
@@ -610,8 +610,8 @@ Figure 4.8: Relationship between WASH variables and cholera incidences.
 </div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wash-country"></span>
-<img src="figures/wash_index_by_country.png" alt="The optimized weighted mean of WASH variables for AFRO countries" width="100%"><p class="caption">
-Figure 4.9: The optimized weighted mean of WASH variables for AFRO countries
+<img src="figures/wash_index_by_country.png" alt="The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries." width="100%"><p class="caption">
+Figure 4.9: The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries.
 </p>
 </div>
 </div>

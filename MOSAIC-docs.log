@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.8.31)  25 SEP 2024 13:28
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.8.31)  25 SEP 2024 22:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -982,13 +982,15 @@ File: figures/wash_index_by_country.png Graphic file (type bmp)
 [27]
 
 [28]
+
+[29]
 Overfull \hbox (143.90997pt too wide) in paragraph at lines 548--563
  [][] 
  []
 
 
 
-[29]
+[30]
 File: figures/vaccine_effectiveness.png Graphic file (type bmp)
 <figures/vaccine_effectiveness.png>
 
@@ -1002,8 +1004,6 @@ Overfull \hbox (281.69998pt too wide) in paragraph at lines 603--614
  []
 
 
-
-[30]
 
 [31]
 File: figures/immune_decay.png Graphic file (type bmp)
@@ -1037,6 +1037,9 @@ Overfull \hbox (562.07999pt too wide) in paragraph at lines 791--814
  [][] 
  []
 
+
+
+[39]
 File: figures/proportion_symptomatic.png Graphic file (type bmp)
 <figures/proportion_symptomatic.png>
 
@@ -1049,14 +1052,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 820--821
 
  []
 
-
-
-[39]
-
-[40]
 File: figures/suspected_cases.png Graphic file (type bmp)
 <figures/suspected_cases.png>
 
+
+[40]
 
 [41]
 
@@ -1149,6 +1149,6 @@ Here is how much of TeX's memory you used:
  45609 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 90i,12n,123p,2001b,415s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,12n,123p,2001b,405s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on MOSAIC-docs.pdf (59 pages).

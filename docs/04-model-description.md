@@ -283,7 +283,7 @@ Covariates will include both historical climate variables and those predicted un
 
 The rate at which infected individuals shed *V. cholerae* into the environment ($\zeta$) is a critical factor influencing cholera transmission. Shedding rates can vary widely depending on the severity of the infection, the immune response of the individual, and environmental factors. According to [Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/), the shedding rate is estimated to range from 0.01 to 10 cells per mL per person per day.
 
-Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, [Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) note that during the, depending on the phase of infection, individuals can shed $10^3$ (asymptomatic cases) to $10^12$ (severe cases) *V. cholerae* cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:
+Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, [Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) note that during the, depending on the phase of infection, individuals can shed $10^3$ (asymptomatic cases) to $10^{12}$ (severe cases) *V. cholerae* cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:
 
 $$
 \zeta \sim \text{Uniform}(0.01, 10).
@@ -348,8 +348,8 @@ To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variable
 </div>
 
 <div class="figure" style="text-align: center">
-<img src="figures/wash_index_by_country.png" alt="The optimized weighted mean of WASH variables for AFRO countries" width="100%" />
-<p class="caption">(\#fig:wash-country)The optimized weighted mean of WASH variables for AFRO countries</p>
+<img src="figures/wash_index_by_country.png" alt="The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries." width="100%" />
+<p class="caption">(\#fig:wash-country)The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries.</p>
 </div>
 
 
