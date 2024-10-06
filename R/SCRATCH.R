@@ -1504,3 +1504,10 @@ ggplot(combined_data, aes(x = week)) +
 
 
 tmp <- arrow::read_parquet(file=file.path(PATHS$DATA_CLIMATE, "climate_data_MRI_AGCM3_2_S_temperature_2m_max_1970-01-01_2030-12-31_DZA.parquet"))
+
+
+
+
+
+
+

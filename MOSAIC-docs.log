@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.8.31)  26 SEP 2024 10:28
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  5 OCT 2024 17:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **MOSAIC-docs.tex
 (./MOSAIC-docs.tex
 LaTeX2e <2024-06-01> patch level 2
-L3 programming layer <2024-08-16>
+L3 programming layer <2024-09-10>
 (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/base/book.cls
 Document Class: book 2024/02/08 v1.4n Standard LaTeX document class
 (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/base/bk10.clo
@@ -98,7 +98,7 @@ LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 )) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
 Package: iftex 2022/02/03 v1.0f TeX engine tests
 ) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.sty (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2024-08-16 L3 programming layer (loader) 
+Package: expl3 2024-09-10 L3 programming layer (loader) 
 (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
 File: l3backend-xetex.def 2024-05-08 L3 backend support: XeTeX
 \g__graphics_track_int=\count277
@@ -217,7 +217,7 @@ Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
 ) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 ))) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
-Package: xcolor 2023/11/15 v3.01 LaTeX color extensions (UK)
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
 (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
@@ -225,14 +225,14 @@ Package xcolor Info: Driver file: xetex.def on input line 274.
 (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/xetex.def
 File: xetex.def 2022/09/22 v5.0n Graphics/color driver for xetex
 ) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)
-Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1350.
-Package xcolor Info: Model `RGB' extended on input line 1366.
-Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1368.
-Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1369.
-Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1370.
-Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1371.
-Package xcolor Info: Model `Gray' substituted by `gray' on input line 1372.
-Package xcolor Info: Model `wave' substituted by `hsb' on input line 1373.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
 ) (/Users/johngiles/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2024-04-26 v4.20 Multi-page Table package (DPC)
 \LTleft=\skip54
@@ -963,6 +963,15 @@ Overfull \hbox (194.82509pt too wide) in paragraph at lines 383--420
 [23]
 File: figures/shedding_rate.png Graphic file (type bmp)
 <figures/shedding_rate.png>
+File: figures/climate_data_MOZ_weekly.png Graphic file (type bmp)
+<figures/climate_data_MOZ_weekly.png>
+File: figures/climate_data_ENSO_weekly.png Graphic file (type bmp)
+<figures/climate_data_ENSO_weekly.png>
+
+Overfull \hbox (780.03003pt too wide) in paragraph at lines 485--534
+ [][] 
+ []
+
 
 
 [24]
@@ -970,108 +979,90 @@ File: figures/shedding_rate.png Graphic file (type bmp)
 [25]
 
 [26]
-File: figures/wash_incidence_correlation.png Graphic file (type bmp)
-<figures/wash_incidence_correlation.png>
-
-LaTeX Warning: Float too large for page by 24.06267pt on input line 519.
-
-File: figures/wash_index_by_country.png Graphic file (type bmp)
-<figures/wash_index_by_country.png>
-
 
 [27]
 
 [28]
+File: figures/cases_binary.png Graphic file (type bmp)
+<figures/cases_binary.png>
+
 
 [29]
-Overfull \hbox (143.90997pt too wide) in paragraph at lines 548--563
- [][] 
- []
-
-
 
 [30]
-File: figures/vaccine_effectiveness.png Graphic file (type bmp)
-<figures/vaccine_effectiveness.png>
+File: figures/suitability_LSTM_fit.png Graphic file (type bmp)
+<figures/suitability_LSTM_fit.png>
+File: figures/suitability_cases_MOZ.png Graphic file (type bmp)
+<figures/suitability_cases_MOZ.png>
+File: figures/suitability_by_country.png Graphic file (type bmp)
+<figures/suitability_by_country.png>
 
-Overfull \hbox (6.89923pt too wide) in paragraph at lines 583--584
- [][] 
- []
+LaTeX Warning: Float too large for page by 59.92982pt on input line 597.
 
 
-Overfull \hbox (281.69998pt too wide) in paragraph at lines 603--614
- [][] 
- []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
 [31]
-File: figures/immune_decay.png Graphic file (type bmp)
-<figures/immune_decay.png>
-
 
 [32]
+
+[33]
+
+[34]
+File: figures/wash_incidence_correlation.png Graphic file (type bmp)
+<figures/wash_incidence_correlation.png>
+
+LaTeX Warning: Float too large for page by 24.06267pt on input line 649.
+
+File: figures/wash_index_by_country.png Graphic file (type bmp)
+<figures/wash_index_by_country.png>
+
+Overfull \hbox (143.90997pt too wide) in paragraph at lines 678--693
+ [][] 
+ []
+
+
+
+[35]
+
+[36]
+
+[37]
+File: figures/vaccine_effectiveness.png Graphic file (type bmp)
+<figures/vaccine_effectiveness.png>
+
+Overfull \hbox (6.89923pt too wide) in paragraph at lines 713--714
+ [][] 
+ []
+
+
+
+[38]
+Overfull \hbox (281.69998pt too wide) in paragraph at lines 733--744
+ [][] 
+ []
+
+File: figures/immune_decay.png Graphic file (type bmp)
+<figures/immune_decay.png>
 File: figures/mobility_flight_data.png Graphic file (type bmp)
 <figures/mobility_flight_data.png>
 File: figures/mobility_network.png Graphic file (type bmp)
 <figures/mobility_network.png>
 
 
-[33]
-
-[34]
-
-[35]
-File: figures/mobility_travel_prob_tau.png Graphic file (type bmp)
-<figures/mobility_travel_prob_tau.png>
-File: figures/mobility_diffusion_pi.png Graphic file (type bmp)
-<figures/mobility_diffusion_pi.png>
-
-
-[36]
-
-[37]
-
-[38]
-Overfull \hbox (562.07999pt too wide) in paragraph at lines 791--814
- [][] 
- []
-
-
-
 [39]
-File: figures/proportion_symptomatic.png Graphic file (type bmp)
-<figures/proportion_symptomatic.png>
-
-Overfull \hbox (10.3428pt too wide) in paragraph at lines 820--821
-[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 820--821
-
- []
-
-File: figures/suspected_cases.png Graphic file (type bmp)
-<figures/suspected_cases.png>
-
 
 [40]
 
 [41]
 
 [42]
-Overfull \hbox (287.62997pt too wide) in paragraph at lines 869--942
- [][] 
- []
-
-File: figures/case_fatality_ratio_and_cases_total_by_country.png Graphic file (type bmp)
-<figures/case_fatality_ratio_and_cases_total_by_country.png>
-File: figures/case_fatality_ratio_beta_distributions.png Graphic file (type bmp)
-<figures/case_fatality_ratio_beta_distributions.png>
-
-LaTeX Warning: Float too large for page by 122.7597pt on input line 1071.
-
+File: figures/mobility_travel_prob_tau.png Graphic file (type bmp)
+<figures/mobility_travel_prob_tau.png>
+File: figures/mobility_diffusion_pi.png Graphic file (type bmp)
+<figures/mobility_diffusion_pi.png>
 
 
 [43]
@@ -1081,18 +1072,45 @@ LaTeX Warning: Float too large for page by 122.7597pt on input line 1071.
 [45]
 
 [46]
-
-[47]
-File: figures/generation_time.png Graphic file (type bmp)
-<figures/generation_time.png>
-
-
-[48]
-
-[49]
-Overfull \hbox (873.49002pt too wide) in paragraph at lines 1178--1253
+Overfull \hbox (562.07999pt too wide) in paragraph at lines 921--944
  [][] 
  []
+
+File: figures/proportion_symptomatic.png Graphic file (type bmp)
+<figures/proportion_symptomatic.png>
+
+Overfull \hbox (10.3428pt too wide) in paragraph at lines 950--951
+[][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 950--951
+
+ []
+
+
+Underfull \vbox (badness 2856) has occurred while \output is active []
+
+
+
+[47]
+
+[48]
+File: figures/suspected_cases.png Graphic file (type bmp)
+<figures/suspected_cases.png>
+
+
+[49]
+Overfull \hbox (287.62997pt too wide) in paragraph at lines 999--1072
+ [][] 
+ []
+
+File: figures/case_fatality_ratio_and_cases_total_by_country.png Graphic file (type bmp)
+<figures/case_fatality_ratio_and_cases_total_by_country.png>
+File: figures/case_fatality_ratio_beta_distributions.png Graphic file (type bmp)
+<figures/case_fatality_ratio_beta_distributions.png>
+
+LaTeX Warning: Float too large for page by 122.7597pt on input line 1201.
 
 
 
@@ -1100,28 +1118,19 @@ Overfull \hbox (873.49002pt too wide) in paragraph at lines 1178--1253
 
 [51]
 
-[52
-
-]
-Chapter 5.
-
+[52]
 
 [53]
+File: figures/generation_time.png Graphic file (type bmp)
+<figures/generation_time.png>
+
 
 [54]
-Chapter 6.
 
+[55]
 
-[55
-
-]
-
-[56
-
-]
-Chapter 7.
-
-Overfull \hbox (626.26004pt too wide) in paragraph at lines 1325--1338
+[56]
+Overfull \hbox (873.49002pt too wide) in paragraph at lines 1308--1383
  [][] 
  []
 
@@ -1129,26 +1138,55 @@ Overfull \hbox (626.26004pt too wide) in paragraph at lines 1325--1338
 
 [57]
 
-[58
+[58]
+Chapter 5.
+
+
+[59
+
+]
+
+[60]
+Chapter 6.
+
+
+[61
+
+]
+
+[62
+
+]
+Chapter 7.
+
+Overfull \hbox (626.26004pt too wide) in paragraph at lines 1455--1468
+ [][] 
+ []
+
+
+
+[63]
+
+[64
 
 ]
 Chapter 8.
 No file MOSAIC-docs.bbl.
 
 
-[59] (./MOSAIC-docs.aux)
+[65] (./MOSAIC-docs.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
-L3 programming layer <2024-08-16>
+L3 programming layer <2024-09-10>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 23406 strings out of 476173
- 449120 string characters out of 5783999
- 1962609 words of memory out of 5000000
- 45609 multiletter control sequences out of 15000+600000
+ 23530 strings out of 476173
+ 453565 string characters out of 5783999
+ 1028203 words of memory out of 5000000
+ 45727 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 90i,12n,123p,2001b,405s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,12n,123p,2001b,419s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on MOSAIC-docs.pdf (59 pages).
+Output written on MOSAIC-docs.pdf (65 pages).

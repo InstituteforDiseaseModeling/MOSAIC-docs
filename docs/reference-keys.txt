@@ -13,6 +13,14 @@ tab:seasonal-table
 eq:beta2
 eq:delta
 fig:unnamed-chunk-2
+fig:climate-data-moz
+fig:climate-data-enso
+tab:climate-data-variables
+fig:cases-binary
+eq:psi
+fig:lstm-model-fit
+fig:psi-prediction-data
+fig:psi-prediction-countries
 tab:wash-weights
 fig:wash-incidence
 fig:wash-country
@@ -66,7 +74,9 @@ transmission-dynamics
 seasonality
 environmental-transmission
 climate-driven-transmission
-modeling-suitability
+modeling-environmental-suitability
+environmental-data
+deep-learning-neural-network-model
 shedding
 water-sanitation-and-hygiene-wash
 immune-dynamics
