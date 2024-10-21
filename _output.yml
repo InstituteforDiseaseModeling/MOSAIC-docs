@@ -3,7 +3,7 @@ bookdown::bs4_book:
   theme:
     primary: "#0167af"
     border-width: "0px"
-  repo: https://github.com/gilesjohnr/MOSAIC-docs
+  repo: https://github.com/InstituteforDiseaseModeling/MOSAIC-docs
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex

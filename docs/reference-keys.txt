@@ -24,6 +24,9 @@ fig:psi-prediction-countries
 tab:wash-weights
 fig:wash-incidence
 fig:wash-country
+fig:vaccination-example
+fig:vaccination-countries
+fig:vaccination-maps
 tab:effectiveness-papers
 eq:omega
 eq:effectiveness
@@ -80,6 +83,7 @@ deep-learning-neural-network-model
 shedding
 water-sanitation-and-hygiene-wash
 immune-dynamics
+estimating-vaccination-rates
 immunity-from-vaccination
 immunity-from-natural-infection
 spatial-dynamics
