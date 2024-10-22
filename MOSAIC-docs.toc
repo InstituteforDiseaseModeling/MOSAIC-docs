@@ -41,16 +41,16 @@
 \contentsline {subsection}{\numberline {4.5.6}Coupling among locations}{47}{subsection.4.5.6}%
 \contentsline {section}{\numberline {4.6}The observation process}{50}{section.4.6}%
 \contentsline {subsection}{\numberline {4.6.1}Rate of symptomatic infection}{50}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}Suspected cases}{50}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.2}Suspected cases}{52}{subsection.4.6.2}%
 \contentsline {subsection}{\numberline {4.6.3}Case fatality rate}{52}{subsection.4.6.3}%
-\contentsline {section}{\numberline {4.7}Demographics}{57}{section.4.7}%
-\contentsline {section}{\numberline {4.8}The reproductive number}{57}{section.4.8}%
-\contentsline {subsection}{\numberline {4.8.1}The generation time distribution}{57}{subsection.4.8.1}%
-\contentsline {section}{\numberline {4.9}Initial conditions}{57}{section.4.9}%
+\contentsline {section}{\numberline {4.7}Demographics}{54}{section.4.7}%
+\contentsline {section}{\numberline {4.8}The reproductive number}{54}{section.4.8}%
+\contentsline {subsection}{\numberline {4.8.1}The generation time distribution}{59}{subsection.4.8.1}%
+\contentsline {section}{\numberline {4.9}Initial conditions}{60}{section.4.9}%
 \contentsline {section}{\numberline {4.10}Model calibration}{60}{section.4.10}%
 \contentsline {section}{\numberline {4.11}Caveats}{60}{section.4.11}%
-\contentsline {section}{\numberline {4.12}Table of parameters}{60}{section.4.12}%
-\contentsline {section}{\numberline {4.13}References}{60}{section.4.13}%
+\contentsline {section}{\numberline {4.12}Table of parameters}{61}{section.4.12}%
+\contentsline {section}{\numberline {4.13}References}{61}{section.4.13}%
 \contentsline {chapter}{\numberline {5}Scenarios}{63}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Vaccination}{63}{section.5.1}%
 \contentsline {subsection}{\numberline {5.1.1}Spatial and Temporal Strategies}{63}{subsection.5.1.1}%
