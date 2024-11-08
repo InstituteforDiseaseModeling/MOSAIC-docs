@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  22 OCT 2024 12:49
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  8 NOV 2024 14:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -920,8 +920,8 @@ File: figures/seasonal_transmission_concept.png Graphic file (type bmp)
 [19]
 File: figures/seasonal_transmission_example_MOZ.png Graphic file (type bmp)
 <figures/seasonal_transmission_example_MOZ.png>
-File: figures/seasonal_precip_hierarchical_cluster.png Graphic file (type bmp)
-<figures/seasonal_precip_hierarchical_cluster.png>
+File: figures/seasonal_precip_ward.D2_cluster.png Graphic file (type bmp)
+<figures/seasonal_precip_ward.D2_cluster.png>
 
 
 [20]
@@ -1196,8 +1196,8 @@ L3 programming layer <2024-09-10>
  ) 
 Here is how much of TeX's memory you used:
  23591 strings out of 476173
- 455776 string characters out of 5783999
- 1028627 words of memory out of 5000000
+ 455681 string characters out of 5783999
+ 1028626 words of memory out of 5000000
  45785 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
