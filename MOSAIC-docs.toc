@@ -51,14 +51,15 @@
 \contentsline {section}{\numberline {4.11}Caveats}{60}{section.4.11}%
 \contentsline {section}{\numberline {4.12}Table of parameters}{61}{section.4.12}%
 \contentsline {section}{\numberline {4.13}References}{61}{section.4.13}%
-\contentsline {chapter}{\numberline {5}Scenarios}{63}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Vaccination}{63}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}Spatial and Temporal Strategies}{63}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Reactive Vaccination}{63}{subsection.5.1.2}%
-\contentsline {section}{\numberline {5.2}Impacts of Climate Change}{64}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Severe Weather Events}{64}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Long-Term Trends}{64}{subsection.5.2.2}%
-\contentsline {chapter}{\numberline {6}Usage}{65}{chapter.6}%
-\contentsline {chapter}{\numberline {7}News}{67}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Past versions of MOSAIC}{67}{section.7.1}%
-\contentsline {chapter}{\numberline {8}References}{69}{chapter.8}%
+\contentsline {chapter}{\numberline {5}Model versions}{63}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Scenarios}{65}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Vaccination}{65}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Spatial and Temporal Strategies}{65}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Reactive Vaccination}{65}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Impacts of Climate Change}{66}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Severe Weather Events}{66}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Long-Term Trends}{66}{subsection.6.2.2}%
+\contentsline {chapter}{\numberline {7}Usage}{67}{chapter.7}%
+\contentsline {chapter}{\numberline {8}News}{69}{chapter.8}%
+\contentsline {section}{November 25, 2024 --- The MOSAIC framework presented at ASMTH 2024}{69}{section*.6}%
+\contentsline {chapter}{\numberline {9}References}{71}{chapter.9}%

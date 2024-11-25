@@ -24,3 +24,11 @@ Table: (\#tab:unnamed-chunk-1)Current and future planned model versions with bri
 |v3.0    |**Future:** Agent-based component with better immune dynamics.                                                                                                                                               |
 
 
+
+
+## The MOSAIC framework presented at ASMTH 2024 (November 25, 2024)
+
+John Giles presented the MOSAIC modeling framework in a talk entitled "*Cholera modeling capacity at IDM:
+leveraging diverse data streams for scenarios and forecasting*" at the American Society of Tropical Medicine and Hygiene (ASTMH) on November 14, 2024 as part the symposium entitled "*Infectious Disease Surveillance and Modeling in LMIC’s: From Data Collection to Forecasting*".
+
+<iframe src="presentations/ASTMH_John_Giles_20241113.pdf" width="700" height="460"></iframe>

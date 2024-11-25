@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  8 NOV 2024 14:51
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  25 NOV 2024 11:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1155,52 +1155,60 @@ Overfull \hbox (873.49002pt too wide) in paragraph at lines 1347--1422
 [62]
 Chapter 5.
 
-
-[63
-
-]
-
-[64]
-Chapter 6.
-
-
-[65
-
-]
-
-[66
-
-]
-Chapter 7.
-
-Overfull \hbox (626.26004pt too wide) in paragraph at lines 1494--1507
+Overfull \hbox (626.26004pt too wide) in paragraph at lines 1432--1445
  [][] 
  []
 
 
 
-[67]
+[63
+
+]
+
+[64
+
+]
+Chapter 6.
+
+
+[65]
+
+[66]
+Chapter 7.
+
+
+[67
+
+]
 
 [68
 
 ]
 Chapter 8.
+
+
+[69]
+
+[70
+
+]
+Chapter 9.
 No file MOSAIC-docs.bbl.
 
 
-[69] (./MOSAIC-docs.aux)
+[71] (./MOSAIC-docs.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-09-10>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 23591 strings out of 476173
- 455681 string characters out of 5783999
- 1028626 words of memory out of 5000000
- 45785 multiletter control sequences out of 15000+600000
+ 23593 strings out of 476173
+ 455741 string characters out of 5783999
+ 1028704 words of memory out of 5000000
+ 45787 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  90i,12n,123p,2001b,415s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on MOSAIC-docs.pdf (69 pages).
+Output written on MOSAIC-docs.pdf (71 pages).

@@ -105,6 +105,7 @@ model-calibration
 caveats
 table-of-parameters
 references
+model-versions
 scenarios
 vaccination
 spatial-and-temporal-strategies
@@ -114,5 +115,4 @@ severe-weather-events
 long-term-trends
 usage
 news
-past-versions-of-mosaic
 references-1
