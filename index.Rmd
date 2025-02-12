@@ -49,8 +49,8 @@ MOSAIC is developed by a team of researchers at the Institute for Disease Modeli
 This work was developed at the Institute for Disease Modeling in support of funded research grants made by the Bill & Melinda Gates Foundation.
 
 <center>
-<img src="./logo/idmod-logo-1.jpg" width="300">
-<img src="./logo/Logotype_dark.svg" width="300">
+<img src="./logo/idmod-logo-1.jpg" width="300" style="margin: 20px 20px;">
+<img src="./logo/Logotype_dark.png" width="300" style="margin: 20px 20px;">
 </center>
 
 <center><span style="color:#808080; font-size:13px;">

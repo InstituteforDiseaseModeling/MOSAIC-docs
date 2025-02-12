@@ -56,13 +56,11 @@ fig:generation
 tab:unnamed-chunk-3
 tab:params
 tab:unnamed-chunk-1
-introduction
-history
-recent-surge
-gtfcc-goals
-ocv-stockpiles
-climate-change
 rationale
+background
+ocv-stockpiles
+impacts-of-climate-change
+data-and-modeling
 data
 historical-incidence-and-deaths
 recent-incidence-and-deaths
@@ -110,7 +108,7 @@ scenarios
 vaccination
 spatial-and-temporal-strategies
 reactive-vaccination
-impacts-of-climate-change
+impacts-of-climate-change-1
 severe-weather-events
 long-term-trends
 usage

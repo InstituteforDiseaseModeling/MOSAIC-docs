@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2024-11-25 at 12:00 PM PST.
+Website under development. Last compiled on 2025-02-12 at 12:44 PM PST.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -136,35 +136,29 @@ This work was developed at the Institute for Disease Modeling in support of fund
 © 2024 Bill \& Melinda Gates Foundation. All rights reserved.
 }
 
-\chapter{Introduction}\label{introduction}
+\chapter{Rationale}\label{rationale}
 
-\section{History}\label{history}
+\section{Background}\label{background}
 
-Vibrio cholerae was introduced to the African continent from Asia in the 1970s and has since become endemic in many countries.
-
-\section{Recent Surge}\label{recent-surge}
-
-Although there have been sporadic cholera outbreaks over the past five decades, there has been a significant surge in cases since 2021. This increase is likely due to factors such as climate change and disruptions to municipal services during the COVID-19 pandemic.
-
-\section{GTFCC Goals}\label{gtfcc-goals}
-
-The Global Task Force on Cholera Control (GTFCC) aims to reduce cholera deaths by 90\% by 2030.
+The bacterium \emph{Vibrio cholerae} was introduced to the African continent from Asia in 1967 and has since become endemic in many countries in Sub-Saharan Africa (SSA). While sporadic outbreaks have occurred each year over the past six decades, a significant surge in transmission has been observed since 2021, which is consistent with a global increase in cases and deaths during this time. This increase is likely driven by a combination of factors such as climate change, disruptions to municipal services due to conflict, population displacement, and past shortages of the Oral Cholera Vaccine (OCV). Therefore, a spatial model of endemic cholera that accounts for the many drivers of transmission and provides insights into the most impactful interventions will be a valuable tool to support cholera control.
 
 \section{OCV Stockpiles}\label{ocv-stockpiles}
 
-A major concern with the recent surge in cases is the depletion of oral cholera vaccine (OCV) stockpiles. In response, officials have shifted to single-dose OCV strategies. Efforts are underway to replenish stockpiles, with a key question being how best to allocate them to reduce transmission regionally and support the GTFCC's goal.
+Containing cholera transmission relies primarily on improvements to Water, Sanitation, and Hygiene (WASH) and the use of the OCV. However, implementing WASH improvements takes time, and in conflict-affected areas, poor infrastructure often hinders progress. As a result, OCV remains a critical tool for slowing cholera spread in both outbreak and endemic settings.
 
-\section{Climate Change}\label{climate-change}
+The depletion of OCV stockpiles in 2024 led to a shift toward single-dose reactive OCV strategies. Increased vaccine production by multiple manufacturers is expected to improve OCV availability in 2025 and beyond. A key question now is how best to allocate OCV through preventative campaigns to reduce transmission and support the goal of reducing cholera deaths by 90\% by 2030, led by the WHO Global Task Force for Cholera Control (GTFCC). The MOSAIC framework is designed to maximize the impact of regional preventative OCV strategies by assessing country prioritization, OCV dosing schedules, and overall OCV demand.
 
-Environmental factors play a significant role in cholera outbreaks, with warmer and wetter conditions creating a more favorable environment for Vibrio cholerae. These conditions are likely to exacerbate the already challenging endemic and outbreak settings. Models that incorporate climatic forcing can provide insights into future cholera dynamics due to climate change and aid in achieving the GTFCC goal.
+\section{Impacts of Climate Change}\label{impacts-of-climate-change}
 
-\chapter{Rationale}\label{rationale}
+Environmental factors play a crucial role in cholera outbreaks, with extreme weather events creating local conditions that foster \emph{V. cholerae} transmission. Models incorporating climate change can provide valuable insights into future cholera dynamics by accounting for environmentally forced transmission, which enables more accurate forecasts and scenarios that will contribute to achieving the GTFCC goal. The MOSAIC framework leverages Artificial Intelligence (AI) models and global climate model projections to predict climate change's impact on cholera transmission and generate mid-term forecasts of high-risk areas across SSA.
 
-A significant challenge in controlling cholera transmission in Sub-Saharan Africa (SSA) is the lack of comprehensive datasets and dynamic models designed to support ongoing policy-making. The persistent endemic nature of cholera in SSA presents a complex quantitative challenge, requiring sophisticated models to produce meaningful inferences. Models that incorporate the necessary natural history and disease dynamics, and operate at adequate spatial and temporal scales, are crucial for providing timely and actionable information to address ongoing and future cholera outbreaks.
+\section{Data and Modeling}\label{data-and-modeling}
 
-Although developing data and models at these scales is challenging, our goal is to iteratively create a landscape-scale transmission model for cholera in SSA that can provide weekly predictions of key epidemiological metrics. Our modeling methods will leverage a wide array of up-to-date data sources, including incidence and mortality reports, patterns of human movement, vaccination history and schedules, and environmental factors.
+A significant challenge in controlling cholera transmission in SSA is the lack of comprehensive data sets and dynamic models designed to support ongoing policy-making. The persistent endemic nature of cholera in SSA presents a complex quantitative challenge, requiring sophisticated models to produce meaningful inferences. Models that incorporate the necessary natural history and disease dynamics, and operate at adequate spatial and temporal scales, are crucial for providing timely and actionable information to address ongoing and future cholera outbreaks.
 
-Key questions to address include when and where to administer a limited supply of oral cholera vaccine (OCV) and how severe weather events and climate change will impact future outbreaks. A landscape-scale model that accounts for endemic transmission patterns will be a valuable tool in addressing these questions.
+Although developing data and models at these scales is challenging, our goal with the MOSAIC framework is to create a landscape-scale transmission model for cholera in SSA (first at the country-level and then later at the district-level). Models are being developed with an array of historical and real-time data sources that include incidence and mortality reports, patterns of human movement, WASH, OCV campaigns, and climate variables.
+
+Key questions we aim to address include when and where to administer a limited supply of oral cholera vaccine (OCV) and how severe weather events and climate change will impact future outbreaks. Our approach will include 5-month forecasts and long-range OCV scenarios out to 2030. Model outputs will be updated biweekly or monthly based on data availability.
 
 \chapter{Data}\label{data}
 
@@ -1039,49 +1033,49 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 \hline
 Country & Cases (2014-2024) & Deaths (2014-2024) & CFR & CFR Lower & CFR Upper & Beta Shape1 & Beta Shape2\\
 \hline
-AFRO Region & 1233933 & 23690 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+AFRO Region & 1290616 & 24610 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
-Angola & 2665 & 74 & 0.028 & 0.022 & 0.035 & 0.010 & 1.918\\
+Angola & 3881 & 122 & 0.031 & 0.026 & 0.037 & 0.011 & 1.911\\
 \hline
-Burundi & 5581 & 41 & 0.007 & 0.005 & 0.010 & 0.007 & 1.934\\
+Burundi & 5695 & 41 & 0.007 & 0.005 & 0.010 & 0.007 & 1.902\\
 \hline
 Benin & 3617 & 56 & 0.015 & 0.012 & 0.020 & 0.008 & 1.906\\
 \hline
-Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
 Cote d'Ivoire & 446 & 18 & 0.040 & 0.024 & 0.063 & 0.013 & 1.863\\
 \hline
-Cameroon & 29946 & 925 & 0.031 & 0.029 & 0.033 & 0.010 & 1.929\\
+Cameroon & 29978 & 926 & 0.031 & 0.029 & 0.033 & 0.010 & 1.929\\
 \hline
-Democratic Republic of Congo & 315630 & 5751 & 0.018 & 0.018 & 0.019 & 0.008 & 1.916\\
+Democratic Republic of Congo & 324021 & 5857 & 0.018 & 0.018 & 0.019 & 0.008 & 1.899\\
 \hline
-Congo & 144 & 10 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Congo & 144 & 10 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
-Comoros & 10549 & 152 & 0.014 & 0.012 & 0.017 & 0.008 & 1.913\\
+Comoros & 11171 & 153 & 0.014 & 0.012 & 0.016 & 0.008 & 1.896\\
 \hline
-Ethiopia & 72168 & 903 & 0.013 & 0.012 & 0.013 & 0.007 & 1.914\\
+Ethiopia & 73920 & 928 & 0.013 & 0.012 & 0.013 & 0.007 & 1.912\\
 \hline
-Ghana & 29825 & 251 & 0.008 & 0.007 & 0.010 & 0.007 & 1.899\\
+Ghana & 35107 & 293 & 0.008 & 0.007 & 0.009 & 0.007 & 1.908\\
 \hline
-Guinea & 1 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Guinea & 1 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
-Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
 Kenya & 47956 & 683 & 0.014 & 0.013 & 0.015 & 0.008 & 1.925\\
 \hline
 Liberia & 580 & 0 & 0.000 & 0.000 & 0.006 & 0.006 & 1.938\\
 \hline
-Mali & 12 & 4 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Mali & 12 & 4 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
-Mozambique & 85191 & 306 & 0.004 & 0.003 & 0.004 & 0.006 & 1.882\\
+Mozambique & 85493 & 335 & 0.004 & 0.004 & 0.004 & 0.006 & 1.881\\
 \hline
-Malawi & 62700 & 1848 & 0.029 & 0.028 & 0.031 & 0.010 & 1.879\\
+Malawi & 62916 & 1859 & 0.030 & 0.028 & 0.031 & 0.010 & 1.888\\
 \hline
 Namibia & 485 & 13 & 0.027 & 0.014 & 0.045 & 0.012 & 2.021\\
 \hline
-Niger & 12666 & 355 & 0.028 & 0.025 & 0.031 & 0.010 & 1.888\\
+Niger & 12705 & 357 & 0.028 & 0.025 & 0.031 & 0.010 & 1.897\\
 \hline
-Nigeria & 258048 & 7119 & 0.028 & 0.027 & 0.028 & 0.010 & 1.899\\
+Nigeria & 265652 & 7242 & 0.027 & 0.027 & 0.028 & 0.009 & 1.891\\
 \hline
 Rwanda & 453 & 0 & 0.000 & 0.000 & 0.008 & 0.007 & 1.926\\
 \hline
@@ -1089,23 +1083,23 @@ Sudan & 362 & 11 & 0.030 & 0.015 & 0.054 & 0.012 & 1.855\\
 \hline
 Somalia & 134839 & 1849 & 0.014 & 0.013 & 0.014 & 0.008 & 1.906\\
 \hline
-South Sudan & 30566 & 653 & 0.021 & 0.020 & 0.023 & 0.009 & 1.913\\
+South Sudan & 56108 & 1140 & 0.020 & 0.019 & 0.022 & 0.009 & 1.915\\
 \hline
-Eswatini & 2 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Eswatini & 2 & 0 & 0.019 & 0.019 & 0.019 & 0.008 & 1.912\\
 \hline
 Chad & 1359 & 90 & 0.066 & 0.054 & 0.081 & 0.015 & 1.857\\
 \hline
-Togo & 509 & 29 & 0.057 & 0.038 & 0.081 & 0.015 & 1.865\\
+Togo & 771 & 38 & 0.049 & 0.035 & 0.067 & 0.014 & 1.866\\
 \hline
-Tanzania & 40965 & 636 & 0.016 & 0.014 & 0.017 & 0.008 & 1.917\\
+Tanzania & 45865 & 667 & 0.015 & 0.013 & 0.016 & 0.008 & 1.915\\
 \hline
-Uganda & 9199 & 181 & 0.020 & 0.017 & 0.023 & 0.009 & 1.912\\
+Uganda & 9286 & 182 & 0.020 & 0.017 & 0.023 & 0.009 & 1.906\\
 \hline
 South Africa & 1403 & 47 & 0.033 & 0.025 & 0.044 & 0.012 & 2.008\\
 \hline
-Zambia & 30671 & 894 & 0.029 & 0.027 & 0.031 & 0.010 & 1.905\\
+Zambia & 30686 & 894 & 0.029 & 0.027 & 0.031 & 0.010 & 1.893\\
 \hline
-Zimbabwe & 45377 & 789 & 0.017 & 0.016 & 0.019 & 0.008 & 1.903\\
+Zimbabwe & 45684 & 793 & 0.017 & 0.016 & 0.019 & 0.008 & 1.903\\
 \hline
 \end{tabular}
 \end{table}
@@ -1474,7 +1468,7 @@ The timing and logistics of reactive vaccination campaigns are critical for cont
   \textbf{Requests and Delay Time Distributions}: Information on vaccine request processes and the distribution of delays in vaccine deployment can be accessed through the GTFCC OCV Dashboard (\href{https://apps.epicentre-msf.org/public/app/gtfcc}{link}).
 \end{itemize}
 
-\section{Impacts of Climate Change}\label{impacts-of-climate-change}
+\section{Impacts of Climate Change}\label{impacts-of-climate-change-1}
 
 \subsection{Severe Weather Events}\label{severe-weather-events}
 

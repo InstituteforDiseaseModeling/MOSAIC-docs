@@ -789,33 +789,33 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 <tbody>
   <tr>
    <td style="text-align:left;"> AFRO Region </td>
-   <td style="text-align:right;"> 1233933 </td>
-   <td style="text-align:right;"> 23690 </td>
+   <td style="text-align:right;"> 1290616 </td>
+   <td style="text-align:right;"> 24610 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 2665 </td>
-   <td style="text-align:right;"> 74 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.035 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.918 </td>
+   <td style="text-align:right;"> 3881 </td>
+   <td style="text-align:right;"> 122 </td>
+   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 0.026 </td>
+   <td style="text-align:right;"> 0.037 </td>
+   <td style="text-align:right;"> 0.011 </td>
+   <td style="text-align:right;"> 1.911 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 5581 </td>
+   <td style="text-align:right;"> 5695 </td>
    <td style="text-align:right;"> 41 </td>
    <td style="text-align:right;"> 0.007 </td>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.010 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.934 </td>
+   <td style="text-align:right;"> 1.902 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Benin </td>
@@ -835,7 +835,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cote d'Ivoire </td>
@@ -849,8 +849,8 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 29946 </td>
-   <td style="text-align:right;"> 925 </td>
+   <td style="text-align:right;"> 29978 </td>
+   <td style="text-align:right;"> 926 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.033 </td>
@@ -859,13 +859,13 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 315630 </td>
-   <td style="text-align:right;"> 5751 </td>
+   <td style="text-align:right;"> 324021 </td>
+   <td style="text-align:right;"> 5857 </td>
    <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.916 </td>
+   <td style="text-align:right;"> 1.899 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Congo </td>
@@ -875,37 +875,37 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Comoros </td>
-   <td style="text-align:right;"> 10549 </td>
-   <td style="text-align:right;"> 152 </td>
+   <td style="text-align:right;"> 11171 </td>
+   <td style="text-align:right;"> 153 </td>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.913 </td>
+   <td style="text-align:right;"> 1.896 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:right;"> 72168 </td>
-   <td style="text-align:right;"> 903 </td>
+   <td style="text-align:right;"> 73920 </td>
+   <td style="text-align:right;"> 928 </td>
    <td style="text-align:right;"> 0.013 </td>
    <td style="text-align:right;"> 0.012 </td>
    <td style="text-align:right;"> 0.013 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.914 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:right;"> 29825 </td>
-   <td style="text-align:right;"> 251 </td>
+   <td style="text-align:right;"> 35107 </td>
+   <td style="text-align:right;"> 293 </td>
    <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 0.009 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.899 </td>
+   <td style="text-align:right;"> 1.908 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Guinea </td>
@@ -915,7 +915,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Guinea-Bissau </td>
@@ -925,7 +925,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
@@ -955,27 +955,27 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 85191 </td>
-   <td style="text-align:right;"> 306 </td>
+   <td style="text-align:right;"> 85493 </td>
+   <td style="text-align:right;"> 335 </td>
    <td style="text-align:right;"> 0.004 </td>
-   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.882 </td>
+   <td style="text-align:right;"> 1.881 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 62700 </td>
-   <td style="text-align:right;"> 1848 </td>
-   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 62916 </td>
+   <td style="text-align:right;"> 1859 </td>
+   <td style="text-align:right;"> 0.030 </td>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.879 </td>
+   <td style="text-align:right;"> 1.888 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Namibia </td>
@@ -989,23 +989,23 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> Niger </td>
-   <td style="text-align:right;"> 12666 </td>
-   <td style="text-align:right;"> 355 </td>
+   <td style="text-align:right;"> 12705 </td>
+   <td style="text-align:right;"> 357 </td>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.025 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.888 </td>
+   <td style="text-align:right;"> 1.897 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 258048 </td>
-   <td style="text-align:right;"> 7119 </td>
-   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 265652 </td>
+   <td style="text-align:right;"> 7242 </td>
+   <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.899 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.891 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Rwanda </td>
@@ -1039,13 +1039,13 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 30566 </td>
-   <td style="text-align:right;"> 653 </td>
-   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 56108 </td>
+   <td style="text-align:right;"> 1140 </td>
    <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.913 </td>
+   <td style="text-align:right;"> 1.915 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Eswatini </td>
@@ -1055,7 +1055,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Chad </td>
@@ -1069,33 +1069,33 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> Togo </td>
-   <td style="text-align:right;"> 509 </td>
-   <td style="text-align:right;"> 29 </td>
-   <td style="text-align:right;"> 0.057 </td>
-   <td style="text-align:right;"> 0.038 </td>
-   <td style="text-align:right;"> 0.081 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 1.865 </td>
+   <td style="text-align:right;"> 771 </td>
+   <td style="text-align:right;"> 38 </td>
+   <td style="text-align:right;"> 0.049 </td>
+   <td style="text-align:right;"> 0.035 </td>
+   <td style="text-align:right;"> 0.067 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 1.866 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:right;"> 40965 </td>
-   <td style="text-align:right;"> 636 </td>
+   <td style="text-align:right;"> 45865 </td>
+   <td style="text-align:right;"> 667 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.013 </td>
    <td style="text-align:right;"> 0.016 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.917 </td>
+   <td style="text-align:right;"> 1.915 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:right;"> 9199 </td>
-   <td style="text-align:right;"> 181 </td>
+   <td style="text-align:right;"> 9286 </td>
+   <td style="text-align:right;"> 182 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.912 </td>
+   <td style="text-align:right;"> 1.906 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> South Africa </td>
@@ -1109,18 +1109,18 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 30671 </td>
+   <td style="text-align:right;"> 30686 </td>
    <td style="text-align:right;"> 894 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.905 </td>
+   <td style="text-align:right;"> 1.893 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:right;"> 45377 </td>
-   <td style="text-align:right;"> 789 </td>
+   <td style="text-align:right;"> 45684 </td>
+   <td style="text-align:right;"> 793 </td>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.019 </td>
