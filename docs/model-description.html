@@ -121,23 +121,32 @@ R_{j,t+1} &amp;= R_{jt} + \gamma I_{jt} - \varepsilon R_{jt} - d_j R_{jt}\\[11pt
 <p><span class="math display" id="eq:foi-human">\[\begin{equation}
 \begin{aligned}
 \Lambda_{j,t+1} &amp;= \frac{
-\beta_{jt}^{\text{hum}} \Big(\big(S_{jt}(1-\tau_{j})\big)  \big(I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}) \big)\Big)^\alpha}{N_{jt}}.\\[11pt]
+\beta_{jt}^{\text{hum}} \big(S_{jt}(1-\tau_{j})\big)  \big(I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}) \big)^{\alpha_1}}{N_{jt}^{\alpha_2}}.\\[11pt]
 \end{aligned}
 \tag{3.2}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(\beta_{jt}^{\text{hum}}\)</span> is the rate of human-to-human transmission. Movement within and among metapopulations is governed by <span class="math inline">\(\tau_i\)</span>, the probability of departing origin location <span class="math inline">\(i\)</span>, and <span class="math inline">\(\pi_{ij}\)</span> is the relative probability of travel from origin <span class="math inline">\(i\)</span> to destination <span class="math inline">\(j\)</span> (see section on <a href="model-description.html#spatial-dynamics">spatial dynamics</a>). To include environmental effects, the force of infection due to environment-to-human transmission (<span class="math inline">\(\Psi_{jt}\)</span>) is defined as:</p>
 <p><span class="math display" id="eq:foi-environment">\[\begin{equation}
 \begin{aligned}
-\Psi_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}} \big(S_{jt}(1-\tau_{j})\big) (1-\theta_j) W_{jt}}{\kappa+W_{jt}},\\[11pt]
+\Psi_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}} \big(S_{jt}(1-\tau_{j})\big) (1-\theta_j) W_{jt}}{(\kappa+W_{jt})},\\[11pt]
 \end{aligned}
 \tag{3.3}
 \end{equation}\]</span></p>
 <p>where <span class="math inline">\(\beta_{jt}^{\text{env}}\)</span> is the rate of environment-to-human transmission and <span class="math inline">\(\theta_j\)</span> is the proportion of the population at location <span class="math inline">\(j\)</span> that at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental compartment of the model is also scaled by the concentration (cells per mL) of <em>V. cholerae</em> that is required for a 50% probability of infection <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/">Fung 2014</a>. See the section on <a href="model-description.html#environmental-transmission">environmental transmission</a> below for more on the water/environment compartment and climatic drivers of transmission.</p>
-<p>Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used formula <span class="math inline">\(p(t) = 1-e^{-rt}\)</span> (see Ross 2007), and then integer quantities are moved between model compartments at each time step according to a binomial process like the example below for the recovery of infected individuals (<span class="math inline">\(\gamma I_{jt}\)</span>):</p>
-<p><span class="math display" id="eq:stoch">\[\begin{equation}
-\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-\exp(-\gamma))
+<p>Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution <span class="math inline">\(p(t) = 1-e^{-rt}\)</span> (see Ross 2007). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals <span class="math inline">\(\gamma I_{jt}\)</span>, where <span class="math inline">\(\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-e^{-\gamma})\)</span>. This gives the following stochastic model mechanisms for human-to-human transmission <span class="math inline">\(\Lambda_{j,t+1}\)</span>:
+<span class="math display" id="eq:stoch-foi-hum">\[
+\Lambda_{j,t+1} \sim \text{Binom}\Big(
+S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{hum}} (I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}))^{\alpha_1} / N_{jt}^{\alpha_2}}
+\Big)
 \tag{3.4}
-\end{equation}\]</span></p>
+\]</span>
+and for the environment-to-human transmission <span class="math inline">\(\Psi_{j,t+1}\)</span>:
+<span class="math display" id="eq:stoch-foi-env">\[
+\Psi_{j,t+1} \sim \text{Binom}\Big(
+S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{env}} (1-\theta_j) W_{jt}/(\kappa+W_{jt})}
+\Big).
+\tag{3.5}
+\]</span></p>
 </div>
 <div id="seasonality" class="section level2" number="3.2">
 <h2>
@@ -146,7 +155,7 @@ R_{j,t+1} &amp;= R_{jt} + \gamma I_{jt} - \varepsilon R_{jt} - d_j R_{jt}\\[11pt
 <p>Cholera transmission is seasonal and is typically associated with the rainy season, so both transmission rate terms <span class="math inline">\(\beta_{jt}^{\text{*}}\)</span> are temporally forced. For human-to-human transmission we used a truncated sine-cosine form of the <a href="https://en.wikipedia.org/wiki/Fourier_series">Fourier series</a> with two harmonic features which has the flexibility to capture seasonal transmission dynamics driven by extended rainy seasons and/or biannual trends:</p>
 <p><span class="math display" id="eq:beta1">\[\begin{equation}
 \beta_{jt}^{\text{hum}} = \beta_{j0}^{\text{hum}} + a_1 \cos\left(\frac{2\pi t}{p}\right) + b_1 \sin\left(\frac{2\pi t}{p}\right) + a_2 \cos\left(\frac{4\pi t}{p}\right) + b_2 \sin\left(\frac{4\pi t}{p}\right)
-\tag{3.5}
+\tag{3.6}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\beta_{j0}^{\text{hum}}\)</span> is the mean human-to-human transmission rate at location <span class="math inline">\(j\)</span> over all time steps. Seasonal dynamics are determined by the parameters <span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span> and <span class="math inline">\(a_2\)</span>, <span class="math inline">\(b_2\)</span> which gives the amplitude of the first and second waves respectively. The periodic cycle <span class="math inline">\(p\)</span> is 52, so the function controls the temporal variation in <span class="math inline">\(\beta_{jt}^{\text{hum}}\)</span> over the 52 weeks of the year.</p>
 <div class="figure" style="text-align: center">
@@ -173,12 +182,12 @@ Figure 3.5: A) Map showing the clustering of African countries based on their se
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:seasonal-all"></span>
 <img src="figures/seasonal_transmission_all.png" alt="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases." width="100%"><p class="caption">
-Figure 3.6: Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation <a href="model-description.html#eq:beta1">(3.5)</a>. Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.
+Figure 3.6: Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation <a href="model-description.html#eq:beta1">(3.6)</a>. Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.
 </p>
 </div>
 <div class="inline-table"><table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
-<span id="tab:seasonal-table">Table 3.1: </span><span id="tab:seasonal-table">Table 3.2: </span>Estimated coefficients for the truncated Fourier model in Equation <a href="model-description.html#eq:beta1">(3.5)</a> fit to countries with reported cholera cases. Model fits are shown in Figure <a href="model-description.html#fig:seasonal-all">3.6</a>.
+<span id="tab:seasonal-table">Table 3.1: </span><span id="tab:seasonal-table">Table 3.2: </span>Estimated coefficients for the truncated Fourier model in Equation <a href="model-description.html#eq:beta1">(3.6)</a> fit to countries with reported cholera cases. Model fits are shown in Figure <a href="model-description.html#fig:seasonal-all">3.6</a>.
 </caption>
 <thead>
 <tr>
@@ -479,17 +488,17 @@ Zimbabwe
 <p>To capture the impacts of climate-drivers on cholera transmission, we have included the parameter <span class="math inline">\(\psi_{jt}\)</span>, which represents the current state of environmental suitability with respect to: <em>i</em>) the survival time of <em>V. cholerae</em> in the environment and, <em>ii</em>) the rate of environment-to-human transmission which contributes to the overall force of infection.</p>
 <p><span class="math display" id="eq:beta2">\[\begin{equation}
 \beta_{jt}^{\text{env}} = \beta_{j0}^{\text{env}} \Bigg(1 + \frac{\psi_{jt}-\bar\psi_j}{\bar\psi_j} \Bigg) \quad \text{and} \quad \bar\psi_j = \frac{1}{T} \sum_{t=1}^{T} \psi_{jt}
-\tag{3.6}
+\tag{3.7}
 \end{equation}\]</span></p>
 <p>This formulation effectively scales the base environmental transmission rate <span class="math inline">\(\beta_{jt}^{\text{env}}\)</span> so that it varies over time according to the climatically driven model of suitability. Note that, unlike the the cosine wave function of <span class="math inline">\(\beta_{jt}^{\text{hum}}\)</span>, this temporal term can increase or decrease over time following multi-annual cycles.</p>
 <p>Environmental suitability (<span class="math inline">\(\psi_{jt}\)</span>) also impacts the survival rate of <em>V. cholerae</em> in the environment (<span class="math inline">\(\delta_{jt}\)</span>) with the form:</p>
 <p><span class="math display" id="eq:delta">\[\begin{equation}
 \delta_{jt} = \delta_{\text{min}} + \psi_{jt} \times (\delta_{\text{max}} - \delta_{\text{min}})
-\tag{3.7}
+\tag{3.8}
 \end{equation}\]</span></p>
 <p>which normalizes the variance of the suitability parameter to be bounded within the minimum (<span class="math inline">\(\delta_{\text{min}}\)</span>) and maximum (<span class="math inline">\(\delta_{\text{max}}\)</span>) survival times of <em>V. cholerae</em>.</p>
 <div class="figure" style="text-align: center">
-<span style="display:block;" id="fig:unnamed-chunk-2"></span>
+<span style="display:block;" id="fig:unnamed-chunk-1"></span>
 <img src="figures/shedding_rate.png" alt="Relationship between environmental suitability ($\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\delta_{\text{min}}$ = 3 days when suitability = 0 and $1/\delta_{\text{max}}$ = 90 days when suitability = 1." width="80%"><p class="caption">
 Figure 3.7: Relationship between environmental suitability (<span class="math inline">\(\psi_{jt}\)</span>) and the rate of <em>V. cholerae</em> decay in the environment (<span class="math inline">\(\delta_j\)</span>). The green line shows the mildest penalty on <em>V. cholerae</em> survival, where survival in the environment is <span class="math inline">\(1/\delta_{\text{min}}\)</span> = 3 days when suitability = 0 and <span class="math inline">\(1/\delta_{\text{max}}\)</span> = 90 days when suitability = 1.
 </p>
@@ -503,7 +512,7 @@ Figure 3.7: Relationship between environmental suitability (<span class="math in
 <h4>
 <span class="header-section-number">3.3.2.1</span> Environmental data<a class="anchor" aria-label="anchor" href="#environmental-data"><i class="fas fa-link"></i></a>
 </h4>
-<p>The mechanism for environment-to-human transmission (Equation <a href="model-description.html#eq:beta2">(3.6)</a>) and rate of decay of <em>V. cholerae</em> in the environment (Equation <a href="model-description.html#eq:delta">(3.7)</a>) is driven by the parameter <span class="math inline">\(\psi_{jt}\)</span>, which we refer to as environmental suitability. The parameter <span class="math inline">\(\psi_{jt}\)</span> is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 24 covariates which include 19 historical and forecasted climate variables under the <a href="https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present">MRI-AGCM3-2-S</a> climate model. Covariates also include 4 large-scale climate drivers such as the Indian Ocean Dipole Mode Index (DMI), and the El Niño Southern Oscillation (ENSO) from 3 different Pacific Ocean regions. We also included a location specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure <a href="model-description.html#fig:climate-data-moz">3.8</a> and DMI and ENSO variables in Figure <a href="model-description.html#fig:climate-data-enso">3.9</a>. A list of all covariates and their sources can be seen in Table <a href="model-description.html#tab:climate-data-variables">3.3</a>.</p>
+<p>The mechanism for environment-to-human transmission (Equation <a href="model-description.html#eq:beta2">(3.7)</a>) and rate of decay of <em>V. cholerae</em> in the environment (Equation <a href="model-description.html#eq:delta">(3.8)</a>) is driven by the parameter <span class="math inline">\(\psi_{jt}\)</span>, which we refer to as environmental suitability. The parameter <span class="math inline">\(\psi_{jt}\)</span> is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 24 covariates which include 19 historical and forecasted climate variables under the <a href="https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present">MRI-AGCM3-2-S</a> climate model. Covariates also include 4 large-scale climate drivers such as the Indian Ocean Dipole Mode Index (DMI), and the El Niño Southern Oscillation (ENSO) from 3 different Pacific Ocean regions. We also included a location specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure <a href="model-description.html#fig:climate-data-moz">3.8</a> and DMI and ENSO variables in Figure <a href="model-description.html#fig:climate-data-enso">3.9</a>. A list of all covariates and their sources can be seen in Table <a href="model-description.html#tab:climate-data-variables">3.3</a>.</p>
 <p>Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:climate-data-moz"></span>
@@ -667,7 +676,7 @@ Figure 3.10: Reported cases converted to binary variable for modeling environmen
 <p>The model is a Long Short-Term Memory (LSTM) neural network designed for binary classification, where environmental suitability, <span class="math inline">\(\psi_{jt}\)</span>, is modeled as a function of the hidden state <span class="math inline">\(h_t\)</span> and hidden bias term <span class="math inline">\(b_h\)</span>. Specifically, <span class="math inline">\(\psi_{jt}\)</span> is defined by a sigmoid activation function applied to the linear combination of the hidden state <span class="math inline">\(h_t\)</span> and the bias <span class="math inline">\(b_h\)</span> which if given by the 3 layers of the LSTM model:</p>
 <p><span class="math display" id="eq:psi">\[\begin{equation}
 \psi_{jt} \sim \text{Sigmoid}(w_h \cdot h_t + b_h)
-\tag{3.8}
+\tag{3.9}
 \end{equation}\]</span></p>
 <p><span class="math display">\[\begin{equation}
 h_t = \text{LSTM}\big(\text{temperature}_{jt}, \ \text{precipitation}_{jt}, \ \text{ENSO}_{t}, \dots \big)
@@ -681,7 +690,7 @@ h_t = \text{LSTM}\big(\text{temperature}_{jt}, \ \text{precipitation}_{jt}, \ \t
 Figure 3.11: Model performance on training and validation data.
 </p>
 </div>
-<p>After model training was completed, we predicted the values of environmental suitability <span class="math inline">\(\psi_{jt}\)</span> across all time steps for each location. Predictions start in January 1970 and go up to 5 months past the present date (currently February 2025). Given the amount of noise in the model predictions, we added a simple LOESS spline with logit transformation to smooth model predictions over time and give a more stable value of <span class="math inline">\(\psi_{jt}\)</span> when incorporating it into other model features (e.g. Equations <a href="model-description.html#eq:beta2">(3.6)</a> and <a href="model-description.html#eq:delta">(3.7)</a>). The resulting model predictions are shown for an example country such as Mozambique in Figure <a href="model-description.html#fig:psi-prediction-data">3.12</a> which compares model predictions to the original case counts and the binary classification. Predicitons for all model locations are shown in a simplified view in Figure <a href="model-description.html#fig:psi-prediction-countries">3.13</a>.</p>
+<p>After model training was completed, we predicted the values of environmental suitability <span class="math inline">\(\psi_{jt}\)</span> across all time steps for each location. Predictions start in January 1970 and go up to 5 months past the present date (currently February 2025). Given the amount of noise in the model predictions, we added a simple LOESS spline with logit transformation to smooth model predictions over time and give a more stable value of <span class="math inline">\(\psi_{jt}\)</span> when incorporating it into other model features (e.g. Equations <a href="model-description.html#eq:beta2">(3.7)</a> and <a href="model-description.html#eq:delta">(3.8)</a>). The resulting model predictions are shown for an example country such as Mozambique in Figure <a href="model-description.html#fig:psi-prediction-data">3.12</a> which compares model predictions to the original case counts and the binary classification. Predicitons for all model locations are shown in a simplified view in Figure <a href="model-description.html#fig:psi-prediction-countries">3.13</a>.</p>
 <p><em>Also, please note that this initial version of the model is fitted to a rather small amount of data. Model hyper parameters were specifically chosen to reduce overfitting. Therefore, we recommend to not over-interpret the time series predictions of the model at this early stage since they are likely to change and improve as more historical incidence data is included in future versions.</em></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:psi-prediction-data"></span>
@@ -920,13 +929,13 @@ Figure 3.18: The total cumulative number of OCV doses distributed through the WH
 <p>We estimated vaccine effectiveness and waning immunity by fitting an exponential decay model to the reported effectiveness of one dose OCV in these studies using the following formulation:</p>
 <p><span class="math display" id="eq:omega">\[\begin{equation}
 \text{Proportion immune}\ t \ \text{days after vaccination} = \phi \times (1 - \omega) ^ {t-t_{\text{vaccination}}}
-\tag{3.9}
+\tag{3.10}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(\phi\)</span> is the effectiveness of one dose OCV, and the based on this specification, it is also the initial proportion immune directly after vaccination. The decay rate parameter <span class="math inline">\(\omega\)</span> is the rate at which initial vaccine derived immunity decays per day post vaccination, and <span class="math inline">\(t\)</span> and <span class="math inline">\(t_{\text{vaccination}}\)</span> are the time (in days) the function is evaluated at and the time of vaccination respectively. When we fitted the model to the data from the cohort studies shown in Table (<a href="model-description.html#tab:effectiveness-papers">3.6</a>) we found that <span class="math inline">\(\omega = 0.00057\)</span> (<span class="math inline">\(0-0.0019\)</span> 95% CI), which gives a mean estimate of 4.8 years for vaccine derived immune duration with unreasonably large confidence intervals (1.4 years to infinite immunity). However, the point estimate of 4.8 years is consistent with anecdotes that one dose OCV is effective for up to at least 3 years.</p>
-<p>The wide confidence intervals are likely due to the wide range of reported estimates for proportion immune after a short duration in the 7–90 days range (<a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext">Azman et al 2016</a> and <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1510330">Qadri et al 2016</a>). Therefore, we chose to use the point estimate of <span class="math inline">\(\omega\)</span> and incorporate uncertainty based on the initial proportion immune (i.e. vaccine effectiveness <span class="math inline">\(\phi\)</span>) shortly after vaccination. Using the decay model in Equation <a href="model-description.html#eq:omega">(3.9)</a> we estimated <span class="math inline">\(\phi\)</span> to be <span class="math inline">\(0.64\)</span> (<span class="math inline">\(0.32-0.96\)</span> 95% CI). We then fit a Beta distribution to the quantiles of <span class="math inline">\(\phi\)</span> by minimizing the sums of squares using the Nelder-Mead optimization algorithm to render the following distribution (shown in Figure <a href="model-description.html#fig:effectiveness">3.19</a>B):</p>
+<p>The wide confidence intervals are likely due to the wide range of reported estimates for proportion immune after a short duration in the 7–90 days range (<a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext">Azman et al 2016</a> and <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1510330">Qadri et al 2016</a>). Therefore, we chose to use the point estimate of <span class="math inline">\(\omega\)</span> and incorporate uncertainty based on the initial proportion immune (i.e. vaccine effectiveness <span class="math inline">\(\phi\)</span>) shortly after vaccination. Using the decay model in Equation <a href="model-description.html#eq:omega">(3.10)</a> we estimated <span class="math inline">\(\phi\)</span> to be <span class="math inline">\(0.64\)</span> (<span class="math inline">\(0.32-0.96\)</span> 95% CI). We then fit a Beta distribution to the quantiles of <span class="math inline">\(\phi\)</span> by minimizing the sums of squares using the Nelder-Mead optimization algorithm to render the following distribution (shown in Figure <a href="model-description.html#fig:effectiveness">3.19</a>B):</p>
 <p><span class="math display" id="eq:effectiveness">\[\begin{equation}
 \phi \sim \text{Beta}(4.57, 2.41).
-\tag{3.10}
+\tag{3.11}
 \end{equation}\]</span></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:effectiveness"></span>
@@ -1033,7 +1042,7 @@ M_{ij} =
 \theta N_i (1-\tau_i) \ &amp; \text{if} \ i = j \\
 \theta N_i \tau_i \pi_{ij} \ &amp; \text{if} \ i \ne j.
 \end{cases}
-\tag{3.11}
+\tag{3.12}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\theta\)</span> is a proportionality constant representing the overall number of trips per person in an origin population of size <span class="math inline">\(N_i\)</span>, <span class="math inline">\(\tau_i\)</span> is the probability of leaving origin <span class="math inline">\(i\)</span>, and <span class="math inline">\(\pi_{ij}\)</span> is the probability of travel to destination <span class="math inline">\(j\)</span> given that travel outside origin <span class="math inline">\(i\)</span> occurs.</p>
 </div>
@@ -1064,7 +1073,7 @@ N_j^\omega d_{ij}^{-\gamma}
 }{
 \sum\limits_{\forall j \ne i} N_j^\omega d_{ij}^{-\gamma}
 }
-\tag{3.12}
+\tag{3.13}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\omega\)</span> scales the attractive force of each <span class="math inline">\(j\)</span> destination based on its population size <span class="math inline">\(N_j\)</span>. The kernel function <span class="math inline">\(d_{ij}^{-\gamma}\)</span> serves as a penalty on the proportion of travel from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> based on distance. Prior distributions of diffusion model parameters are defined as:
 <span class="math display">\[
@@ -1094,7 +1103,7 @@ Figure 3.24: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 <p>The likelihood of introductions of cholera from disparate locations is a major concern during cholera outbreaks. However, this can be difficult to characterize given the endemic dynamics and patterns of human movement. We include a few measures of spatial heterogeneity here and the first is a simple importation probability based on connectivity and the possibility of incoming infections. The basic probability of transmission from an origin <span class="math inline">\(i\)</span> to a particular destination <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span> is defined as:</p>
 <p><span class="math display" id="eq:prob">\[\begin{equation}
 p(i,j,t) = 1 - e^{-\beta_{jt}^{\text{hum}} (((1-\tau_j)S_{jt})/N_{jt}) \pi_{ij}\tau_iI_{it}}
-\tag{3.13}
+\tag{3.14}
 \end{equation}\]</span></p>
 </div>
 <div id="the-spatial-hazard" class="section level3" number="3.5.5">
@@ -1108,12 +1117,12 @@ h(j,t) = \frac{
 }{
 1/\big(1 + \beta_{jt}^{\text{hum}} (1-\tau_j)S_{jt}\big)
 }.
-\tag{3.14}
+\tag{3.15}
 \end{equation}\]</span></p>
 <p>And then normalizing to give the waiting time distribution for all locations:</p>
 <p><span class="math display" id="eq:waiting">\[\begin{equation}
 w(j,t) = h(j,T) \prod_{t=1}^{T-1}1-h(j,t).
-\tag{3.15}
+\tag{3.16}
 \end{equation}\]</span></p>
 </div>
 <div id="coupling-among-locations" class="section level3" number="3.5.6">
@@ -1127,7 +1136,7 @@ C_{ij} = \frac{
 }{
 \sqrt{\text{var}(y_i) \text{var}(y_j)}
 }
-\tag{3.16}
+\tag{3.17}
 \end{equation}\]</span>
 Where <span class="math inline">\(y_{it} = I_{it}/N_i\)</span> and <span class="math inline">\(y_{jt} = I_{jt}/N_j\)</span>. Mean prevalence in each location is <span class="math inline">\(\bar{y_i} = \frac{1}{T} \sum_{t=1}^{T} y_{it}\)</span> and <span class="math inline">\(\bar{y_j} = \frac{1}{T} \sum_{t=1}^{T} y_{jt}\)</span>.</p>
 </div>
@@ -1272,7 +1281,7 @@ Figure 3.26: Proportion of suspected cholera cases that are true infections. Pan
 \mu_j \sim \text{Beta}(s_{1,j}, s_{2,j})
 \]</span></p>
 <p>Where <span class="math inline">\(s_{1,i}\)</span> and <span class="math inline">\(s_{2,j}\)</span> are the two positive shape parameters of the Beta distribution estimated for destination <span class="math inline">\(j\)</span>. By definition <span class="math inline">\(\mu_j\)</span> is the CFR for reported cases which are a subset of the total number of infections. Therefore, to infer the total number of deaths attributable to cholera infection, we assume that the CFR of observed cases is proportionally equivalent to the CFR of all cases and then calculate total deaths <span class="math inline">\(D\)</span> as follows:</p>
-<p><span class="math display">\[\begin{equation}
+<p><span class="math display" id="eq:deaths">\[\begin{equation}
 \begin{aligned}
 \text{CFR}_{\text{observed}} &amp;= \text{CFR}_{\text{total}}\\
 \\[3pt]
@@ -1283,6 +1292,7 @@ Figure 3.26: Proportion of suspected cholera cases that are true infections. Pan
 \\[3pt]
 D_{jt} &amp;= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
 \end{aligned}
+\tag{3.18}
 \end{equation}\]</span></p>
 <div class="inline-table"><table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
@@ -2921,7 +2931,7 @@ Zimbabwe
 <p>The reproductive number is a common metric of epidemic growth that represents the average number of secondary cases generated by a primary case at a specific time during an epidemic. We track how <span class="math inline">\(R\)</span> changes over time by estimating the instantaneous reproductive number <span class="math inline">\(R_t\)</span> as described in <a href="https://academic.oup.com/aje/article/178/9/1505/89262">Cori et al 2013</a>. We track <span class="math inline">\(R_t\)</span> across all metapopulations in the model to give <span class="math inline">\(R_{jt}\)</span> using the following formula:</p>
 <p><span class="math display" id="eq:R">\[\begin{equation}
 R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
-\tag{3.17}
+\tag{3.19}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(I_{jt}\)</span> is the number of new infections in destination <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span>, and
 <span class="math inline">\(g(\Delta t)\)</span> represents the probability value from the generation time distribution of cholera. This is accomplished by using the weighed sum in the denominator which is highly influenced by the generation time distribution.</p>
@@ -2932,7 +2942,7 @@ R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
 <p>The generation time distribution gives the time between when an individual is infected and when they infect subsequent individuals. We parameterized this quantity using a Gamma distribution with a mean of 5 days:</p>
 <p><span class="math display" id="eq:generation-time">\[\begin{equation}
 g(\cdot) \sim \text{Gamma}(0.5, 0.1).
-\tag{3.18}
+\tag{3.20}
 \end{equation}\]</span></p>
 <p>Here, shape=0.5, rate=0.1, and the mean if given by shape/rate. Previous studies use a mean of 5 days (<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7060667/#:~:text=The%20serial%20interval%20for%20cholera,routes%20(45%2C%2046).">Kahn et al 2020</a> and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4880069/">Azman 2016</a>), however a mean of 3, 5, 7, or 10 days may be admissible (<a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0001901">Azman 2012</a>).</p>
 <div class="figure" style="text-align: center">
@@ -2943,7 +2953,7 @@ Figure 3.29: This is generation time
 </div>
 <div class="inline-table"><table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-<span id="tab:unnamed-chunk-3">Table 3.13: </span><span id="tab:unnamed-chunk-3">Table 3.14: </span>Generation Time in Weeks
+<span id="tab:unnamed-chunk-2">Table 3.13: </span><span id="tab:unnamed-chunk-2">Table 3.14: </span>Generation Time in Weeks
 </caption>
 <thead><tr>
 <th style="text-align:left;">

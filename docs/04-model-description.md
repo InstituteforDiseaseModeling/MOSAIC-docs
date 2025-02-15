@@ -42,7 +42,7 @@ For descriptions of all parameters in Equation \@ref(eq:system), see Table (\@re
 \begin{equation}
 \begin{aligned}
 \Lambda_{j,t+1} &= \frac{
-\beta_{jt}^{\text{hum}} \Big(\big(S_{jt}(1-\tau_{j})\big)  \big(I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}) \big)\Big)^\alpha}{N_{jt}}.\\[11pt]
+\beta_{jt}^{\text{hum}} \big(S_{jt}(1-\tau_{j})\big)  \big(I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}) \big)^{\alpha_1}}{N_{jt}^{\alpha_2}}.\\[11pt]
 \end{aligned}
 (\#eq:foi-human)
 \end{equation}
@@ -51,23 +51,27 @@ Where $\beta_{jt}^{\text{hum}}$ is the rate of human-to-human transmission. Move
 
 \begin{equation}
 \begin{aligned}
-\Psi_{j,t+1} &= \frac{\beta_{jt}^{\text{env}} \big(S_{jt}(1-\tau_{j})\big) (1-\theta_j) W_{jt}}{\kappa+W_{jt}},\\[11pt]
+\Psi_{j,t+1} &= \frac{\beta_{jt}^{\text{env}} \big(S_{jt}(1-\tau_{j})\big) (1-\theta_j) W_{jt}}{(\kappa+W_{jt})},\\[11pt]
 \end{aligned}
 (\#eq:foi-environment)
 \end{equation}
 
 where $\beta_{jt}^{\text{env}}$ is the rate of environment-to-human transmission and $\theta_j$ is the proportion of the population at location $j$ that at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental compartment of the model is also scaled by the concentration (cells per mL) of *V. cholerae* that is required for a 50% probability of infection [Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/). See the section on [environmental transmission][Environmental transmission] below for more on the water/environment compartment and climatic drivers of transmission.
 
-Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used formula $p(t) = 1-e^{-rt}$ (see Ross 2007), and then integer quantities are moved between model compartments at each time step according to a binomial process like the example below for the recovery of infected individuals ($\gamma I_{jt}$):
-
-
-
-
-\begin{equation}
-\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-\exp(-\gamma))
-(\#eq:stoch)
-\end{equation}
-
+Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see Ross 2007). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$, where $\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-e^{-\gamma})$. This gives the following stochastic model mechanisms for human-to-human transmission $\Lambda_{j,t+1}$:
+$$
+\Lambda_{j,t+1} \sim \text{Binom}\Big(
+S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{hum}} (I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}))^{\alpha_1} / N_{jt}^{\alpha_2}}
+\Big)
+(\#eq:stoch-foi-hum)
+$$
+and for the environment-to-human transmission $\Psi_{j,t+1}$:
+$$
+\Psi_{j,t+1} \sim \text{Binom}\Big(
+S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{env}} (1-\theta_j) W_{jt}/(\kappa+W_{jt})}
+\Big).
+(\#eq:stoch-foi-env)
+$$
 
 ## Seasonality
 Cholera transmission is seasonal and is typically associated with the rainy season, so both transmission rate terms $\beta_{jt}^{\text{*}}$ are temporally forced. For human-to-human transmission we used a truncated sine-cosine form of the [Fourier series](https://en.wikipedia.org/wiki/Fourier_series) with two harmonic features which has the flexibility to capture seasonal transmission dynamics driven by extended rainy seasons and/or biannual trends:
@@ -260,7 +264,7 @@ which normalizes the variance of the suitability parameter to be bounded within 
 
 <div class="figure" style="text-align: center">
 <img src="figures/shedding_rate.png" alt="Relationship between environmental suitability ($\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\delta_{\text{min}}$ = 3 days when suitability = 0 and $1/\delta_{\text{max}}$ = 90 days when suitability = 1." width="80%" />
-<p class="caption">(\#fig:unnamed-chunk-2)Relationship between environmental suitability ($\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\delta_{\text{min}}$ = 3 days when suitability = 0 and $1/\delta_{\text{max}}$ = 90 days when suitability = 1.</p>
+<p class="caption">(\#fig:unnamed-chunk-1)Relationship between environmental suitability ($\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\delta_{\text{min}}$ = 3 days when suitability = 0 and $1/\delta_{\text{max}}$ = 90 days when suitability = 1.</p>
 </div>
 
 ### Modeling environmental suitability
@@ -769,6 +773,7 @@ Where $s_{1,i}$ and $s_{2,j}$ are the two positive shape parameters of the Beta 
 \\[3pt]
 D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
 \end{aligned}
+(\#eq:deaths)
 \end{equation}
 
 
@@ -1488,7 +1493,7 @@ Here, shape=0.5, rate=0.1, and the mean if given by shape/rate. Previous studies
 </div>
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:unnamed-chunk-3)(\#tab:unnamed-chunk-3)Generation Time in Weeks</caption>
+<caption>(\#tab:unnamed-chunk-2)(\#tab:unnamed-chunk-2)Generation Time in Weeks</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Interval </th>

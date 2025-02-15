@@ -3,7 +3,8 @@ fig:diagram
 eq:system
 eq:foi-human
 eq:foi-environment
-eq:stoch
+eq:stoch-foi-hum
+eq:stoch-foi-env
 eq:beta1
 fig:seasonal-concept
 fig:seasonal-example
@@ -12,7 +13,7 @@ fig:seasonal-all
 tab:seasonal-table
 eq:beta2
 eq:delta
-fig:unnamed-chunk-2
+fig:unnamed-chunk-1
 fig:climate-data-moz
 fig:climate-data-enso
 tab:climate-data-variables
@@ -46,6 +47,7 @@ eq:correlation
 tab:symptomatic-table
 fig:symptomatic-fig
 fig:rho
+eq:deaths
 tab:cfr
 fig:cfr-cases
 fig:cfr-beta
@@ -53,7 +55,7 @@ tab:demographics
 eq:R
 eq:generation-time
 fig:generation
-tab:unnamed-chunk-3
+tab:unnamed-chunk-2
 tab:params
 tab:unnamed-chunk-1
 rationale

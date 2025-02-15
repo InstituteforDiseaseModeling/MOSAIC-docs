@@ -19,34 +19,34 @@
 \contentsline {chapter}{\numberline {3}Model description}{13}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Transmission dynamics}{13}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Seasonality}{17}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Environmental transmission}{20}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Climate-driven transmission}{20}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Modeling environmental suitability}{22}{subsection.3.3.2}%
-\contentsline {subsubsection}{\numberline {3.3.2.1}Environmental data}{22}{subsubsection.3.3.2.1}%
-\contentsline {subsubsection}{\numberline {3.3.2.2}Deep learning neural network model}{27}{subsubsection.3.3.2.2}%
-\contentsline {subsection}{\numberline {3.3.3}Shedding}{32}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}WAter, Sanitation, and Hygiene (WASH)}{32}{subsection.3.3.4}%
+\contentsline {section}{\numberline {3.3}Environmental transmission}{18}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Climate-driven transmission}{18}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Modeling environmental suitability}{24}{subsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.2.1}Environmental data}{24}{subsubsection.3.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.3.2.2}Deep learning neural network model}{24}{subsubsection.3.3.2.2}%
+\contentsline {subsection}{\numberline {3.3.3}Shedding}{30}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}WAter, Sanitation, and Hygiene (WASH)}{33}{subsection.3.3.4}%
 \contentsline {section}{\numberline {3.4}Immune dynamics}{33}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Estimating Vaccination Rates}{33}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.1}Estimating Vaccination Rates}{36}{subsection.3.4.1}%
 \contentsline {subsection}{\numberline {3.4.2}Immunity from vaccination}{36}{subsection.3.4.2}%
 \contentsline {subsection}{\numberline {3.4.3}Immunity from natural infection}{40}{subsection.3.4.3}%
 \contentsline {section}{\numberline {3.5}Spatial dynamics}{41}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}Human mobility model}{42}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Estimating the departure process}{44}{subsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.5.3}Estimating the diffusion process}{44}{subsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.5.1}Human mobility model}{41}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Estimating the departure process}{45}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Estimating the diffusion process}{45}{subsection.3.5.3}%
 \contentsline {subsection}{\numberline {3.5.4}The probability of spatial transmission}{45}{subsection.3.5.4}%
-\contentsline {subsection}{\numberline {3.5.5}The spatial hazard}{45}{subsection.3.5.5}%
-\contentsline {subsection}{\numberline {3.5.6}Coupling among locations}{45}{subsection.3.5.6}%
+\contentsline {subsection}{\numberline {3.5.5}The spatial hazard}{48}{subsection.3.5.5}%
+\contentsline {subsection}{\numberline {3.5.6}Coupling among locations}{48}{subsection.3.5.6}%
 \contentsline {section}{\numberline {3.6}The observation process}{48}{section.3.6}%
 \contentsline {subsection}{\numberline {3.6.1}Rate of symptomatic infection}{48}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Suspected cases}{50}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}Case fatality rate}{50}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.2}Suspected cases}{49}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Case fatality rate}{51}{subsection.3.6.3}%
 \contentsline {section}{\numberline {3.7}Demographics}{52}{section.3.7}%
 \contentsline {section}{\numberline {3.8}The reproductive number}{52}{section.3.8}%
 \contentsline {subsection}{\numberline {3.8.1}The generation time distribution}{57}{subsection.3.8.1}%
-\contentsline {section}{\numberline {3.9}Initial conditions}{58}{section.3.9}%
-\contentsline {section}{\numberline {3.10}Model calibration}{58}{section.3.10}%
-\contentsline {section}{\numberline {3.11}Caveats}{58}{section.3.11}%
+\contentsline {section}{\numberline {3.9}Initial conditions}{57}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Model calibration}{59}{section.3.10}%
+\contentsline {section}{\numberline {3.11}Caveats}{59}{section.3.11}%
 \contentsline {section}{\numberline {3.12}Table of parameters}{59}{section.3.12}%
 \contentsline {section}{\numberline {3.13}References}{59}{section.3.13}%
 \contentsline {chapter}{\numberline {4}Model versions}{61}{chapter.4}%

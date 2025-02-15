@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  12 FEB 2025 12:44
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.3)  14 FEB 2025 16:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -907,96 +907,99 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [16]
 File: figures/seasonal_transmission_concept.png Graphic file (type bmp)
 <figures/seasonal_transmission_concept.png>
-
-
-[17]
 File: figures/seasonal_transmission_example_MOZ.png Graphic file (type bmp)
 <figures/seasonal_transmission_example_MOZ.png>
 File: figures/seasonal_precip_ward.D2_cluster.png Graphic file (type bmp)
 <figures/seasonal_precip_ward.D2_cluster.png>
 
 
-[18]
-
-[19]
+[17]
 File: figures/seasonal_transmission_all.png Graphic file (type bmp)
 <figures/seasonal_transmission_all.png>
 
-LaTeX Warning: Float too large for page by 107.76767pt on input line 370.
+LaTeX Warning: Float too large for page by 107.76767pt on input line 378.
 
-LaTeX Font Info:    Calculating math sizes for size <11.75> on input line 377.
+LaTeX Font Info:    Calculating math sizes for size <11.75> on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 11.75pt on input line 377.
+(Font)              scaled to size 11.75pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 8.22496pt on input line 377.
+(Font)              scaled to size 8.22496pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.875pt on input line 377.
+(Font)              scaled to size 5.875pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 11.75107pt on input line 377.
+(Font)              scaled to size 11.75107pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 8.22571pt on input line 377.
+(Font)              scaled to size 8.22571pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.87553pt on input line 377.
+(Font)              scaled to size 5.87553pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 11.74873pt on input line 377.
+(Font)              scaled to size 11.74873pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 8.22408pt on input line 377.
+(Font)              scaled to size 8.22408pt on input line 385.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 5.87436pt on input line 377.
+(Font)              scaled to size 5.87436pt on input line 385.
 
-Overfull \hbox (194.82509pt too wide) in paragraph at lines 377--414
+Overfull \hbox (194.82509pt too wide) in paragraph at lines 385--422
  [][] 
  []
 
 
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+
+[18]
+
+[19]
 
 [20]
 
 [21]
 File: figures/shedding_rate.png Graphic file (type bmp)
 <figures/shedding_rate.png>
-File: figures/climate_data_MOZ_weekly.png Graphic file (type bmp)
-<figures/climate_data_MOZ_weekly.png>
-File: figures/climate_data_ENSO_weekly.png Graphic file (type bmp)
-<figures/climate_data_ENSO_weekly.png>
-
-Overfull \hbox (780.03003pt too wide) in paragraph at lines 479--528
- [][] 
- []
-
 
 
 [22]
 
 [23]
+File: figures/climate_data_MOZ_weekly.png Graphic file (type bmp)
+<figures/climate_data_MOZ_weekly.png>
+File: figures/climate_data_ENSO_weekly.png Graphic file (type bmp)
+<figures/climate_data_ENSO_weekly.png>
+
+Overfull \hbox (780.03003pt too wide) in paragraph at lines 487--536
+ [][] 
+ []
+
+File: figures/cases_binary.png Graphic file (type bmp)
+<figures/cases_binary.png>
+
 
 [24]
 
 [25]
 
 [26]
-File: figures/cases_binary.png Graphic file (type bmp)
-<figures/cases_binary.png>
-
 
 [27]
 
 [28]
 File: figures/suitability_LSTM_fit.png Graphic file (type bmp)
 <figures/suitability_LSTM_fit.png>
+
+
+[29]
 File: figures/suitability_cases_MOZ.png Graphic file (type bmp)
 <figures/suitability_cases_MOZ.png>
 File: figures/suitability_by_country.png Graphic file (type bmp)
 <figures/suitability_by_country.png>
 
-LaTeX Warning: Float too large for page by 59.92982pt on input line 591.
+LaTeX Warning: Float too large for page by 59.92982pt on input line 599.
 
 
-Underfull \vbox (badness 7613) has occurred while \output is active []
+Underfull \vbox (badness 4120) has occurred while \output is active []
 
 
-
-[29]
 
 [30]
 
@@ -1006,7 +1009,7 @@ Underfull \vbox (badness 7613) has occurred while \output is active []
 File: figures/wash_incidence_correlation.png Graphic file (type bmp)
 <figures/wash_incidence_correlation.png>
 
-LaTeX Warning: Float too large for page by 24.06267pt on input line 643.
+LaTeX Warning: Float too large for page by 24.06267pt on input line 651.
 
 File: figures/wash_index_by_country.png Graphic file (type bmp)
 <figures/wash_index_by_country.png>
@@ -1026,42 +1029,40 @@ File: figures/vaccination_maps.png Graphic file (type bmp)
 
 
 [36]
-
-[37]
-
-[38]
-Overfull \hbox (143.90997pt too wide) in paragraph at lines 711--726
+Overfull \hbox (143.90997pt too wide) in paragraph at lines 719--734
  [][] 
  []
 
 
+
+[37]
+
+[38]
 
 [39]
 File: figures/vaccine_effectiveness.png Graphic file (type bmp)
 <figures/vaccine_effectiveness.png>
 
-Overfull \hbox (6.89923pt too wide) in paragraph at lines 746--747
- [][] 
- []
-
-
-Overfull \hbox (281.69998pt too wide) in paragraph at lines 766--777
+Overfull \hbox (6.89923pt too wide) in paragraph at lines 754--755
  [][] 
  []
 
 
 
 [40]
+Overfull \hbox (281.69998pt too wide) in paragraph at lines 774--785
+ [][] 
+ []
+
 File: figures/immune_decay.png Graphic file (type bmp)
 <figures/immune_decay.png>
-
-
-[41]
 File: figures/mobility_flight_data.png Graphic file (type bmp)
 <figures/mobility_flight_data.png>
 File: figures/mobility_network.png Graphic file (type bmp)
 <figures/mobility_network.png>
 
+
+[41]
 
 [42]
 
@@ -1079,35 +1080,35 @@ File: figures/mobility_diffusion_pi.png Graphic file (type bmp)
 [46]
 
 [47]
-Overfull \hbox (562.07999pt too wide) in paragraph at lines 954--977
+
+[48]
+Overfull \hbox (562.07999pt too wide) in paragraph at lines 962--985
  [][] 
  []
 
 File: figures/proportion_symptomatic.png Graphic file (type bmp)
 <figures/proportion_symptomatic.png>
 
-Overfull \hbox (10.3428pt too wide) in paragraph at lines 983--984
+Overfull \hbox (10.3428pt too wide) in paragraph at lines 991--992
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 983--984
+Underfull \hbox (badness 10000) in paragraph at lines 991--992
 
  []
 
 
 
-[48]
-
 [49]
+
+[50]
 File: figures/suspected_cases.png Graphic file (type bmp)
 <figures/suspected_cases.png>
 
 
-[50]
-
 [51]
-Overfull \hbox (287.62997pt too wide) in paragraph at lines 1032--1105
+Overfull \hbox (287.62997pt too wide) in paragraph at lines 1041--1114
  [][] 
  []
 
@@ -1116,7 +1117,7 @@ File: figures/case_fatality_ratio_and_cases_total_by_country.png Graphic file (t
 File: figures/case_fatality_ratio_beta_distributions.png Graphic file (type bmp)
 <figures/case_fatality_ratio_beta_distributions.png>
 
-LaTeX Warning: Float too large for page by 122.7597pt on input line 1234.
+LaTeX Warning: Float too large for page by 122.7597pt on input line 1243.
 
 
 
@@ -1136,7 +1137,7 @@ File: figures/generation_time.png Graphic file (type bmp)
 [57]
 
 [58]
-Overfull \hbox (873.49002pt too wide) in paragraph at lines 1341--1416
+Overfull \hbox (873.49002pt too wide) in paragraph at lines 1350--1425
  [][] 
  []
 
@@ -1147,7 +1148,7 @@ Overfull \hbox (873.49002pt too wide) in paragraph at lines 1341--1416
 [60]
 Chapter 4.
 
-Overfull \hbox (626.26004pt too wide) in paragraph at lines 1426--1439
+Overfull \hbox (626.26004pt too wide) in paragraph at lines 1435--1448
  [][] 
  []
 
@@ -1195,12 +1196,12 @@ L3 programming layer <2024-09-10>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 23589 strings out of 476173
- 455723 string characters out of 5783999
- 1028647 words of memory out of 5000000
- 45783 multiletter control sequences out of 15000+600000
+ 23591 strings out of 476173
+ 455760 string characters out of 5783999
+ 1028748 words of memory out of 5000000
+ 45785 multiletter control sequences out of 15000+600000
  567563 words of font info for 114 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 90i,12n,123p,2001b,415s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,12n,123p,2001b,399s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on MOSAIC-docs.pdf (69 pages).
