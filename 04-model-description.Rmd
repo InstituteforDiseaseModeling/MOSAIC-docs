@@ -2,9 +2,9 @@
 
 # Model description
 
-Here we describe the methods of MOSAIC beta version 0.1. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of disease dynamics such as human mobility, environmental conditions, and vaccination schedules. As MOSAIC continues to evolve, future iterations will refine model components based on available data and improved model mechanisms, which we hope will increase its applicability to real-world scenarios.
+Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of disease dynamics such as human mobility, environmental conditions, and vaccination schedules. As MOSAIC continues to evolve, future iterations will refine model components based on available data and improved model mechanisms, which we hope will increase its applicability to real-world scenarios.
 
-The model operates on weekly time steps from January 2023 to August 2024 and includes 41 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map).
+The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map).
 
 ```{r map, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green."}
 knitr::include_graphics("figures/africa_map.png")
@@ -15,75 +15,76 @@ knitr::include_graphics("figures/africa_map.png")
 
 ## Transmission dynamics
 
-The model has a metapopulation structure with familiar compartments for Susceptible, Infected, and Recovered individuals with SIRS dynamics. The model also contains compartments for vaccinated individuals (V) and Water & environment based transmission (W) which we refer to as SVIWRS.
+The model has a metapopulation structure with familiar compartments for Susceptible, Exposed, Infected, and Recovered individuals with SEIRS dynamics. The model also contains compartments for one- and two-dose vaccination ($V_1$ and $V_2$) and Water & environment based transmission (W) which we refer to as SVEIWRS.
 
-```{r diagram, echo=FALSE, fig.align='center', out.width="95%", fig.cap="This diagram of the SVIWRS (Susceptible-Vaccinated-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths)."}
-knitr::include_graphics("diagrams/v_0_1.drawio.png")
+```{r diagram, echo=FALSE, fig.align='center', out.width="95%", fig.cap="This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths)."}
+knitr::include_graphics("diagrams/v_0_3.drawio.png")
 ```
 
-The SVIWRS metapopulation model, shown in Figure \@ref(fig:diagram), is governed by the following difference equations:
+The SVEIWRS metapopulation model, shown in Figure \@ref(fig:diagram), is governed by the following difference equations:
 
 \begin{equation}
 \begin{aligned}
-S_{j,t+1} &= b_j N_{jt} + S_{jt} - \phi \nu_{jt} S_{jt} + \omega V_{jt} - \Lambda_{j,t+1} - \Psi_{j,t+1} + \varepsilon R_{jt} - d_j S_{jt}\\[11pt]
-V_{j,t+1} &= V_{jt} + \phi \nu_{jt} S_{jt} - \omega V_{jt} - d_j V_{jt}\\[11pt]
-I_{j,t+1} &= I_{jt} + \Lambda_{j,t+1} + \Psi_{j,t+1} - \gamma I_{jt} - \mu \sigma I_{jt} - d_j I_{jt}\\[11pt]
-W_{j,t+1} &= W_{jt} + \zeta I_{jt} - \delta_{jt} W_{jt}\\[11pt]
-R_{j,t+1} &= R_{jt} + \gamma I_{jt} - \varepsilon R_{jt} - d_j R_{jt}\\[11pt]
+S_{j,t+1} &= S_{jt} + b_{jt} N_{jt} + \varepsilon R_{jt} + \big( \omega_1 V_{1,jt} + \omega_2 V_{2,jt} \big) - \nu_{1,jt}S_{jt}/(S_{jt} + E_{jt}) - \big( \Lambda^{S}_{j,t+1} - \Psi^S_{j,t+1} \big) - d_{jt} S_{jt}\\[11pt]
+V_{1,j,t+1} &= V_{1,jt} + \nu_{1,jt}S_{jt}/(S_{jt} + E_{jt}) - \omega_1 V_{1,jt} - \big( \Lambda^{V_1}_{j,t+1} - \Psi^{V_1}_{j,t+1} \big) - d_{jt} V_{1,jt}\\[11pt]
+V_{2,j,t+1} &= V_{2,jt} + \nu_{2,jt} - \omega_2 V_{2,jt} - \big( \Lambda^{V_2}_{j,t+1} - \Psi^{V_2}_{j,t+1} \big) - d_{jt} V_{2,jt}\\[11pt]
+E_{j,t+1} &= E_{jt} + \big( \Lambda_{j,t+1} + \Psi_{j,t+1}\big) - \iota E_{jt} - d_{jt} E_{jt}\\[11pt]
+I_{1,j,t+1} &= I_{1,jt} + \sigma\,\iota\,E_{jt} - \gamma_1 I_{1,jt} - \mu_j I_{1,jt} - d_{jt} I_{1,jt}\\[11pt]
+I_{2,j,t+1} &= I_{2,jt} + (1-\sigma)\,\iota\,E_{jt} - \gamma_2 I_{2,jt} - d_{jt} I_{1,jt}\\[11pt]
+W_{j,t+1} &= W_{jt} + \big( \zeta_1 I_{1,jt} + \zeta_2 I_{2,jt} \big) - \delta_{jt} W_{jt}\\[11pt]
+R_{j,t+1} &= R_{jt} + \big( \gamma_1 I_{1,jt} + \gamma_2 I_{2,jt} \big) - \varepsilon R_{jt} - d_{jt} R_{jt}
 \end{aligned}
 (\#eq:system)
 \end{equation}
 
 
-For descriptions of all parameters in Equation \@ref(eq:system), see Table (\@ref(tab:params)). Transmission dynamics are driven by the two force of infection terms, $\Lambda_{jt}$ and $\Psi_{jt}$. The force of infection due to human-to-human ($\Lambda_{jt}$) is:
+For descriptions of all parameters in Equation \@ref(eq:system), see Table (\@ref(tab:params)). Transmission dynamics are driven by the two force of infection terms, $\Lambda_{jt}$ and $\Psi_{jt}$. The full force of infection due to human-to-human ($\Lambda_{jt}$) is:
 
 \begin{equation}
 \begin{aligned}
 \Lambda_{j,t+1} &= \frac{
-\beta_{jt}^{\text{hum}} \big(S_{jt}(1-\tau_{j})\big)  \big(I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}) \big)^{\alpha_1}}{N_{jt}^{\alpha_2}}.\\[11pt]
+\beta_{jt}^{\text{hum}} \big( (S_{jt} + (1-\phi_1) V_{1,jt} + (1-\phi_2) V_{2,jt}) (1-\tau_{j})\big)  \big((I_{1,jt} + I_{2,jt})(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_i(I_{1,jt} + I_{2,jt})) \big)^{\alpha_1}}{N_{jt}^{\alpha_2}}.\\[11pt]
 \end{aligned}
 (\#eq:foi-human)
 \end{equation}
 
-Where $\beta_{jt}^{\text{hum}}$ is the rate of human-to-human transmission. Movement within and among metapopulations is governed by $\tau_i$, the probability of departing origin location $i$, and $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]). To include environmental effects, the force of infection due to environment-to-human transmission ($\Psi_{jt}$) is defined as:
+Where $\beta_{jt}^{\text{hum}}$ is the rate of human-to-human transmission. Movement within and among metapopulations is governed by $\tau_i$, the probability of departing origin location $i$, and $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]). Note that the difference equations contain terms $\Lambda^{S}_{jt}$, $\Lambda^{V_1}_{jt}$, and $\Lambda^{V_2}_{jt}$, which parses the full force of infection into the number of new infections due to human-to-human transmission for each of the $S$, $V_1$, and $V_2$ compartments respectively.
+
+To include environmental effects, the force of infection due to environment-to-human transmission ($\Psi_{jt}$) is defined as:
 
 \begin{equation}
 \begin{aligned}
-\Psi_{j,t+1} &= \frac{\beta_{jt}^{\text{env}} \big(S_{jt}(1-\tau_{j})\big) (1-\theta_j) W_{jt}}{(\kappa+W_{jt})},\\[11pt]
+\Psi_{j,t+1} &= \frac{\beta_{jt}^{\text{env}} \big( (S_{jt} + (1-\phi_1) V_{1,jt} + (1-\phi_2) V_{2,jt}) (1-\tau_{j})\big) (1-\theta_j) W_{jt}}{(\kappa+W_{jt})},\\[11pt]
 \end{aligned}
 (\#eq:foi-environment)
 \end{equation}
 
-where $\beta_{jt}^{\text{env}}$ is the rate of environment-to-human transmission and $\theta_j$ is the proportion of the population at location $j$ that at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental compartment of the model is also scaled by the concentration (cells per mL) of *V. cholerae* that is required for a 50% probability of infection [Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/). See the section on [environmental transmission][Environmental transmission] below for more on the water/environment compartment and climatic drivers of transmission.
+where $\beta_{jt}^{\text{env}}$ is the rate of environment-to-human transmission and $\theta_j$ is the proportion of the population at location $j$ that at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental compartment of the model is also scaled by the concentration (cells per mL) of *V. cholerae* that is required for a 50% probability of infection [Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/). See the section on [environmental transmission][Environmental transmission] below for more on the water/environment compartment and climatic drivers of transmission. Similar to $\Lambda_{jt}$, the $\Psi_{jt}$ term is also parsed into $\Psi^{S}_{jt}$, $\Psi^{V_1}_{jt}$, and $\Psi^{V_2}_{jt}$ to give the force of infection due to environmental transmission for each of the $S$, $V_1$, and $V_2$ compartments.
 
-Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see Ross 2007). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$, where $\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-e^{-\gamma})$. This gives the following stochastic model mechanisms for human-to-human transmission $\Lambda_{j,t+1}$:
-$$
-\Lambda_{j,t+1} \sim \text{Binom}\Big(
-S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{hum}} (I_{jt}(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_iI_{it}))^{\alpha_1} / N_{jt}^{\alpha_2}}
-\Big)
-(\#eq:stoch-foi-hum)
-$$
-and for the environment-to-human transmission $\Psi_{j,t+1}$:
-$$
-\Psi_{j,t+1} \sim \text{Binom}\Big(
-S_{jt}(1-\tau_{j}),\ 1 - e^{-\beta_{jt}^{\text{env}} (1-\theta_j) W_{jt}/(\kappa+W_{jt})}
-\Big).
-(\#eq:stoch-foi-env)
-$$
-
-## Seasonality
-Cholera transmission is seasonal and is typically associated with the rainy season, so both transmission rate terms $\beta_{jt}^{\text{*}}$ are temporally forced. For human-to-human transmission we used a truncated sine-cosine form of the [Fourier series](https://en.wikipedia.org/wiki/Fourier_series) with two harmonic features which has the flexibility to capture seasonal transmission dynamics driven by extended rainy seasons and/or biannual trends:
+Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see [Ross 2007](https://www.google.com/books/edition/Introduction_to_Probability_Models/1uxBwhAb_zYC?hl=en)). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$:
 
 \begin{equation}
-\beta_{jt}^{\text{hum}} = \beta_{j0}^{\text{hum}} + a_1 \cos\left(\frac{2\pi t}{p}\right) + b_1 \sin\left(\frac{2\pi t}{p}\right) + a_2 \cos\left(\frac{4\pi t}{p}\right) + b_2 \sin\left(\frac{4\pi t}{p}\right)
+\frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-e^{-\gamma}).
+\end{equation}
+
+For a detailed list of all stochastic transitions in the model, see Table (\@ref(tab:params)) below.
+
+## Latency
+
+An important feature of the SVEIWRS model is the inclusion of an exposed compartment $\left(E\right)$ , which captures the latent period between exposure and the onset of infectiousness. In our model, individuals who become infected first enter the $E$ compartment, where they remain for a period governed by the incubation period $\iota$, before progressing to the infectious compartments $I_1$ (severe symptomatic infection) or $I_2$ (mild and/or asymptomatic infection).
+
+A systematic review by [Azman et al (2013)](http://www.sciencedirect.com/science/article/pii/S0163445312003477) estimated the median incubation period for cholera to be approximately $1.4 \ \text{days} \ (1.3–1.6 \ 95\% \text{CI})$. This relatively short latency is one of the key characteristic governing cholera dynamics and is critical for accurately capturing the rapid spatial spread observed during outbreaks.
+
+
+## Seasonality
+Cholera transmission is seasonal and is typically associated with the rainy season, so both transmission rate terms $\beta_{jt}^{\text{*}}$ are temporally forced. For human-to-human transmission we used a sinusoidal mechanism as in [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x). Specifically, the function is a truncated sine-cosine form of the [Fourier series](https://en.wikipedia.org/wiki/Fourier_series) with two harmonic features which has the flexibility to capture seasonal transmission dynamics driven by extended rainy seasons and/or biannual trends:
+
+\begin{equation}
+\beta_{jt}^{\text{hum}} = \beta_{j0}^{\text{hum}} \left(1 + a_1 \cos\left(\frac{2\pi t}{p}\right) + b_1 \sin\left(\frac{2\pi t}{p}\right) + a_2 \cos\left(\frac{4\pi t}{p}\right) + b_2 \sin\left(\frac{4\pi t}{p}\right)\right).
 (\#eq:beta1)
 \end{equation}
 
-Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 52, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over the 52 weeks of the year. 
-
-```{r seasonal-concept, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="85%", fig.cap="An example of the temporal distribution of the human-to-human transmission rate across each of the 52 weeks of the year given by the cosine wave function. The wave function is fitted to each country and is designed to align with the rainy season as indicated by the shaded region in this figure."}
-knitr::include_graphics("figures/seasonal_transmission_concept.png")
-```
+Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 366, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over each day of the year.
 
 We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
 
@@ -827,227 +828,415 @@ R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
 Where $I_{jt}$ is the number of new infections in destination $j$ at time $t$, and
 $g(\Delta t)$ represents the probability value from the generation time distribution of cholera. This is accomplished by using the weighed sum in the denominator which is highly influenced by the generation time distribution. 
 
-### The generation time distribution
-
-The generation time distribution gives the time between when an individual is infected and when they infect subsequent individuals. We parameterized this quantity using a Gamma distribution with a mean of 5 days:
-
-\begin{equation}
-g(\cdot) \sim \text{Gamma}(0.5, 0.1).
-(\#eq:generation-time)
-\end{equation}
-
-Here, shape=0.5, rate=0.1, and the mean if given by shape/rate. Previous studies use a mean of 5 days ([Kahn et al 2020](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7060667/#:~:text=The%20serial%20interval%20for%20cholera,routes%20(45%2C%2046).) and [Azman 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4880069/)), however a mean of 3, 5, 7, or 10 days may be admissible ([Azman 2012](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0001901)).
-
-
-```{r generation, echo=FALSE, fig.align='center', out.width="95%", fig.cap="This is generation time"}
-knitr::include_graphics("figures/generation_time.png")
-```
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(knitr)
-library(kableExtra)
-df <- read.csv("./tables/generation_time_weeks.csv")
-df$Probability <- round(df$Probability, 3)
-knitr::kable(df, caption = "Generation Time in Weeks") %>%
-  kable_styling(full_width = FALSE,
-                bootstrap_options = c("hover", "condensed"))
-```
-
-
 
 
 
 ## Initial conditions
 
-Since this first version of the model will begin on Jan 2023 (to take advantage of available weekly data), the initial conditions surrounding population immunity must be estimated. To set these initial conditions, we use historical data to find the total number of reported cases for a location over the previous X years, multiply by $1/\sigma$ to estimate total infections from those symptomatic cases that are reported, and then adjust based on waning immunity. We also sum the total number of vaccinations over the past X years and adjust for vaccine efficacy $\phi$ and waning immunity from vaccination $\omega$.
+Since the first version of the model begins in January 2023 (to leverage available weekly data), we must estimate the initial state of population immunity. Our approach is as follows:
 
-* total number infected? From reported cases... back out symptomatic and asymptomatic
+1. **Reported Cases and Infections:**  
+   We start by using historical data to determine the total number of reported cholera cases for a given location over the previous *X* years. Because only symptomatic cases are reported, we multiply the reported case counts by \(1/\sigma\) (where \(\sigma\) is the proportion of infections that are symptomatic) to approximate the total number of infections.
 
-* Total number immune due to natural infections in the past X years
+2. **Natural Immunity:**  
+   Next, we estimate the number of individuals who acquired immunity through natural infection during the past *X* years. This involves adjusting the total infections by accounting for immune decay, governed by the parameter \(\varepsilon\).
 
-* total number immune due to past vaccinations in the X years
+3. **Vaccine-derived Immunity:**  
+   We also sum the total number of vaccinations administered over the past *X* years. This number is adjusted by the vaccine effectiveness (denoted \(\phi\)) and the waning immunity rate (\(\omega\)) to estimate the current number of individuals with vaccine-derived immunity.
 
-Use deconvolution based on immune decay estimated in vaccine section
+4. **Deconvolution:**  
+   Finally, we combine these estimates using a deconvolution approach based on the estimated immune decay parameters (from both vaccination and natural infection) to set the model’s initial conditions.
 
+In total, the initial conditions reflect:
+- The estimated total number infected (backed out from reported cases),
+- The number immune due to natural infection, and
+- The number immune from past vaccination campaigns.
 
-
-
+---
 
 ## Model calibration
 
-* The model will be calibrated using Latin hypercube sampling for hyper-parameters and model likelihoods fit to incidence and deaths.
+Model calibration is performed to fine-tune the hyperparameters and ensure the model accurately represents the observed data. Our calibration strategy involves:
 
-* An important challenge is flexibly fitting to data that are often missing or only available in aggregated forms.
+- **Latin Hypercube Sampling (LHS):**  
+  We use LHS to explore the parameter space efficiently. This method helps generate a diverse set of hyperparameter combinations for evaluation.
 
-[Fig: different spatial and temporal scales of available data]
+- **Likelihood Fitting:**  
+  For each set of hyperparameters, the model likelihood is computed based on the observed incidence and death data. The calibration process searches for the hyperparameter set that maximizes the model’s likelihood.
+
+- **Data Challenges:**  
+  A key challenge in calibration is the incomplete or aggregated nature of the available data. To address this, we incorporate methods that allow flexible fitting even when data are sparse or reported at different temporal scales.
+
+By combining LHS and likelihood-based calibration, we aim to identify a robust set of hyperparameters that accurately capture both the temporal and spatial dynamics of cholera transmission in Sub-Saharan Africa.
 
 
-## Caveats
-
-* Simplest model to start. Easier for initial spatial structure but with minimum additional compartments to calibrate to available data (vaccination, cases, deaths).
-* Country level aggregations. First generation data is 2023/24...
-* Assumes vaccinating susceptible only individuals.
-* For climate, summarizing for whole country.
 
 
 ## Table of parameters
 ```{r params, echo=FALSE, message=FALSE, warning=FALSE}
 
 tbl <- data.frame(
-     Parameter = c(
-          "$i$",  # Index i
-          "$j$",  # Index j
-          "$t$",  # Index t
-          "$b_j$",  # Birth rate of population j
-          "$d_j$",  # Mortality rate of population j
-          "$N_{jt}$",  # Population size of destination j at time t
-          "$S_{jt}$",  # Susceptible individuals in destination j at time t
-          "$V_{jt}$",  # Vaccinated individuals in destination j at time t
-          "$I_{jt}$",  # Infected individuals in destination j at time t
-          "$W_{jt}$",  # V. cholerae in the environment in destination j at time t
-          "$R_{jt}$",  # Recovered (immune) individuals in destination j at time t
-          "$\\Lambda_{j,t+1}$",  # Human-to-human force of infection in destination j at time t+1
-          "$\\Psi_{j,t+1}$",  # Environment-to-human force of infection in destination j at time t+1
-          "$\\phi$",  # Effectiveness of Oral Cholera Vaccine (OCV)
-          "$\\nu_{jt}$",  # Rate of OCV vaccination in destination j at time t
-          "$\\omega$",  # Waning immunity rate of vaccinated individuals
-          "$\\varepsilon$",  # Waning immunity rate of recovered individuals
-          "$\\gamma$",  # Recovery rate of infected individuals
-          "$\\mu$",  # Mortality rate due to V. cholerae infection
-          "$\\sigma$",  # Proportion of symptomatic V. cholerae infections
-          "$\\rho$",  # Proportion of suspected cholera cases that are true infections
-          "$\\zeta$",  # Shedding rate of V. cholerae into the environment
-          "$\\delta$",  # Environmental decay rate of V. cholerae
-          "$\\delta_{\\text{min}}$",  # Minimum environmental decay rate of V. cholerae
-          "$\\delta_{\\text{max}}$",  # Maximum environmental decay rate of V. cholerae
-          "$\\psi_{jt}$",  # Environmental suitability of V. cholerae in destination j at time t
-          "$\\beta_{j0}^{\\text{hum}}$",  # Baseline human-to-human transmission rate in destination j
-          "$\\beta_{jt}^{\\text{hum}}$",  # Seasonal human-to-human transmission rate in destination j at time t
-          "$\\beta_{j0}^{\\text{env}}$",  # Baseline environment-to-human transmission rate in destination j
-          "$\\beta_{jt}^{\\text{env}}$",  # Environment-to-human transmission rate in destination j at time t
-          "$\\alpha$",  # Population mixing parameter
-          "$\\tau_i$",  # Probability of departure from origin i
-          "$\\pi_{ij}$",  # Probability of travel from origin i to destination j
-          "$\\theta_{j}$",  # Proportion with adequate WASH in destination j
-          "$\\kappa$"  # Concentration of V. cholerae required for 50% infection probability
-     ),
-     Description = c(
-          "Index $i$ represents the origin metapopulation.",  # i
-          "Index $j$ represents the destination metapopulation.",  # j
-          "Index $t$ is the time step which is one week (7 days).",  # t
-          "Birth rate of population $j$.",  # b_j
-          "Overall mortality rate of population $j$.",  # d_j
-          "Total population size of destination $j$ at time $t$.",  # N_{jt}
-          "Number of susceptible individuals in destination $j$ at time $t$.",  # S_{jt}
-          "Number of effectively vaccinated individuals in destination $j$ at time $t$.",  # V_{jt}
-          "Number of infected individuals in destination $j$ at time $t$.",  # I_{jt}
-          "Total amount of V. cholerae in the environment in destination $j$ at time $t$.",  # W_{jt}
-          "Number of recovered (and therefore immune) individuals in destination $j$ at time $t$.",  # R_{jt}
-          "The force of infection due to human-to-human transmission in destination $j$ at time step $t+1$.",  # Lambda_{j,t+1}
-          "The force of infection due to environment-to-human transmission in destination $j$ at time step $t+1$.",  # Psi_{j,t+1}
-          "The effectiveness of Oral Cholera Vaccine (OCV).",  # phi
-          "The reported rate of vaccination with OCV in destination $j$ at time $t$.",  # nu_{jt}
-          "Rate of waning immunity of vaccinated individuals.",  # omega
-          "Rate of waning immunity of recovered individuals.",  # varepsilon
-          "Recovery rate of infected individuals.",  # gamma
-          "Mortality rate due to infection with *V. cholerae*.",  # mu
-          "Proportion of *V. cholerae* infections that are symptomatic.",  # sigma
-          "The proportion of suspected cholera cases that are true infections.",  # rho
-          "Rate that infected individuals shed *V. cholerae* into the environment.",  # zeta
-          "The environmental suitability dependent decay rate of *V. cholerae* in the environment.",  # delta
-          "The minimum decay rate of *V. cholerae* in the environment obtained when environmental suitability ($\\psi_{jt}$) = 0.",  # delta_{min}
-          "The maximum decay rate of *V. cholerae* in the environment obtained when environmental suitability  ($\\psi_{jt}$) = 1.",  # delta_{max}
-          "The climatically driven environmental suitability of *V. cholerae* in destination $j$ at time $t$.",  # psi_{jt}
-          "The baseline rate of human-to-human transmission in destination $j$.",  # beta_{j0}^{hum}
-          "The seasonal rate of human-to-human transmission in destination $j$ at time $t$.",  # beta_{jt}^{hum}
-          "The baseline rate of environment-to-human transmission in destination $j$.",  # beta_{j0}^{env}
-          "The rate of environment-to-human transmission in destination $j$ at time $t$.",  # beta_{jt}^{env}
-          "The overall population mixing parameter.",  # alpha
-          "The probability that an individual departs origin $i$.",  # tau_i
-          "The probability that an individual travels from origin $i$ to destination $j$ given that they have departed origin $i$.",  # pi_{ij}
-          "The proportion of the population that have adequate Water, Sanitation and Hygiene (WASH).",  # theta_j
-          "The concentration (number of cells per mL) of *V. cholerae* required for a 50% probability of infection."  # kappa
-     ),
-     Distribution = c(
-          "",  # i
-          "",  # j
-          "",  # t
-          "",  # b_j
-          "",  # d_j
-          "",  # N_{jt}
-          "",  # S_{jt}
-          "",  # V_{jt}
-          "",  # I_{jt}
-          "",  # W_{jt}
-          "",  # R_{jt}
-          "",  # Lambda_{j,t+1}
-          "",  # Psi_{j,t+1}
-          "",  # phi
-          "",  # nu_{jt}
-          "",  # omega
-          "",  # varepsilon
-          "",  # gamma
-          "",  # mu
-          "",  # sigma
-          "",  # rho
-          "$0.1\\mbox{-}10$",  # zeta
-          "",  # delta
-          "",  # delta_{min}
-          "",  # delta_{max}
-          "",  # psi_{jt}
-          "",  # beta_{j0}^{hum}
-          "",  # beta_{jt}^{hum}
-          "",  # beta_{j0}^{env}
-          "",  # beta_{jt}^{env}
-          "0.95",  # alpha
-          "",  # tau_i
-          "",  # pi_{ij}
-          "",  # theta_j
-          "$10^5\\mbox{-}10^6$"  # kappa
-     ),
-     Source = c(
-          "",  # i
-          "",  # j
-          "",  # t
-          "",  # b_j
-          "",  # d_j
-          "",  # N_{jt}
-          "",  # S_{jt}
-          "",  # V_{jt}
-          "",  # I_{jt}
-          "",  # W_{jt}
-          "",  # R_{jt}
-          "",  # Lambda_{j,t+1}
-          "",  # Psi_{j,t+1}
-          "",  # phi
-          "",  # nu_{jt}
-          "",  # omega
-          "",  # varepsilon
-          "",  # gamma
-          "",  # mu
-          "",  # sigma
-          "",  # rho
-          "",  # zeta
-          "",  # delta
-          "",  # delta_{min}
-          "",  # delta_{max}
-          "",  # psi_{jt}
-          "",  # beta_{j0}^{hum}
-          "",  # beta_{jt}^{hum}
-          "",  # beta_{j0}^{env}
-          "",  # beta_{jt}^{env}
-          "[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)",  # alpha
-          "",  # tau_i
-          "",  # pi_{ij}
-          "",  # theta_j
-          "[Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/)"  # kappa
-     )
-     
+  Parameter = c(
+    "$i$",            # Parameter: i (origin metapopulation index)
+    "$j$",            # Parameter: j (destination metapopulation index)
+    "$t$",            # Parameter: t (time step, one week)
+    "$b_{jt}$",          # Parameter: b_j (birth rate of population j)
+    "$d_{jt}$",          # Parameter: d_j (mortality rate of population j)
+    "$N_{jt}$",       # Parameter: N_{jt} (population size of destination j at time t)
+    "$S_{jt}$",       # Parameter: S_{jt} (number of susceptibles in destination j at time t)
+    "$V_{1,jt}$",     # Parameter: V_{1,jt} (individuals with one-dose vaccination in destination j at time t)
+    "$V_{2,jt}$",     # Parameter: V_{2,jt} (individuals with two-dose vaccination in destination j at time t)
+    "$I_{1,jt}$",     # Parameter: I_{1,jt} (symptomatic infected individuals in destination j at time t)
+    "$I_{2,jt}$",     # Parameter: I_{2,jt} (asymptomatic infected individuals in destination j at time t)
+    "$W_{jt}$",       # Parameter: W_{jt} (amount of *V. cholerae* in the environment in destination j at time t)
+    "$R_{jt}$",       # Parameter: R_{jt} (recovered/immune individuals in destination j at time t)
+    "$\\Lambda_{j,t+1}$",  # Parameter: Lambda_{j,t+1} (human-to-human force of infection at time t+1)
+    "$\\Psi_{j,t+1}$",     # Parameter: Psi_{j,t+1} (environment-to-human force of infection at time t+1)
+    "$\\iota$",       # Parameter: iota (incubation period of cholera infection)
+    "$\\phi_1$",      # Parameter: phi_1 (vaccine effectiveness for one-dose OCV)
+    "$\\phi_2$",      # Parameter: phi_2 (vaccine effectiveness for two-dose OCV)
+    "$\\nu_{jt}$",    # Parameter: nu_{jt} (vaccination rate in destination j at time t)
+    "$\\omega_1$",    # Parameter: omega_1 (waning immunity rate for one-dose OCV)
+    "$\\omega_2$",    # Parameter: omega_2 (waning immunity rate for two-dose OCV)
+    "$\\varepsilon$", # Parameter: varepsilon (waning immunity rate of recovered individuals)
+    "$\\gamma_1$",    # Parameter: gamma_1 (recovery rate of symptomatic infected individuals)
+    "$\\gamma_2$",    # Parameter: gamma_2 (recovery rate of asymptomatic infected individuals)
+    "$\\mu$",         # Parameter: mu (mortality rate due to *V. cholerae* infection)
+    "$\\sigma$",      # Parameter: sigma (proportion of infections that are symptomatic)
+    "$\\rho$",        # Parameter: rho (proportion of suspected cases that are true infections)
+    "$\\zeta_1$",     # Parameter: zeta_1 (shedding rate by symptomatic individuals)
+    "$\\zeta_2$",     # Parameter: zeta_2 (shedding rate by asymptomatic individuals)
+    "$\\delta$",      # Parameter: delta (environmental decay rate of *V. cholerae*)
+    "$\\delta_{\\text{min}}$",  # Parameter: delta_min (min decay rate when psi_jt = 0)
+    "$\\delta_{\\text{max}}$",  # Parameter: delta_max (max decay rate when psi_jt = 1)
+    "$\\psi_{jt}$",   # Parameter: psi_jt (environmental suitability in destination j at time t)
+    "$\\beta_{j0}^{\\text{hum}}$",  # Parameter: beta_{j0}^{hum} (baseline human-to-human transmission rate)
+    "$\\beta_{jt}^{\\text{hum}}$",   # Parameter: beta_{jt}^{hum} (seasonal human-to-human transmission rate)
+    "$\\beta_{j0}^{\\text{env}}$",   # Parameter: beta_{j0}^{env} (baseline environment-to-human transmission rate)
+    "$\\beta_{jt}^{\\text{env}}$",    # Parameter: beta_{jt}^{env} (environment-to-human transmission rate at time t)
+    "$a_1$",          # Parameter: a_1 (first Fourier cosine coefficient for seasonality)
+    "$b_1$",          # Parameter: b_1 (first Fourier sine coefficient for seasonality)
+    "$a_2$",          # Parameter: a_2 (second Fourier cosine coefficient for seasonality)
+    "$b_2$",          # Parameter: b_2 (second Fourier sine coefficient for seasonality)
+    "$p$",            # Parameter: p (period of the seasonal cycle, in days)
+    "$\\alpha_1$",    # Parameter: alpha_1 (exponent on infectious individuals in the force of infection numerator)
+    "$\\alpha_2$",    # Parameter: alpha_2 (exponent on population size in the denominator; 0 = density, 1 = frequency dependence)
+    "$\\tau_i$",      # Parameter: tau_i (probability an individual departs from origin i)
+    "$\\pi_{ij}$",    # Parameter: pi_{ij} (probability of travel from i to j given departure)
+    "$\\theta_{j}$",  # Parameter: theta_j (proportion with adequate WASH in destination j)
+    "$\\kappa$"       # Parameter: kappa (concentration of *V. cholerae* for 50% infection probability)
+  ),
+  Description = c(
+    "Index representing the origin metapopulation.",                                  # i
+    "Index representing the destination metapopulation.",                              # j
+    "Time step (one week).",                                                           # t
+    "Birth rate of population $j$.",                                                   # b_j
+    "Mortality rate of population $j$.",                                               # d_j
+    "Population size of destination $j$ at time $t$.",                                 # N_{jt}
+    "Number of susceptible individuals in destination $j$ at time $t$.",               # S_{jt}
+    "Number of individuals with one-dose vaccination in destination $j$ at time $t$.",  # V_{1,jt}
+    "Number of individuals with two-dose vaccination in destination $j$ at time $t$.",  # V_{2,jt}
+    "Number of symptomatic infected individuals in destination $j$ at time $t$.",       # I_{1,jt}
+    "Number of asymptomatic infected individuals in destination $j$ at time $t$.",       # I_{2,jt}
+    "Amount of *V. cholerae* in the environment in destination $j$ at time $t$.",         # W_{jt}
+    "Number of recovered (immune) individuals in destination $j$ at time $t$.",           # R_{jt}
+    "Human-to-human force of infection in destination $j$ at time $t+1$.",                # Lambda_{j,t+1}
+    "Environment-to-human force of infection in destination $j$ at time $t+1$.",          # Psi_{j,t+1}
+    "The incubation period of cholera infection",                                        # iota
+    "Vaccine effectiveness of one-dose OCV.",                                            # phi_1
+    "Vaccine effectiveness of two-dose OCV.",                                            # phi_2
+    "Vaccination rate (OCV doses administered) in destination $j$ at time $t$.",          # nu_{jt}
+    "Waning immunity rate of vaccinated individuals with one-dose OCV.",                 # omega_1
+    "Waning immunity rate of vaccinated individuals with two-dose OCV.",                 # omega_2
+    "Waning immunity rate of recovered individuals.",                                  # varepsilon
+    "Recovery rate of symptomatic infected individuals.",                              # gamma_1
+    "Recovery rate of asymptomatic infected individuals.",                             # gamma_2
+    "Mortality rate due to *V. cholerae* infection.",                                    # mu
+    "Proportion of infections that are symptomatic.",                                  # sigma
+    "Proportion of suspected cases that are true infections.",                         # rho
+    "Shedding rate of *V. cholerae* by symptomatic individuals.",                        # zeta_1
+    "Shedding rate of *V. cholerae* by asymptomatic individuals.",                       # zeta_2
+    "Environmental decay rate of *V. cholerae*.",                                        # delta
+    "Minimum decay rate when $\\psi_{jt}=0$.",                                           # delta_min
+    "Maximum decay rate when $\\psi_{jt}=1$.",                                           # delta_max
+    "Environmental suitability of *V. cholerae* in destination $j$ at time $t$.",         # psi_{jt}
+    "Baseline human-to-human transmission rate in destination $j$.",                     # beta_{j0}^{hum}
+    "Seasonal human-to-human transmission rate in destination $j$ at time $t$.",          # beta_{jt}^{hum}
+    "Baseline environment-to-human transmission rate in destination $j$.",               # beta_{j0}^{env}
+    "Environment-to-human transmission rate in destination $j$ at time $t$.",             # beta_{jt}^{env}
+    "First Fourier cosine coefficient for seasonality.",                               # a_1
+    "First Fourier sine coefficient for seasonality.",                                 # b_1
+    "Second Fourier cosine coefficient for seasonality.",                              # a_2
+    "Second Fourier sine coefficient for seasonality.",                                # b_2
+    "Period of the seasonal cycle (set to days).",                                      # p
+    "Exponent on infectious individuals in the force of infection numerator.",  # alpha_1
+    "Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence.",  # alpha_2
+    "Probability an individual departs from origin $i$.",                              # tau_i
+    "Probability of travel from origin $i$ to destination $j$ given departure.",         # pi_{ij}
+    "Proportion with adequate WASH in destination $j$.",                               # theta_j
+    "Concentration of *V. cholerae* (cells/mL) required for 50% infection probability."   # kappa
+  ),
+  Distribution = c(
+    "",        # i
+    "",        # j
+    "",        # t
+    "",        # b_j
+    "",        # d_j
+    "",        # N_{jt}
+    "",        # S_{jt}
+    "",        # V_{1,jt}
+    "",        # V_{2,jt}
+    "",        # I_{1,jt}
+    "",        # I_{2,jt}
+    "",        # W_{jt}
+    "",        # R_{jt}
+    "",        # Lambda_{j,t+1}
+    "",        # Psi_{j,t+1}
+    "$1.4 \\ \\text{days} \\ (1.3–1.6 \\ 95\\% \\text{CI})$",  # iota
+    "",        # phi_1
+    "",        # phi_2
+    "",        # nu_{jt}
+    "",        # omega_1
+    "",        # omega_2
+    "",        # varepsilon
+    "",        # gamma_1
+    "",        # gamma_2
+    "",        # mu
+    "",        # sigma
+    "",        # rho
+    "$0.1\\mbox{-}10$",  # zeta_1
+    "$0.1\\mbox{-}10$",  # zeta_2
+    "Determined dynamically in model based on $\\psi_{jt}$.",        # delta
+    "$0.333 \\ (3 \\ \\text{days})$",        # delta_min
+    "$0.011 \\ (90 \\ \\text{days})$",        # delta_max
+    "Estimated by LSTM-RNN model.",        # psi_{jt}
+    "",        # beta_{j0}^{hum}
+    "",        # beta_{jt}^{hum}
+    "",        # beta_{j0}^{env}
+    "",        # beta_{jt}^{env}
+    "See Table \\@ref(tab:seasonal-table).",  # a_1
+    "See Table \\@ref(tab:seasonal-table).",  # b_1
+    "See Table \\@ref(tab:seasonal-table).",  # a_2
+    "See Table \\@ref(tab:seasonal-table).",  # b_2
+    "$366$",   # p
+    "$0.95$",  # alpha_1
+    "$0.95$",  # alpha_2
+    "",        # tau_i
+    "",        # pi_{ij}
+    "See Figure \\@ref(fig:wash-country).",        # theta_j
+    "$10^5\\mbox{-}10^6$"  # kappa
+  ),
+  Source = c(
+    "",        # i
+    "",        # j
+    "",        # t
+    "[UN World Population Prospects](https://population.un.org/wpp/)",        # b_j
+    "[UN World Population Prospects](https://population.un.org/wpp/)",        # d_j
+    "",        # N_{jt}
+    "",        # S_{jt}
+    "",        # V_{1,jt}
+    "",        # V_{2,jt}
+    "",        # I_{1,jt}
+    "",        # I_{2,jt}
+    "",        # W_{jt}
+    "",        # R_{jt}
+    "",        # Lambda_{j,t+1}
+    "",        # Psi_{j,t+1}
+    "[Azman et al 2013](http://www.sciencedirect.com/science/article/pii/S0163445312003477)", # iota
+    "",        # phi_1
+    "",        # phi_2
+    "",        # nu_{jt}
+    "",        # omega_1
+    "",        # omega_2
+    "",        # varepsilon
+    "",        # gamma_1
+    "",        # gamma_2
+    "",        # mu
+    "",        # sigma
+    "",        # rho
+    "<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>",  # zeta_1
+    "<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>",  # zeta_2
+    "",        # delta
+    "",        # delta_min
+    "",        # delta_max
+    "",        # psi_{jt}
+    "",        # beta_{j0}^{hum}
+    "",        # beta_{jt}^{hum}
+    "",        # beta_{j0}^{env}
+    "",        # beta_{jt}^{env}
+    "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # a_1
+    "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # b_1
+    "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # a_2
+    "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # b_2
+    "", # p
+    "[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)",  # alpha_1
+    "[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)",  # alpha_2
+    "",        # tau_i
+    "",        # pi_{ij}
+    "[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)",        # theta_j
+    "[Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/)"   # kappa
+  )
 )
 
-knitr::kable(tbl, caption = "Descriptions of model parameters along with prior distributions and sources where applicable.")
+
+kable(tbl, caption = "Comprehensive List of Model Parameters, Descriptions, Distributions, and Sources")
+
 ```
 
-## References
 
+
+
+## Table of stochastic transitions
+```{r transitions, echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl <- data.frame(
+  "Term" = c(
+    "**$\\mathbf{S}$ (susceptible)**",
+    "$+ b_{jt} N_{jt}$",
+    "$+ \\varepsilon R_{jt}$",
+    "$+ \\omega_1 V_{1,jt}$",
+    "$+ \\omega_2 V_{2,jt}$",
+    "$- \\nu_{1,jt}S_{jt}/(S_{jt} + E_{jt})$",
+    "$- \\Lambda^{S}_{j,t+1}$",
+    "$+ \\Psi^S_{j,t+1}$",
+    "$- d_{jt} S_{jt}$",
+    "**$\\mathbf{V_1}$ (one-dose OCV)**",
+    "$+ \\nu_{1,jt} S_{jt}/(S_{jt} + E_{jt})$",
+    "$- \\omega_1 V_{1,jt}$",
+    "$- \\Lambda^{V_1}_{j,t+1}$",
+    "$+ \\Psi^{V_1}_{j,t+1}$",
+    "$- d_{jt} V_{1,jt}$",
+    "**$\\mathbf{V_2}$ (two-dose OCV)**",
+    "$+ \\nu_{2,jt}$",
+    "$- \\omega_2 V_{2,jt}$",
+    "$- \\Lambda^{V_2}_{j,t+1}$",
+    "$+ \\Psi^{V_2}_{j,t+1}$",
+    "$- d_{jt} V_{2,jt}$",
+    "**$\\mathbf{E}$ (exposed)**",
+    "$+ \\Lambda_{j,t+1}$",
+    "$+ \\Psi_{j,t+1}$",
+    "$- \\iota E_{jt}$",
+    "$- d_{jt} E_{jt}$",
+    "**$\\mathbf{I_1}$ (symptomatic)**",
+    "$+ \\sigma\\,\\iota\\,E_{jt}$",
+    "$- \\gamma_1 I_{1,jt}$",
+    "$- \\mu_j I_{1,jt}$",
+    "$- d_{jt} I_{1,jt}$",
+    "**$\\mathbf{I_2}$ (asymptomatic)**",
+    "$+ (1-\\sigma)\\,\\iota\\,E_{jt}$",
+    "$- \\gamma_2 I_{2,jt}$",
+    "$- d_{jt} I_{2,jt}$",
+    "**$\\mathbf{W}$ (environment)**",
+    "$+ \\zeta_1 I_{1,jt}$",
+    "$+ \\zeta_2 I_{2,jt}$",
+    "$- \\delta_{jt} W_{jt}$",
+    "**$\\mathbf{R}$ (recovered)**",
+    "$+ \\gamma_1 I_{1,jt}$",
+    "$+ \\gamma_2 I_{2,jt}$",
+    "$- \\varepsilon R_{jt}$",
+    "$- d_{jt} R_{jt}$"
+  ),
+  Description = c(
+    "",
+    "New individuals entering the susceptible class from births.",
+    "Loss of immunity for recovered individuals.",
+    "Waning immunity from one-dose OCV.",
+    "Waning immunity from two-dose OCV.",
+    "Susceptible individuals receiving one-dose OCV (leaving $S$).",
+    "Human-to-human force of infection on the susceptible class.",
+    "Environment-to-human force of infection on the susceptible class.",
+    "Background death among susceptible individuals.",
+    "",
+    "Entry of susceptible individuals into the one-dose vaccinated class.",
+    "Waning immunity in the one-dose vaccinated class.",
+    "Human-to-human force of infection on the one-dose vaccinated class.",
+    "Environment-to-human force of infection on one-dose vaccinated class.",
+    "Background death among one-dose vaccinated individuals.",
+    "",
+    "Transition of one-dose vaccinated individuals to the two-dose vaccinated class (full course of OCV).",
+    "Waning immunity in the two-dose vaccinated class.",
+    "Human-to-human force of infection on the two-dose vaccinated class.",
+    "Environment-to-human force of infection on the two-dose vaccinated class.",
+    "Background death among two-dose vaccinated individuals.",
+    "",
+    "Human-to-human force of infection contributing to new exposures.",
+    "Environment-to-human force of infection contributing to new exposures.",
+    "Progression of exposed individuals toward the infectious class.",
+    "Background death among exposed individuals.",
+    "",
+    "Exposed individuals progressing to symptomatic infection.",
+    "Recovery from symptomatic infection.",
+    "Deaths due to symptomatic infection.",
+    "Background death among individuals with symptomatic infection.",
+    "",
+    "Exposed individuals progressing to asymptomatic infection.",
+    "Recovery from asymptomatic infection.",
+    "Background death among individuals with asymptomatic infection.",
+    "",
+    "Amount of *V. cholerae* (cells/ml) shed into the environment by symptomatic individuals.",
+    "Amount of *V. cholerae* (cells/ml) shed into the environment by asymptomatic individuals.",
+    "Decay of viable *V. cholerae* in the environment.",
+    "",
+    "Recovery of individuals with symptomatic infection.",
+    "Recovery of individuals with asymptomatic infection.",
+    "Loss of immunity for recovered individuals.",
+    "Background death among recovered individuals."
+  ),
+  "Stochastic Transition" = c(
+    "",
+    "$\\text{Binom}\\big( N_{jt},\\; 1 - \\exp(-b_{jt}) \\big)$",
+    "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-\\varepsilon) \\big)$",
+    "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-\\omega_1) \\big)$",
+    "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-\\omega_2) \\big)$",
+    "$\\text{Pois}\\Big( \\nu_{1,jt} \\cdot \\frac{S_{jt}}{(S_{jt}+E_{jt})} \\Big)$",
+    # Updated lambda term for susceptible:
+    "$\\text{Binom}\\Big((1-\\tau_{j})S_{jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+    # Updated psi term for susceptible:
+    "$\\text{Binom}\\Big((1-\\tau_{j})S_{jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+    "$\\text{Binom}\\big( S_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\text{Pois}\\Big( \\nu_{1,jt} \\cdot \\frac{S_{jt}}{(S_{jt}+E_{jt})} \\Big)$",
+    "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-\\omega_1) \\big)$",
+    # Updated lambda term for one-dose OCV:
+    "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_1)V_{1,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+    # Updated psi term for one-dose OCV:
+    "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_1)V_{1,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+    "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\text{Pois}\\big( \\nu_{2,jt} \\big)$",
+    "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-\\omega_2) \\big)$",
+    # Updated lambda term for two-dose OCV:
+    "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_2)V_{2,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+    # Updated psi term for two-dose OCV:
+    "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_2)V_{2,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+    "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\Lambda^{S}_{j,t+1} + \\Lambda^{V_1}_{j,t+1} + \\Lambda^{V_2}_{j,t+1}$",
+    "$\\Psi^{S}_{j,t+1} + \\Psi^{V_1}_{j,t+1} + \\Psi^{V_2}_{j,t+1}$",
+    "$\\text{Binom}\\big( E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+    "$\\text{Binom}\\big( E_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\text{Binom}\\big( \\sigma E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+    "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\gamma_1) \\big)$",
+    "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\mu_j) \\big)$",
+    "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\text{Binom}\\big( (1-\\sigma) E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+    "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-\\gamma_2) \\big)$",
+    "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+    "",
+    "$\\text{Pois}\\big( \\zeta_1 I_{1,jt} \\big)$",
+    "$\\text{Pois}\\big( \\zeta_2 I_{2,jt} \\big)$",
+    "$\\text{Pois}\\big( \\delta_{jt} W_{jt} \\big)$",
+    "",
+    "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\gamma_1) \\big)$",
+    "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-\\gamma_2) \\big)$",
+    "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-\\varepsilon) \\big)$",
+    "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$"
+  )
+)
+
+knitr::kable(tbl, caption = "Stochastic Transitions and their descriptions for each term in the difference equations")
+
+```
 

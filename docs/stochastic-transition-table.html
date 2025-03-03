@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>5 Stochastic Transition Table | Stochastic Transitions Table with Binomial Draws</title>
+
+    <meta name="author" content="Your Name" />
+  
+   <meta name="description" content="<p>This is a minimal example of using the bookdown package to write a book.
+The HTML output format for this example is bookdown::bs4_book,
+set in the _output.yml file.</p>" />
+   <meta name="generator" content="placeholder" />
+  <meta property="og:title" content="5 Stochastic Transition Table | Stochastic Transitions Table with Binomial Draws" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="<p>This is a minimal example of using the bookdown package to write a book.
+The HTML output format for this example is bookdown::bs4_book,
+set in the _output.yml file.</p>" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="5 Stochastic Transition Table | Stochastic Transitions Table with Binomial Draws" />
+  
+  <meta name="twitter:description" content="<p>This is a minimal example of using the bookdown package to write a book.
+The HTML output format for this example is bookdown::bs4_book,
+set in the _output.yml file.</p>" />
+  
+  <!-- JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script>
+    <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet" />
+    <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script>
+    <script src="libs/bs3compat-0.8.0/transition.js"></script>
+    <script src="libs/bs3compat-0.8.0/tabs.js"></script>
+    <script src="libs/bs3compat-0.8.0/bs3compat.js"></script>
+    <link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet" />
+    <script src="libs/bs4_book-1.0.0/bs4_book.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script>
+
+  <!-- CSS -->
+  <style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+    <style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+          margin-bottom: 0em;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+      <link rel="stylesheet" href="style.css" />
+  
+</head>
+
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book">
+    <a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Stochastic Transitions Table with Binomial Draws</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+      </form>
+
+      <nav aria-label="Table of contents">
+        <h2>Table of contents</h2>
+        <div id="book-toc"></div>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="#">View book source <i class="fab fa-github"></i></a></li></p>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="col-sm-12 col-md-9 col-lg-7" id="content">
+<div id="stochastic-transition-table" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Stochastic Transition Table</h1>
+<p>Each row below describes a transition: the left-hand side indicates the compartment being updated, the specific term is the rate-based term, and the stochastic transition is given as a binomial draw from the source population with probability <span class="math inline">\(1-\exp(-r)\)</span>.</p>
+<table>
+<colgroup>
+<col width="32%" />
+<col width="18%" />
+<col width="49%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Difference Equation Term</th>
+<th>Specific Term</th>
+<th>Stochastic Transition (Binomial Draw)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><span class="math inline">\(S_{j,t+1}\)</span></strong></td>
+<td><span class="math inline">\(b_{jt}\,N_{jt}\)</span></td>
+<td><span class="math inline">\(\Delta S_{\text{birth}} \sim \text{Binom}(N_{jt}, 1-\exp(-b_{jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\varepsilon\,R_{jt}\)</span></td>
+<td><span class="math inline">\(\Delta S_{\text{loss immunity}} \sim \text{Binom}(R_{jt}, 1-\exp(-\varepsilon))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\omega_1\,V_{1,jt}\)</span></td>
+<td><span class="math inline">\(\Delta S_{\text{waning }V_1} \sim \text{Binom}(V_{1,jt}, 1-\exp(-\omega_1))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\omega_2\,V_{2,jt}\)</span></td>
+<td><span class="math inline">\(\Delta S_{\text{waning }V_2} \sim \text{Binom}(V_{2,jt}, 1-\exp(-\omega_2))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\nu_{1,jt}\,S_{jt}\)</span> (loss from <span class="math inline">\(S\)</span>)</td>
+<td><span class="math inline">\(\Delta S_{\text{vaccination}} \sim \text{Binom}(S_{jt}, 1-\exp(-\nu_{1,jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\Lambda^S_{j,t+1}-\Psi^S_{j,t+1}\)</span> (infection flow)</td>
+<td><span class="math inline">\(\Delta S_{\text{infection}} \sim \text{Binom}(S_{jt}, 1-\exp(-[\Lambda^S_{j,t+1}-\Psi^S_{j,t+1}]))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,S_{jt}\)</span> (death from <span class="math inline">\(S\)</span>)</td>
+<td><span class="math inline">\(\Delta S_{\text{death}} \sim \text{Binom}(S_{jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td><strong><span class="math inline">\(V_{1,jt+1}\)</span></strong></td>
+<td><span class="math inline">\(\nu_{1,jt}\,S_{jt}\)</span> (entry to <span class="math inline">\(V_1\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{1,\text{entry}} \sim \text{Binom}(S_{jt}, 1-\exp(-\nu_{1,jt}))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\omega_1\,V_{1,jt}\)</span> (waning from <span class="math inline">\(V_1\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{1,\text{waning}} \sim \text{Binom}(V_{1,jt}, 1-\exp(-\omega_1))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\Lambda^{V_1}_{j,t+1}-\Psi^{V_1}_{j,t+1}\)</span></td>
+<td><span class="math inline">\(\Delta V_{1,\text{infection flow}} \sim \text{Binom}(V_{1,jt}, 1-\exp(-[\Lambda^{V_1}_{j,t+1}-\Psi^{V_1}_{j,t+1}]))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,V_{1,jt}\)</span> (death from <span class="math inline">\(V_1\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{1,\text{death}} \sim \text{Binom}(V_{1,jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td><strong><span class="math inline">\(V_{2,jt+1}\)</span></strong></td>
+<td><span class="math inline">\(\nu_{2,jt}\,V_{1,jt}\)</span> (entry to <span class="math inline">\(V_2\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{2,\text{entry}} \sim \text{Binom}(V_{1,jt}, 1-\exp(-\nu_{2,jt}))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\omega_2\,V_{2,jt}\)</span> (waning from <span class="math inline">\(V_2\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{2,\text{waning}} \sim \text{Binom}(V_{2,jt}, 1-\exp(-\omega_2))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\Lambda^{V_2}_{j,t+1}-\Psi^{V_2}_{j,t+1}\)</span></td>
+<td><span class="math inline">\(\Delta V_{2,\text{infection flow}} \sim \text{Binom}(V_{2,jt}, 1-\exp(-[\Lambda^{V_2}_{j,t+1}-\Psi^{V_2}_{j,t+1}]))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,V_{2,jt}\)</span> (death from <span class="math inline">\(V_2\)</span>)</td>
+<td><span class="math inline">\(\Delta V_{2,\text{death}} \sim \text{Binom}(V_{2,jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td><strong><span class="math inline">\(E_{j,t+1}\)</span></strong></td>
+<td><span class="math inline">\(\Lambda_{j,t+1}+\Psi_{j,t+1}\)</span> (new exposures)</td>
+<td><span class="math inline">\(\Delta E_{\text{new}} \sim \text{Binom}(S_{jt}, 1-\exp(-[\Lambda_{j,t+1}+\Psi_{j,t+1}]))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\iota\,E_{jt}\)</span> (progression from <span class="math inline">\(E\)</span>)</td>
+<td><span class="math inline">\(\Delta E_{\text{progress}} \sim \text{Binom}(E_{jt}, 1-\exp(-\iota))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,E_{jt}\)</span> (death from <span class="math inline">\(E\)</span>)</td>
+<td><span class="math inline">\(\Delta E_{\text{death}} \sim \text{Binom}(E_{jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong><span class="math inline">\(I_{1,jt+1}\)</span></strong></td>
+<td><span class="math inline">\(\sigma\,\iota\,E_{jt}\)</span> (entry to <span class="math inline">\(I_1\)</span>)</td>
+<td><span class="math inline">\(\Delta I_{1,\text{entry}} \sim \text{Binom}(E_{jt}, 1-\exp(-\iota))\)</span> (with a fraction <span class="math inline">\(\sigma\)</span> assigned to <span class="math inline">\(I_1\)</span>)</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\gamma_1\,I_{1,jt}\)</span> (recovery)</td>
+<td><span class="math inline">\(\Delta I_{1,\text{recovery}} \sim \text{Binom}(I_{1,jt}, 1-\exp(-\gamma_1))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\mu_j\,I_{1,jt}\)</span> (disease‐induced death)</td>
+<td><span class="math inline">\(\Delta I_{1,\text{disease death}} \sim \text{Binom}(I_{1,jt}, 1-\exp(-\mu_j))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,I_{1,jt}\)</span> (background death)</td>
+<td><span class="math inline">\(\Delta I_{1,\text{death}} \sim \text{Binom}(I_{1,jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong><span class="math inline">\(I_{2,jt+1}\)</span></strong></td>
+<td><span class="math inline">\((1-\sigma)\,\iota\,E_{jt}\)</span> (entry to <span class="math inline">\(I_2\)</span>)</td>
+<td><span class="math inline">\(\Delta I_{2,\text{entry}} \sim \text{Binom}(E_{jt}, 1-\exp(-\iota))\)</span> (with a fraction <span class="math inline">\(1-\sigma\)</span> assigned to <span class="math inline">\(I_2\)</span>)</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\gamma_2\,I_{2,jt}\)</span> (recovery)</td>
+<td><span class="math inline">\(\Delta I_{2,\text{recovery}} \sim \text{Binom}(I_{2,jt}, 1-\exp(-\gamma_2))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,I_{1,jt}\)</span> (death; note: as written, this term acts on <span class="math inline">\(I_1\)</span>)</td>
+<td><span class="math inline">\(\Delta I_{2,\text{death}} \sim \text{Binom}(I_{1,jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+<tr class="even">
+<td><strong><span class="math inline">\(W_{j,t+1}\)</span></strong></td>
+<td><span class="math inline">\(\zeta_1\,I_{1,jt}\)</span> (from <span class="math inline">\(I_1\)</span>)</td>
+<td><span class="math inline">\(\Delta W_{1} \sim \text{Binom}(I_{1,jt}, 1-\exp(-\zeta_1))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\zeta_2\,I_{2,jt}\)</span> (from <span class="math inline">\(I_2\)</span>)</td>
+<td><span class="math inline">\(\Delta W_{2} \sim \text{Binom}(I_{2,jt}, 1-\exp(-\zeta_2))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\delta_{jt}\,W_{jt}\)</span> (decay of <span class="math inline">\(W\)</span>)</td>
+<td><span class="math inline">\(\Delta W_{\text{decay}} \sim \text{Binom}(W_{jt}, 1-\exp(-\delta_{jt}))\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong><span class="math inline">\(R_{j,t+1}\)</span></strong></td>
+<td><span class="math inline">\(\gamma_1\,I_{1,jt}\)</span> (recovery from <span class="math inline">\(I_1\)</span>)</td>
+<td><span class="math inline">\(\Delta R_{1} \sim \text{Binom}(I_{1,jt}, 1-\exp(-\gamma_1))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(\gamma_2\,I_{2,jt}\)</span> (recovery from <span class="math inline">\(I_2\)</span>)</td>
+<td><span class="math inline">\(\Delta R_{2} \sim \text{Binom}(I_{2,jt}, 1-\exp(-\gamma_2))\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline">\(\varepsilon\,R_{jt}\)</span> (loss of immunity)</td>
+<td><span class="math inline">\(\Delta R_{\text{loss immunity}} \sim \text{Binom}(R_{jt}, 1-\exp(-\varepsilon))\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline">\(d_{jt}\,R_{jt}\)</span> (death from <span class="math inline">\(R\)</span>)</td>
+<td><span class="math inline">\(\Delta R_{\text{death}} \sim \text{Binom}(R_{jt}, 1-\exp(-d_{jt}))\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+  </main>
+
+  <div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page">
+      <h2>On this page</h2>
+      <div id="book-on-this-page"></div>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          <li><a id="book-source" href="#">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="#">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5">
+  <div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Stochastic Transitions Table with Binomial Draws</strong>" was written by Your Name. It was last built on 2025-02-25.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+<script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+
+</html>

@@ -3,10 +3,7 @@ fig:diagram
 eq:system
 eq:foi-human
 eq:foi-environment
-eq:stoch-foi-hum
-eq:stoch-foi-env
 eq:beta1
-fig:seasonal-concept
 fig:seasonal-example
 fig:seasonal-cluster
 fig:seasonal-all
@@ -53,10 +50,8 @@ fig:cfr-cases
 fig:cfr-beta
 tab:demographics
 eq:R
-eq:generation-time
-fig:generation
-tab:unnamed-chunk-2
 tab:params
+tab:transitions
 tab:unnamed-chunk-1
 rationale
 background
@@ -74,6 +69,7 @@ wash-water-sanitation-and-hygiene
 demographics
 model-description
 transmission-dynamics
+latency
 seasonality
 environmental-transmission
 climate-driven-transmission
@@ -99,12 +95,10 @@ suspected-cases
 case-fatality-rate
 demographics-1
 the-reproductive-number
-the-generation-time-distribution
 initial-conditions
 model-calibration
-caveats
 table-of-parameters
-references
+table-of-stochastic-transitions
 model-versions
 scenarios
 vaccination
@@ -115,4 +109,4 @@ severe-weather-events
 long-term-trends
 usage
 news
-references-1
+references
