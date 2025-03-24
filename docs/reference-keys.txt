@@ -2,7 +2,9 @@ fig:map
 fig:diagram
 eq:system
 eq:foi-human
+eq:foi-human-total
 eq:foi-environment
+eq:foi-environment-total
 eq:beta1
 fig:seasonal-example
 fig:seasonal-cluster
@@ -50,8 +52,7 @@ fig:cfr-cases
 fig:cfr-beta
 tab:demographics
 eq:R
-tab:params
-tab:transitions
+tab:mosaic-table
 tab:unnamed-chunk-1
 rationale
 background
@@ -97,8 +98,10 @@ demographics-1
 the-reproductive-number
 initial-conditions
 model-calibration
-table-of-parameters
+table-of-mosaic-framework-countries
+table-of-model-parameters
 table-of-stochastic-transitions
+table-of-vaccination-model-terms
 model-versions
 scenarios
 vaccination

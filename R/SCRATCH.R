@@ -1511,3 +1511,220 @@ tmp <- arrow::read_parquet(file=file.path(PATHS$DATA_CLIMATE, "climate_data_MRI_
 
 
 
+
+
+
+<div id="transitions-table"></div>
+     ## Table of stochastic transitions
+     ```{r transitions, echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl <- data.frame(
+     "Term" = c(
+          "**$\\mathbf{S}$ (susceptible)**",
+          "$+ b_{jt} N_{jt}$",
+          "$+ \\varepsilon R_{jt}$",
+          "$+ \\omega_1 V_{1,jt}$",
+          "$+ \\omega_2 V_{2,jt}$",
+          "$- \\nu_{1,jt}S_{jt}/(S_{jt} + E_{jt})$",
+          "$- \\Lambda^{S}_{j,t+1}$",
+          "$+ \\Psi^S_{j,t+1}$",
+          "$- d_{jt} S_{jt}$",
+          "**$\\mathbf{V_1}$ (one-dose OCV)**",
+          "$+ \\nu_{1,jt} S_{jt}/(S_{jt} + E_{jt})$",
+          "$- \\omega_1 V_{1,jt}$",
+          "$- \\Lambda^{V_1}_{j,t+1}$",
+          "$+ \\Psi^{V_1}_{j,t+1}$",
+          "$- d_{jt} V_{1,jt}$",
+          "**$\\mathbf{V_2}$ (two-dose OCV)**",
+          "$+ \\nu_{2,jt}$",
+          "$- \\omega_2 V_{2,jt}$",
+          "$- \\Lambda^{V_2}_{j,t+1}$",
+          "$+ \\Psi^{V_2}_{j,t+1}$",
+          "$- d_{jt} V_{2,jt}$",
+          "**$\\mathbf{E}$ (exposed)**",
+          "$+ \\Lambda_{j,t+1}$",
+          "$+ \\Psi_{j,t+1}$",
+          "$- \\iota E_{jt}$",
+          "$- d_{jt} E_{jt}$",
+          "**$\\mathbf{I_1}$ (symptomatic)**",
+          "$+ \\sigma\\,\\iota\\,E_{jt}$",
+          "$- \\gamma_1 I_{1,jt}$",
+          "$- \\mu_j I_{1,jt}$",
+          "$- d_{jt} I_{1,jt}$",
+          "**$\\mathbf{I_2}$ (asymptomatic)**",
+          "$+ (1-\\sigma)\\,\\iota\\,E_{jt}$",
+          "$- \\gamma_2 I_{2,jt}$",
+          "$- d_{jt} I_{2,jt}$",
+          "**$\\mathbf{W}$ (environment)**",
+          "$+ \\zeta_1 I_{1,jt}$",
+          "$+ \\zeta_2 I_{2,jt}$",
+          "$- \\delta_{jt} W_{jt}$",
+          "**$\\mathbf{R}$ (recovered)**",
+          "$+ \\gamma_1 I_{1,jt}$",
+          "$+ \\gamma_2 I_{2,jt}$",
+          "$- \\varepsilon R_{jt}$",
+          "$- d_{jt} R_{jt}$"
+     ),
+     Description = c(
+          "",
+          "New individuals entering the susceptible class from births.",
+          "Loss of immunity for recovered individuals.",
+          "Waning immunity from one-dose OCV.",
+          "Waning immunity from two-dose OCV.",
+          "Susceptible individuals receiving one-dose OCV (leaving $S$).",
+          "Human-to-human force of infection on the susceptible class.",
+          "Environment-to-human force of infection on the susceptible class.",
+          "Background death among susceptible individuals.",
+          "",
+          "Entry of susceptible individuals into the one-dose vaccinated class.",
+          "Waning immunity in the one-dose vaccinated class.",
+          "Human-to-human force of infection on the one-dose vaccinated class.",
+          "Environment-to-human force of infection on one-dose vaccinated class.",
+          "Background death among one-dose vaccinated individuals.",
+          "",
+          "Transition of one-dose vaccinated individuals to the two-dose vaccinated class (full course of OCV).",
+          "Waning immunity in the two-dose vaccinated class.",
+          "Human-to-human force of infection on the two-dose vaccinated class.",
+          "Environment-to-human force of infection on the two-dose vaccinated class.",
+          "Background death among two-dose vaccinated individuals.",
+          "",
+          "Human-to-human force of infection contributing to new exposures.",
+          "Environment-to-human force of infection contributing to new exposures.",
+          "Progression of exposed individuals toward the infectious class.",
+          "Background death among exposed individuals.",
+          "",
+          "Exposed individuals progressing to symptomatic infection.",
+          "Recovery from symptomatic infection.",
+          "Deaths due to symptomatic infection.",
+          "Background death among individuals with symptomatic infection.",
+          "",
+          "Exposed individuals progressing to asymptomatic infection.",
+          "Recovery from asymptomatic infection.",
+          "Background death among individuals with asymptomatic infection.",
+          "",
+          "Amount of *V. cholerae* (cells/ml) shed into the environment by symptomatic individuals.",
+          "Amount of *V. cholerae* (cells/ml) shed into the environment by asymptomatic individuals.",
+          "Decay of viable *V. cholerae* in the environment.",
+          "",
+          "Recovery of individuals with symptomatic infection.",
+          "Recovery of individuals with asymptomatic infection.",
+          "Loss of immunity for recovered individuals.",
+          "Background death among recovered individuals."
+     ),
+     "Stochastic Transition" = c(
+          "",
+          "$\\text{Binom}\\big( N_{jt},\\; 1 - \\exp(-b_{jt}) \\big)$",
+          "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-\\varepsilon) \\big)$",
+          "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-\\omega_1) \\big)$",
+          "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-\\omega_2) \\big)$",
+          "$\\text{Pois}\\Big( \\nu_{1,jt} \\cdot \\frac{S_{jt}}{(S_{jt}+E_{jt})} \\Big)$",
+          # Updated lambda term for susceptible:
+          "$\\text{Binom}\\Big((1-\\tau_{j})S_{jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+          # Updated psi term for susceptible:
+          "$\\text{Binom}\\Big((1-\\tau_{j})S_{jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+          "$\\text{Binom}\\big( S_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\text{Pois}\\Big( \\nu_{1,jt} \\cdot \\frac{S_{jt}}{(S_{jt}+E_{jt})} \\Big)$",
+          "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-\\omega_1) \\big)$",
+          # Updated lambda term for one-dose OCV:
+          "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_1)V_{1,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+          # Updated psi term for one-dose OCV:
+          "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_1)V_{1,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+          "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\text{Pois}\\big( \\nu_{2,jt} \\big)$",
+          "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-\\omega_2) \\big)$",
+          # Updated lambda term for two-dose OCV:
+          "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_2)V_{2,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{hum}} ((1-\\tau_{j})I_{jt} + \\sum_{\\forall i \\not= j} (\\pi_{ij}\\tau_iI_{it}))^{\\alpha_1} / N_{jt}^{\\alpha_2}}\\big)\\Big)$",
+          # Updated psi term for two-dose OCV:
+          "$\\text{Binom}\\Big((1-\\tau_{j})(1-\\phi_2)V_{2,jt},\\ 1 - \\exp\\big({-\\beta_{jt}^{\\text{env}} (1-\\theta_j) W_{jt} / (\\kappa+W_{jt})}\\big)\\Big)$",
+          "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\Lambda^{S}_{j,t+1} + \\Lambda^{V_1}_{j,t+1} + \\Lambda^{V_2}_{j,t+1}$",
+          "$\\Psi^{S}_{j,t+1} + \\Psi^{V_1}_{j,t+1} + \\Psi^{V_2}_{j,t+1}$",
+          "$\\text{Binom}\\big( E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+          "$\\text{Binom}\\big( E_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\text{Binom}\\big( \\sigma E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+          "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\gamma_1) \\big)$",
+          "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\mu_j) \\big)$",
+          "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\text{Binom}\\big( (1-\\sigma) E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+          "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-\\gamma_2) \\big)$",
+          "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
+          "",
+          "$\\text{Pois}\\big( \\zeta_1 I_{1,jt} \\big)$",
+          "$\\text{Pois}\\big( \\zeta_2 I_{2,jt} \\big)$",
+          "$\\text{Pois}\\big( \\delta_{jt} W_{jt} \\big)$",
+          "",
+          "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\gamma_1) \\big)$",
+          "$\\text{Binom}\\big( I_{2,jt},\\; 1 - \\exp(-\\gamma_2) \\big)$",
+          "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-\\varepsilon) \\big)$",
+          "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$"
+     )
+)
+
+knitr::kable(tbl, caption = "Stochastic Transitions and their descriptions for each term in the difference equations")
+
+```
+
+<div id="vaccination-table"></div>
+     ## Table of vaccination model terms
+
+```{r vaccination-table, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+vacc_terms <- data.frame(
+     Compartment = c(
+          "$V^{\\text{imm}}_{1,j,t+1}$",
+          "$V^{\\text{sus}}_{1,j,t+1}$",
+          "$V^{\\text{inf}}_{1,j,t+1}$",
+          "$V^{\\text{imm}}_{2,j,t+1}$",
+          "$V^{\\text{sus}}_{2,j,t+1}$",
+          "$V^{\\text{inf}}_{2,j,t+1}$",
+          "$V_{1,j,t}$",
+          "$V_{2,j,t}$"
+     ),
+     Population = c(
+          "Effectively immunized one-dose recipients",
+          "Still susceptible one-dose recipients",
+          "Infected one-dose recipients",
+          "Effectively immunized two-dose recipients",
+          "Still susceptible two-dose recipients",
+          "Infected two-dose recipients",
+          "Total one-dose recipients",
+          "Total two-dose recipients"
+     ),
+     Equation = c(
+          "$V^{\\text{imm}}_{1,j,t+1} = V^{\\text{imm}}_{1,jt}$ <br> $+\\,\\displaystyle\\frac{\\phi_1\\,\\nu_{1,jt}\\,S_{jt}}{(S_{jt}+E_{jt})}$ <br> $-\\,\\omega_1\\,V^{\\text{imm}}_{1,jt}$ <br> $-\\,\\displaystyle\\frac{\\nu_{2,jt}\\,V^{\\text{imm}}_{1,jt}}{(V^{\\text{imm}}_{1,jt}+V^{\\text{sus}}_{1,jt})}$ <br> $-\\,d_{jt}\\,V^{\\text{imm}}_{1,jt}$",
+          "$V^{\\text{sus}}_{1,j,t+1} = V^{\\text{sus}}_{1,jt}$ <br> $+\\,\\displaystyle\\frac{(1-\\phi_1)\\,\\nu_{1,jt}\\,S_{jt}}{(S_{jt}+E_{jt})}$ <br> $+\\,\\omega_1\\,V^{\\text{imm}}_{1,jt}$ <br> $-\\,(\\Lambda^{V_1}_{j,t+1}+\\Psi^{V_1}_{j,t+1})$ <br> $-\\,\\displaystyle\\frac{\\nu_{2,jt}\\,V^{\\text{sus}}_{1,jt}}{(V^{\\text{imm}}_{1,jt}+V^{\\text{sus}}_{1,jt})}$ <br> $-\\,d_{jt}\\,V^{\\text{sus}}_{1,jt}$",
+          "$V^{\\text{inf}}_{1,j,t+1} = V^{\\text{inf}}_{1,jt}$ <br> $+\\,(\\Lambda^{V_1}_{j,t+1}+\\Psi^{V_1}_{j,t+1})$ <br> $-\\,d_{jt}\\,V^{\\text{inf}}_{1,jt}$ <br> \\quad $\\mathbf{(tracking only)}$",
+          "$V^{\\text{imm}}_{2,j,t+1} = V^{\\text{imm}}_{2,jt}$ <br> $+\\,\\phi_2\\,\\nu_{2,jt}$ <br> $-\\,\\omega_2\\,V^{\\text{imm}}_{2,jt}$ <br> $-\\,d_{jt}\\,V^{\\text{imm}}_{2,jt}$",
+          "$V^{\\text{sus}}_{2,j,t+1} = V^{\\text{sus}}_{2,jt}$ <br> $+\\,(1-\\phi_2)\\,\\nu_{2,jt}$ <br> $+\\,\\omega_2\\,V^{\\text{imm}}_{2,jt}$ <br> $-\\,(\\Lambda^{V_2}_{j,t+1}+\\Psi^{V_2}_{j,t+1})$ <br> $-\\,d_{jt}\\,V^{\\text{sus}}_{2,jt}$",
+          "$V^{\\text{inf}}_{2,j,t+1} = V^{\\text{inf}}_{2,jt}$ <br> $+\\,(\\Lambda^{V_2}_{j,t+1}+\\Psi^{V_2}_{j,t+1})$ <br> $-\\,d_{jt}\\,V^{\\text{inf}}_{2,jt}$ <br> \\quad $\\mathbf{(tracking only)}$",
+          "$V_{1,j,t} = V^{\\text{imm}}_{1,j,t} + V^{\\text{sus}}_{1,j,t} + V^{\\text{inf}}_{1,j,t}$",
+          "$V_{2,j,t} = V^{\\text{imm}}_{2,j,t} + V^{\\text{sus}}_{2,j,t} + V^{\\text{inf}}_{2,j,t}$"
+     ),
+     Notes = c(
+          "+ Incoming newly vaccinated <br> - Waning vaccine immunity (⇒ $V^{\\text{sus}}_{1}$) <br> - Second dose recipients (⇒ $V_{2}$ compartment)",
+          "+ Incoming newly vaccinated <br> + Waning vaccine immunity <br> - Infected (⇒ $E_{j,t}$) <br> - Second dose recipients (⇒ $V_{2}$ compartment)",
+          "+ One-dose recipients infected (⇒ $E_{j,t}$) <br> **Compartment used for tracking only.**",
+          "+ Incoming second dose recipients <br> - Waning vaccine immunity (⇒ $V^{\\text{sus}}_{2}$)",
+          "+ Incoming second dose recipients <br> + Waning vaccine immunity <br> - Infected (⇒ $E_{j,t}$)",
+          "+ Infected two-dose recipients (⇒ $E_{j,t}$) <br> **Compartment used for tracking only.**",
+          "Sum of all one-dose sub-compartments. Tracked only and approximately equal to reported OCV campaign data. <br> **Compartment used for tracking only.**",
+          "Sum of all two-dose sub-compartments. Tracked only and approximately equal to reported OCV campaign data. <br> **Compartment used for tracking only.**"
+     ),
+     stringsAsFactors = FALSE
+)
+
+knitr::kable(vacc_terms,
+             col.names = c("Compartment", "Population", "Equation", "Notes"),
+             caption = "Table of vaccination model terms.",
+             escape = FALSE) %>%
+     kableExtra::kable_styling(full_width = TRUE)
+
+
+
+```

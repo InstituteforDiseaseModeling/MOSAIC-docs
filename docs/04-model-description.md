@@ -4,14 +4,12 @@
 
 Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of disease dynamics such as human mobility, environmental conditions, and vaccination schedules. As MOSAIC continues to evolve, future iterations will refine model components based on available data and improved model mechanisms, which we hope will increase its applicability to real-world scenarios.
 
-The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map).
+The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map) and the [Table of MOSAIC framework countries](#mosaic-table).
 
 <div class="figure" style="text-align: center">
-<img src="figures/africa_map.png" alt="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green." width="100%" />
-<p class="caption">(\#fig:map)A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green.</p>
+<img src="figures/africa_map.png" alt="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue." width="100%" />
+<p class="caption">(\#fig:map)A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue.</p>
 </div>
-
-
 
 
 ## Transmission dynamics
@@ -19,7 +17,7 @@ The model operates on daily time steps and will be fitted to historical incidenc
 The model has a metapopulation structure with familiar compartments for Susceptible, Exposed, Infected, and Recovered individuals with SEIRS dynamics. The model also contains compartments for one- and two-dose vaccination ($V_1$ and $V_2$) and Water & environment based transmission (W) which we refer to as SVEIWRS.
 
 <div class="figure" style="text-align: center">
-<img src="diagrams/v_0_3.drawio.png" alt="This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths)." width="95%" />
+<img src="diagrams/v_0_5.drawio.png" alt="This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths)." width="100%" />
 <p class="caption">(\#fig:diagram)This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths).</p>
 </div>
 
@@ -27,41 +25,126 @@ The SVEIWRS metapopulation model, shown in Figure \@ref(fig:diagram), is governe
 
 \begin{equation}
 \begin{aligned}
-S_{j,t+1} &= S_{jt} + b_{jt} N_{jt} + \varepsilon R_{jt} + \big( \omega_1 V_{1,jt} + \omega_2 V_{2,jt} \big) - \nu_{1,jt}S_{jt}/(S_{jt} + E_{jt}) - \big( \Lambda^{S}_{j,t+1} - \Psi^S_{j,t+1} \big) - d_{jt} S_{jt}\\[11pt]
-V_{1,j,t+1} &= V_{1,jt} + \nu_{1,jt}S_{jt}/(S_{jt} + E_{jt}) - \omega_1 V_{1,jt} - \big( \Lambda^{V_1}_{j,t+1} - \Psi^{V_1}_{j,t+1} \big) - d_{jt} V_{1,jt}\\[11pt]
-V_{2,j,t+1} &= V_{2,jt} + \nu_{2,jt} - \omega_2 V_{2,jt} - \big( \Lambda^{V_2}_{j,t+1} - \Psi^{V_2}_{j,t+1} \big) - d_{jt} V_{2,jt}\\[11pt]
-E_{j,t+1} &= E_{jt} + \big( \Lambda_{j,t+1} + \Psi_{j,t+1}\big) - \iota E_{jt} - d_{jt} E_{jt}\\[11pt]
-I_{1,j,t+1} &= I_{1,jt} + \sigma\,\iota\,E_{jt} - \gamma_1 I_{1,jt} - \mu_j I_{1,jt} - d_{jt} I_{1,jt}\\[11pt]
-I_{2,j,t+1} &= I_{2,jt} + (1-\sigma)\,\iota\,E_{jt} - \gamma_2 I_{2,jt} - d_{jt} I_{1,jt}\\[11pt]
-W_{j,t+1} &= W_{jt} + \big( \zeta_1 I_{1,jt} + \zeta_2 I_{2,jt} \big) - \delta_{jt} W_{jt}\\[11pt]
-R_{j,t+1} &= R_{jt} + \big( \gamma_1 I_{1,jt} + \gamma_2 I_{2,jt} \big) - \varepsilon R_{jt} - d_{jt} R_{jt}
+\mathbf{\text{Susceptible population:}}\\[1mm]
+S_{j,t+1} = \ & 
+S_{jt} 
++ b_{jt}\,N_{jt} 
++ \varepsilon\,R_{jt} 
+- \frac{\nu_{1,jt}\,S_{jt}}{\left(S_{jt}+E_{jt}\right)} 
+- \left( \Lambda^{S}_{j,t+1} + \Psi^{S}_{j,t+1} \right) 
+- d_{jt}\,S_{jt}\\[3mm]
+\mathbf{\text{One-dose vaccination:}}\\[1mm]
+V^{\text{imm}}_{1,j,t+1} = \ & 
+V^{\text{imm}}_{1,jt} 
++ \frac{\phi_1\,\nu_{1,jt}\,S_{jt}}{\left(S_{jt}+E_{jt}\right)}
+- \omega_1\,V^{\text{imm}}_{1,jt} 
+- \frac{\nu_{2,jt}\,V^{\text{imm}}_{1,jt}}{\left(V^{\text{imm}}_{1,jt}+V^{\text{sus}}_{1,jt}\right)}
+- d_{jt}\,V^{\text{imm}}_{1,jt}\\[1mm]
+V^{\text{sus}}_{1,j,t+1} = \ & 
+V^{\text{sus}}_{1,jt} 
++ \frac{\left(1-\phi_1\right)\,\nu_{1,jt}\,S_{jt}}{\left(S_{jt}+E_{jt}\right)}
++ \omega_1\,V^{\text{imm}}_{1,jt} 
+- \left( \Lambda^{V_1}_{j,t+1} + \Psi^{V_1}_{j,t+1} \right) 
+- \frac{\nu_{2,jt}\,V^{\text{sus}}_{1,jt}}{\left(V^{\text{imm}}_{1,jt}+V^{\text{sus}}_{1,jt}\right)} 
+- d_{jt}\,V^{\text{sus}}_{1,jt}\\[1mm]
+V^{\text{inf}}_{1,j,t+1} = \ & 
+V^{\text{inf}}_{1,jt} 
++ \left( \Lambda^{V_1}_{j,t+1} + \Psi^{V_1}_{j,t+1} \right) 
+- d_{jt}\,V^{\text{inf}}_{1,jt} \quad \mathbf{\text{(tracking only)}}\\[6mm]
+\mathbf{\text{Two-dose vaccination:}}\\[3mm]
+V^{\text{imm}}_{2,j,t+1} = \ & 
+V^{\text{imm}}_{2,jt} 
++ \phi_2\,\nu_{2,jt} 
+- \omega_2\,V^{\text{imm}}_{2,jt} 
+- d_{jt}\,V^{\text{imm}}_{2,jt}\\[3mm]
+V^{\text{sus}}_{2,j,t+1} = \ & 
+V^{\text{sus}}_{2,jt} 
++ \left(1-\phi_2\right)\,\nu_{2,jt} 
++ \omega_2\,V^{\text{imm}}_{2,jt} 
+- \left( \Lambda^{V_2}_{j,t+1} + \Psi^{V_2}_{j,t+1} \right) 
+- d_{jt}\,V^{\text{sus}}_{2,jt}\\[3mm]
+V^{\text{inf}}_{2,j,t+1} = \ &
+V^{\text{inf}}_{2,jt} 
++ \left( \Lambda^{V_2}_{j,t+1} + \Psi^{V_2}_{j,t+1} \right) 
+- d_{jt}\,V^{\text{inf}}_{2,jt} \quad \mathbf{\text{(tracking only)}}\\[6mm]
+\mathbf{\text{Infection dynamics:}}\\[3mm]
+E_{j,t+1} = \ &
+E_{jt} 
++ \left( \Lambda_{j,t+1} + \Psi_{j,t+1}\right) 
+- \iota\,E_{jt} 
+- d_{jt}\,E_{jt}\\[3mm]
+I_{1,j,t+1} = \ &
+I_{1,jt} 
++ \sigma\,\iota\,E_{jt} 
+- \gamma_1\,I_{1,jt} 
+- \mu_j\,I_{1,jt} 
+- d_{jt}\,I_{1,jt}\\[3mm]
+I_{2,j,t+1} = \ &
+I_{2,jt} 
++ \left(1-\sigma\right)\,\iota\,E_{jt} 
+- \gamma_2\,I_{2,jt} 
+- d_{jt}\,I_{2,jt}\\[3mm]
+R_{j,t+1} = \ &
+R_{jt} 
++ \left( \gamma_1\,I_{1,jt} + \gamma_2\,I_{2,jt} \right) 
+- \varepsilon\,R_{jt} 
+- d_{jt}\,R_{jt}\\[5mm]
+\mathbf{\text{Environment:}}\\[3mm]
+W_{j,t+1} = \ &
+W_{jt} 
++ \left( \zeta_1\,I_{1,jt} + \zeta_2\,I_{2,jt} \right) 
+- \delta_{jt}\,W_{jt}\\[3mm]
 \end{aligned}
 (\#eq:system)
 \end{equation}
 
+For detailed descriptions of all parameters appearing in Equation \@ref(eq:system), see the [Table of model parameters](#parameters-table). Transmission dynamics in the model are governed primarily by two distinct force-of-infection terms: the human-to-human force of infection, $\Lambda_{jt}$, and the environmental force of infection, $\Psi_{jt}$.
 
-For descriptions of all parameters in Equation \@ref(eq:system), see Table (\@ref(tab:params)). Transmission dynamics are driven by the two force of infection terms, $\Lambda_{jt}$ and $\Psi_{jt}$. The full force of infection due to human-to-human ($\Lambda_{jt}$) is:
+The human-to-human transmission component at time $t+1$ in location $j$ is defined separately for susceptible ($S$), one-dose vaccinated ($V_1$), and two-dose vaccinated ($V_2$) individuals as:
 
 \begin{equation}
 \begin{aligned}
-\Lambda_{j,t+1} &= \frac{
-\beta_{jt}^{\text{hum}} \big( (S_{jt} + (1-\phi_1) V_{1,jt} + (1-\phi_2) V_{2,jt}) (1-\tau_{j})\big)  \big((I_{1,jt} + I_{2,jt})(1-\tau_{j}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_i(I_{1,jt} + I_{2,jt})) \big)^{\alpha_1}}{N_{jt}^{\alpha_2}}.\\[11pt]
+\Lambda^S_{j,t+1} &= \frac{
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\Lambda^{V_1}_{j,t+1} &= \frac{
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{1,jt}  \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\Lambda^{V_2}_{j,t+1} &= \frac{
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{2,jt} \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}}.
 \end{aligned}
 (\#eq:foi-human)
 \end{equation}
 
-Where $\beta_{jt}^{\text{hum}}$ is the rate of human-to-human transmission. Movement within and among metapopulations is governed by $\tau_i$, the probability of departing origin location $i$, and $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]). Note that the difference equations contain terms $\Lambda^{S}_{jt}$, $\Lambda^{V_1}_{jt}$, and $\Lambda^{V_2}_{jt}$, which parses the full force of infection into the number of new infections due to human-to-human transmission for each of the $S$, $V_1$, and $V_2$ compartments respectively.
+The total human-to-human force of infection is then the sum of these three components:
 
-To include environmental effects, the force of infection due to environment-to-human transmission ($\Psi_{jt}$) is defined as:
+\begin{equation}
+\Lambda_{j,t+1} =  \Lambda^S_{j,t+1} + \Lambda^{V_1}_{j,t+1} + \Lambda^{V_2}_{j,t+1}.
+(\#eq:foi-human-total)
+\end{equation}
+
+
+In these equations, $\beta_{jt}^{\text{hum}}$ represents the rate of human-to-human transmission. Movement within and among metapopulations is governed by the parameter $\tau_i$, indicating the probability of departing origin location $i$, while $\pi_{ij}$ describes the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]). The terms $\Lambda^{S}_{jt}$, $\Lambda^{V_1}_{jt}$, and $\Lambda^{V_2}_{jt}$ explicitly partition the overall human-to-human force of infection into separate contributions from susceptible, one-dose vaccinated, and two-dose vaccinated individuals, linking directly to the compartmental structure of the model described by the system of difference equations.
+
+
+
+The environmental force of infection ($\Psi_{jt}$), capturing environment-to-human transmission at location $j$ and time $t+1$, is also explicitly partitioned into susceptible ($S$), one-dose vaccinated ($V_1$), and two-dose vaccinated ($V_2$) compartments:
 
 \begin{equation}
 \begin{aligned}
-\Psi_{j,t+1} &= \frac{\beta_{jt}^{\text{env}} \big( (S_{jt} + (1-\phi_1) V_{1,jt} + (1-\phi_2) V_{2,jt}) (1-\tau_{j})\big) (1-\theta_j) W_{jt}}{(\kappa+W_{jt})},\\[11pt]
+\Psi^S_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
+\Psi^{V_1}_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{1,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
+\Psi^{V_2}_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{2,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}}.
 \end{aligned}
 (\#eq:foi-environment)
 \end{equation}
 
-where $\beta_{jt}^{\text{env}}$ is the rate of environment-to-human transmission and $\theta_j$ is the proportion of the population at location $j$ that at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental compartment of the model is also scaled by the concentration (cells per mL) of *V. cholerae* that is required for a 50% probability of infection [Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/). See the section on [environmental transmission][Environmental transmission] below for more on the water/environment compartment and climatic drivers of transmission. Similar to $\Lambda_{jt}$, the $\Psi_{jt}$ term is also parsed into $\Psi^{S}_{jt}$, $\Psi^{V_1}_{jt}$, and $\Psi^{V_2}_{jt}$ to give the force of infection due to environmental transmission for each of the $S$, $V_1$, and $V_2$ compartments.
+The total environmental force of infection is then the sum of these three components:
+
+\begin{equation}
+\Psi_{j,t+1} = \Psi^S_{j,t+1} + \Psi^{V_1}_{j,t+1} + \Psi^{V_2}_{j,t+1}.
+(\#eq:foi-environment-total)
+\end{equation}
+
+Here, $\beta_{jt}^{\text{env}}$ denotes the rate of environment-to-human transmission, and $\theta_j$ is the proportion of the population at location $j$ with at least basic access to Water, Sanitation, and Hygiene (WASH). The environmental exposure is scaled by the concentration of *V. cholerae* (cells per mL) associated with a 50% probability of infection ([Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/)). Additional details regarding environmental compartments, water reservoirs, and climatic factors influencing transmission
 
 Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see [Ross 2007](https://www.google.com/books/edition/Introduction_to_Probability_Models/1uxBwhAb_zYC?hl=en)). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$:
 
@@ -69,7 +152,7 @@ Note that all model processes are stochastic. Transition rates are converted to 
 \frac{\partial R}{\partial t} \sim \text{Binom}(I_{jt}, 1-e^{-\gamma}).
 \end{equation}
 
-For a detailed list of all stochastic transitions in the model, see Table (\@ref(tab:params)) below.
+For a detailed list of all stochastic transitions in the model, see the [Table of stochastic transitions](#transitions-table) below.
 
 ## Latency
 
@@ -1516,13 +1599,61 @@ Model calibration is performed to fine-tune the hyperparameters and ensure the m
 
 By combining LHS and likelihood-based calibration, we aim to identify a robust set of hyperparameters that accurately capture both the temporal and spatial dynamics of cholera transmission in Sub-Saharan Africa.
 
+<div id="mosaic-table"></div>
+## Table of MOSAIC framework countries
+
+
+Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
+
+|ISO |Country                          |Region          |Cholera News                                   |
+|:---|:--------------------------------|:---------------|:----------------------------------------------|
+|BDI |Burundi                          |Eastern Africa  |[Cholera News: Burundi](https://news.google.com/search?q=Cholera+Burundi&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|ERI |Eritrea                          |Eastern Africa  |[Cholera News: Eritrea](https://news.google.com/search?q=Cholera+Eritrea&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|ETH |Ethiopia                         |Eastern Africa  |[Cholera News: Ethiopia](https://news.google.com/search?q=Cholera+Ethiopia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|KEN |Kenya                            |Eastern Africa  |[Cholera News: Kenya](https://news.google.com/search?q=Cholera+Kenya&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|MWI |Malawi                           |Eastern Africa  |[Cholera News: Malawi](https://news.google.com/search?q=Cholera+Malawi&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|MOZ |Mozambique                       |Eastern Africa  |[Cholera News: Mozambique](https://news.google.com/search?q=Cholera+Mozambique&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|RWA |Rwanda                           |Eastern Africa  |[Cholera News: Rwanda](https://news.google.com/search?q=Cholera+Rwanda&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|SOM |Somalia                          |Eastern Africa  |[Cholera News: Somalia](https://news.google.com/search?q=Cholera+Somalia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|SSD |South Sudan                      |Eastern Africa  |[Cholera News: South Sudan](https://news.google.com/search?q=Cholera+South+Sudan&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|TZA |Tanzania                         |Eastern Africa  |[Cholera News: Tanzania](https://news.google.com/search?q=Cholera+Tanzania&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|UGA |Uganda                           |Eastern Africa  |[Cholera News: Uganda](https://news.google.com/search?q=Cholera+Uganda&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|ZMB |Zambia                           |Eastern Africa  |[Cholera News: Zambia](https://news.google.com/search?q=Cholera+Zambia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|ZWE |Zimbabwe                         |Eastern Africa  |[Cholera News: Zimbabwe](https://news.google.com/search?q=Cholera+Zimbabwe&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|AGO |Angola                           |Middle Africa   |[Cholera News: Angola](https://news.google.com/search?q=Cholera+Angola&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|CMR |Cameroon                         |Middle Africa   |[Cholera News: Cameroon](https://news.google.com/search?q=Cholera+Cameroon&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|CAF |Central African Republic         |Middle Africa   |[Cholera News: Central African Republic](https://news.google.com/search?q=Cholera+Central+African+Republic&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|TCD |Chad                             |Middle Africa   |[Cholera News: Chad](https://news.google.com/search?q=Cholera+Chad&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|COD |Democratic Republic of the Congo |Middle Africa   |[Cholera News: Democratic Republic of the Congo](https://news.google.com/search?q=Cholera+Democratic+Republic+of+the+Congo&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GNQ |Equatorial Guinea                |Middle Africa   |[Cholera News: Equatorial Guinea](https://news.google.com/search?q=Cholera+Equatorial+Guinea&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GAB |Gabon                            |Middle Africa   |[Cholera News: Gabon](https://news.google.com/search?q=Cholera+Gabon&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|COG |Republic of the Congo            |Middle Africa   |[Cholera News: Republic of the Congo](https://news.google.com/search?q=Cholera+Republic+of+the+Congo&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|BWA |Botswana                         |Southern Africa |[Cholera News: Botswana](https://news.google.com/search?q=Cholera+Botswana&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|SWZ |Kingdom of eSwatini              |Southern Africa |[Cholera News: Kingdom of eSwatini](https://news.google.com/search?q=Cholera+Kingdom+of+eSwatini&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|NAM |Namibia                          |Southern Africa |[Cholera News: Namibia](https://news.google.com/search?q=Cholera+Namibia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|ZAF |South Africa                     |Southern Africa |[Cholera News: South Africa](https://news.google.com/search?q=Cholera+South+Africa&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|BEN |Benin                            |Western Africa  |[Cholera News: Benin](https://news.google.com/search?q=Cholera+Benin&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|BFA |Burkina Faso                     |Western Africa  |[Cholera News: Burkina Faso](https://news.google.com/search?q=Cholera+Burkina+Faso&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|CIV |Côte d'Ivoire                    |Western Africa  |[Cholera News: Côte d'Ivoire](https://news.google.com/search?q=Cholera+Côte+d'Ivoire&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GHA |Ghana                            |Western Africa  |[Cholera News: Ghana](https://news.google.com/search?q=Cholera+Ghana&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GIN |Guinea                           |Western Africa  |[Cholera News: Guinea](https://news.google.com/search?q=Cholera+Guinea&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GNB |Guinea-Bissau                    |Western Africa  |[Cholera News: Guinea-Bissau](https://news.google.com/search?q=Cholera+Guinea-Bissau&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|LBR |Liberia                          |Western Africa  |[Cholera News: Liberia](https://news.google.com/search?q=Cholera+Liberia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|MLI |Mali                             |Western Africa  |[Cholera News: Mali](https://news.google.com/search?q=Cholera+Mali&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|MRT |Mauritania                       |Western Africa  |[Cholera News: Mauritania](https://news.google.com/search?q=Cholera+Mauritania&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|NER |Niger                            |Western Africa  |[Cholera News: Niger](https://news.google.com/search?q=Cholera+Niger&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|NGA |Nigeria                          |Western Africa  |[Cholera News: Nigeria](https://news.google.com/search?q=Cholera+Nigeria&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|SEN |Senegal                          |Western Africa  |[Cholera News: Senegal](https://news.google.com/search?q=Cholera+Senegal&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|SLE |Sierra Leone                     |Western Africa  |[Cholera News: Sierra Leone](https://news.google.com/search?q=Cholera+Sierra+Leone&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|GMB |The Gambia                       |Western Africa  |[Cholera News: The Gambia](https://news.google.com/search?q=Cholera+The+Gambia&hl=en-US&gl=US&ceid=US:en&sort=date)|
+|TGO |Togo                             |Western Africa  |[Cholera News: Togo](https://news.google.com/search?q=Cholera+Togo&hl=en-US&gl=US&ceid=US:en&sort=date)|
 
 
 
-## Table of parameters
+<div id="parameters-table"></div>
+## Table of model parameters
 
 
-Table: (\#tab:params)Comprehensive List of Model Parameters, Descriptions, Distributions, and Sources
 
 |Parameter                 |Description                                                                                                            |Distribution                                          |Source                                                                        |
 |:-------------------------|:----------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------|:-----------------------------------------------------------------------------|
@@ -1580,10 +1711,10 @@ Table: (\#tab:params)Comprehensive List of Model Parameters, Descriptions, Distr
 
 
 
+<div id="transitions-table"></div>
 ## Table of stochastic transitions
 
 
-Table: (\#tab:transitions)Stochastic Transitions and their descriptions for each term in the difference equations
 
 |Term                                    |Description                                                                                          |Stochastic.Transition                                                                                                                                                                                       |
 |:---------------------------------------|:----------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1634,3 +1765,16 @@ Table: (\#tab:transitions)Stochastic Transitions and their descriptions for each
 
 
 
+<div id="vaccination-table"></div>
+## Table of vaccination model terms
+
+| Term | Population | Equation | Notes 
+| ------ | ------------ | ------------ | ------------------------------------------------------------ |
+| $V^{\text{imm}}_{1,j,t+1}$   | Effectively immunized one-dose recipients      | $V^{\text{imm}}_{1,j,t+1} = V^{\text{imm}}_{1,jt}$ <br> $+ \ \phi_1 \nu_{1, jt} \cdot S_{jt} \big/ \big(S_{jt} + E_{jt}\big)$ <br> $- \ \omega_1 V^{\text{imm}}_{1,jt}$ <br> $- \ \nu_{2,jt} \cdot V^{\text{imm}}_{1,jt} \big/ \big(V^{\text{imm}}_{1,jt} + V^{\text{sus}}_{1,jt} \big)$                                 | + Incoming newly vaccinated <br> - Waning vaccine immunity (⇒ $V^{\text{sus}}_{1}$) <br> - Second dose recipients (⇒ $V_2$ compartment)  |
+| $V^{\text{sus}}_{1,j,t+1}$   | Still susceptible one-dose recipients          | $V^{\text{sus}}_{1,j,t+1} = V^{\text{sus}}_{1,jt}$ <br> $+ \ (1 - \phi_1) \nu_{1, jt}$ <br> $+ \ \omega_1 V^{\text{imm}}_{1,jt}$ <br> $- \ \big(\Lambda^{V_1}_{j,t+1} + \Psi^{V_1}_{j,t+1}\big)$ <br> $- \ \nu_{2, jt} \cdot V^{\text{sus}}_{1,jt} \big/ \big(V^{\text{imm}}_{1,jt} + V^{\text{sus}}_{1,jt} \big)$       | + Incoming newly vaccinated <br> + Waning vaccine immunity <br> - Infected (⇒ $E_{j,t}$) <br> - Second dose recipients (⇒ $V_2$ compartment) |
+| $V^{\text{inf}}_{1,j,t+1}$   | Infected one-dose recipients                   | $V^{\text{inf}}_{1,j,t+1} = V^{\text{inf}}_{1,jt}$ <br> $+ \ \big(\Lambda^{V_1}_{j,t+1} + \Psi^{V_1}_{j,t+1}\big)$                                                                                                                                                                                                       | + One-dose recipients infected (⇒ $E_{j,t}$) <br> **Compartment used for tracking only.** |
+| $V^{\text{imm}}_{2,j,t+1}$   | Effectively immunized two-dose recipients      | $V^{\text{imm}}_{2,j,t+1} = V^{\text{imm}}_{2,jt}$ <br> $+ \ \phi_2 \nu_{2, jt}$  <br> $- \ \omega_2 V^{\text{imm}}_{2,jt}$                                                                                                                                                                                              | + Incoming second dose recipients <br> - Waning vaccine immunity (⇒ $V^{\text{sus}}_{2}$) |
+| $V^{\text{sus}}_{2,j,t+1}$   | Still susceptible two-dose recipients          | $V^{\text{sus}}_{2,j,t+1} = V^{\text{sus}}_{2,jt}$ <br> $+ \ (1 - \phi_2) \nu_{2,jt}$ <br> $+ \ \omega_2 V^{\text{imm}}_{2,jt}$ <br> $- \ \big(\Lambda^{V_2}_{j,t+1} + \Psi^{V_2}_{j,t+1}\big)$                                                                                                                          | + Incoming second dose recipients <br> + Waning vaccine immunity <br> - Infected (⇒ $E_{j,t}$)   |
+| $V^{\text{inf}}_{2,j,t+1}$   | Infected two-dose recipients                   | $V^{\text{inf}}_{2,j,t+1} = V^{\text{inf}}_{2}$ <br> $+ \ \big(\Lambda^{V_2}_{j,t+1} + \Psi^{V_2}_{j,t+1}\big)$                                                                                                                                                                                                          | + Infected two-dose recipients (⇒ $E_{j,t}$). **Compartment used for tracking only.** |
+| $V_{1,j,t}$                  | Total one-dose recipients                      | $V_{1,j,t} = V^{\text{imm}}_{1,j,t} + V^{\text{sus}}_{1,j,t} + V^{\text{inf}}_{1,j,t}$                                                                                                                                                                                                                                   | Sum of all one-dose sub-compartments. Tracked only and approximately equal to reported OCV campaign data. **Compartment used for tracking only.** |
+| $V_{2,j,t}$                  | Total two-dose recipients                      | $V_{2,j,t} = V^{\text{imm}}_{2,j,t} + V^{\text{sus}}_{2,j,t} + V^{\text{inf}}_{2,j,t}$                                                                                                                                                                                                                                   | Sum of all two-dose sub-compartments. Tracked only and approximately equal to reported OCV campaign data. **Compartment used for tracking only.** |
