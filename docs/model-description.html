@@ -186,9 +186,9 @@ W_{jt}
 <p><span class="math display" id="eq:foi-human">\[\begin{equation}
 \begin{aligned}
 \Lambda^S_{j,t+1} &amp;= \frac{
-\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[4mm]
 \Lambda^{V_1}_{j,t+1} &amp;= \frac{
-\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{1,jt}  \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{1,jt}  \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[4mm]
 \Lambda^{V_2}_{j,t+1} &amp;= \frac{
 \beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{2,jt} \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}}.
 \end{aligned}
@@ -203,8 +203,8 @@ W_{jt}
 <p>The environmental force of infection (<span class="math inline">\(\Psi_{jt}\)</span>), capturing environment-to-human transmission at location <span class="math inline">\(j\)</span> and time <span class="math inline">\(t+1\)</span>, is also explicitly partitioned into susceptible (<span class="math inline">\(S\)</span>), one-dose vaccinated (<span class="math inline">\(V_1\)</span>), and two-dose vaccinated (<span class="math inline">\(V_2\)</span>) compartments:</p>
 <p><span class="math display" id="eq:foi-environment">\[\begin{equation}
 \begin{aligned}
-\Psi^S_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
-\Psi^{V_1}_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{1,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
+\Psi^S_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[4mm]
+\Psi^{V_1}_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{1,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[4mm]
 \Psi^{V_2}_{j,t+1} &amp;= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{2,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}}.
 \end{aligned}
 \tag{3.4}
@@ -252,7 +252,7 @@ Figure 3.3: Example of a grid of 30 uniformly distributed points within Mozambiq
 Figure 3.4: A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.
 </p>
 </div>
-<p>Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 41 countries in the MOSAIC framework. These dynamics are visualized in Figure <a href="model-description.html#fig:seasonal-all">3.5</a>, with the corresponding Fourier model coefficients presented in Table <a href="model-description.html#tab:seasonal-table">3.1</a>.</p>
+<p>Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure <a href="model-description.html#fig:seasonal-all">3.5</a>, with the corresponding Fourier model coefficients presented in Table <a href="model-description.html#tab:seasonal-table">3.1</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:seasonal-all"></span>
 <img src="figures/seasonal_transmission_all.png" alt="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases." width="100%"><p class="caption">
@@ -555,26 +555,27 @@ Zimbabwe
 <span class="header-section-number">3.4</span> Environmental transmission<a class="anchor" aria-label="anchor" href="#environmental-transmission"><i class="fas fa-link"></i></a>
 </h2>
 <p>Environmental transmission is a critical factor in cholera spread and consists of several key components: the rate at which infected individuals shed <em>V. cholerae</em> into the environment, the pathogen’s survival rate in environmental conditions, and the overall suitability of the environment for sustaining the bacteria over time.</p>
-<div id="climate-driven-transmission" class="section level3" number="3.4.1">
-<h3>
-<span class="header-section-number">3.4.1</span> Climate-driven transmission<a class="anchor" aria-label="anchor" href="#climate-driven-transmission"><i class="fas fa-link"></i></a>
-</h3>
 <p>To capture the impacts of climate-drivers on cholera transmission, we have included the parameter <span class="math inline">\(\psi_{jt}\)</span>, which represents the current state of environmental suitability with respect to: <em>i</em>) the survival time of <em>V. cholerae</em> in the environment and, <em>ii</em>) the rate of environment-to-human transmission which contributes to the overall force of infection.</p>
 <p><span class="math display" id="eq:beta2">\[\begin{equation}
 \beta_{jt}^{\text{env}} = \beta_{j0}^{\text{env}} \Bigg(1 + \frac{\psi_{jt}-\bar\psi_j}{\bar\psi_j} \Bigg) \quad \text{and} \quad \bar\psi_j = \frac{1}{T} \sum_{t=1}^{T} \psi_{jt}
 \tag{3.7}
 \end{equation}\]</span></p>
 <p>This formulation effectively scales the base environmental transmission rate <span class="math inline">\(\beta_{jt}^{\text{env}}\)</span> so that it varies over time according to the climatically driven model of suitability. Note that, unlike the the cosine wave function of <span class="math inline">\(\beta_{jt}^{\text{hum}}\)</span>, this temporal term can increase or decrease over time following multi-annual cycles.</p>
-<p>Environmental suitability (<span class="math inline">\(\psi_{jt}\)</span>) also impacts the survival rate of <em>V. cholerae</em> in the environment (<span class="math inline">\(\delta_{jt}\)</span>) with the form:</p>
-<p><span class="math display" id="eq:delta">\[\begin{equation}
-\delta_{jt} = \delta_{\text{min}} + \psi_{jt} \times (\delta_{\text{max}} - \delta_{\text{min}})
+<div id="suitability-dependent-decay-rate" class="section level3" number="3.4.1">
+<h3>
+<span class="header-section-number">3.4.1</span> Suitability-dependent decay rate<a class="anchor" aria-label="anchor" href="#suitability-dependent-decay-rate"><i class="fas fa-link"></i></a>
+</h3>
+<p>Suitability also influences how long <em>V. cholerae</em> survives in the environment. The decay rate <span class="math inline">\(\delta_{jt}\)</span> is modeled as the inverse of survival time, which varies with suitability. This is defined as:</p>
+<p><span class="math display" id="eq:delta">\[
+\delta_{jt} = \frac{1}{\text{days}_{\text{short}} + f\big(\psi_{jt}\big) \cdot \big(\text{days}_{\text{long}} - \text{days}_{\text{short}}\big)}.
 \tag{3.8}
-\end{equation}\]</span></p>
-<p>which normalizes the variance of the suitability parameter to be bounded within the minimum (<span class="math inline">\(\delta_{\text{min}}\)</span>) and maximum (<span class="math inline">\(\delta_{\text{max}}\)</span>) survival times of <em>V. cholerae</em>.</p>
+\]</span></p>
+<p>Where <span class="math inline">\(\text{days}_{\text{short}}\)</span> is the shortest survival time (e.g., 3 days) and <span class="math inline">\(\text{days}_{\text{long}}\)</span> is the longest survival time (e.g., 90 days). Suitability is mapped to <em>V. cholerae</em> decay rate through a transformation function <span class="math inline">\(f(\psi_{jt})\)</span> that scales suitability values using a cumulative <a href="https://en.wikipedia.org/wiki/Beta_distribution">Beta distribution</a> and two shape parameters <span class="math inline">\(s_1\)</span> and <span class="math inline">\(s_2\)</span>: <span class="math inline">\(f\big(\psi_{jt}\big) = \text{pbeta}(\psi_{jt} \mid s_1, \, s_2)\)</span>.</p>
+<p>The transformation <span class="math inline">\(f\big(\psi_{jt}\big) \in [0, 1]\)</span> enables a range of functional forms, including linear, convex, concave, sigmoidal, or arcsine responses to suitability. This flexibility ensures that survival dynamics can reflect a variety of empirically plausible relationships with environmental conditions which can be seen in Figure <a href="model-description.html#fig:vibrio-decay-rate">3.6</a>.</p>
 <div class="figure" style="text-align: center">
-<span style="display:block;" id="fig:unnamed-chunk-1"></span>
-<img src="figures/shedding_rate.png" alt="Relationship between environmental suitability ($\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\delta_{\text{min}}$ = 3 days when suitability = 0 and $1/\delta_{\text{max}}$ = 90 days when suitability = 1." width="80%"><p class="caption">
-Figure 3.6: Relationship between environmental suitability (<span class="math inline">\(\psi_{jt}\)</span>) and the rate of <em>V. cholerae</em> decay in the environment (<span class="math inline">\(\delta_j\)</span>). The green line shows the mildest penalty on <em>V. cholerae</em> survival, where survival in the environment is <span class="math inline">\(1/\delta_{\text{min}}\)</span> = 3 days when suitability = 0 and <span class="math inline">\(1/\delta_{\text{max}}\)</span> = 90 days when suitability = 1.
+<span style="display:block;" id="fig:vibrio-decay-rate"></span>
+<img src="figures/vibrio_decay_rate.png" alt="Relationship between environmental suitability ($\psi_{jt}$) and the survival and decay rate of *V. cholerae* in the environment ($\delta_{jt}$). Curves represent four transformation types used to map suitability to survival time via the cumulative Beta distribution with different shape parameters ($s_1$, $s_2$). The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate, defined as $\delta_{jt} = 1/\text{days}(\psi_{jt})$. Horizontal dashed lines indicate the bounds on survival time, from 3 days (low suitability) to 90 days (high suitability) in this example." width="100%"><p class="caption">
+Figure 3.6: Relationship between environmental suitability (<span class="math inline">\(\psi_{jt}\)</span>) and the survival and decay rate of <em>V. cholerae</em> in the environment (<span class="math inline">\(\delta_{jt}\)</span>). Curves represent four transformation types used to map suitability to survival time via the cumulative Beta distribution with different shape parameters (<span class="math inline">\(s_1\)</span>, <span class="math inline">\(s_2\)</span>). The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate, defined as <span class="math inline">\(\delta_{jt} = 1/\text{days}(\psi_{jt})\)</span>. Horizontal dashed lines indicate the bounds on survival time, from 3 days (low suitability) to 90 days (high suitability) in this example.
 </p>
 </div>
 </div>
@@ -3974,7 +3975,7 @@ A key challenge in calibration is the incomplete or aggregated nature of the ava
 <li><a class="nav-link" href="#seasonality"><span class="header-section-number">3.3</span> Seasonality</a></li>
 <li>
 <a class="nav-link" href="#environmental-transmission"><span class="header-section-number">3.4</span> Environmental transmission</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#climate-driven-transmission"><span class="header-section-number">3.4.1</span> Climate-driven transmission</a></li>
+<li><a class="nav-link" href="#suitability-dependent-decay-rate"><span class="header-section-number">3.4.1</span> Suitability-dependent decay rate</a></li>
 <li><a class="nav-link" href="#modeling-environmental-suitability"><span class="header-section-number">3.4.2</span> Modeling environmental suitability</a></li>
 <li><a class="nav-link" href="#shedding"><span class="header-section-number">3.4.3</span> Shedding</a></li>
 <li><a class="nav-link" href="#water-sanitation-and-hygiene-wash"><span class="header-section-number">3.4.4</span> WAter, Sanitation, and Hygiene (WASH)</a></li>

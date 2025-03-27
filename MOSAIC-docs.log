@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.3.3)  24 MAR 2025 14:29
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.3.3)  27 MAR 2025 13:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -919,6 +919,9 @@ Overfull \hbox (1.49942pt too wide) detected at line 369
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 
 [17]
 
@@ -931,6 +934,13 @@ File: figures/seasonal_transmission_example_MOZ.png Graphic file (type bmp)
 <figures/seasonal_transmission_example_MOZ.png>
 File: figures/seasonal_precip_ward.D2_cluster.png Graphic file (type bmp)
 <figures/seasonal_precip_ward.D2_cluster.png>
+
+
+[19]
+
+[20]
+
+[21]
 File: figures/seasonal_transmission_all.png Graphic file (type bmp)
 <figures/seasonal_transmission_all.png>
 
@@ -961,62 +971,53 @@ Overfull \hbox (194.82509pt too wide) in paragraph at lines 463--500
  []
 
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+Underfull \vbox (badness 1389) has occurred while \output is active []
 
 
-
-[19]
-
-[20]
-
-[21]
 
 [22]
 
 [23]
-File: figures/shedding_rate.png Graphic file (type bmp)
-<figures/shedding_rate.png>
+File: figures/vibrio_decay_rate.png Graphic file (type bmp)
+<figures/vibrio_decay_rate.png>
 
 
 [24]
+
+[25]
 File: figures/climate_data_MOZ_weekly.png Graphic file (type bmp)
 <figures/climate_data_MOZ_weekly.png>
 File: figures/climate_data_ENSO_weekly.png Graphic file (type bmp)
 <figures/climate_data_ENSO_weekly.png>
 
-Overfull \hbox (780.03003pt too wide) in paragraph at lines 565--614
+Overfull \hbox (780.03003pt too wide) in paragraph at lines 567--616
  [][] 
  []
 
 
 
-[25]
-
 [26]
 
 [27]
-File: figures/cases_binary.png Graphic file (type bmp)
-<figures/cases_binary.png>
-
 
 [28]
-
-[29]
+File: figures/cases_binary.png Graphic file (type bmp)
+<figures/cases_binary.png>
 File: figures/suitability_LSTM_fit.png Graphic file (type bmp)
 <figures/suitability_LSTM_fit.png>
+
+
+[29]
+
+[30]
 File: figures/suitability_cases_MOZ.png Graphic file (type bmp)
 <figures/suitability_cases_MOZ.png>
 File: figures/suitability_by_country.png Graphic file (type bmp)
 <figures/suitability_by_country.png>
 
-LaTeX Warning: Float too large for page by 59.92982pt on input line 677.
+LaTeX Warning: Float too large for page by 59.92982pt on input line 679.
 
 
-Underfull \vbox (badness 7613) has occurred while \output is active []
-
-
-
-[30]
 
 [31]
 
@@ -1026,10 +1027,13 @@ Underfull \vbox (badness 7613) has occurred while \output is active []
 File: figures/wash_incidence_correlation.png Graphic file (type bmp)
 <figures/wash_incidence_correlation.png>
 
-LaTeX Warning: Float too large for page by 24.06267pt on input line 729.
+LaTeX Warning: Float too large for page by 24.06267pt on input line 731.
 
 File: figures/wash_index_by_country.png Graphic file (type bmp)
 <figures/wash_index_by_country.png>
+
+Underfull \vbox (badness 6725) has occurred while \output is active []
+
 
 
 [34]
@@ -1046,26 +1050,29 @@ File: figures/vaccination_maps.png Graphic file (type bmp)
 
 
 [37]
-
-[38]
-
-[39]
-Overfull \hbox (143.90997pt too wide) in paragraph at lines 797--812
+Overfull \hbox (143.90997pt too wide) in paragraph at lines 799--814
  [][] 
  []
 
 
+Underfull \vbox (badness 1019) has occurred while \output is active []
+
+
+
+[38]
+
+[39]
 
 [40]
 File: figures/vaccine_effectiveness.png Graphic file (type bmp)
 <figures/vaccine_effectiveness.png>
 
-Overfull \hbox (6.89923pt too wide) in paragraph at lines 832--833
+Overfull \hbox (6.89923pt too wide) in paragraph at lines 834--835
  [][] 
  []
 
 
-Overfull \hbox (281.69998pt too wide) in paragraph at lines 852--863
+Overfull \hbox (281.69998pt too wide) in paragraph at lines 854--865
  [][] 
  []
 
@@ -1099,35 +1106,36 @@ File: figures/mobility_diffusion_pi.png Graphic file (type bmp)
 [47]
 
 [48]
-Overfull \hbox (562.07999pt too wide) in paragraph at lines 1040--1063
+
+[49]
+Overfull \hbox (562.07999pt too wide) in paragraph at lines 1042--1065
  [][] 
  []
 
+
+
+[50]
 File: figures/proportion_symptomatic.png Graphic file (type bmp)
 <figures/proportion_symptomatic.png>
 
-Overfull \hbox (10.3428pt too wide) in paragraph at lines 1069--1070
+Overfull \hbox (10.3428pt too wide) in paragraph at lines 1071--1072
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1069--1070
+Underfull \hbox (badness 10000) in paragraph at lines 1071--1072
 
  []
 
 
 
-[49]
-
-[50]
+[51]
 File: figures/suspected_cases.png Graphic file (type bmp)
 <figures/suspected_cases.png>
 
 
-[51]
-
 [52]
-Overfull \hbox (287.62997pt too wide) in paragraph at lines 1119--1192
+Overfull \hbox (287.62997pt too wide) in paragraph at lines 1121--1194
  [][] 
  []
 
@@ -1136,7 +1144,7 @@ File: figures/case_fatality_ratio_and_cases_total_by_country.png Graphic file (t
 File: figures/case_fatality_ratio_beta_distributions.png Graphic file (type bmp)
 <figures/case_fatality_ratio_beta_distributions.png>
 
-LaTeX Warning: Float too large for page by 122.7597pt on input line 1321.
+LaTeX Warning: Float too large for page by 122.7597pt on input line 1323.
 
 
 
@@ -1151,12 +1159,12 @@ LaTeX Warning: Float too large for page by 122.7597pt on input line 1321.
 [57]
 
 [58]
-Overfull \hbox (747.00998pt too wide) in paragraph at lines 1388--1473
+Overfull \hbox (747.00998pt too wide) in paragraph at lines 1390--1475
  [][] 
  []
 
 
-Overfull \hbox (1019.38002pt too wide) in paragraph at lines 1479--1580
+Overfull \hbox (1019.38002pt too wide) in paragraph at lines 1481--1582
 [] 
  []
 
@@ -1178,7 +1186,7 @@ Overfull \vbox (104.69926pt too high) has occurred while \output is active []
 
 
 [62]
-Overfull \hbox (1284.4101pt too wide) in paragraph at lines 1585--1678
+Overfull \hbox (1284.4101pt too wide) in paragraph at lines 1587--1680
 [] 
  []
 
@@ -1193,74 +1201,41 @@ Overfull \vbox (24.5655pt too high) has occurred while \output is active []
 
 
 [64]
-Overfull \hbox (2.11089pt too wide) in paragraph at lines 1690--1691
+Overfull \hbox (2.11089pt too wide) in paragraph at lines 1692--1693
 []\TU/lmr/m/n/10 Term  
  []
 
 
-Overfull \hbox (6.47006pt too wide) in paragraph at lines 1692--1693
+Overfull \hbox (6.47006pt too wide) in paragraph at lines 1694--1695
 []\TU/lmr/m/n/10 Population  
  []
 
-
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1702--1702
-[]|$[][]$|  
- []
-
-
-Overfull \hbox (4.13007pt too wide) in paragraph at lines 1702--1702
-[]|\TU/lmr/m/n/10 Effectively 
- []
-
-
-Overfull \hbox (2.91008pt too wide) in paragraph at lines 1702--1702
-[][][][][][] [] 
- []
-
-
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1702--1702
-[] [][][][]$ 
- []
-
-
-Overfull \hbox (24.73405pt too wide) in paragraph at lines 1702--1702
-[][][][][][] [] 
- []
-
-Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
-Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
-
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1703--1703
-[]|$[][]$|  
- []
-
-
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1703--1703
-[] [][][][]$ 
- []
-
-
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1703--1703
-[] [][][] [] 
- []
-
-
-Overfull \hbox (20.08606pt too wide) in paragraph at lines 1703--1703
-[][][][][][] [] 
- []
-
-Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
-Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
 Overfull \hbox (10.2139pt too wide) in paragraph at lines 1704--1704
 []|$[][]$|  
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1704--1704
-[] [][][] [] 
+Overfull \hbox (4.13007pt too wide) in paragraph at lines 1704--1704
+[]|\TU/lmr/m/n/10 Effectively 
  []
 
+
+Overfull \hbox (2.91008pt too wide) in paragraph at lines 1704--1704
+[][][][][][] [] 
+ []
+
+
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1704--1704
+[] [][][][]$ 
+ []
+
+
+Overfull \hbox (24.73405pt too wide) in paragraph at lines 1704--1704
+[][][][][][] [] 
+ []
+
+Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
 Overfull \hbox (10.2139pt too wide) in paragraph at lines 1705--1705
@@ -1268,24 +1243,25 @@ Overfull \hbox (10.2139pt too wide) in paragraph at lines 1705--1705
  []
 
 
-Overfull \hbox (4.13007pt too wide) in paragraph at lines 1705--1705
-[]|\TU/lmr/m/n/10 Effectively 
- []
-
-
 Overfull \hbox (3.39006pt too wide) in paragraph at lines 1705--1705
-[] [][][][]$|  
+[] [][][][]$ 
  []
 
+
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1705--1705
+[] [][][] [] 
+ []
+
+
+Overfull \hbox (20.08606pt too wide) in paragraph at lines 1705--1705
+[][][][][][] [] 
+ []
+
+Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
 Overfull \hbox (10.2139pt too wide) in paragraph at lines 1706--1706
 []|$[][]$|  
- []
-
-
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1706--1706
-[] [][][][]$ 
  []
 
 
@@ -1300,18 +1276,50 @@ Overfull \hbox (10.2139pt too wide) in paragraph at lines 1707--1707
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1707--1707
+Overfull \hbox (4.13007pt too wide) in paragraph at lines 1707--1707
+[]|\TU/lmr/m/n/10 Effectively 
+ []
+
+
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1707--1707
+[] [][][][]$|  
+ []
+
+Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
+
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1708--1708
+[]|$[][]$|  
+ []
+
+
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1708--1708
+[] [][][][]$ 
+ []
+
+
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1708--1708
 [] [][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (0.7849pt too wide) in paragraph at lines 1708--1708
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1709--1709
 []|$[][]$|  
  []
 
 
-Overfull \hbox (0.7849pt too wide) in paragraph at lines 1709--1709
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1709--1709
+[] [][][] [] 
+ []
+
+Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
+
+Overfull \hbox (0.7849pt too wide) in paragraph at lines 1710--1710
+[]|$[][]$|  
+ []
+
+
+Overfull \hbox (0.7849pt too wide) in paragraph at lines 1711--1711
 []|$[][]$|  
  []
 
@@ -1320,7 +1328,7 @@ Overfull \hbox (0.7849pt too wide) in paragraph at lines 1709--1709
 [66]
 Chapter 4.
 
-Overfull \hbox (626.26004pt too wide) in paragraph at lines 1718--1731
+Overfull \hbox (626.26004pt too wide) in paragraph at lines 1720--1733
  [][] 
  []
 
@@ -1369,8 +1377,8 @@ L3 programming layer <2025-01-18>
  ) 
 Here is how much of TeX's memory you used:
  23671 strings out of 475785
- 457256 string characters out of 5771733
- 1039580 words of memory out of 5000000
+ 457339 string characters out of 5771733
+ 1040862 words of memory out of 5000000
  46232 multiletter control sequences out of 15000+600000
  568371 words of font info for 119 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191

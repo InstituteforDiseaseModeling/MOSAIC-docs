@@ -12,7 +12,7 @@ fig:seasonal-all
 tab:seasonal-table
 eq:beta2
 eq:delta
-fig:unnamed-chunk-1
+fig:vibrio-decay-rate
 fig:climate-data-moz
 fig:climate-data-enso
 tab:climate-data-variables
@@ -73,7 +73,7 @@ transmission-dynamics
 latency
 seasonality
 environmental-transmission
-climate-driven-transmission
+suitability-dependent-decay-rate
 modeling-environmental-suitability
 environmental-data
 deep-learning-neural-network-model

@@ -103,9 +103,9 @@ The human-to-human transmission component at time $t+1$ in location $j$ is defin
 \begin{equation}
 \begin{aligned}
 \Lambda^S_{j,t+1} &= \frac{
-\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[4mm]
 \Lambda^{V_1}_{j,t+1} &= \frac{
-\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{1,jt}  \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[5mm]
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{1,jt}  \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}},\\[4mm]
 \Lambda^{V_2}_{j,t+1} &= \frac{
 \beta_{jt}^{\text{hum}} \, (1-\tau_{j})V^{\text{sus}}_{2,jt} \, \left[ (1-\tau_{j})(I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}}.
 \end{aligned}
@@ -128,8 +128,8 @@ The environmental force of infection ($\Psi_{jt}$), capturing environment-to-hum
 
 \begin{equation}
 \begin{aligned}
-\Psi^S_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
-\Psi^{V_1}_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{1,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[8pt]
+\Psi^S_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[4mm]
+\Psi^{V_1}_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{1,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}},\\[4mm]
 \Psi^{V_2}_{j,t+1} &= \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})V^{\text{sus}}_{2,jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}}.
 \end{aligned}
 (\#eq:foi-environment)
@@ -182,7 +182,7 @@ For countries with no reported case data, we inferred seasonal dynamics using th
 knitr::include_graphics("figures/seasonal_precip_ward.D2_cluster.png")
 ```
 
-Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 41 countries in the MOSAIC framework. These dynamics are visualized in Figure \@ref(fig:seasonal-all), with the corresponding Fourier model coefficients presented in Table \@ref(tab:seasonal-table).
+Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure \@ref(fig:seasonal-all), with the corresponding Fourier model coefficients presented in Table \@ref(tab:seasonal-table).
 
 ```{r seasonal-all, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \\@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases."}
 knitr::include_graphics("figures/seasonal_transmission_all.png")
@@ -230,8 +230,6 @@ kable(final_table_data_cases,
 
 Environmental transmission is a critical factor in cholera spread and consists of several key components: the rate at which infected individuals shed *V. cholerae* into the environment, the pathogen's survival rate in environmental conditions, and the overall suitability of the environment for sustaining the bacteria over time.
 
-### Climate-driven transmission
-
 To capture the impacts of climate-drivers on cholera transmission, we have included the parameter $\psi_{jt}$, which represents the current state of environmental suitability with respect to: *i*) the survival time of *V. cholerae* in the environment and, *ii*) the rate of environment-to-human transmission which contributes to the overall force of infection. 
 
 \begin{equation}
@@ -241,17 +239,22 @@ To capture the impacts of climate-drivers on cholera transmission, we have inclu
 
 This formulation effectively scales the base environmental transmission rate $\beta_{jt}^{\text{env}}$ so that it varies over time according to the climatically driven model of suitability. Note that, unlike the the cosine wave function of $\beta_{jt}^{\text{hum}}$, this temporal term can increase or decrease over time following multi-annual cycles.
 
-Environmental suitability ($\psi_{jt}$) also impacts the survival rate of *V. cholerae* in the environment ($\delta_{jt}$) with the form:
 
-\begin{equation}
-\delta_{jt} = \delta_{\text{min}} + \psi_{jt} \times (\delta_{\text{max}} - \delta_{\text{min}})
+### Suitability-dependent decay rate
+
+Suitability also influences how long *V. cholerae* survives in the environment. The decay rate \( \delta_{jt} \) is modeled as the inverse of survival time, which varies with suitability. This is defined as:
+
+$$
+\delta_{jt} = \frac{1}{\text{days}_{\text{short}} + f\big(\psi_{jt}\big) \cdot \big(\text{days}_{\text{long}} - \text{days}_{\text{short}}\big)}.
 (\#eq:delta)
-\end{equation}
+$$
 
-which normalizes the variance of the suitability parameter to be bounded within the minimum ($\delta_{\text{min}}$) and maximum ($\delta_{\text{max}}$) survival times of *V. cholerae*.
+Where $\text{days}_{\text{short}}$ is the shortest survival time (e.g., 3 days) and $\text{days}_{\text{long}}$ is the longest survival time (e.g., 90 days). Suitability is mapped to *V. cholerae* decay rate through a transformation function $f(\psi_{jt})$ that scales suitability values using a cumulative [Beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) and two shape parameters $s_1$ and $s_2$: $f\big(\psi_{jt}\big) = \text{pbeta}(\psi_{jt} \mid s_1, \, s_2)$.
 
-```{r, echo=FALSE, cache=TRUE, fig.align='center', out.width="80%", fig.cap="Relationship between environmental suitability ($\\psi_{jt}$) and the rate of *V. cholerae* decay in the environment ($\\delta_j$). The green line shows the mildest penalty on *V. cholerae* survival, where survival in the environment is $1/\\delta_{\\text{min}}$ = 3 days when suitability = 0 and $1/\\delta_{\\text{max}}$ = 90 days when suitability = 1."}
-knitr::include_graphics("figures/shedding_rate.png")
+The transformation $f\big(\psi_{jt}\big) \in [0, 1]$ enables a range of functional forms, including linear, convex, concave, sigmoidal, or arcsine responses to suitability. This flexibility ensures that survival dynamics can reflect a variety of empirically plausible relationships with environmental conditions which can be seen in Figure \@ref(fig:vibrio-decay-rate).
+
+```{r vibrio-decay-rate, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Relationship between environmental suitability ($\\psi_{jt}$) and the survival and decay rate of *V. cholerae* in the environment ($\\delta_{jt}$). Curves represent four transformation types used to map suitability to survival time via the cumulative Beta distribution with different shape parameters ($s_1$, $s_2$). The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate, defined as $\\delta_{jt} = 1/\\text{days}(\\psi_{jt})$. Horizontal dashed lines indicate the bounds on survival time, from 3 days (low suitability) to 90 days (high suitability) in this example."}
+knitr::include_graphics("figures/vibrio_decay_rate.png")
 ```
 
 ### Modeling environmental suitability
@@ -260,7 +263,7 @@ knitr::include_graphics("figures/shedding_rate.png")
 
 The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) and rate of decay of *V. cholerae* in the environment (Equation \@ref(eq:delta)) is driven by the parameter $\psi_{jt}$, which we refer to as environmental suitability. The parameter $\psi_{jt}$ is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 24 covariates which include 19 historical and forecasted climate variables under the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) climate model. Covariates also include 4 large-scale climate drivers such as the Indian Ocean Dipole Mode Index (DMI), and the El Niño Southern Oscillation (ENSO) from 3 different Pacific Ocean regions. We also included a location specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \@ref(fig:climate-data-moz) and DMI and ENSO variables in Figure \@ref(fig:climate-data-enso). A list of all covariates and their sources can be seen in Table \@ref(tab:climate-data-variables).
 
-Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model. 
+Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.
 
 ```{r climate-data-moz, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Climate data acquired from the OpenMeteo data API. Data were collected from 30 uniformly distributed points across each country and then aggregated to give weekly values of 17 climate variable from 1970 to 2030."}
 knitr::include_graphics("figures/climate_data_MOZ_weekly.png")
