@@ -781,15 +781,135 @@ Figure 3.12: The smoothed LSTM model predictions (lines) and binary suitability 
 </div>
 </div>
 </div>
-<div id="shedding" class="section level3" number="3.4.3">
+<div id="shedding-of-v.-cholerae" class="section level3" number="3.4.3">
 <h3>
-<span class="header-section-number">3.4.3</span> Shedding<a class="anchor" aria-label="anchor" href="#shedding"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.4.3</span> Shedding of <em>V. cholerae</em><a class="anchor" aria-label="anchor" href="#shedding-of-v.-cholerae"><i class="fas fa-link"></i></a>
 </h3>
-<p>The rate at which infected individuals shed <em>V. cholerae</em> into the environment (<span class="math inline">\(\zeta\)</span>) is a critical factor influencing cholera transmission. Shedding rates can vary widely depending on the severity of the infection, the immune response of the individual, and environmental factors. According to <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/">Fung 2014</a>, the shedding rate is estimated to range from 0.01 to 10 cells per mL per person per day.</p>
-<p>Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al (2009)</a> note that during the, depending on the phase of infection, individuals can shed <span class="math inline">\(10^3\)</span> (asymptomatic cases) to <span class="math inline">\(10^{12}\)</span> (severe cases) <em>V. cholerae</em> cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:</p>
-<p><span class="math display">\[
-\zeta \sim \text{Uniform}(0.01, 10).
+<p>The rate at which infected individuals shed <em>Vibrio cholerae</em> into the environment is a critical factor influencing cholera transmission dynamics. Shedding rates vary widely depending on the severity of infection, the host immune response, and environmental conditions. To reflect this heterogeneity, the model distinguishes between two types of infected individuals:</p>
+<ul>
+<li>Symptomatic individuals (<span class="math inline">\(I_1\)</span>), who tend to shed substantially more bacteria for longer due to more severe gastrointestinal symptoms;</li>
+<li>Asymptomatic individuals (<span class="math inline">\(I_2\)</span>), who shed less per capita and for a shorter period of time, but may contribute significantly to environmental contamination due to their larger numbers.</li>
+</ul>
+<p>According to the modeling study done by <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/">Fung et al. (2014)</a>, estimates of <em>V. cholerae</em> shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. (2009)</a> report that individuals may shed between <span class="math inline">\(10^3\)</span> <span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span> in asymptomatic cases and up to <span class="math inline">\(10^{12}\)</span> <span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span> in severe symptomatic infections. While these quantities are slightly different from the <span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span> units used in cholera transmission models, it implies that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.</p>
+<p>To account for the uncertainty in levels of <em>V. cholerae</em> shedding, we collated a short list of studies that either report empirical findings or modeling analyses that set priors for shedding parameters. These sources reflect a wide range of assumptions and contexts, but nonetheless provide a spectrum of estimated <em>V. cholerae</em> shedding rates that we can use to inform our model (see the <a href="model-description.html#shedding-table">table of shedding parameters below</a> below).</p>
+<p>We currently assume that shedding rates are constant and drawn from independent uniform distributions in units of <span class="math inline">\(\mathbf{\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}}\)</span>, which is consistent with the frequently cited sources for shedding rates of <a href="https://doi.org/10.1186/1471-2334-1-1">Codeço 2001</a> and others:</p>
+<p><span class="math display" id="eq:shedding">\[
+\begin{aligned}
+\zeta_1 \ \sim \ &amp;\text{Uniform}(10^4,\ 10^{8}) \quad \mathbf{\text{(symptomatic shedding)}},\\
+\zeta_2 \ \sim \ &amp;\text{Uniform}(0.01,\ 10^3) \quad \mathbf{\text{(asymptomatic shedding)}}.
+\end{aligned}
+\tag{3.10}
 \]</span></p>
+<p>The definition of these priors assumes that:</p>
+<ol style="list-style-type: decimal">
+<li>the watery stool of infected individuals has approximately the same density as water (1kg/L), such that <span class="math inline">\(10^5 \text{cells}~\text{g}^{-1}\text{day}^{-1} \approx 10^5 \text{cells}~\text{mL}^{-1}\text{person}^{-1}\text{day}^{-1}\)</span>, and</li>
+<li>shedding in symptomatic individuals is always greater than that of asymptomatic individuals with the potential to be many orders of magnitude greater.</li>
+</ol>
+<p>These priors also reflect the observed variability in the literature while preserving identifiability in model fitting. The upper bound for symptomatic shedding (<span class="math inline">\(10^8\)</span>) is conservative relative to extreme values (e.g., <span class="math inline">\(10^{12}\)</span> cells/L in rice water stool), but comfortably spans values seen in both clinical observations and theoretical models. The lower bound (<span class="math inline">\(10^4\)</span>) ensures that small but still epidemiologically significant shedding is captured. For asymptomatic individuals, the range of 0.01 to <span class="math inline">\(10^3\)</span> <span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span> captures both low empirical estimates (e.g. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/">Mosley et al. 1968</a>) and broader assumptions made in cholera transmission models (e.g. <a href="https://doi.org/10.1186/1471-2334-1-1">Codeço 2001</a>). The range of these priors therefore provides sufficient flexibility to represent both high-intensity shedding in severe cases and low-level contributions distributed across a larger number of asymptomatic individuals.</p>
+<p>The table below summarizes key published estimates and assumptions regarding <em>V. cholerae</em> and related bacterial shedding rates:</p>
+<div id="shedding-table">
+
+</div>
+<div class="inline-table"><table class="table table-sm">
+<colgroup>
+<col width="10%">
+<col width="27%">
+<col width="7%">
+<col width="38%">
+<col width="15%">
+</colgroup>
+<thead><tr class="header">
+<th>Value(s)</th>
+<th>Units</th>
+<th>Infection</th>
+<th>Description</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(10^3\)</span></td>
+<td><span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span></td>
+<td>Asymptomatic</td>
+<td>Approx. 1 day of shedding at ~10³ vibrios per gram of stool</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/">Mosley et al. (1968)</a></td>
+</tr>
+<tr class="even">
+<td>
+<span class="math inline">\(10^6\)</span>–<span class="math inline">\(10^9\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span></td>
+<td>NA</td>
+<td>Number of fecal coliform indicator bacteria in human feces</td>
+<td><a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/en/704041468740420118">Feachem et al. (1983)</a></td>
+</tr>
+<tr class="odd">
+<td>
+<span class="math inline">\(1\)</span>–<span class="math inline">\(100\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span></td>
+<td>All</td>
+<td>Point estimate of 10; range 1–100 used in sensitivity analysis</td>
+<td><a href="https://doi.org/10.1186/1471-2334-1-1">Codeço (2001)</a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10\)</span></td>
+<td><span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span></td>
+<td>All</td>
+<td>Assumed shedding rate used in epidemic model incorporating hyperinfectivity</td>
+<td><a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007">Hartley et al. (2006)</a></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\leq 10^5\)</span></td>
+<td><span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span></td>
+<td>Asymptomatic</td>
+<td>No symptoms; low-level shedding of vibrios</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. (2009)</a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\leq 10^8\)</span></td>
+<td><span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span></td>
+<td>Mild</td>
+<td>Diarrhoea with moderate vibrios in stool</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. (2009)</a></td>
+</tr>
+<tr class="odd">
+<td>
+<span class="math inline">\(10^7\)</span>–<span class="math inline">\(10^9\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{g}^{-1}~\text{stool}\)</span></td>
+<td>Severe</td>
+<td>Vomiting and profuse diarrhoea with high shedding</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. (2009)</a></td>
+</tr>
+<tr class="even">
+<td>
+<span class="math inline">\(10^{10}\)</span>–<span class="math inline">\(10^{12}\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{L}^{-1}~\text{stool}\)</span></td>
+<td>Severe</td>
+<td>Concentration in rice water stool from symptomatic individuals</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. (2009)</a></td>
+</tr>
+<tr class="odd">
+<td>
+<span class="math inline">\(0.01\)</span>–<span class="math inline">\(10\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span></td>
+<td>All</td>
+<td>Reported as general estimate across all infections</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/">Fung (2014)</a></td>
+</tr>
+<tr class="even">
+<td>
+<span class="math inline">\(10\)</span>–<span class="math inline">\(100\)</span>
+</td>
+<td><span class="math inline">\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)</span></td>
+<td>All</td>
+<td>Represents shedding rates in two distinct sub-populations</td>
+<td><a href="https://doi.org/10.1016/j.amc.2014.05.036">Njagarah &amp; Nyabadza (2014)</a></td>
+</tr>
+</tbody>
+</table></div>
 </div>
 <div id="water-sanitation-and-hygiene-wash" class="section level3" number="3.4.4">
 <h3>
@@ -797,7 +917,7 @@ Figure 3.12: The smoothed LSTM model predictions (lines) and binary suitability 
 </h3>
 <p>Since <em>V. cholerae</em> is transmitted through fecal contamination of water and other consumables, the level of exposure to contaminated substrates significantly impacts transmission rates. Interventions involving Water, Sanitation, and Hygiene (WASH) have long been a first line of defense in reducing cholera transmission, and in this context, WASH variables can serve as proxy for the rate of contact with environmental risk factors. In the MOSAIC model, WASH variables are incorporated mechanistically, allowing for intervention scenarios that include changes to WASH. However, it is necessary to distill available WASH variables into a single parameter that represents the WASH-determined contact rate with contaminated substrates for each location <span class="math inline">\(j\)</span>, which we define as <span class="math inline">\(\theta_j\)</span>.</p>
 <p>To parameterize <span class="math inline">\(\theta_j\)</span>, we calculated a weighted mean of the 8 WASH variables in <a href="https://doi.org/10.1021/acs.est.3c01317">Sikder et al 2023</a> and originally modeled by the <a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext">Local Burden of Disease WaSH Collaborators 2020</a>. The 8 WASH variables (listed in Table <a href="model-description.html#tab:wash-weights">3.4</a>) provide population-weighted measures of the proportion of the population that either: <em>i</em>) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or <em>ii</em>) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement (<span class="math inline">\(1-\text{value}\)</span>) to give the proportion of the population <em>not</em> exposed to each risk factor. We used the <a href="https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim"><code>optim</code></a> function in R and the <a href="https://en.wikipedia.org/wiki/Limited-memory_BFGS">L-BFGS-B</a> algorithm to estimate the set of optimal weights (Table <a href="model-description.html#tab:wash-weights">3.4</a>) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of <span class="math inline">\(r =\)</span> -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure <a href="model-description.html#fig:wash-incidence">3.13</a>). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as (<span class="math inline">\(1-\theta_j\)</span>) in the environment-to-human force of infection (<span class="math inline">\(\Psi_{jt}\)</span>). Values of <span class="math inline">\(\theta_j\)</span> for all countries are shown in Figure <a href="model-description.html#fig:wash-country">3.14</a>.</p>
-<div class="inline-table"><table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div class="inline-table"><table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 <span id="tab:wash-weights">Table 3.4: </span><span id="tab:wash-weights">Table 3.5: </span>Table of optimized weights used to calculate the single mean WASH index for all countries.
 </caption>
@@ -1004,13 +1124,13 @@ Figure 3.17: The total cumulative number of OCV doses distributed through the WH
 <p>We estimated vaccine effectiveness and waning immunity by fitting an exponential decay model to the reported effectiveness of one dose OCV in these studies using the following formulation:</p>
 <p><span class="math display" id="eq:omega">\[\begin{equation}
 \text{Proportion immune}\ t \ \text{days after vaccination} = \phi \times (1 - \omega) ^ {t-t_{\text{vaccination}}}
-\tag{3.10}
+\tag{3.11}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(\phi\)</span> is the effectiveness of one dose OCV, and the based on this specification, it is also the initial proportion immune directly after vaccination. The decay rate parameter <span class="math inline">\(\omega\)</span> is the rate at which initial vaccine derived immunity decays per day post vaccination, and <span class="math inline">\(t\)</span> and <span class="math inline">\(t_{\text{vaccination}}\)</span> are the time (in days) the function is evaluated at and the time of vaccination respectively. When we fitted the model to the data from the cohort studies shown in Table (<a href="model-description.html#tab:effectiveness-papers">3.6</a>) we found that <span class="math inline">\(\omega = 0.00057\)</span> (<span class="math inline">\(0-0.0019\)</span> 95% CI), which gives a mean estimate of 4.8 years for vaccine derived immune duration with unreasonably large confidence intervals (1.4 years to infinite immunity). However, the point estimate of 4.8 years is consistent with anecdotes that one dose OCV is effective for up to at least 3 years.</p>
-<p>The wide confidence intervals are likely due to the wide range of reported estimates for proportion immune after a short duration in the 7–90 days range (<a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext">Azman et al 2016</a> and <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1510330">Qadri et al 2016</a>). Therefore, we chose to use the point estimate of <span class="math inline">\(\omega\)</span> and incorporate uncertainty based on the initial proportion immune (i.e. vaccine effectiveness <span class="math inline">\(\phi\)</span>) shortly after vaccination. Using the decay model in Equation <a href="model-description.html#eq:omega">(3.10)</a> we estimated <span class="math inline">\(\phi\)</span> to be <span class="math inline">\(0.64\)</span> (<span class="math inline">\(0.32-0.96\)</span> 95% CI). We then fit a Beta distribution to the quantiles of <span class="math inline">\(\phi\)</span> by minimizing the sums of squares using the Nelder-Mead optimization algorithm to render the following distribution (shown in Figure <a href="model-description.html#fig:effectiveness">3.18</a>B):</p>
+<p>The wide confidence intervals are likely due to the wide range of reported estimates for proportion immune after a short duration in the 7–90 days range (<a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext">Azman et al 2016</a> and <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1510330">Qadri et al 2016</a>). Therefore, we chose to use the point estimate of <span class="math inline">\(\omega\)</span> and incorporate uncertainty based on the initial proportion immune (i.e. vaccine effectiveness <span class="math inline">\(\phi\)</span>) shortly after vaccination. Using the decay model in Equation <a href="model-description.html#eq:omega">(3.11)</a> we estimated <span class="math inline">\(\phi\)</span> to be <span class="math inline">\(0.64\)</span> (<span class="math inline">\(0.32-0.96\)</span> 95% CI). We then fit a Beta distribution to the quantiles of <span class="math inline">\(\phi\)</span> by minimizing the sums of squares using the Nelder-Mead optimization algorithm to render the following distribution (shown in Figure <a href="model-description.html#fig:effectiveness">3.18</a>B):</p>
 <p><span class="math display" id="eq:effectiveness">\[\begin{equation}
 \phi \sim \text{Beta}(4.57, 2.41).
-\tag{3.11}
+\tag{3.12}
 \end{equation}\]</span></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:effectiveness"></span>
@@ -1117,7 +1237,7 @@ M_{ij} =
 \theta N_i (1-\tau_i) \ &amp; \text{if} \ i = j \\
 \theta N_i \tau_i \pi_{ij} \ &amp; \text{if} \ i \ne j.
 \end{cases}
-\tag{3.12}
+\tag{3.13}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\theta\)</span> is a proportionality constant representing the overall number of trips per person in an origin population of size <span class="math inline">\(N_i\)</span>, <span class="math inline">\(\tau_i\)</span> is the probability of leaving origin <span class="math inline">\(i\)</span>, and <span class="math inline">\(\pi_{ij}\)</span> is the probability of travel to destination <span class="math inline">\(j\)</span> given that travel outside origin <span class="math inline">\(i\)</span> occurs.</p>
 </div>
@@ -1148,7 +1268,7 @@ N_j^\omega d_{ij}^{-\gamma}
 }{
 \sum\limits_{\forall j \ne i} N_j^\omega d_{ij}^{-\gamma}
 }
-\tag{3.13}
+\tag{3.14}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\omega\)</span> scales the attractive force of each <span class="math inline">\(j\)</span> destination based on its population size <span class="math inline">\(N_j\)</span>. The kernel function <span class="math inline">\(d_{ij}^{-\gamma}\)</span> serves as a penalty on the proportion of travel from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> based on distance. Prior distributions of diffusion model parameters are defined as:
 <span class="math display">\[
@@ -1178,7 +1298,7 @@ Figure 3.23: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 <p>The likelihood of introductions of cholera from disparate locations is a major concern during cholera outbreaks. However, this can be difficult to characterize given the endemic dynamics and patterns of human movement. We include a few measures of spatial heterogeneity here and the first is a simple importation probability based on connectivity and the possibility of incoming infections. The basic probability of transmission from an origin <span class="math inline">\(i\)</span> to a particular destination <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span> is defined as:</p>
 <p><span class="math display" id="eq:prob">\[\begin{equation}
 p(i,j,t) = 1 - e^{-\beta_{jt}^{\text{hum}} (((1-\tau_j)S_{jt})/N_{jt}) \pi_{ij}\tau_iI_{it}}
-\tag{3.14}
+\tag{3.15}
 \end{equation}\]</span></p>
 </div>
 <div id="the-spatial-hazard" class="section level3" number="3.6.5">
@@ -1192,12 +1312,12 @@ h(j,t) = \frac{
 }{
 1/\big(1 + \beta_{jt}^{\text{hum}} (1-\tau_j)S_{jt}\big)
 }.
-\tag{3.15}
+\tag{3.16}
 \end{equation}\]</span></p>
 <p>And then normalizing to give the waiting time distribution for all locations:</p>
 <p><span class="math display" id="eq:waiting">\[\begin{equation}
 w(j,t) = h(j,T) \prod_{t=1}^{T-1}1-h(j,t).
-\tag{3.16}
+\tag{3.17}
 \end{equation}\]</span></p>
 </div>
 <div id="coupling-among-locations" class="section level3" number="3.6.6">
@@ -1211,7 +1331,7 @@ C_{ij} = \frac{
 }{
 \sqrt{\text{var}(y_i) \text{var}(y_j)}
 }
-\tag{3.17}
+\tag{3.18}
 \end{equation}\]</span>
 Where <span class="math inline">\(y_{it} = I_{it}/N_i\)</span> and <span class="math inline">\(y_{jt} = I_{jt}/N_j\)</span>. Mean prevalence in each location is <span class="math inline">\(\bar{y_i} = \frac{1}{T} \sum_{t=1}^{T} y_{it}\)</span> and <span class="math inline">\(\bar{y_j} = \frac{1}{T} \sum_{t=1}^{T} y_{jt}\)</span>.</p>
 </div>
@@ -1367,7 +1487,7 @@ Figure 3.25: Proportion of suspected cholera cases that are true infections. Pan
 \\[3pt]
 D_{jt} &amp;= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
 \end{aligned}
-\tag{3.18}
+\tag{3.19}
 \end{equation}\]</span></p>
 <div class="inline-table"><table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
@@ -3006,7 +3126,7 @@ Zimbabwe
 <p>The reproductive number is a common metric of epidemic growth that represents the average number of secondary cases generated by a primary case at a specific time during an epidemic. We track how <span class="math inline">\(R\)</span> changes over time by estimating the instantaneous reproductive number <span class="math inline">\(R_t\)</span> as described in <a href="https://academic.oup.com/aje/article/178/9/1505/89262">Cori et al 2013</a>. We track <span class="math inline">\(R_t\)</span> across all metapopulations in the model to give <span class="math inline">\(R_{jt}\)</span> using the following formula:</p>
 <p><span class="math display" id="eq:R">\[\begin{equation}
 R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
-\tag{3.19}
+\tag{3.20}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(I_{jt}\)</span> is the number of new infections in destination <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span>, and
 <span class="math inline">\(g(\Delta t)\)</span> represents the probability value from the generation time distribution of cholera. This is accomplished by using the weighed sum in the denominator which is highly influenced by the generation time distribution.</p>
@@ -3977,7 +4097,7 @@ A key challenge in calibration is the incomplete or aggregated nature of the ava
 <a class="nav-link" href="#environmental-transmission"><span class="header-section-number">3.4</span> Environmental transmission</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#suitability-dependent-decay-rate"><span class="header-section-number">3.4.1</span> Suitability-dependent decay rate</a></li>
 <li><a class="nav-link" href="#modeling-environmental-suitability"><span class="header-section-number">3.4.2</span> Modeling environmental suitability</a></li>
-<li><a class="nav-link" href="#shedding"><span class="header-section-number">3.4.3</span> Shedding</a></li>
+<li><a class="nav-link" href="#shedding-of-v.-cholerae"><span class="header-section-number">3.4.3</span> Shedding of V. cholerae</a></li>
 <li><a class="nav-link" href="#water-sanitation-and-hygiene-wash"><span class="header-section-number">3.4.4</span> WAter, Sanitation, and Hygiene (WASH)</a></li>
 </ul>
 </li>

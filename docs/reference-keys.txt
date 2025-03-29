@@ -21,6 +21,7 @@ eq:psi
 fig:lstm-model-fit
 fig:psi-prediction-data
 fig:psi-prediction-countries
+eq:shedding
 tab:wash-weights
 fig:wash-incidence
 fig:wash-country
@@ -77,7 +78,7 @@ suitability-dependent-decay-rate
 modeling-environmental-suitability
 environmental-data
 deep-learning-neural-network-model
-shedding
+shedding-of-v.-cholerae
 water-sanitation-and-hygiene-wash
 immune-dynamics
 estimating-vaccination-rates

@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2025-03-27 at 01:41 PM PDT.
+Website under development. Last compiled on 2025-03-28 at 07:16 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -678,15 +678,82 @@ After model training was completed, we predicted the values of environmental sui
 \caption{The smoothed LSTM model predictions (lines) and binary suitability classification (shaded areas) over time for all countries in the MOSAIC framework. Orange lines show forecasts beyond the current date. With ENSO and DMI covariates included in the model, forecasts are limited to 5 months.}\label{fig:psi-prediction-countries}
 \end{figure}
 
-\subsection{Shedding}\label{shedding}
+\subsection{\texorpdfstring{Shedding of \emph{V. cholerae}}{Shedding of V. cholerae}}\label{shedding-of-v.-cholerae}
 
-The rate at which infected individuals shed \emph{V. cholerae} into the environment (\(\zeta\)) is a critical factor influencing cholera transmission. Shedding rates can vary widely depending on the severity of the infection, the immune response of the individual, and environmental factors. According to \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung 2014}, the shedding rate is estimated to range from 0.01 to 10 cells per mL per person per day.
+The rate at which infected individuals shed \emph{Vibrio cholerae} into the environment is a critical factor influencing cholera transmission dynamics. Shedding rates vary widely depending on the severity of infection, the host immune response, and environmental conditions. To reflect this heterogeneity, the model distinguishes between two types of infected individuals:
 
-Further studies support these findings, indicating that shedding rates can indeed fluctuate significantly. For instance, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al (2009)} note that during the, depending on the phase of infection, individuals can shed \(10^3\) (asymptomatic cases) to \(10^{12}\) (severe cases) \emph{V. cholerae} cells per gram of stool. Future version of the model may attempt to capture the nuances of shedding dynamics, but here we make the simplifying assumption that shedding is constant across infected individuals and has a wide range of variability with no prior distributional assumptions:
+\begin{itemize}
+\tightlist
+\item
+  Symptomatic individuals (\(I_1\)), who tend to shed substantially more bacteria for longer due to more severe gastrointestinal symptoms;
+\item
+  Asymptomatic individuals (\(I_2\)), who shed less per capita and for a shorter period of time, but may contribute significantly to environmental contamination due to their larger numbers.
+\end{itemize}
+
+According to the modeling study done by \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung et al.~(2014)}, estimates of \emph{V. cholerae} shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} report that individuals may shed between \(10^3\) \(\text{cells}~\text{g}^{-1}~\text{stool}\) in asymptomatic cases and up to \(10^{12}\) \(\text{cells}~\text{g}^{-1}~\text{stool}\) in severe symptomatic infections. While these quantities are slightly different from the \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) units used in cholera transmission models, it implies that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.
+
+To account for the uncertainty in levels of \emph{V. cholerae} shedding, we collated a short list of studies that either report empirical findings or modeling analyses that set priors for shedding parameters. These sources reflect a wide range of assumptions and contexts, but nonetheless provide a spectrum of estimated \emph{V. cholerae} shedding rates that we can use to inform our model (see the \hyperref[shedding-table]{table of shedding parameters below} below).
+
+We currently assume that shedding rates are constant and drawn from independent uniform distributions in units of \(\mathbf{\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}}\), which is consistent with the frequently cited sources for shedding rates of \href{https://doi.org/10.1186/1471-2334-1-1}{Codeço 2001} and others:
 
 \[
-\zeta \sim \text{Uniform}(0.01, 10).
+\begin{aligned}
+\zeta_1 \ \sim \ &\text{Uniform}(10^4,\ 10^{8}) \quad \mathbf{\text{(symptomatic shedding)}},\\
+\zeta_2 \ \sim \ &\text{Uniform}(0.01,\ 10^3) \quad \mathbf{\text{(asymptomatic shedding)}}.
+\end{aligned}
+\label{eq:shedding}
 \]
+
+The definition of these priors assumes that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\tightlist
+\item
+  the watery stool of infected individuals has approximately the same density as water (1kg/L), such that \(10^5 \text{cells}~\text{g}^{-1}\text{day}^{-1} \approx 10^5 \text{cells}~\text{mL}^{-1}\text{person}^{-1}\text{day}^{-1}\), and
+\item
+  shedding in symptomatic individuals is always greater than that of asymptomatic individuals with the potential to be many orders of magnitude greater.
+\end{enumerate}
+
+These priors also reflect the observed variability in the literature while preserving identifiability in model fitting. The upper bound for symptomatic shedding (\(10^8\)) is conservative relative to extreme values (e.g., \(10^{12}\) cells/L in rice water stool), but comfortably spans values seen in both clinical observations and theoretical models. The lower bound (\(10^4\)) ensures that small but still epidemiologically significant shedding is captured. For asymptomatic individuals, the range of 0.01 to \(10^3\) \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) captures both low empirical estimates (e.g.~\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/}{Mosley et al.~1968}) and broader assumptions made in cholera transmission models (e.g.~\href{https://doi.org/10.1186/1471-2334-1-1}{Codeço 2001}). The range of these priors therefore provides sufficient flexibility to represent both high-intensity shedding in severe cases and low-level contributions distributed across a larger number of asymptomatic individuals.
+
+The table below summarizes key published estimates and assumptions regarding \emph{V. cholerae} and related bacterial shedding rates:
+
+\phantomsection\label{shedding-table}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1031}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2784}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.0773}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.3866}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1546}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Value(s)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Units
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Infection
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Source
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(10^3\) & \(\text{cells}~\text{g}^{-1}~\text{stool}\) & Asymptomatic & Approx. 1 day of shedding at \textasciitilde10³ vibrios per gram of stool & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/}{Mosley et al.~(1968)} \\
+\(10^6\)--\(10^9\) & \(\text{cells}~\text{g}^{-1}~\text{stool}\) & NA & Number of fecal coliform indicator bacteria in human feces & \href{https://documents.worldbank.org/en/publication/documents-reports/documentdetail/en/704041468740420118}{Feachem et al.~(1983)} \\
+\(1\)--\(100\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Point estimate of 10; range 1--100 used in sensitivity analysis & \href{https://doi.org/10.1186/1471-2334-1-1}{Codeço (2001)} \\
+\(10\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Assumed shedding rate used in epidemic model incorporating hyperinfectivity & \href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007}{Hartley et al.~(2006)} \\
+\(\leq 10^5\) & \(\text{cells}~\text{g}^{-1}~\text{stool}\) & Asymptomatic & No symptoms; low-level shedding of vibrios & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} \\
+\(\leq 10^8\) & \(\text{cells}~\text{g}^{-1}~\text{stool}\) & Mild & Diarrhoea with moderate vibrios in stool & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} \\
+\(10^7\)--\(10^9\) & \(\text{cells}~\text{g}^{-1}~\text{stool}\) & Severe & Vomiting and profuse diarrhoea with high shedding & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} \\
+\(10^{10}\)--\(10^{12}\) & \(\text{cells}~\text{L}^{-1}~\text{stool}\) & Severe & Concentration in rice water stool from symptomatic individuals & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} \\
+\(0.01\)--\(10\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Reported as general estimate across all infections & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung (2014)} \\
+\(10\)--\(100\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Represents shedding rates in two distinct sub-populations & \href{https://doi.org/10.1016/j.amc.2014.05.036}{Njagarah \& Nyabadza (2014)} \\
+\end{longtable}
 
 \subsection{WAter, Sanitation, and Hygiene (WASH)}\label{water-sanitation-and-hygiene-wash}
 
