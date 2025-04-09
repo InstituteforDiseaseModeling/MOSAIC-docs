@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2025-03-28 at 07:16 PM PDT.
+Website under development. Last compiled on 2025-04-08 at 05:47 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -346,7 +346,7 @@ R_{jt}
 \mathbf{\text{Environment:}}\\[3mm]
 W_{j,t+1} = \ &
 W_{jt} 
-+ \left( \zeta_1\,I_{1,jt} + \zeta_2\,I_{2,jt} \right) 
++ \left(1-\theta_j\right)\left( \zeta_1\,I_{1,jt} + \zeta_2\,I_{2,jt} \right) 
 - \delta_{jt}\,W_{jt}\\[3mm]
 \end{aligned}
 \label{eq:system}
@@ -420,7 +420,7 @@ Cholera transmission is seasonal and is typically associated with the rainy seas
 \label{eq:beta1}
 \end{equation}
 
-Where, \(\beta_{j0}^{\text{hum}}\) is the mean human-to-human transmission rate at location \(j\) over all time steps. Seasonal dynamics are determined by the parameters \(a_1\), \(b_1\) and \(a_2\), \(b_2\) which gives the amplitude of the first and second waves respectively. The periodic cycle \(p\) is 366, so the function controls the temporal variation in \(\beta_{jt}^{\text{hum}}\) over each day of the year.
+Where, \(\beta_{j0}^{\text{hum}}\) is the mean human-to-human transmission rate at location \(j\) over all time steps. Seasonal dynamics are determined by the parameters \(a_1\), \(b_1\) and \(a_2\), \(b_2\) which gives the amplitude of the first and second waves respectively. The periodic cycle \(p\) is 365, so the function controls the temporal variation in \(\beta_{jt}^{\text{hum}}\) over each day of the year.
 
 We estimated the parameters in the Fourier series (\(a_1\), \(b_1\), \(a_2\), \(b_2\)) using the \href{https://en.wikipedia.org/wiki/Levenberg\%E2\%80\%93Marquardt_algorithm}{Levenberg--Marquardt} algorithm in the \href{https://rdrr.io/cran/minpack.lm/}{\texttt{minpack.lm}} R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the \href{https://open-meteo.com/en/docs/historical-weather-api}{Open-Meteo Historical Weather Data API}. Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
 
@@ -466,35 +466,41 @@ Using the model fitting methods described above, and the cluster-based approach 
 \cline{2-5}
 Country & $a_1$ & $a_2$ & $b_1$ & $b_2$\\
 \hline
-Burundi & -0.31 (-0.35 to -0.27) & -0.49 (-0.53 to -0.45) & -0.42 (-0.45 to -0.39) & -0.36 (-0.41 to -0.31)\\
+Burundi & -0.42 (-0.52 to -0.32) & -0.3 (-0.4 to -0.21) & -0.06 (-0.16 to 0.04) & -0.22 (-0.32 to -0.12)\\
 \hline
-Cameroon & -0.64 (-0.67 to -0.62) & 0.08 (0.04 to 0.11) & 0.01 (-0.04 to 0.06) & -0.28 (-0.31 to -0.26)\\
+Cameroon & -0.97 (-1.15 to -0.78) & -0.08 (-0.26 to 0.1) & 0.44 (0.27 to 0.62) & -0.71 (-0.89 to -0.53)\\
 \hline
-DRC & 0.28 (0.26 to 0.31) & -0.22 (-0.31 to -0.13) & 0.15 (0.08 to 0.23) & -0.2 (-0.28 to -0.13)\\
+DRC & 0.01 (-0.03 to 0.05) & -0.08 (-0.12 to -0.04) & 0.23 (0.19 to 0.27) & -0.04 (-0.08 to 0)\\
 \hline
-Ethiopia & -0.52 (-0.59 to -0.46) & -0.38 (-0.41 to -0.34) & -0.04 (-0.12 to 0.03) & -0.03 (-0.13 to 0.07)\\
+Ethiopia & -0.42 (-0.47 to -0.36) & -0.12 (-0.17 to -0.06) & 0.22 (0.16 to 0.27) & 0.05 (0 to 0.11)\\
 \hline
-Kenya & 0.03 (-0.02 to 0.07) & -0.16 (-0.19 to -0.12) & 0.5 (0.46 to 0.53) & 0.12 (0.09 to 0.15)\\
+Ghana & -0.71 (-1.7 to 0.27) & 1.31 (0.47 to 2.15) & -0.29 (-0.95 to 0.37) & -1.17 (-1.73 to -0.6)\\
 \hline
-Malawi & 0.51 (0.47 to 0.54) & 0.16 (0.12 to 0.2) & 0.39 (0.36 to 0.43) & 0.4 (0.37 to 0.44)\\
+Kenya & 0.12 (-0.08 to 0.31) & -0.28 (-0.48 to -0.08) & 0.93 (0.73 to 1.13) & 0.25 (0.05 to 0.45)\\
 \hline
-Mozambique & 0.22 (0.19 to 0.26) & -0.36 (-0.39 to -0.33) & 0.48 (0.44 to 0.53) & 0.02 (-0.04 to 0.07)\\
+Malawi & 1.29 (1.06 to 1.53) & 0.29 (0.05 to 0.53) & 1.11 (0.87 to 1.35) & 1.23 (0.99 to 1.47)\\
 \hline
-Nigeria & -0.27 (-0.3 to -0.24) & 0.22 (0.15 to 0.29) & -0.16 (-0.2 to -0.11) & 0.42 (0.38 to 0.46)\\
+Mozambique & 0.4 (0.23 to 0.57) & -0.7 (-0.87 to -0.53) & 1.2 (1.03 to 1.37) & 0.19 (0.02 to 0.36)\\
 \hline
-Somalia & -0.16 (-0.2 to -0.12) & -0.24 (-0.3 to -0.17) & 0.84 (0.82 to 0.86) & -0.59 (-0.61 to -0.57)\\
+Niger & 2.95 (1.4 to 4.51) & -3.42 (-4.63 to -2.2) & 1.79 (0.8 to 2.79) & 1.72 (0.94 to 2.51)\\
 \hline
-South Africa & -0.41 (-0.62 to -0.19) & 0.13 (-0.07 to 0.33) & -0.54 (-0.67 to -0.41) & 0.63 (0.54 to 0.72)\\
+Nigeria & -0.25 (-0.39 to -0.11) & -0.3 (-0.43 to -0.16) & -0.91 (-1.05 to -0.77) & 0.17 (0.04 to 0.31)\\
 \hline
-Tanzania & 0.03 (0 to 0.06) & -0.06 (-0.12 to -0.01) & 0.09 (0.06 to 0.12) & 0.23 (0.2 to 0.26)\\
+Somalia & -0.22 (-0.28 to -0.17) & -0.24 (-0.29 to -0.18) & 0.91 (0.86 to 0.97) & -0.37 (-0.42 to -0.32)\\
 \hline
-Togo & -0.17 (-0.45 to 0.12) & -0.28 (-0.43 to -0.13) & -0.63 (-0.72 to -0.54) & 0.28 (0.06 to 0.51)\\
+South Africa & -2.33 (-3.43 to -1.22) & 1.06 (0.06 to 2.07) & -2.72 (-3.74 to -1.71) & 3.23 (2.1 to 4.36)\\
 \hline
-Uganda & -0.79 (-0.9 to -0.69) & 0.39 (0.32 to 0.46) & 0.12 (-0.07 to 0.31) & 0.04 (-0.16 to 0.23)\\
+South Sudan & 1.01 (0.73 to 1.29) & 1.54 (1.3 to 1.78) & 0.18 (-0.05 to 0.41) & 0.02 (-0.22 to 0.26)\\
 \hline
-Zambia & 0.69 (0.63 to 0.74) & 0.43 (0.39 to 0.46) & 0.23 (0.18 to 0.28) & 0.2 (0.14 to 0.26)\\
+Tanzania & 0.49 (0.37 to 0.61) & -0.13 (-0.25 to -0.02) & -0.6 (-0.71 to -0.48) & -0.29 (-0.41 to -0.18)\\
 \hline
-Zimbabwe & 1.12 (1.08 to 1.17) & 0.51 (0.48 to 0.53) & 0.3 (0.24 to 0.35) & -0.08 (-0.13 to -0.03)\\
+Togo & 1.11 (0.77 to 1.46) & 0.02 (-0.33 to 0.36) & -1 (-1.36 to -0.63) & -0.91 (-1.27 to -0.55)\\
+\hline
+Uganda & -0.17 (-0.56 to 0.22) & 0.52 (0.13 to 0.9) & 0.6 (0.22 to 0.99) & 0.42 (0.04 to 0.81)\\
+\hline
+Zambia & 1.53 (1.29 to 1.77) & 0.88 (0.64 to 1.12) & 0.67 (0.44 to 0.91) & 0.78 (0.55 to 1.02)\\
+\hline
+Zimbabwe & 0.99 (0.87 to 1.11) & 0.34 (0.23 to 0.46) & 0.54 (0.42 to 0.65) & 0.12 (0 to 0.23)\\
 \hline
 \end{tabular}
 \end{table}
@@ -754,6 +760,43 @@ Source
 \(0.01\)--\(10\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Reported as general estimate across all infections & \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung (2014)} \\
 \(10\)--\(100\) & \(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\) & All & Represents shedding rates in two distinct sub-populations & \href{https://doi.org/10.1016/j.amc.2014.05.036}{Njagarah \& Nyabadza (2014)} \\
 \end{longtable}
+
+\subsection{Recovery rates}\label{recovery-rates}
+
+The recovery rates in the MOSAIC model are defined as the inverse of the shedding duration for infected individuals. This reflects the period during which individuals contribute to the environmental load of \emph{Vibrio cholerae}, regardless of the presence of clinical symptoms. The model distinguishes between:
+
+\textbf{Symptomatic individuals (\(\gamma_1\)):}\\
+Individuals in the \(I_1\) compartment typically experience acute watery diarrhea and may shed large quantities of \emph{V. cholerae} for several days. Clinical studies and reviews suggest that symptomatic patients shed vibrios for approximately \textbf{3 to 5 days}, with shedding sometimes persisting up to 14 days (\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~2009}, \href{https://www.sciencedirect.com/science/article/pii/S014067361260436X}{Harris et al.~2012}). Based on these estimates, we define the recovery rate as a uniform distribution over plausible durations:
+
+\[
+\gamma_1 \sim \text{Uniform}(1/7,\ 1/3) \quad \text{day}^{-1}
+\]
+
+\textbf{Asymptomatic individuals (\(\gamma_2\)):}\\
+Asymptomatic individuals in the \(I_2\) compartment may not show clinical symptoms but can still shed \emph{V. cholerae} for extended periods. Observational studies indicate shedding can persist for \textbf{7 to 14 days}, and potentially longer (\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/}{Mosley et al.~1968}, \href{https://files.ontario.ca/moh-ophs-cholera-en-2022.pdf}{Public Health Ontario 2022}). To capture this range, we define the asymptomatic recovery rate as:
+
+\[
+\gamma_2 \sim \text{Uniform}(1/14,\ 1/7) \quad \text{day}^{-1}
+\]
+
+In cases where point estimates are preferred or required for model fitting, we use the mean values of each distribution:
+
+\[
+\gamma_1 = \frac{1}{5} = 0.2 \ \text{day}^{-1}, \qquad
+\gamma_2 = \frac{1}{10} = 0.1 \ \text{day}^{-1}
+\]
+
+These parameterizations reflect the empirical difference in shedding durations by symptom status and are consistent with previous cholera transmission models\\
+(e.g., \href{https://doi.org/10.1186/1471-2334-1-1}{Codeço 2001}). They also align with the structure of the environmental shedding process and the \(I_1\), \(I_2\) compartments in the model.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/recovery_rates} 
+
+}
+
+\caption{Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model.}\label{fig:recovery-rates}
+\end{figure}
 
 \subsection{WAter, Sanitation, and Hygiene (WASH)}\label{water-sanitation-and-hygiene-wash}
 
@@ -1631,7 +1674,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$b\_2\$ & Second Fourier sine coefficient for seasonality. & See Table \textbackslash{}@ref(tab:seasonal-table). & [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)\\
 \hline
-\$p\$ & Period of the seasonal cycle (set to days). & \$366\$ & \\
+\$p\$ & Period of the seasonal cycle (set to days). & \$365\$ & \\
 \hline
 \$\textbackslash{}alpha\_1\$ & Exponent on infectious individuals in the force of infection numerator. & \$0.95\$ & [Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)\\
 \hline

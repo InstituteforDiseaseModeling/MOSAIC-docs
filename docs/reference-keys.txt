@@ -22,6 +22,7 @@ fig:lstm-model-fit
 fig:psi-prediction-data
 fig:psi-prediction-countries
 eq:shedding
+fig:recovery-rates
 tab:wash-weights
 fig:wash-incidence
 fig:wash-country
@@ -79,6 +80,7 @@ modeling-environmental-suitability
 environmental-data
 deep-learning-neural-network-model
 shedding-of-v.-cholerae
+recovery-rates
 water-sanitation-and-hygiene-wash
 immune-dynamics
 estimating-vaccination-rates

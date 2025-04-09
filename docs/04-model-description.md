@@ -92,7 +92,7 @@ R_{jt}
 \mathbf{\text{Environment:}}\\[3mm]
 W_{j,t+1} = \ &
 W_{jt} 
-+ \left( \zeta_1\,I_{1,jt} + \zeta_2\,I_{2,jt} \right) 
++ \left(1-\theta_j\right)\left( \zeta_1\,I_{1,jt} + \zeta_2\,I_{2,jt} \right) 
 - \delta_{jt}\,W_{jt}\\[3mm]
 \end{aligned}
 (\#eq:system)
@@ -169,7 +169,7 @@ Cholera transmission is seasonal and is typically associated with the rainy seas
 (\#eq:beta1)
 \end{equation}
 
-Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 366, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over each day of the year.
+Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 365, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over each day of the year.
 
 We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
 
@@ -211,108 +211,129 @@ Using the model fitting methods described above, and the cluster-based approach 
 <tbody>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:left;"> -0.31 (-0.35 to -0.27) </td>
-   <td style="text-align:left;"> -0.49 (-0.53 to -0.45) </td>
-   <td style="text-align:left;"> -0.42 (-0.45 to -0.39) </td>
-   <td style="text-align:left;"> -0.36 (-0.41 to -0.31) </td>
+   <td style="text-align:left;"> -0.42 (-0.52 to -0.32) </td>
+   <td style="text-align:left;"> -0.3 (-0.4 to -0.21) </td>
+   <td style="text-align:left;"> -0.06 (-0.16 to 0.04) </td>
+   <td style="text-align:left;"> -0.22 (-0.32 to -0.12) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:left;"> -0.64 (-0.67 to -0.62) </td>
-   <td style="text-align:left;"> 0.08 (0.04 to 0.11) </td>
-   <td style="text-align:left;"> 0.01 (-0.04 to 0.06) </td>
-   <td style="text-align:left;"> -0.28 (-0.31 to -0.26) </td>
+   <td style="text-align:left;"> -0.97 (-1.15 to -0.78) </td>
+   <td style="text-align:left;"> -0.08 (-0.26 to 0.1) </td>
+   <td style="text-align:left;"> 0.44 (0.27 to 0.62) </td>
+   <td style="text-align:left;"> -0.71 (-0.89 to -0.53) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> DRC </td>
-   <td style="text-align:left;"> 0.28 (0.26 to 0.31) </td>
-   <td style="text-align:left;"> -0.22 (-0.31 to -0.13) </td>
-   <td style="text-align:left;"> 0.15 (0.08 to 0.23) </td>
-   <td style="text-align:left;"> -0.2 (-0.28 to -0.13) </td>
+   <td style="text-align:left;"> 0.01 (-0.03 to 0.05) </td>
+   <td style="text-align:left;"> -0.08 (-0.12 to -0.04) </td>
+   <td style="text-align:left;"> 0.23 (0.19 to 0.27) </td>
+   <td style="text-align:left;"> -0.04 (-0.08 to 0) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:left;"> -0.52 (-0.59 to -0.46) </td>
-   <td style="text-align:left;"> -0.38 (-0.41 to -0.34) </td>
-   <td style="text-align:left;"> -0.04 (-0.12 to 0.03) </td>
-   <td style="text-align:left;"> -0.03 (-0.13 to 0.07) </td>
+   <td style="text-align:left;"> -0.42 (-0.47 to -0.36) </td>
+   <td style="text-align:left;"> -0.12 (-0.17 to -0.06) </td>
+   <td style="text-align:left;"> 0.22 (0.16 to 0.27) </td>
+   <td style="text-align:left;"> 0.05 (0 to 0.11) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Ghana </td>
+   <td style="text-align:left;"> -0.71 (-1.7 to 0.27) </td>
+   <td style="text-align:left;"> 1.31 (0.47 to 2.15) </td>
+   <td style="text-align:left;"> -0.29 (-0.95 to 0.37) </td>
+   <td style="text-align:left;"> -1.17 (-1.73 to -0.6) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:left;"> 0.03 (-0.02 to 0.07) </td>
-   <td style="text-align:left;"> -0.16 (-0.19 to -0.12) </td>
-   <td style="text-align:left;"> 0.5 (0.46 to 0.53) </td>
-   <td style="text-align:left;"> 0.12 (0.09 to 0.15) </td>
+   <td style="text-align:left;"> 0.12 (-0.08 to 0.31) </td>
+   <td style="text-align:left;"> -0.28 (-0.48 to -0.08) </td>
+   <td style="text-align:left;"> 0.93 (0.73 to 1.13) </td>
+   <td style="text-align:left;"> 0.25 (0.05 to 0.45) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:left;"> 0.51 (0.47 to 0.54) </td>
-   <td style="text-align:left;"> 0.16 (0.12 to 0.2) </td>
-   <td style="text-align:left;"> 0.39 (0.36 to 0.43) </td>
-   <td style="text-align:left;"> 0.4 (0.37 to 0.44) </td>
+   <td style="text-align:left;"> 1.29 (1.06 to 1.53) </td>
+   <td style="text-align:left;"> 0.29 (0.05 to 0.53) </td>
+   <td style="text-align:left;"> 1.11 (0.87 to 1.35) </td>
+   <td style="text-align:left;"> 1.23 (0.99 to 1.47) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:left;"> 0.22 (0.19 to 0.26) </td>
-   <td style="text-align:left;"> -0.36 (-0.39 to -0.33) </td>
-   <td style="text-align:left;"> 0.48 (0.44 to 0.53) </td>
-   <td style="text-align:left;"> 0.02 (-0.04 to 0.07) </td>
+   <td style="text-align:left;"> 0.4 (0.23 to 0.57) </td>
+   <td style="text-align:left;"> -0.7 (-0.87 to -0.53) </td>
+   <td style="text-align:left;"> 1.2 (1.03 to 1.37) </td>
+   <td style="text-align:left;"> 0.19 (0.02 to 0.36) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Niger </td>
+   <td style="text-align:left;"> 2.95 (1.4 to 4.51) </td>
+   <td style="text-align:left;"> -3.42 (-4.63 to -2.2) </td>
+   <td style="text-align:left;"> 1.79 (0.8 to 2.79) </td>
+   <td style="text-align:left;"> 1.72 (0.94 to 2.51) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:left;"> -0.27 (-0.3 to -0.24) </td>
-   <td style="text-align:left;"> 0.22 (0.15 to 0.29) </td>
-   <td style="text-align:left;"> -0.16 (-0.2 to -0.11) </td>
-   <td style="text-align:left;"> 0.42 (0.38 to 0.46) </td>
+   <td style="text-align:left;"> -0.25 (-0.39 to -0.11) </td>
+   <td style="text-align:left;"> -0.3 (-0.43 to -0.16) </td>
+   <td style="text-align:left;"> -0.91 (-1.05 to -0.77) </td>
+   <td style="text-align:left;"> 0.17 (0.04 to 0.31) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:left;"> -0.16 (-0.2 to -0.12) </td>
-   <td style="text-align:left;"> -0.24 (-0.3 to -0.17) </td>
-   <td style="text-align:left;"> 0.84 (0.82 to 0.86) </td>
-   <td style="text-align:left;"> -0.59 (-0.61 to -0.57) </td>
+   <td style="text-align:left;"> -0.22 (-0.28 to -0.17) </td>
+   <td style="text-align:left;"> -0.24 (-0.29 to -0.18) </td>
+   <td style="text-align:left;"> 0.91 (0.86 to 0.97) </td>
+   <td style="text-align:left;"> -0.37 (-0.42 to -0.32) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> South Africa </td>
-   <td style="text-align:left;"> -0.41 (-0.62 to -0.19) </td>
-   <td style="text-align:left;"> 0.13 (-0.07 to 0.33) </td>
-   <td style="text-align:left;"> -0.54 (-0.67 to -0.41) </td>
-   <td style="text-align:left;"> 0.63 (0.54 to 0.72) </td>
+   <td style="text-align:left;"> -2.33 (-3.43 to -1.22) </td>
+   <td style="text-align:left;"> 1.06 (0.06 to 2.07) </td>
+   <td style="text-align:left;"> -2.72 (-3.74 to -1.71) </td>
+   <td style="text-align:left;"> 3.23 (2.1 to 4.36) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> South Sudan </td>
+   <td style="text-align:left;"> 1.01 (0.73 to 1.29) </td>
+   <td style="text-align:left;"> 1.54 (1.3 to 1.78) </td>
+   <td style="text-align:left;"> 0.18 (-0.05 to 0.41) </td>
+   <td style="text-align:left;"> 0.02 (-0.22 to 0.26) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:left;"> 0.03 (0 to 0.06) </td>
-   <td style="text-align:left;"> -0.06 (-0.12 to -0.01) </td>
-   <td style="text-align:left;"> 0.09 (0.06 to 0.12) </td>
-   <td style="text-align:left;"> 0.23 (0.2 to 0.26) </td>
+   <td style="text-align:left;"> 0.49 (0.37 to 0.61) </td>
+   <td style="text-align:left;"> -0.13 (-0.25 to -0.02) </td>
+   <td style="text-align:left;"> -0.6 (-0.71 to -0.48) </td>
+   <td style="text-align:left;"> -0.29 (-0.41 to -0.18) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Togo </td>
-   <td style="text-align:left;"> -0.17 (-0.45 to 0.12) </td>
-   <td style="text-align:left;"> -0.28 (-0.43 to -0.13) </td>
-   <td style="text-align:left;"> -0.63 (-0.72 to -0.54) </td>
-   <td style="text-align:left;"> 0.28 (0.06 to 0.51) </td>
+   <td style="text-align:left;"> 1.11 (0.77 to 1.46) </td>
+   <td style="text-align:left;"> 0.02 (-0.33 to 0.36) </td>
+   <td style="text-align:left;"> -1 (-1.36 to -0.63) </td>
+   <td style="text-align:left;"> -0.91 (-1.27 to -0.55) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:left;"> -0.79 (-0.9 to -0.69) </td>
-   <td style="text-align:left;"> 0.39 (0.32 to 0.46) </td>
-   <td style="text-align:left;"> 0.12 (-0.07 to 0.31) </td>
-   <td style="text-align:left;"> 0.04 (-0.16 to 0.23) </td>
+   <td style="text-align:left;"> -0.17 (-0.56 to 0.22) </td>
+   <td style="text-align:left;"> 0.52 (0.13 to 0.9) </td>
+   <td style="text-align:left;"> 0.6 (0.22 to 0.99) </td>
+   <td style="text-align:left;"> 0.42 (0.04 to 0.81) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:left;"> 0.69 (0.63 to 0.74) </td>
-   <td style="text-align:left;"> 0.43 (0.39 to 0.46) </td>
-   <td style="text-align:left;"> 0.23 (0.18 to 0.28) </td>
-   <td style="text-align:left;"> 0.2 (0.14 to 0.26) </td>
+   <td style="text-align:left;"> 1.53 (1.29 to 1.77) </td>
+   <td style="text-align:left;"> 0.88 (0.64 to 1.12) </td>
+   <td style="text-align:left;"> 0.67 (0.44 to 0.91) </td>
+   <td style="text-align:left;"> 0.78 (0.55 to 1.02) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:left;"> 1.12 (1.08 to 1.17) </td>
-   <td style="text-align:left;"> 0.51 (0.48 to 0.53) </td>
-   <td style="text-align:left;"> 0.3 (0.24 to 0.35) </td>
-   <td style="text-align:left;"> -0.08 (-0.13 to -0.03) </td>
+   <td style="text-align:left;"> 0.99 (0.87 to 1.11) </td>
+   <td style="text-align:left;"> 0.34 (0.23 to 0.46) </td>
+   <td style="text-align:left;"> 0.54 (0.42 to 0.65) </td>
+   <td style="text-align:left;"> 0.12 (0 to 0.23) </td>
   </tr>
 </tbody>
 </table>
@@ -497,6 +518,38 @@ The table below summarizes key published estimates and assumptions regarding *V.
 | $0.01$--$10$       | $\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$ | All          | Reported as general estimate across all infections                       | [Fung (2014)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/) |
 | $10$--$100$        | $\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$ | All          | Represents shedding rates in two distinct sub-populations                | [Njagarah & Nyabadza (2014)](https://doi.org/10.1016/j.amc.2014.05.036) |
 
+### Recovery rates
+
+The recovery rates in the MOSAIC model are defined as the inverse of the shedding duration for infected individuals. This reflects the period during which individuals contribute to the environmental load of *Vibrio cholerae*, regardless of the presence of clinical symptoms. The model distinguishes between:
+
+**Symptomatic individuals ($\gamma_1$):**  
+Individuals in the $I_1$ compartment typically experience acute watery diarrhea and may shed large quantities of *V. cholerae* for several days. Clinical studies and reviews suggest that symptomatic patients shed vibrios for approximately **3 to 5 days**, with shedding sometimes persisting up to 14 days  ([Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/), [Harris et al. 2012](https://www.sciencedirect.com/science/article/pii/S014067361260436X)). Based on these estimates, we define the recovery rate as a uniform distribution over plausible durations:
+
+$$
+\gamma_1 \sim \text{Uniform}(1/7,\ 1/3) \quad \text{day}^{-1}
+$$
+
+**Asymptomatic individuals ($\gamma_2$):**  
+Asymptomatic individuals in the $I_2$ compartment may not show clinical symptoms but can still shed *V. cholerae* for extended periods. Observational studies indicate shedding can persist for **7 to 14 days**, and potentially longer ([Mosley et al. 1968](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/), [Public Health Ontario 2022](https://files.ontario.ca/moh-ophs-cholera-en-2022.pdf)). To capture this range, we define the asymptomatic recovery rate as:
+
+$$
+\gamma_2 \sim \text{Uniform}(1/14,\ 1/7) \quad \text{day}^{-1}
+$$
+
+In cases where point estimates are preferred or required for model fitting, we use the mean values of each distribution:
+
+$$
+\gamma_1 = \frac{1}{5} = 0.2 \ \text{day}^{-1}, \qquad
+\gamma_2 = \frac{1}{10} = 0.1 \ \text{day}^{-1}
+$$
+
+These parameterizations reflect the empirical difference in shedding durations by symptom status and are consistent with previous cholera transmission models  
+(e.g., [Codeço 2001](https://doi.org/10.1186/1471-2334-1-1)). They also align with the structure of the environmental shedding process and the $I_1$, $I_2$ compartments in the model.
+
+<div class="figure" style="text-align: center">
+<img src="figures/recovery_rates.png" alt="Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model." width="100%" />
+<p class="caption">(\#fig:recovery-rates)Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model.</p>
+</div>
 
 ### WAter, Sanitation, and Hygiene (WASH) 
 
@@ -1735,7 +1788,7 @@ Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
 |$b_1$                     |First Fourier sine coefficient for seasonality.                                                                        |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
 |$a_2$                     |Second Fourier cosine coefficient for seasonality.                                                                     |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
 |$b_2$                     |Second Fourier sine coefficient for seasonality.                                                                       |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$p$                       |Period of the seasonal cycle (set to days).                                                                            |$366$                                                 |                                                                              |
+|$p$                       |Period of the seasonal cycle (set to days).                                                                            |$365$                                                 |                                                                              |
 |$\alpha_1$                |Exponent on infectious individuals in the force of infection numerator.                                                |$0.95$                                                |[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)|
 |$\alpha_2$                |Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. |$0.95$                                                |[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)              |
 |$\tau_i$                  |Probability an individual departs from origin $i$.                                                                     |                                                      |                                                                              |
