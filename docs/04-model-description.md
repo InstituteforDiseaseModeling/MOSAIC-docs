@@ -735,12 +735,12 @@ $$
 The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
 
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per week in 2017 among all countries." width="100%" />
-<p class="caption">(\#fig:mobility-data)The average number of air passengers per week in 2017 among all countries.</p>
+<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per day in 2017 among all countries." width="100%" />
+<p class="caption">(\#fig:mobility-data)The average number of air passengers per day in 2017 among all countries.</p>
 </div>
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per week in 2017." width="100%" />
-<p class="caption">(\#fig:mobility-network)A network map showing the average number of air passengers per week in 2017.</p>
+<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per day in 2017." width="100%" />
+<p class="caption">(\#fig:mobility-network)A network map showing the average number of air passengers per day in 2017.</p>
 </div>
 
 
@@ -809,8 +809,8 @@ $$
 The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG](https://www.oag.com/flight-data-sets) using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each week." width="100%" />
-<p class="caption">(\#fig:mobility-departure)The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each week.</p>
+<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day." width="100%" />
+<p class="caption">(\#fig:mobility-departure)The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.</p>
 </div>
 
 
@@ -1809,7 +1809,7 @@ Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
 |Term                                    |Description                                                                                          |Stochastic.Transition                                                                                                                                                                                       |
 |:---------------------------------------|:----------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |**$\mathbf{S}$ (susceptible)**          |                                                                                                     |                                                                                                                                                                                                            |
-|$+ b_{jt} N_{jt}$                       |New individuals entering the susceptible class from births.                                          |$\text{Binom}\big( N_{jt},\; 1 - \exp(-b_{jt}) \big)$                                                                                                                                                       |
+|$+ b_{jt} N_{jt}$                       |New individuals entering the susceptible class from births.                                          |$\text{Pois}\big( N_{jt}b_{jt} \big)$                                                                                                                                                                       |
 |$+ \varepsilon R_{jt}$                  |Loss of immunity for recovered individuals.                                                          |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                  |
 |$+ \omega_1 V_{1,jt}$                   |Waning immunity from one-dose OCV.                                                                   |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                   |
 |$+ \omega_2 V_{2,jt}$                   |Waning immunity from two-dose OCV.                                                                   |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                   |

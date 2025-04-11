@@ -114,7 +114,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2025-04-08 at 05:47 PM PDT.
+Website under development. Last compiled on 2025-04-11 at 12:26 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -999,7 +999,7 @@ The parameters in the model diagram in Figure \ref{fig:diagram} that have a \(jt
 
 }
 
-\caption{The average number of air passengers per week in 2017 among all countries.}\label{fig:mobility-data}
+\caption{The average number of air passengers per day in 2017 among all countries.}\label{fig:mobility-data}
 \end{figure}
 \begin{figure}
 
@@ -1007,7 +1007,7 @@ The parameters in the model diagram in Figure \ref{fig:diagram} that have a \(jt
 
 }
 
-\caption{A network map showing the average number of air passengers per week in 2017.}\label{fig:mobility-network}
+\caption{A network map showing the average number of air passengers per day in 2017.}\label{fig:mobility-network}
 \end{figure}
 
 \subsection{Human mobility model}\label{human-mobility-model}
@@ -1076,7 +1076,7 @@ The models for \(\tau_i\) and \(\pi_{ij}\) were fitted to air traffic data from 
 
 }
 
-\caption{The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95\% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each week.}\label{fig:mobility-departure}
+\caption{The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95\% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.}\label{fig:mobility-departure}
 \end{figure}
 
 \begin{figure}
@@ -1700,7 +1700,7 @@ Term & Description & Stochastic.Transition\\
 \hline
 **\$\textbackslash{}mathbf\{S\}\$ (susceptible)** &  & \\
 \hline
-\$+ b\_\{jt\} N\_\{jt\}\$ & New individuals entering the susceptible class from births. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( N\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-b\_\{jt\}) \textbackslash{}big)\$\\
+\$+ b\_\{jt\} N\_\{jt\}\$ & New individuals entering the susceptible class from births. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( N\_\{jt\}b\_\{jt\} \textbackslash{}big)\$\\
 \hline
 \$+ \textbackslash{}varepsilon R\_\{jt\}\$ & Loss of immunity for recovered individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( R\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}varepsilon) \textbackslash{}big)\$\\
 \hline

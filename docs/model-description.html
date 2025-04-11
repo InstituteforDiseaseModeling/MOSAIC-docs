@@ -1288,14 +1288,14 @@ Figure 3.20: The duration of immunity after natural infection with <em>V. choler
 <p>The parameters in the model diagram in Figure <a href="model-description.html#fig:diagram">3.2</a> that have a <span class="math inline">\(jt\)</span> subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection <span class="math inline">\(\Lambda_{jt}\)</span> which moves contagion among metapopulations according to the connectivity provided by parameters <span class="math inline">\(\tau_i\)</span> (the probability departure) and <span class="math inline">\(\pi_{ij}\)</span> (the probability of diffusion to destination <span class="math inline">\(j\)</span>). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure <a href="model-description.html#fig:mobility-data">3.21</a>).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:mobility-data"></span>
-<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per week in 2017 among all countries." width="100%"><p class="caption">
-Figure 3.21: The average number of air passengers per week in 2017 among all countries.
+<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per day in 2017 among all countries." width="100%"><p class="caption">
+Figure 3.21: The average number of air passengers per day in 2017 among all countries.
 </p>
 </div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:mobility-network"></span>
-<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per week in 2017." width="100%"><p class="caption">
-Figure 3.22: A network map showing the average number of air passengers per week in 2017.
+<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per day in 2017." width="100%"><p class="caption">
+Figure 3.22: A network map showing the average number of air passengers per day in 2017.
 </p>
 </div>
 <div id="human-mobility-model" class="section level3" number="3.6.1">
@@ -1360,8 +1360,8 @@ N_j^\omega d_{ij}^{-\gamma}
 <p>The models for <span class="math inline">\(\tau_i\)</span> and <span class="math inline">\(\pi_{ij}\)</span> were fitted to air traffic data from <a href="https://www.oag.com/flight-data-sets">OAG</a> using the <code>mobility</code> R package (<a href="https://covid-19-mobility-data-network.github.io/mobility/">Giles 2020</a>). Estimates for mobility model parameters are shown in Figures <a href="model-description.html#fig:mobility-departure">3.23</a> and <a href="model-description.html#fig:mobility-diffusion">3.24</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:mobility-departure"></span>
-<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each week." width="100%"><p class="caption">
-Figure 3.23: The estimated weekly probability of travel outside of each origin location <span class="math inline">\(\tau_i\)</span> and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin <span class="math inline">\(i\)</span> each week.
+<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day." width="100%"><p class="caption">
+Figure 3.23: The estimated weekly probability of travel outside of each origin location <span class="math inline">\(\tau_i\)</span> and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin <span class="math inline">\(i\)</span> each day.
 </p>
 </div>
 <div class="figure" style="text-align: center">
@@ -3852,7 +3852,7 @@ A key challenge in calibration is the incomplete or aggregated nature of the ava
 <tr class="even">
 <td align="left"><span class="math inline">\(+ b_{jt} N_{jt}\)</span></td>
 <td align="left">New individuals entering the susceptible class from births.</td>
-<td align="left"><span class="math inline">\(\text{Binom}\big( N_{jt},\; 1 - \exp(-b_{jt}) \big)\)</span></td>
+<td align="left"><span class="math inline">\(\text{Pois}\big( N_{jt}b_{jt} \big)\)</span></td>
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(+ \varepsilon R_{jt}\)</span></td>

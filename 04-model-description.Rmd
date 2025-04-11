@@ -625,10 +625,10 @@ knitr::include_graphics("figures/immune_decay.png")
 
 The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
 
-```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of air passengers per week in 2017 among all countries."}
+```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of air passengers per day in 2017 among all countries."}
 knitr::include_graphics("figures/mobility_flight_data.png")
 ```
-```{r mobility-network, echo=FALSE, fig.align='center', out.width="100%", fig.cap="A network map showing the average number of air passengers per week in 2017."}
+```{r mobility-network, echo=FALSE, fig.align='center', out.width="100%", fig.cap="A network map showing the average number of air passengers per day in 2017."}
 knitr::include_graphics("figures/mobility_network.png")
 ```
 
@@ -697,7 +697,7 @@ $$
 
 The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG](https://www.oag.com/flight-data-sets) using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
-```{r mobility-departure, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The estimated weekly probability of travel outside of each origin location $\\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each week."}
+```{r mobility-departure, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The estimated weekly probability of travel outside of each origin location $\\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day."}
 knitr::include_graphics("figures/mobility_travel_prob_tau.png")
 ```
 
@@ -1362,7 +1362,7 @@ tbl <- data.frame(
      ),
      "Stochastic Transition" = c(
           "",
-          "$\\text{Binom}\\big( N_{jt},\\; 1 - \\exp(-b_{jt}) \\big)$",
+          "$\\text{Pois}\\big( N_{jt}b_{jt} \\big)$",
           "$\\text{Binom}\\big( R_{jt},\\; 1 - \\exp(-\\varepsilon) \\big)$",
           "$\\text{Binom}\\big( V_{1,jt},\\; 1 - \\exp(-\\omega_1) \\big)$",
           "$\\text{Binom}\\big( V_{2,jt},\\; 1 - \\exp(-\\omega_2) \\big)$",
