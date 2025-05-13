@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>4 Model calibration | MOSAIC: a spatial model of endemic cholera</title>
+<meta name="author" content="John R Giles">
+<meta name="description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
+<meta name="generator" content="bookdown 0.40 with bs4_book()">
+<meta property="og:title" content="4 Model calibration | MOSAIC: a spatial model of endemic cholera">
+<meta property="og:type" content="book">
+<meta property="og:description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="4 Model calibration | MOSAIC: a spatial model of endemic cholera">
+<meta name="twitter:description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.8.0/transition.js"></script><script src="libs/bs3compat-0.8.0/tabs.js"></script><script src="libs/bs3compat-0.8.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+          margin-bottom: 0em;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">MOSAIC: a spatial model of endemic cholera</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"></a></li>
+<li><a class="" href="rationale.html"><span class="header-section-number">1</span> Rationale</a></li>
+<li><a class="" href="data.html"><span class="header-section-number">2</span> Data</a></li>
+<li><a class="" href="model-description.html"><span class="header-section-number">3</span> Model description</a></li>
+<li><a class="active" href="model-calibration-1.html"><span class="header-section-number">4</span> Model calibration</a></li>
+<li><a class="" href="scenarios.html"><span class="header-section-number">5</span> Scenarios</a></li>
+<li><a class="" href="usage.html"><span class="header-section-number">6</span> Usage</a></li>
+<li><a class="" href="news.html"><span class="header-section-number">7</span> News</a></li>
+<li><a class="" href="references.html"><span class="header-section-number">8</span> References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/InstituteforDiseaseModeling/MOSAIC-docs">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="model-calibration-1" class="section level1" number="4">
+<h1>
+<span class="header-section-number">4</span> Model calibration<a class="anchor" aria-label="anchor" href="#model-calibration-1"><i class="fas fa-link"></i></a>
+</h1>
+<div id="bayesian-likelihood-approach" class="section level2" number="4.1">
+<h2>
+<span class="header-section-number">4.1</span> Bayesian Likelihood Approach<a class="anchor" aria-label="anchor" href="#bayesian-likelihood-approach"><i class="fas fa-link"></i></a>
+</h2>
+<p>The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a <em>likelihood function</em>. One major assumption of the Bayesian method is that all model parameters—and most importantly, the link between model and data—have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly-informed by other data sources and meta-analyses (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
+<p>To calibrate the MOSAIC model to observed cholera surveillance data, the algorithm updates prior beliefs about model parameters through the likelihood function <span class="math inline">\(\mathcal{L}(\boldsymbol{\Theta})\)</span>. The likelihood is essentially a function of model parameters that measures how probable our particular model is given the observed data, or more formally, the posterior probability distribution of the parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. This parameter vector includes all quantities required for a single iteration of the model, which includes transmission rates, mobility parameters, and seasonal forcing coefficients for example (see the <a href="https://www.mosaicmod.org/model-description.html#table-of-model-parameters">Table of Model Parameters</a>).
+<span class="math display" id="eq:theta">\[\begin{equation}
+\boldsymbol{\Theta} = \{\, \beta,\, \gamma,\, \omega,\, a_1,\, a_2,\, b_1,\, b_2,\, \dots \, \}
+\tag{4.1}
+\end{equation}\]</span>
+During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of <span class="math inline">\(\boldsymbol{\Theta}\)</span> using the a brute force sampling algorthim (more details below):
+<span class="math display" id="eq:general-likelihood">\[\begin{equation}
+\hat{\boldsymbol{\Theta}} = \underset{\boldsymbol{\Theta}}{\arg\max}\big[\log \mathcal{L}(\boldsymbol{\Theta})\big].
+\tag{4.2}
+\end{equation}\]</span></p>
+<p>To specify the likelihood function, we treat <span class="math inline">\(\mathcal{L}(\boldsymbol{\Theta})\)</span> as the posterior density of <span class="math inline">\(\boldsymbol{\Theta}\)</span> given the observed cholera surveillance data, and then use the <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem">Bayes’ theorem</a> to set up the model-data link.
+<span class="math display" id="eq:bayes-1">\[\begin{equation}
+\mathcal{L}(\boldsymbol{\Theta}) \Longrightarrow P(\boldsymbol{\Theta}\mid\text{data})  
+\tag{4.3}
+\end{equation}\]</span>
+Because the observed data <span class="math inline">\(P(\text{data})\)</span> does not depend on the model parameters and the prior <span class="math inline">\(P(\boldsymbol{\Theta})\)</span> is assumed to be uniform, these two terms can be treated as constants in Bayes’ theorem. Consequently, the posterior density is proportional to the likelihood:
+<span class="math display" id="eq:bayes-2">\[\begin{equation}
+P(\boldsymbol{\Theta}\mid\text{data})
+=\;
+\frac{\displaystyle
+P(\text{data}\mid\boldsymbol{\Theta})\;
+\overbrace{P(\boldsymbol{\Theta})}^{\text{constant}}
+}
+{\displaystyle
+\underbrace{P(\text{data})}_{\text{constant}}
+}
+\;\propto\;
+P(\text{data}\mid\boldsymbol{\Theta}),
+\tag{4.4}
+\end{equation}\]</span>
+therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood <span class="math inline">\(P(\text{data}\mid\boldsymbol{\Theta})\)</span>, and we can now construct the likelihood function using the relevant probability density functions <span class="math inline">\(f(y\mid\mu)\)</span> as described below.</p>
+</div>
+<div id="total-log-likelihood-for-cases-and-deaths" class="section level2" number="4.2">
+<h2>
+<span class="header-section-number">4.2</span> Total Log-likelihood for Cases and Deaths<a class="anchor" aria-label="anchor" href="#total-log-likelihood-for-cases-and-deaths"><i class="fas fa-link"></i></a>
+</h2>
+<p>Because the model posterior is proportional to <span class="math inline">\(P(\text{data}\mid\boldsymbol{\Theta})\)</span>, we constructed the likelihood function with
+the appropriate distribution for each of the observed data types using common notation for a probability density function <span class="math inline">\(f(y\mid\mu)\)</span>. The MOSAIC framework is a spatial model, so we also included the <span class="math inline">\(J\)</span> spatial locations and <span class="math inline">\(T\)</span> time points in the full
+likelihood, which gives the product over both indices:</p>
+<p><span class="math display" id="eq:total-log-likelihood-1">\[\begin{equation}
+P\left(\text{data}\mid\boldsymbol{\Theta}\right)
+\;=\;
+\prod_{j=1}^{J}
+\;\prod_{t=1}^{T}
+f\!\left(
+y_{jt}\;
+\bigl|\;
+\mu_{jt}\!\left(\boldsymbol{\Theta}\right)
+\right),
+\tag{4.5}
+\end{equation}\]</span></p>
+<p>where <span class="math inline">\(y_{jt}\)</span> is the observed count (cases, deaths, etc.) for location <span class="math inline">\(j\)</span> at
+time <span class="math inline">\(t\)</span>, and <span class="math inline">\(\mu_{jt}(\boldsymbol{\Theta})\)</span> is the corresponding model-generated
+mean. Substituting <span class="math inline">\(f(\cdot)\)</span> with the appropriate probability distribution
+(Poisson, Negative Binomial, etc.) yields the explicit likelihood function used in
+calibration.</p>
+<p>The total log-likelihood combines contributions from observed cases and deaths across locations and time points. This combined likelihood function quantifies the probability of the observed epidemiological data given the model parameters <span class="math inline">\(\boldsymbol{\Theta}\)</span>.
+<span class="math display" id="eq:total-log-likelihood-2">\[\begin{equation}
+\log \mathcal{L}(\boldsymbol{\Theta}) =
+\sum_{j=1}^{J} w_{j} \left[
+w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\bigr)
++ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\bigr)
+\right]
+\tag{4.6}
+\end{equation}\]</span></p>
+<p>Note that each log-likelihood term is weighted three times — by a location weight <span class="math inline">\(w_j\)</span>, a time-step weight <span class="math inline">\(w_t\)</span>, and an outcome-specific weight <span class="math inline">\(w_{\text{cases}}\)</span> or <span class="math inline">\(w_{\text{deaths}}\)</span> — so that contributions reflect data reliability and public-health priorities across space, time, and outcome. The choice between Poisson and Negative Binomial for the density <span class="math inline">\(P(\cdot)\)</span> is driven by the local mean-variance relationship (VMR), ensuring that the assumed error structure mirrors the dispersion actually observed in the surveillance data. The next subsection details the parameterisation of each probability distribution and how the corresponding likelihood is computed.</p>
+<div class="inline-table"><table class="table table-sm">
+<colgroup>
+<col width="38%">
+<col width="61%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(J\)</span></td>
+<td>Number of locations</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T\)</span></td>
+<td>Number of time points</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(C_{j,t}^{\text{obs}}\)</span></td>
+<td>Observed cases at location <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span>
+</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D_{j,t}^{\text{obs}}\)</span></td>
+<td>Observed deaths at location <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span>
+</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(C_{j,t}^{\text{est}}(\boldsymbol{\Theta})\)</span></td>
+<td>Model-estimated mean cases at location <span class="math inline">\(j\)</span>, time <span class="math inline">\(t\)</span>
+</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D_{j,t}^{\text{est}}(\boldsymbol{\Theta})\)</span></td>
+<td>Model-estimated mean deaths at location <span class="math inline">\(j\)</span>, time <span class="math inline">\(t\)</span>
+</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(w_j\)</span></td>
+<td>Location-specific weights (reflecting population or data confidence)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(w_t\)</span></td>
+<td>Time-specific weights (typically uniform, <span class="math inline">\(w_t=1\)</span>)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(w_{\text{cases}}\)</span></td>
+<td>Relative weight for cases</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(w_{\text{deaths}}\)</span></td>
+<td>Relative weight for deaths</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(k_{\text{cases}, j}\)</span></td>
+<td>Dispersion parameter for cases at location <span class="math inline">\(j\)</span>
+</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k_{\text{deaths}, j}\)</span></td>
+<td>Dispersion parameter for deaths at location <span class="math inline">\(j\)</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div id="distributional-assumptions-for-likelihood-components" class="section level2" number="4.3">
+<h2>
+<span class="header-section-number">4.3</span> Distributional Assumptions for Likelihood Components<a class="anchor" aria-label="anchor" href="#distributional-assumptions-for-likelihood-components"><i class="fas fa-link"></i></a>
+</h2>
+<p>For each location <span class="math inline">\(j\)</span> and time step <span class="math inline">\(t\)</span> the density <span class="math inline">\(f\!\left(y_{jt}\mid\mu_{jt}\left(\boldsymbol{\Theta}\right)\right)\)</span> in Equation
+<a href="model-calibration-1.html#eq:total-log-likelihood-1">(4.5)</a> is chosen to match the observed mean–variance relationship at that location, which is
+calculated as <span class="math inline">\(\mathrm{VMR}_j = \mathrm{Var}(y_{j\cdot}) / \mathrm{Mean}(y_{j\cdot})\)</span> from the raw surveillance counts.
+If <span class="math inline">\(\mathrm{VMR}_j &lt; 1.5\)</span> the data are close to <em>equi-dispersion</em> and we adopt a <em>Poisson</em> distributed error model. Otherwise,
+the count data are considered to be <em>over-dispersed</em> and we use a <em>Negative Binomial</em> error model with a location-specific dispersion
+parameter <span class="math inline">\(k_j\)</span>.</p>
+<div id="negative-binomial-density-vmr-ge-1.5" class="section level3" number="4.3.1">
+<h3>
+<span class="header-section-number">4.3.1</span> Negative Binomial density (VMR <span class="math inline">\(\ge 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#negative-binomial-density-vmr-ge-1.5"><i class="fas fa-link"></i></a>
+</h3>
+<p><span class="math display" id="eq:negbin">\[\begin{equation}
+\log P_{\text{NB}}\!\bigl(y_{jt}\mid\mu_{jt},k_j\bigr)
+\,=\,
+\log\Gamma(y_{jt}+k_j)-\log\Gamma(k_j)-\log\Gamma(y_{jt}+1)
++k_j\log\!\Bigl[\tfrac{k_j}{k_j+\mu_{jt}}\Bigr]
++y_{jt}\log\!\Bigl[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\Bigr]
+\tag{4.7}
+\end{equation}\]</span>
+The dispersion is estimated*per location via the method-of-moments:
+<span class="math display" id="eq:dispersion">\[\begin{equation}
+k_j \;=\;\frac{\mu_j^2}{\mathrm{Var}(y_{j\cdot})-\mu_j},
+\tag{4.8}
+\end{equation}\]</span>
+so that <span class="math inline">\(\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j\)</span>. As <span class="math inline">\(k_j\rightarrow\infty\)</span> the density in
+<a href="model-calibration-1.html#eq:negbin">(4.7)</a> collapses smoothly to the Poisson form.</p>
+</div>
+<div id="poisson-density-vmr-1.5" class="section level3" number="4.3.2">
+<h3>
+<span class="header-section-number">4.3.2</span> Poisson density (VMR <span class="math inline">\(&lt; 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#poisson-density-vmr-1.5"><i class="fas fa-link"></i></a>
+</h3>
+<p><span class="math display" id="eq:poisson">\[\begin{equation}
+\log P_{\text{Pois}}\!\bigl(y_{jt}\mid\mu_{jt}\bigr)
+\,=\;
+y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
+\tag{4.9}
+\end{equation}\]</span></p>
+<p>The automatic Poisson/Negative-Binomial switch ensures that the
+error structure embedded in the likelihood replicates the empirical
+dispersion seen in the surveillance data, while the weighting scheme
+<span class="math inline">\(w_j,\,w_t,\,w_{\text{cases}},\,w_{\text{deaths}}\)</span> (introduced in
+Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>) controls the relative influence
+of each location, time step, and outcome on the overall fit.</p>
+</div>
+</div>
+<div id="algorithm-for-parameter-estimation" class="section level2" number="4.4">
+<h2>
+<span class="header-section-number">4.4</span> Algorithm for Parameter Estimation<a class="anchor" aria-label="anchor" href="#algorithm-for-parameter-estimation"><i class="fas fa-link"></i></a>
+</h2>
+<p>The MOSAIC calibration relies on a <em>brute-force random sampling</em> (BFRS) workflow with importance-sampling for estimating posterior parameter distributions. The BFRS approach is deliberately simple, fully parallelisable, and maps directly onto the informative priors which have been painstakingly estimated a priori (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
+<p>Unlike <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is small because the LASER modelling engine, whose fast, metapopulation implementation can evaluate each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> parameter draw in milliseconds.</p>
+<p>Relative to <a href="https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any">Latin-hypercube</a> or <a href="https://en.wikipedia.org/wiki/Sobol_sequence">Sobol sequence</a> sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with LASER’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.</p>
+<p>The steps below summarise how this BFRS workflow is turned into a practical calibration routine—moving from prior draws, through model simulation and likelihood evaluation, to the identification of the best-fitting parameter set.</p>
+<ol style="list-style-type: decimal">
+<li><em>Generate reproducible parameter sample</em></li>
+</ol>
+<p>Draw <span class="math inline">\(n_{\text{sim}}\)</span> independent parameter vectors <span class="math inline">\(\boldsymbol{\Theta}^{(i)} \sim P(\boldsymbol{\Theta})\)</span> using predetermined random seeds, ensuring that the calibration can be rerun and audited exactly.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><em>Forward-simulate</em></li>
+</ol>
+<p>The transitions between most model compartments are stochastic, so for each independent sampling of the parameter space <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we run the stochastic transmission model for <span class="math inline">\(n_{\text{iter}}\)</span> internal iterations.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><em>Evaluate the fit for every draw</em></li>
+</ol>
+<p>For each of the <span class="math inline">\(n_{\text{sim}} \times n_{\text{iter}}\)</span> internal iterations, compute the total <em>negative</em> log-likelihood <span class="math inline">\(-\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> via Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><em>Post-processing end-points</em></li>
+</ol>
+<ul>
+<li>
+<em>Posterior parameter distributions</em> – convert all log-likelihoods to importance weights for estimating marginal posteriors (next section).<br>
+</li>
+<li>
+<em>Bayesian model averaging</em> – use the weighted ensemble to generate probabilistic forecasts.<br>
+</li>
+<li>
+<em>Best-fit scenario set</em> – select <span class="math inline">\(\hat{\boldsymbol{\Theta}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]\)</span> for deterministic scenario and counter-factual analyses.</li>
+</ul>
+</div>
+<div id="estimating-the-posterior-distribution-of-model-parameters" class="section level2" number="4.5">
+<h2>
+<span class="header-section-number">4.5</span> Estimating the Posterior Distribution of Model Parameters<a class="anchor" aria-label="anchor" href="#estimating-the-posterior-distribution-of-model-parameters"><i class="fas fa-link"></i></a>
+</h2>
+<p>To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
+<span class="math inline">\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method a well-known method technique to estimate posterior distributions originally described by <a href="https://pubsonline.informs.org/doi/10.1287/opre.1.5.263">Kahn &amp; Marshall 1953</a> and reviewed in a more modern context by <a href="https://doi.org/10.1002/wics.56">Tokdar &amp; Kass 2010</a>. Thus, we calculate the IS-weights using the <span class="math inline">\(\Delta \text{AIC}\)</span> with a practical cut–off of <span class="math inline">\(\Delta=4\)</span> and retain the IS for a subset of supported models as described the in steps below:</p>
+<div id="compute-delta-textaic-for-every-draw" class="section level3" number="4.5.1">
+<h3>
+<span class="header-section-number">4.5.1</span> Compute <span class="math inline">\(\Delta \text{AIC}\)</span> for every draw<a class="anchor" aria-label="anchor" href="#compute-delta-textaic-for-every-draw"><i class="fas fa-link"></i></a>
+</h3>
+<p>For any model, the <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Akaike Information Criterion</a> is <span class="math inline">\(\text{AIC} \;=\; 2k \;-\; 2\log\mathcal{L}\)</span>, where <span class="math inline">\(k\)</span> is the number of estimated parameters. Because every MOSAIC simulation has the same <span class="math inline">\(k\)</span>, the <span class="math inline">\(\Delta \text{AIC}\)</span> of draw <span class="math inline">\(i\)</span> relative to the best draw is determined solely by the difference in log-likelihood.
+<span class="math display" id="eq:aic-delta">\[\begin{equation}
+\Delta_i
+\;=\;
+\text{AIC}_i - \text{AIC}_{\text{min}}
+\;=\;
+-\,2\!\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
+            \log\mathcal{L}_{\max}\bigr]
+\tag{4.10}
+\end{equation}\]</span></p>
+</div>
+<div id="assign-truncated-importance-weights" class="section level3" number="4.5.2">
+<h3>
+<span class="header-section-number">4.5.2</span> Assign truncated importance weights<a class="anchor" aria-label="anchor" href="#assign-truncated-importance-weights"><i class="fas fa-link"></i></a>
+</h3>
+<p>Since the BFRS method generates a large ensemble of candidate parameter sets <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we reduce the influence of poorly fitting models by truncating the importance weights using a <span class="math inline">\(\Delta \text{AIC}\)</span> cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior.
+<span class="math display" id="eq:aic-weights">\[\begin{equation}
+\tilde{w}_i \;=\;
+\begin{cases}
+\exp\!\bigl[-\tfrac12 \Delta_i\bigr], &amp; \Delta_i \le 4,\\[6pt]
+0, &amp; \Delta_i &gt; 4,
+\end{cases}
+\qquad \text{and} \qquad
+\tilde{w}_i \;=\;
+\dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
+\tag{4.11}
+\end{equation}\]</span>
+The threshold of <span class="math inline">\(\Delta_i \le 4\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(\exp(-2) \approx 0.14\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (<a href="https://doi.org/10.1007/b97636">Burnham &amp; Anderson 2002</a>). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.</p>
+</div>
+<div id="posterior-summaries" class="section level3" number="4.5.3">
+<h3>
+<span class="header-section-number">4.5.3</span> Posterior summaries<a class="anchor" aria-label="anchor" href="#posterior-summaries"><i class="fas fa-link"></i></a>
+</h3>
+<p>Because the vector of truncated <span class="math inline">\(\Delta \text{AIC}\)</span> weights <span class="math inline">\(\mathbf{\tilde{w}}\)</span> are proportional to the posterior density <span class="math inline">\(P(\boldsymbol{\Theta}\mid\text{data})\)</span>, we estimate the true Bayesian posterior distributions of each fitted model parameter as a weighted empirical statistic. Take for example the scalar <span class="math inline">\(\sigma\)</span>, which gives the proportion of infections that are symptomatic. It is an element of each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> sample of the parameter space, so <span class="math inline">\(\bigl\{\sigma^{(i)}\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> gives all <span class="math inline">\(\sigma\)</span> values for which a likelihood has been calculated. Therefore, we derive the posterior mean and 95% credible intervals for <span class="math inline">\(\sigma\)</span> as:
+<span class="math display" id="eq:weighted-posterior">\[\begin{equation}
+\mathbb{E}[\sigma] \;=\; \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i\,\sigma^{(i)}
+\qquad \text{and} \qquad
+95\% \, \text{CI} \;=\; \bigl[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\bigr].
+\tag{4.12}
+\end{equation}\]</span>
+Where <span class="math inline">\(Q^{(\tilde{w})}_{p}\)</span> denotes the <span class="math inline">\(\tilde{w}\)</span>-weighted <span class="math inline">\(p\)</span>-th quantile of the retained ensemble, ensuring that the resulting intervals are
+fully consistent with the Bayesian posterior implied by the importance-sampling weights.</p>
+</div>
+</div>
+<div id="model-convergence" class="section level2" number="4.6">
+<h2>
+<span class="header-section-number">4.6</span> Model convergence<a class="anchor" aria-label="anchor" href="#model-convergence"><i class="fas fa-link"></i></a>
+</h2>
+<p>Because the MOSAIC framework uses an i.i.d. brute-force random sampling (BFRS) scheme for model fitting, traditional chain-based diagnostics such as <span class="math inline">\(\hat R\)</span> are not relevant. Instead we track three complementary weight–based statistics that together tell us <em>how many</em> models inform the posterior, <em>how strongly</em> they agree, and <em>how evenly</em> their support is distributed. These metrics also provide mathematical criteria that supported by previous theory and empirical studies, which is crucial for assessing model convergence. Specifically these metrics are:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Effective sample size</strong> — <span class="math inline">\(\widehat{\text{ESS}}\)</span><br>
+gauges the amount of independent posterior information retained in the subset of best fitting model runs.</li>
+<li>
+<strong>Agreement index</strong> — <span class="math inline">\(A\)</span><br>
+measures the level of consensus among the retained best subset models.</li>
+<li>
+<strong>Coefficient of variation of weights</strong> — <span class="math inline">\(\mathrm{CV}_{\tilde w}\)</span><br>
+measures the variability of the retained models and detects extremely skewed model weights.</li>
+</ol>
+<div id="effective-sample-size-ess" class="section level3" number="4.6.1">
+<h3>
+<span class="header-section-number">4.6.1</span> Effective sample size (ESS)<a class="anchor" aria-label="anchor" href="#effective-sample-size-ess"><i class="fas fa-link"></i></a>
+</h3>
+<p>Since the BFRS draws are independent of <span class="math inline">\(P(\boldsymbol{\Theta})\)</span>, ESS plays
+the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We employ the specification of the ESS in <a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a> using the <span class="math inline">\(\Delta \text{AIC}\)</span>-truncated model weights <span class="math inline">\(\tilde w_i\)</span> from Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>:
+<span class="math display">\[\begin{equation}
+\widehat{\text{ESS}}
+\;=\;
+\Bigl[
+\sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
+\Bigr]^{-1}.
+\label{eq:ess}
+\end{equation}\]</span>
+Because discarded model runs have <span class="math inline">\(\tilde{w}_i=0\)</span>, ESS reflects only the retained
+subset. In dynamic Bayesian models an ESS <span class="math inline">\(\gtrsim\!500\)</span>–<span class="math inline">\(1000\)</span> is generally
+adequate for stable posterior medians and 95 % credible intervals
+(<a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a>;
+<a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>).</p>
+</div>
+<div id="agreement-index-a" class="section level3" number="4.6.2">
+<h3>
+<span class="header-section-number">4.6.2</span> Agreement index <span class="math inline">\(A\)</span><a class="anchor" aria-label="anchor" href="#agreement-index-a"><i class="fas fa-link"></i></a>
+</h3>
+<p>We quantify consensus among the retained subset of best models <span class="math inline">\(\mathcal B = \{\,i : \Delta_i \le 4\}\)</span> by the normalized <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Shannon entropy</a> of their model weights <span class="math inline">\(\tilde w_i\)</span>:
+<span class="math display" id="eq:agreement">\[\begin{equation}
+A = \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
+\qquad \text{and} \qquad
+H(\mathbf{\tilde{w}})
+=
+-\sum_{i\in\mathcal B}\tilde w_i\,\log\tilde w_i.
+\tag{4.13}
+\end{equation}\]</span>
+Note that by definition <span class="math inline">\(A \in \{0,1\}\)</span> because <span class="math inline">\(0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|\)</span>. When <span class="math inline">\(A=1\)</span>, all weights are equal (<span class="math inline">\(\tilde w_i = 1/|\mathcal B|\)</span>) and there is a high degree of consensus in the sense that all models share similar fit. When <span class="math inline">\(A=0\)</span>, a single model dominates (<span class="math inline">\(\tilde w_i = 1\)</span>) for one model run <span class="math inline">\(i\)</span> and zero for the rest), which gives poor consensus among the subset of best models <span class="math inline">\(\mathcal B\)</span>.</p>
+</div>
+<div id="coefficient-of-variation-of-weights" class="section level3" number="4.6.3">
+<h3>
+<span class="header-section-number">4.6.3</span> Coefficient of variation of weights<a class="anchor" aria-label="anchor" href="#coefficient-of-variation-of-weights"><i class="fas fa-link"></i></a>
+</h3>
+<p>Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
+<span class="math display" id="eq:cvw">\[\begin{equation}
+\mathrm{CV}_\mathbf{\tilde{w}}
+=
+\frac{\sqrt{\sum_{i\in\mathcal B}(\tilde{w}_i-\bar w)^2}}
+     {\bar w}
+\qquad \text{and} \qquad
+\bar w=\tfrac1{|\mathcal B|}.
+\tag{4.14}
+\end{equation}\]</span>
+Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights.</p>
+</div>
+<div id="practical-convergence-guidelines" class="section level3" number="4.6.4">
+<h3>
+<span class="header-section-number">4.6.4</span> Practical convergence guidelines<a class="anchor" aria-label="anchor" href="#practical-convergence-guidelines"><i class="fas fa-link"></i></a>
+</h3>
+<p>A calibration run that meets all three criteria indicates that the retained ensemble is <em>informative</em> (high ESS), <em>internally consistent</em> (high <span class="math inline">\(A\)</span>), and <em>numerically stable</em> (moderate <span class="math inline">\(\mathbf{\tilde{w}}\)</span>), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table <a href="model-calibration-1.html#tab:calibration">4.1</a> with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>).</p>
+<div class="inline-table"><table class="table table-sm">
+<caption>
+<span id="tab:calibration">Table 4.1: </span>Detials on convergence diagnostics with recommended thresholds and troubleshooting guidelines.</caption>
+<colgroup>
+<col width="63%">
+<col width="22%">
+<col width="14%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Metric</th>
+<th align="left">Target range</th>
+<th align="left">Source</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Effective Sample Size <span class="math inline">\(\left(\widehat{\text{ESS}}\right)\)</span>
+</td>
+<td align="left"><span class="math inline">\(\gt 500\)</span></td>
+<td align="left"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelamn et al 2014</a></td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left"><span class="math inline">\(\gt 1000\)</span></td>
+<td align="left"><a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a></td>
+</tr>
+<tr class="odd">
+<td align="left">Agreement Index <span class="math inline">\(\left(A\right)\)</span>
+</td>
+<td align="left"><span class="math inline">\(\gt 0.7 \ \text{or} \ 0.8\)</span></td>
+<td align="left"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
+</tr>
+<tr class="even">
+<td align="left">Weight Coefficient of Variation <span class="math inline">\(\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)\)</span>
+</td>
+<td align="left"><span class="math inline">\(\lt 1 \ \text{or} \ 2\)</span></td>
+<td align="left"><a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al 1994</a></td>
+</tr>
+</tbody>
+</table></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:likelihood-example"></span>
+<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%"><p class="caption">
+Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green.
+</p>
+</div>
+</div>
+</div>
+<div id="model-forecasting" class="section level2" number="4.7">
+<h2>
+<span class="header-section-number">4.7</span> Model Forecasting<a class="anchor" aria-label="anchor" href="#model-forecasting"><i class="fas fa-link"></i></a>
+</h2>
+<p>This section is in development.</p>
+</div>
+<div id="scenarios-and-counter-factuals" class="section level2" number="4.8">
+<h2>
+<span class="header-section-number">4.8</span> Scenarios and Counter Factuals<a class="anchor" aria-label="anchor" href="#scenarios-and-counter-factuals"><i class="fas fa-link"></i></a>
+</h2>
+<p>This section is in development.</p>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DKRGVPD7GE"></script><script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DKRGVPD7GE');
+</script>
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="model-description.html"><span class="header-section-number">3</span> Model description</a></div>
+<div class="next"><a href="scenarios.html"><span class="header-section-number">5</span> Scenarios</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#model-calibration-1"><span class="header-section-number">4</span> Model calibration</a></li>
+<li><a class="nav-link" href="#bayesian-likelihood-approach"><span class="header-section-number">4.1</span> Bayesian Likelihood Approach</a></li>
+<li><a class="nav-link" href="#total-log-likelihood-for-cases-and-deaths"><span class="header-section-number">4.2</span> Total Log-likelihood for Cases and Deaths</a></li>
+<li>
+<a class="nav-link" href="#distributional-assumptions-for-likelihood-components"><span class="header-section-number">4.3</span> Distributional Assumptions for Likelihood Components</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#negative-binomial-density-vmr-ge-1.5"><span class="header-section-number">4.3.1</span> Negative Binomial density (VMR \(\ge 1.5\))</a></li>
+<li><a class="nav-link" href="#poisson-density-vmr-1.5"><span class="header-section-number">4.3.2</span> Poisson density (VMR \(&lt; 1.5\))</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#algorithm-for-parameter-estimation"><span class="header-section-number">4.4</span> Algorithm for Parameter Estimation</a></li>
+<li>
+<a class="nav-link" href="#estimating-the-posterior-distribution-of-model-parameters"><span class="header-section-number">4.5</span> Estimating the Posterior Distribution of Model Parameters</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#compute-delta-textaic-for-every-draw"><span class="header-section-number">4.5.1</span> Compute \(\Delta \text{AIC}\) for every draw</a></li>
+<li><a class="nav-link" href="#assign-truncated-importance-weights"><span class="header-section-number">4.5.2</span> Assign truncated importance weights</a></li>
+<li><a class="nav-link" href="#posterior-summaries"><span class="header-section-number">4.5.3</span> Posterior summaries</a></li>
+</ul>
+</li>
+<li>
+<a class="nav-link" href="#model-convergence"><span class="header-section-number">4.6</span> Model convergence</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#effective-sample-size-ess"><span class="header-section-number">4.6.1</span> Effective sample size (ESS)</a></li>
+<li><a class="nav-link" href="#agreement-index-a"><span class="header-section-number">4.6.2</span> Agreement index \(A\)</a></li>
+<li><a class="nav-link" href="#coefficient-of-variation-of-weights"><span class="header-section-number">4.6.3</span> Coefficient of variation of weights</a></li>
+<li><a class="nav-link" href="#practical-convergence-guidelines"><span class="header-section-number">4.6.4</span> Practical convergence guidelines</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.7</span> Model Forecasting</a></li>
+<li><a class="nav-link" href="#scenarios-and-counter-factuals"><span class="header-section-number">4.8</span> Scenarios and Counter Factuals</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/InstituteforDiseaseModeling/MOSAIC-docs/blob/master/05-model-calibration.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/InstituteforDiseaseModeling/MOSAIC-docs/edit/master/05-model-calibration.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>MOSAIC: a spatial model of endemic cholera</strong>" was written by John R Giles. </p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
