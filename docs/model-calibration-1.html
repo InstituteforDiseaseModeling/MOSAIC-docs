@@ -152,8 +152,8 @@ calibration.</p>
 <span class="math display" id="eq:total-log-likelihood-2">\[\begin{equation}
 \log \mathcal{L}(\boldsymbol{\Theta}) =
 \sum_{j=1}^{J} w_{j} \left[
-w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\bigr)
-+ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\bigr)
+w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\right)
++ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\left(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\right)
 \right]
 \tag{4.6}
 \end{equation}\]</span></p>
@@ -240,11 +240,11 @@ parameter <span class="math inline">\(k_j\)</span>.</p>
 <span class="header-section-number">4.3.1</span> Negative Binomial density (VMR <span class="math inline">\(\ge 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#negative-binomial-density-vmr-ge-1.5"><i class="fas fa-link"></i></a>
 </h3>
 <p><span class="math display" id="eq:negbin">\[\begin{equation}
-\log P_{\text{NB}}\!\bigl(y_{jt}\mid\mu_{jt},k_j\bigr)
+\log P_{\text{NB}}\!\left(y_{jt}\mid\mu_{jt},k_j\right)
 \,=\,
 \log\Gamma(y_{jt}+k_j)-\log\Gamma(k_j)-\log\Gamma(y_{jt}+1)
-+k_j\log\!\Bigl[\tfrac{k_j}{k_j+\mu_{jt}}\Bigr]
-+y_{jt}\log\!\Bigl[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\Bigr]
++k_j\log\!\left[\tfrac{k_j}{k_j+\mu_{jt}}\right]
++y_{jt}\log\!\left[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\right]
 \tag{4.7}
 \end{equation}\]</span>
 The dispersion is estimated per location via the method-of-moments:
@@ -260,7 +260,7 @@ so that <span class="math inline">\(\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j
 <span class="header-section-number">4.3.2</span> Poisson density (VMR <span class="math inline">\(&lt; 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#poisson-density-vmr-1.5"><i class="fas fa-link"></i></a>
 </h3>
 <p><span class="math display" id="eq:poisson">\[\begin{equation}
-\log P_{\text{Pois}}\!\bigl(y_{jt}\mid\mu_{jt}\bigr)
+\log P_{\text{Pois}}\!\left(y_{jt}\mid\mu_{jt}\right)
 \,=\;
 y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
 \tag{4.9}
@@ -323,8 +323,8 @@ of each location, time step, and outcome on the overall fit.</p>
 \;=\;
 \text{AIC}_i - \text{AIC}_{\text{min}}
 \;=\;
--\,2\!\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
-\log\mathcal{L}_{\max}\bigr]
+-\,2\!\left[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
+\log\mathcal{L}_{\max}\right]
 \tag{4.10}
 \end{equation}\]</span></p>
 </div>
@@ -336,7 +336,7 @@ of each location, time step, and outcome on the overall fit.</p>
 <span class="math display" id="eq:aic-weights">\[\begin{equation}
 \tilde{w}_i \;=\;
 \begin{cases}
-\exp\!\bigl[-\tfrac12 \Delta_i\bigr], &amp; \Delta_i \le 6,\\[6pt]
+\exp\!\left[-\tfrac12 \Delta_i\right], &amp; \Delta_i \le 6,\\[6pt]
 0, &amp; \Delta_i &gt; 6,
 \end{cases}
 \qquad \text{and} \qquad
@@ -354,7 +354,7 @@ The threshold of <span class="math inline">\(\Delta_i \le 6\)</span> is widely u
 <span class="math display" id="eq:weighted-posterior">\[\begin{equation}
 \mathbb{E}[\sigma] \;=\; \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i\,\sigma^{(i)}
 \qquad \text{and} \qquad
-95\% \, \text{CI} \;=\; \bigl[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\bigr].
+95\% \, \text{CI} \;=\; \left[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\right].
 \tag{4.12}
 \end{equation}\]</span>
 Where <span class="math inline">\(Q^{(\tilde{w})}_{p}\)</span> denotes the <span class="math inline">\(\tilde{w}\)</span>-weighted <span class="math inline">\(p\)</span>-th quantile of the retained ensemble, ensuring that the resulting intervals are

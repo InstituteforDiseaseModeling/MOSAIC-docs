@@ -80,8 +80,8 @@ The total log-likelihood combines contributions from observed cases and deaths a
 \begin{equation}
 \log \mathcal{L}(\boldsymbol{\Theta}) =
 \sum_{j=1}^{J} w_{j} \left[
-w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\bigr)
-+ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\bigl(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\bigr)
+w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\right)
++ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\left(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\right)
 \right]
 (\#eq:total-log-likelihood-2)
 \end{equation}
@@ -117,11 +117,11 @@ parameter $k_j$.
 
 ### Negative Binomial density  (VMR $\ge 1.5$)
 \begin{equation}
-\log P_{\text{NB}}\!\bigl(y_{jt}\mid\mu_{jt},k_j\bigr)
+\log P_{\text{NB}}\!\left(y_{jt}\mid\mu_{jt},k_j\right)
 \,=\,
 \log\Gamma(y_{jt}+k_j)-\log\Gamma(k_j)-\log\Gamma(y_{jt}+1)
-+k_j\log\!\Bigl[\tfrac{k_j}{k_j+\mu_{jt}}\Bigr]
-+y_{jt}\log\!\Bigl[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\Bigr]
++k_j\log\!\left[\tfrac{k_j}{k_j+\mu_{jt}}\right]
++y_{jt}\log\!\left[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\right]
 (\#eq:negbin)
 \end{equation}
 The dispersion is estimated per location via the method-of-moments:
@@ -135,7 +135,7 @@ so that $\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j$. As $k_j\rightarrow\infty
 ### Poisson density  (VMR $< 1.5$)
 
 \begin{equation}
-\log P_{\text{Pois}}\!\bigl(y_{jt}\mid\mu_{jt}\bigr)
+\log P_{\text{Pois}}\!\left(y_{jt}\mid\mu_{jt}\right)
 \,=\;
 y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
 (\#eq:poisson)
@@ -144,7 +144,7 @@ y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
 The automatic Poisson/Negative-Binomial switch ensures that the
 error structure embedded in the likelihood replicates the empirical
 dispersion seen in the surveillance data, while the weighting scheme
-\(w_j,\,w_t,\,w_{\text{cases}},\,w_{\text{deaths}}\) (introduced in
+$w_j,\,w_t,\,w_{\text{cases}},\,w_{\text{deaths}}$ (introduced in
 Equation \@ref(eq:total-log-likelihood-2)) controls the relative influence
 of each location, time step, and outcome on the overall fit.
 
@@ -192,8 +192,8 @@ For any model, the [Akaike Information Criterion](https://en.wikipedia.org/wiki/
 \;=\;
 \text{AIC}_i - \text{AIC}_{\text{min}}
 \;=\;
--\,2\!\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
-\log\mathcal{L}_{\max}\bigr]
+-\,2\!\left[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
+\log\mathcal{L}_{\max}\right]
 (\#eq:aic-delta)
 \end{equation}
 
@@ -203,7 +203,7 @@ Since the BFRS method generates a large ensemble of candidate parameter sets $\b
 \begin{equation}
 \tilde{w}_i \;=\;
 \begin{cases}
-\exp\!\bigl[-\tfrac12 \Delta_i\bigr], & \Delta_i \le 6,\\[6pt]
+\exp\!\left[-\tfrac12 \Delta_i\right], & \Delta_i \le 6,\\[6pt]
 0, & \Delta_i > 6,
 \end{cases}
 \qquad \text{and} \qquad
@@ -219,7 +219,7 @@ Because the vector of truncated $\Delta \text{AIC}$ weights $\mathbf{\tilde{w}}$
 \begin{equation}
 \mathbb{E}[\sigma] \;=\; \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i\,\sigma^{(i)}
 \qquad \text{and} \qquad
-95\% \, \text{CI} \;=\; \bigl[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\bigr].
+95\% \, \text{CI} \;=\; \left[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\right].
 (\#eq:weighted-posterior)
 \end{equation}
 Where $Q^{(\tilde{w})}_{p}$ denotes the $\tilde{w}$-weighted $p$-th quantile of the retained ensemble, ensuring that the resulting intervals are
