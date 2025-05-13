@@ -2,25 +2,25 @@
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DKRGVPD7GE"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
 
-  gtag('config', 'G-DKRGVPD7GE');
+gtag('config', 'G-DKRGVPD7GE');
 </script>
 
 # Model calibration
 
 ## Bayesian Likelihood Approach
 
-The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a *likelihood function*. One major assumption of the Bayesian method is that all model parameters---and most importantly, the link between model and data---have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly-informed by other data sources and meta-analyses (see the [Model Description](https://www.mosaicmod.org/model-description.html) page). 
+The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a *likelihood function*. One major assumption of the Bayesian method is that all model parameters---and most importantly, the link between model and data---have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly informed by other data sources and meta-analyses (see the [Model Description](https://www.mosaicmod.org/model-description.html) page). 
 
 To calibrate the MOSAIC model to observed cholera surveillance data, the algorithm updates prior beliefs about model parameters through the likelihood function $\mathcal{L}(\boldsymbol{\Theta})$. The likelihood is essentially a function of model parameters that measures how probable our particular model is given the observed data, or more formally, the posterior probability distribution of the parameter vector $\boldsymbol{\Theta}$. This parameter vector includes all quantities required for a single iteration of the model, which includes transmission rates, mobility parameters, and seasonal forcing coefficients for example (see the [Table of Model Parameters](https://www.mosaicmod.org/model-description.html#table-of-model-parameters)).
 \begin{equation}
 \boldsymbol{\Theta} = \{\, \beta,\, \gamma,\, \omega,\, a_1,\, a_2,\, b_1,\, b_2,\, \dots \, \}
 (\#eq:theta)
 \end{equation}
-During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of $\boldsymbol{\Theta}$ using the a brute force sampling algorthim (more details below):
+During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of $\boldsymbol{\Theta}$ using a brute‑force random sampling algorithm (more details below):
 \begin{equation}
 \hat{\boldsymbol{\Theta}} = \underset{\boldsymbol{\Theta}}{\arg\max}\big[\log \mathcal{L}(\boldsymbol{\Theta})\big].
 (\#eq:general-likelihood)
@@ -124,7 +124,7 @@ parameter $k_j$.
 +y_{jt}\log\!\Bigl[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\Bigr]
 (\#eq:negbin)
 \end{equation}
-The dispersion is estimated*per location via the method-of-moments:
+The dispersion is estimated per location via the method-of-moments:
 \begin{equation}
 k_j \;=\;\frac{\mu_j^2}{\mathrm{Var}(y_{j\cdot})-\mu_j},
 (\#eq:dispersion)
@@ -182,7 +182,7 @@ For each of the $n_{\text{sim}} \times n_{\text{iter}}$ internal iterations, com
 ## Estimating the Posterior Distribution of Model Parameters
 
 To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method a well-known method technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights using the $\Delta \text{AIC}$ with a practical cut–off of $\Delta=4$ and retain the IS for a subset of supported models as described the in steps below:
+$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights using the $\Delta \text{AIC}$ with a practical cut–off of $\Delta=4$ and retain the IS for a subset of supported models as described in the steps below:
 
 ### Compute $\Delta \text{AIC}$ for every draw
 
@@ -193,7 +193,7 @@ For any model, the [Akaike Information Criterion](https://en.wikipedia.org/wiki/
 \text{AIC}_i - \text{AIC}_{\text{min}}
 \;=\;
 -\,2\!\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
-            \log\mathcal{L}_{\max}\bigr]
+\log\mathcal{L}_{\max}\bigr]
 (\#eq:aic-delta)
 \end{equation}
 
@@ -203,15 +203,15 @@ Since the BFRS method generates a large ensemble of candidate parameter sets $\b
 \begin{equation}
 \tilde{w}_i \;=\;
 \begin{cases}
-\exp\!\bigl[-\tfrac12 \Delta_i\bigr], & \Delta_i \le 4,\\[6pt]
-0, & \Delta_i > 4,
+\exp\!\bigl[-\tfrac12 \Delta_i\bigr], & \Delta_i \le 6,\\[6pt]
+0, & \Delta_i > 6,
 \end{cases}
 \qquad \text{and} \qquad
 \tilde{w}_i \;=\;
 \dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
 (\#eq:aic-weights)
 \end{equation}
-The threshold of $\Delta_i \le 4$ is widely used in model selection and corresponds approximately to a likelihood ratio of $\exp(-2) \approx 0.14$, which in nested-model comparisons aligns loosely with a frequentist $p$-value of 0.05 ([Burnham & Anderson 2002](https://doi.org/10.1007/b97636)). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.
+The threshold of $\Delta_i \le 6$ is widely used in model selection and corresponds approximately to a likelihood ratio of $p_i = \exp(-\Delta_i/2) \approx 0.05$, which in nested-model comparisons aligns loosely with a frequentist $p$-value of 0.05 (Burnham & Anderson [2002](https://doi.org/10.1007/b97636) and [2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.
 
 ### Posterior summaries
 
@@ -233,22 +233,21 @@ fully consistent with the Bayesian posterior implied by the importance-sampling 
 Because the MOSAIC framework uses an i.i.d. brute-force random sampling (BFRS) scheme for model fitting, traditional chain-based diagnostics such as $\hat R$ are not relevant. Instead we track three complementary weight–based statistics that together tell us *how many* models inform the posterior, *how strongly* they agree, and *how evenly* their support is distributed. These metrics also provide mathematical criteria that supported by previous theory and empirical studies, which is crucial for assessing model convergence. Specifically these metrics are:
 
 1. **Effective sample size** — $\widehat{\text{ESS}}$  
-   gauges the amount of independent posterior information retained in the subset of best fitting model runs.
+gauges the amount of independent posterior information retained in the subset of best fitting model runs.
 2. **Agreement index** — $A$  
-   measures the level of consensus among the retained best subset models.
+measures the level of consensus among the retained best subset models.
 3. **Coefficient of variation of weights** — $\mathrm{CV}_{\tilde w}$  
-   measures the variability of the retained models and detects extremely skewed model weights.
+measures the variability of the retained models and detects extremely skewed model weights.
 
 
 ### Effective sample size (ESS)
 Since the BFRS draws are independent of $P(\boldsymbol{\Theta})$, ESS plays
 the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500) using the $\Delta \text{AIC}$-truncated model weights $\tilde w_i$ from Equation \@ref(eq:aic-weights):
 \begin{equation}
-\widehat{\text{ESS}}
-\;=\;
-\Bigl[
+\widehat{\text{ESS}} =
+\left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
-\Bigr]^{-1}.
+\right]^{-1}.
 \label{eq:ess}
 \end{equation}
 Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
@@ -261,7 +260,8 @@ adequate for stable posterior medians and 95 % credible intervals
 ### Agreement index *A*
 We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 4\}\) by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
 \begin{equation}
-A = \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
+A = 
+\frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
 \qquad \text{and} \qquad
 H(\mathbf{\tilde{w}})
 =
@@ -274,10 +274,9 @@ Note that by definition $A \in \{0,1\}$ because $0 \;\le\; H(\mathbf{\tilde{w}})
 ### Coefficient of variation of weights
 Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
 \begin{equation}
-\mathrm{CV}_\mathbf{\tilde{w}}
-=
-\frac{\sqrt{\sum_{i\in\mathcal B}(\tilde{w}_i-\bar w)^2}}
-     {\bar w}
+\mathrm{CV}_\mathbf{\tilde{w}} =
+\frac{\sqrt{\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
+{\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
 (\#eq:cvw)
@@ -292,18 +291,19 @@ A calibration run that meets all three criteria indicates that the retained ense
 
 Table: (\#tab:calibration)Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.
 
-|Metric                                                                          |Target range                |Source            |
-|:-------------------------------------------------------------------------------|:---------------------------|:-----------------|
-|Effective Sample Size $\left(\widehat{\text{ESS}}\right)$                       |$\gt 500$                   |[Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)|
-|                                                                                |$\gt 1000$                  |[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)|
-|Agreement Index $\left(A\right)$                                                |$\gt 0.7 \ \text{or} \ 0.8$ |[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)|
-|Weight Coefficient of Variation $\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)$ |$\lt 1 \ \text{or} \ 2$     |[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)|
+|Metric                                                                          |Target range                               |                  Source|
+|:-------------------------------------------------------------------------------|:------------------------------------------|-----------------------:|
+|$\Delta$AIC cut-off                                                             |$\le 6 \ \left(p\! \approx \! 0.05\right)$ |[Burnham & Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)|
+|Effective Sample Size $\left(\widehat{\text{ESS}}\right)$                       |$\gt 500$                                  |[Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)|
+|                                                                                |$\gt 1000$                                 |[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)|
+|Agreement Index $\left(A\right)$                                                |$\gt 0.7 \ \text{or} \ 0.8$                |[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)|
+|Weight Coefficient of Variation $\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)$ |$\lt 1 \ \text{or} \ 2$                    |[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)|
 
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%" />
-<p class="caption">(\#fig:likelihood-example)Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green.</p>
+<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%" />
+<p class="caption">(\#fig:likelihood-example)Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green.</p>
 </div>
 
 

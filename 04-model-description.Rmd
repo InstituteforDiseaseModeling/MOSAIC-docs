@@ -712,24 +712,23 @@ knitr::include_graphics("figures/mobility_diffusion_pi.png")
 
 Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3), where we give $\mathcal{H}_{jt}\in(0,1)$, the daily probability that at least one new infection is introduced into destination $j$ on day $t$. Adapting the notation of the human force of infection (Equation \@ref(eq:foi-human)), the hazard is:
 \begin{equation}
-\mathcal{H}_{jt}
-=
+\mathcal{H}_{jt} =
 \frac{
   \beta^{\text{hum}}_{jt}\,
-  \Bigl[
-    1-\exp\!\Bigl(
-      -\dfrac{(1-\tau_j)\,
-        \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)}{N_{jt}}
-      \sum_{i\neq j}
+  \left[
+    1-\exp\!\left(
+      -\dfrac{\left(1-\tau_j\right)\,
+        \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)}{N_{jt}}
+      \sum_{\substack{i=1\\ i\neq j}}^{J}
         \pi_{ij}\,\tau_i\,
         \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
-    \Bigr)
-  \Bigr]
+    \right)
+  \right]
 }{
-  1\,/\,\Bigl(
-    1+\beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
-      \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)
-  \Bigr)
+  1\,/\,\left(
+    1+\beta^{\text{hum}}_{jt}\,\left(1-\tau_j\right)\,
+      \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)
+  \right)
 }.
 \label{eq:spatial-hazard}
 \end{equation}
@@ -747,20 +746,19 @@ To characterise how strongly infection dynamics in one country reflect those in 
 [Keeling & Rohani (2002)](https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x).
 For each pair of locations $i$ and $j$ we compute
 \begin{equation}
-\mathcal{C}_{ij}
-=
+\mathcal{C}_{ij} =
 \frac{
-  \bigl(y_{it}-\bar{y}_{i}\bigr)
-  \bigl(y_{jt}-\bar{y}_{j}\bigr)
+  \left(y_{it}-\bar{y}_{i}\right)
+  \left(y_{jt}-\bar{y}_{j}\right)
 }{
-  \sqrt{\operatorname{var}(y_{i})\,\operatorname{var}(y_{j})}
+  \sqrt{\operatorname{var}\left(y_{i}\right)\,\operatorname{var}\left(y_{j}\right)}
 },
 \label{eq:correlation}
 \end{equation}
 
 where the prevalence time series are $y_{it}=(I_{1,it}+I_{2,it})/N_{i}$ and $y_{jt}=(I_{1,jt}+I_{2,jt})/N_{j}$.
 Mean prevalence in each location is $\bar{y}_{i}=\tfrac{1}{T}\sum_{t=1}^{T}y_{it}$ and $\bar{y}_{j}=\tfrac{1}{T}\sum_{t=1}^{T}y_{jt}$,
-with $\operatorname{var}(y_{i})$ and $\operatorname{var}(y_{j})$ calculated over the same interval $T$. The coefficient $C_{ij}\in[-1,1]$ 
+with $\operatorname{var}(y_{i})$ and $\operatorname{var}(y_{j})$ calculated over the same interval $T$. The coefficient $\mathcal{C}_{ij}\in[-1,1]$ 
 therefore measures the degree to which fluctuations in infection prevalence are synchronised between metapopulations, providing a complementary 
 view of spatial heterogeneity alongside the importation hazard $\mathcal{H}_{jt}$.
 

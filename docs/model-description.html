@@ -1377,24 +1377,23 @@ Figure 3.24: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 </h3>
 <p>Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by <a href="http://link.springer.com/10.1007/s10651-007-0059-3">Bjørnstad &amp; Grenfell (2008)</a>, where we give <span class="math inline">\(\mathcal{H}_{jt}\in(0,1)\)</span>, the daily probability that at least one new infection is introduced into destination <span class="math inline">\(j\)</span> on day <span class="math inline">\(t\)</span>. Adapting the notation of the human force of infection (Equation <a href="model-description.html#eq:foi-human">(3.2)</a>), the hazard is:
 <span class="math display">\[\begin{equation}
-\mathcal{H}_{jt}
-=
+\mathcal{H}_{jt} =
 \frac{
   \beta^{\text{hum}}_{jt}\,
-  \Bigl[
-    1-\exp\!\Bigl(
-      -\dfrac{(1-\tau_j)\,
-        \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)}{N_{jt}}
-      \sum_{i\neq j}
+  \left[
+    1-\exp\!\left(
+      -\dfrac{\left(1-\tau_j\right)\,
+        \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)}{N_{jt}}
+      \sum_{\substack{i=1\\ i\neq j}}^{J}
         \pi_{ij}\,\tau_i\,
         \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
-    \Bigr)
-  \Bigr]
+    \right)
+  \right]
 }{
-  1\,/\,\Bigl(
-    1+\beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
-      \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)
-  \Bigr)
+  1\,/\,\left(
+    1+\beta^{\text{hum}}_{jt}\,\left(1-\tau_j\right)\,
+      \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)
+  \right)
 }.
 \label{eq:spatial-hazard}
 \end{equation}\]</span></p>
@@ -1411,19 +1410,18 @@ Figure 3.24: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 <a href="https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x">Keeling &amp; Rohani (2002)</a>.
 For each pair of locations <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> we compute
 <span class="math display">\[\begin{equation}
-\mathcal{C}_{ij}
-=
+\mathcal{C}_{ij} =
 \frac{
-  \bigl(y_{it}-\bar{y}_{i}\bigr)
-  \bigl(y_{jt}-\bar{y}_{j}\bigr)
+  \left(y_{it}-\bar{y}_{i}\right)
+  \left(y_{jt}-\bar{y}_{j}\right)
 }{
-  \sqrt{\operatorname{var}(y_{i})\,\operatorname{var}(y_{j})}
+  \sqrt{\operatorname{var}\left(y_{i}\right)\,\operatorname{var}\left(y_{j}\right)}
 },
 \label{eq:correlation}
 \end{equation}\]</span></p>
 <p>where the prevalence time series are <span class="math inline">\(y_{it}=(I_{1,it}+I_{2,it})/N_{i}\)</span> and <span class="math inline">\(y_{jt}=(I_{1,jt}+I_{2,jt})/N_{j}\)</span>.
 Mean prevalence in each location is <span class="math inline">\(\bar{y}_{i}=\tfrac{1}{T}\sum_{t=1}^{T}y_{it}\)</span> and <span class="math inline">\(\bar{y}_{j}=\tfrac{1}{T}\sum_{t=1}^{T}y_{jt}\)</span>,
-with <span class="math inline">\(\operatorname{var}(y_{i})\)</span> and <span class="math inline">\(\operatorname{var}(y_{j})\)</span> calculated over the same interval <span class="math inline">\(T\)</span>. The coefficient <span class="math inline">\(C_{ij}\in[-1,1]\)</span>
+with <span class="math inline">\(\operatorname{var}(y_{i})\)</span> and <span class="math inline">\(\operatorname{var}(y_{j})\)</span> calculated over the same interval <span class="math inline">\(T\)</span>. The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span>
 therefore measures the degree to which fluctuations in infection prevalence are synchronised between metapopulations, providing a complementary
 view of spatial heterogeneity alongside the importation hazard <span class="math inline">\(\mathcal{H}_{jt}\)</span>.</p>
 </div>
@@ -4167,11 +4165,11 @@ A key challenge in calibration is the incomplete or aggregated nature of the ava
 </tbody>
 </table></div>
 <!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-DKRGVPD7GE"></script><script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
 
-  gtag('config', 'G-DKRGVPD7GE');
+gtag('config', 'G-DKRGVPD7GE');
 </script>
 </div>
 </div>

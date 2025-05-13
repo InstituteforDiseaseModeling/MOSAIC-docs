@@ -91,13 +91,13 @@
 <h2>
 <span class="header-section-number">4.1</span> Bayesian Likelihood Approach<a class="anchor" aria-label="anchor" href="#bayesian-likelihood-approach"><i class="fas fa-link"></i></a>
 </h2>
-<p>The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a <em>likelihood function</em>. One major assumption of the Bayesian method is that all model parameters—and most importantly, the link between model and data—have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly-informed by other data sources and meta-analyses (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
+<p>The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a <em>likelihood function</em>. One major assumption of the Bayesian method is that all model parameters—and most importantly, the link between model and data—have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly informed by other data sources and meta-analyses (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
 <p>To calibrate the MOSAIC model to observed cholera surveillance data, the algorithm updates prior beliefs about model parameters through the likelihood function <span class="math inline">\(\mathcal{L}(\boldsymbol{\Theta})\)</span>. The likelihood is essentially a function of model parameters that measures how probable our particular model is given the observed data, or more formally, the posterior probability distribution of the parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. This parameter vector includes all quantities required for a single iteration of the model, which includes transmission rates, mobility parameters, and seasonal forcing coefficients for example (see the <a href="https://www.mosaicmod.org/model-description.html#table-of-model-parameters">Table of Model Parameters</a>).
 <span class="math display" id="eq:theta">\[\begin{equation}
 \boldsymbol{\Theta} = \{\, \beta,\, \gamma,\, \omega,\, a_1,\, a_2,\, b_1,\, b_2,\, \dots \, \}
 \tag{4.1}
 \end{equation}\]</span>
-During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of <span class="math inline">\(\boldsymbol{\Theta}\)</span> using the a brute force sampling algorthim (more details below):
+During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of <span class="math inline">\(\boldsymbol{\Theta}\)</span> using a brute‑force random sampling algorithm (more details below):
 <span class="math display" id="eq:general-likelihood">\[\begin{equation}
 \hat{\boldsymbol{\Theta}} = \underset{\boldsymbol{\Theta}}{\arg\max}\big[\log \mathcal{L}(\boldsymbol{\Theta})\big].
 \tag{4.2}
@@ -247,7 +247,7 @@ parameter <span class="math inline">\(k_j\)</span>.</p>
 +y_{jt}\log\!\Bigl[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\Bigr]
 \tag{4.7}
 \end{equation}\]</span>
-The dispersion is estimated*per location via the method-of-moments:
+The dispersion is estimated per location via the method-of-moments:
 <span class="math display" id="eq:dispersion">\[\begin{equation}
 k_j \;=\;\frac{\mu_j^2}{\mathrm{Var}(y_{j\cdot})-\mu_j},
 \tag{4.8}
@@ -312,7 +312,7 @@ of each location, time step, and outcome on the overall fit.</p>
 <span class="header-section-number">4.5</span> Estimating the Posterior Distribution of Model Parameters<a class="anchor" aria-label="anchor" href="#estimating-the-posterior-distribution-of-model-parameters"><i class="fas fa-link"></i></a>
 </h2>
 <p>To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-<span class="math inline">\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method a well-known method technique to estimate posterior distributions originally described by <a href="https://pubsonline.informs.org/doi/10.1287/opre.1.5.263">Kahn &amp; Marshall 1953</a> and reviewed in a more modern context by <a href="https://doi.org/10.1002/wics.56">Tokdar &amp; Kass 2010</a>. Thus, we calculate the IS-weights using the <span class="math inline">\(\Delta \text{AIC}\)</span> with a practical cut–off of <span class="math inline">\(\Delta=4\)</span> and retain the IS for a subset of supported models as described the in steps below:</p>
+<span class="math inline">\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by <a href="https://pubsonline.informs.org/doi/10.1287/opre.1.5.263">Kahn &amp; Marshall 1953</a> and reviewed in a more modern context by <a href="https://doi.org/10.1002/wics.56">Tokdar &amp; Kass 2010</a>. Thus, we calculate the IS-weights using the <span class="math inline">\(\Delta \text{AIC}\)</span> with a practical cut–off of <span class="math inline">\(\Delta=4\)</span> and retain the IS for a subset of supported models as described in the steps below:</p>
 <div id="compute-delta-textaic-for-every-draw" class="section level3" number="4.5.1">
 <h3>
 <span class="header-section-number">4.5.1</span> Compute <span class="math inline">\(\Delta \text{AIC}\)</span> for every draw<a class="anchor" aria-label="anchor" href="#compute-delta-textaic-for-every-draw"><i class="fas fa-link"></i></a>
@@ -324,7 +324,7 @@ of each location, time step, and outcome on the overall fit.</p>
 \text{AIC}_i - \text{AIC}_{\text{min}}
 \;=\;
 -\,2\!\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
-            \log\mathcal{L}_{\max}\bigr]
+\log\mathcal{L}_{\max}\bigr]
 \tag{4.10}
 \end{equation}\]</span></p>
 </div>
@@ -336,15 +336,15 @@ of each location, time step, and outcome on the overall fit.</p>
 <span class="math display" id="eq:aic-weights">\[\begin{equation}
 \tilde{w}_i \;=\;
 \begin{cases}
-\exp\!\bigl[-\tfrac12 \Delta_i\bigr], &amp; \Delta_i \le 4,\\[6pt]
-0, &amp; \Delta_i &gt; 4,
+\exp\!\bigl[-\tfrac12 \Delta_i\bigr], &amp; \Delta_i \le 6,\\[6pt]
+0, &amp; \Delta_i &gt; 6,
 \end{cases}
 \qquad \text{and} \qquad
 \tilde{w}_i \;=\;
 \dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
 \tag{4.11}
 \end{equation}\]</span>
-The threshold of <span class="math inline">\(\Delta_i \le 4\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(\exp(-2) \approx 0.14\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (<a href="https://doi.org/10.1007/b97636">Burnham &amp; Anderson 2002</a>). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.</p>
+The threshold of <span class="math inline">\(\Delta_i \le 6\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(p_i = \exp(-\Delta_i/2) \approx 0.05\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (Burnham &amp; Anderson <a href="https://doi.org/10.1007/b97636">2002</a> and <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">2004</a>). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.</p>
 </div>
 <div id="posterior-summaries" class="section level3" number="4.5.3">
 <h3>
@@ -384,11 +384,10 @@ measures the variability of the retained models and detects extremely skewed mod
 <p>Since the BFRS draws are independent of <span class="math inline">\(P(\boldsymbol{\Theta})\)</span>, ESS plays
 the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We employ the specification of the ESS in <a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a> using the <span class="math inline">\(\Delta \text{AIC}\)</span>-truncated model weights <span class="math inline">\(\tilde w_i\)</span> from Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>:
 <span class="math display">\[\begin{equation}
-\widehat{\text{ESS}}
-\;=\;
-\Bigl[
+\widehat{\text{ESS}} =
+\left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
-\Bigr]^{-1}.
+\right]^{-1}.
 \label{eq:ess}
 \end{equation}\]</span>
 Because discarded model runs have <span class="math inline">\(\tilde{w}_i=0\)</span>, ESS reflects only the retained
@@ -403,7 +402,8 @@ adequate for stable posterior medians and 95 % credible intervals
 </h3>
 <p>We quantify consensus among the retained subset of best models <span class="math inline">\(\mathcal B = \{\,i : \Delta_i \le 4\}\)</span> by the normalized <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Shannon entropy</a> of their model weights <span class="math inline">\(\tilde w_i\)</span>:
 <span class="math display" id="eq:agreement">\[\begin{equation}
-A = \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
+A =
+\frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
 \qquad \text{and} \qquad
 H(\mathbf{\tilde{w}})
 =
@@ -418,10 +418,9 @@ Note that by definition <span class="math inline">\(A \in \{0,1\}\)</span> becau
 </h3>
 <p>Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
 <span class="math display" id="eq:cvw">\[\begin{equation}
-\mathrm{CV}_\mathbf{\tilde{w}}
-=
-\frac{\sqrt{\sum_{i\in\mathcal B}(\tilde{w}_i-\bar w)^2}}
-     {\bar w}
+\mathrm{CV}_\mathbf{\tilde{w}} =
+\frac{\sqrt{\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
+{\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
 \tag{4.14}
@@ -437,45 +436,51 @@ Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns 
 <caption>
 <span id="tab:calibration">Table 4.1: </span>Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.</caption>
 <colgroup>
-<col width="63%">
-<col width="22%">
-<col width="14%">
+<col width="54%">
+<col width="29%">
+<col width="16%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Metric</th>
 <th align="left">Target range</th>
-<th align="left">Source</th>
+<th align="right">Source</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td align="left">
+<span class="math inline">\(\Delta\)</span>AIC cut-off</td>
+<td align="left"><span class="math inline">\(\le 6 \ \left(p\! \approx \! 0.05\right)\)</span></td>
+<td align="right"><a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">Burnham &amp; Anderson 2004</a></td>
+</tr>
+<tr class="even">
 <td align="left">Effective Sample Size <span class="math inline">\(\left(\widehat{\text{ESS}}\right)\)</span>
 </td>
 <td align="left"><span class="math inline">\(\gt 500\)</span></td>
-<td align="left"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelamn et al 2014</a></td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"><span class="math inline">\(\gt 1000\)</span></td>
-<td align="left"><a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a></td>
+<td align="right"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelamn et al 2014</a></td>
 </tr>
 <tr class="odd">
+<td align="left"></td>
+<td align="left"><span class="math inline">\(\gt 1000\)</span></td>
+<td align="right"><a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a></td>
+</tr>
+<tr class="even">
 <td align="left">Agreement Index <span class="math inline">\(\left(A\right)\)</span>
 </td>
 <td align="left"><span class="math inline">\(\gt 0.7 \ \text{or} \ 0.8\)</span></td>
-<td align="left"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
+<td align="right"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Weight Coefficient of Variation <span class="math inline">\(\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)\)</span>
 </td>
 <td align="left"><span class="math inline">\(\lt 1 \ \text{or} \ 2\)</span></td>
-<td align="left"><a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al 1994</a></td>
+<td align="right"><a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al 1994</a></td>
 </tr>
 </tbody>
 </table></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:likelihood-example"></span>
-<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%"><p class="caption">
-Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minumum to maximum with the model simulation giving the maximum likelihood highlighted in green.
+<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%"><p class="caption">
+Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green.
 </p>
 </div>
 </div>
