@@ -821,52 +821,61 @@ The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG
 
 
 
-
-
-### The probability of spatial transmission
-
-The likelihood of introductions of cholera from disparate locations is a major concern during cholera outbreaks. However, this can be difficult to characterize given the endemic dynamics and patterns of human movement. We include a few measures of spatial heterogeneity here and the first is a simple importation probability based on connectivity and the possibility of incoming infections. The basic probability of transmission from an origin $i$ to a particular destination $j$ and time $t$ is defined as:
-
-\begin{equation} 
-p(i,j,t) = 1 - e^{-\beta_{jt}^{\text{hum}} (((1-\tau_j)S_{jt})/N_{jt}) \pi_{ij}\tau_iI_{it}}
-(\#eq:prob)
-\end{equation}
-
-
 ### The spatial hazard
-Although we are more concerned with endemic dynamics here, there are likely to be periods of time early in the rainy season where cholera cases and the rate of transmission is low enough for spatial spread to resemble epidemic dynamics for a time. During such times periods, we can estimate the arrival time of contagion for any location where cases are yet to be reported. We do this be estimating the spatial hazard of transmission:
 
-\begin{equation} 
-h(j,t) = \frac{
-\beta_{jt}^{\text{hum}} \Big(1 - \exp\big(-((1-\tau_j)S_{jt}/N_{jt}) \sum_{\forall i \not= j} \pi_{ij}\tau_i (I_{it}/N_{it}) \big) \Big)
+Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3), where we give $\mathcal{H}_{jt}\in(0,1)$, the daily probability that at least one new infection is introduced into destination $j$ on day $t$. Adapting the notation of the human force of infection (Equation \@ref(eq:foi-human)), the hazard is:
+\begin{equation}
+\mathcal{H}_{jt}
+=
+\frac{
+  \beta^{\text{hum}}_{jt}\,
+  \Bigl[
+    1-\exp\!\Bigl(
+      -\dfrac{(1-\tau_j)\,
+        \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)}{N_{jt}}
+      \sum_{i\neq j}
+        \pi_{ij}\,\tau_i\,
+        \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
+    \Bigr)
+  \Bigr]
 }{
-1/\big(1 + \beta_{jt}^{\text{hum}} (1-\tau_j)S_{jt}\big)
+  1\,/\,\Bigl(
+    1+\beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
+      \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)
+  \Bigr)
 }.
-(\#eq:hazard)
+\label{eq:spatial-hazard}
 \end{equation}
 
-And then normalizing to give the waiting time distribution for all locations:
-
-\begin{equation} 
-w(j,t) = h(j,T) \prod_{t=1}^{T-1}1-h(j,t).
-(\#eq:waiting)
-\end{equation}
+The term in square brackets converts a per-capita arrival rate into a per-day probability, while the denominator keeps $\mathcal{H}_{jt}$ bounded between
+0 and 1. The susceptible pool now explicitly includes individuals whose vaccine-derived immunity has waned
+$\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)$, and both symptomatic and asymptomatic infections
+$(I_{1,it}+I_{2,it})$ in origin $i$ contribute to the export pressure weighted by the gravity-model mobility terms $\pi_{ij}\tau_i$.
 
 
 
 ### Coupling among locations
 
-Another measure of spatial heterogeneity is to quantify the coupling of disease dynamics among metapopulations using a correlation coefficient. Here, we use the definition of spatial correlation between locations $i$ and $j$ as $C_{ij}$ described in [Keeling and Rohani (2002)](https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x), which gives a measure of how similar infection dynamics are between locations.
-
-\begin{equation} 
-C_{ij} = \frac{
-( y_{it} - \bar{y}_i )( y_{jt} - \bar{y}_j )
+To characterise how strongly infection dynamics in one country reflect those in another we follow the spatial–correlation metric of
+[Keeling & Rohani (2002)](https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x).
+For each pair of locations $i$ and $j$ we compute
+\begin{equation}
+\mathcal{C}_{ij}
+=
+\frac{
+  \bigl(y_{it}-\bar{y}_{i}\bigr)
+  \bigl(y_{jt}-\bar{y}_{j}\bigr)
 }{
-\sqrt{\text{var}(y_i) \text{var}(y_j)}
-}
-(\#eq:correlation)
+  \sqrt{\operatorname{var}(y_{i})\,\operatorname{var}(y_{j})}
+},
+\label{eq:correlation}
 \end{equation}
-Where $y_{it} = I_{it}/N_i$ and $y_{jt} = I_{jt}/N_j$. Mean prevalence in each location is $\bar{y_i} = \frac{1}{T} \sum_{t=1}^{T} y_{it}$ and $\bar{y_j} = \frac{1}{T} \sum_{t=1}^{T} y_{jt}$.
+
+where the prevalence time series are $y_{it}=(I_{1,it}+I_{2,it})/N_{i}$ and $y_{jt}=(I_{1,jt}+I_{2,jt})/N_{j}$.
+Mean prevalence in each location is $\bar{y}_{i}=\tfrac{1}{T}\sum_{t=1}^{T}y_{it}$ and $\bar{y}_{j}=\tfrac{1}{T}\sum_{t=1}^{T}y_{jt}$,
+with $\operatorname{var}(y_{i})$ and $\operatorname{var}(y_{j})$ calculated over the same interval $T$. The coefficient $C_{ij}\in[-1,1]$ 
+therefore measures the degree to which fluctuations in infection prevalence are synchronised between metapopulations, providing a complementary 
+view of spatial heterogeneity alongside the importation hazard $\mathcal{H}_{jt}$.
 
 
 

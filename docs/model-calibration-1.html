@@ -399,7 +399,7 @@ adequate for stable posterior medians and 95 % credible intervals
 </div>
 <div id="agreement-index-a" class="section level3" number="4.6.2">
 <h3>
-<span class="header-section-number">4.6.2</span> Agreement index <span class="math inline">\(A\)</span><a class="anchor" aria-label="anchor" href="#agreement-index-a"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.6.2</span> Agreement index <em>A</em><a class="anchor" aria-label="anchor" href="#agreement-index-a"><i class="fas fa-link"></i></a>
 </h3>
 <p>We quantify consensus among the retained subset of best models <span class="math inline">\(\mathcal B = \{\,i : \Delta_i \le 4\}\)</span> by the normalized <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Shannon entropy</a> of their model weights <span class="math inline">\(\tilde w_i\)</span>:
 <span class="math display" id="eq:agreement">\[\begin{equation}
@@ -428,14 +428,14 @@ Note that by definition <span class="math inline">\(A \in \{0,1\}\)</span> becau
 \end{equation}\]</span>
 Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights.</p>
 </div>
-<div id="practical-convergence-guidelines" class="section level3" number="4.6.4">
+<div id="convergence-guidelines" class="section level3" number="4.6.4">
 <h3>
-<span class="header-section-number">4.6.4</span> Practical convergence guidelines<a class="anchor" aria-label="anchor" href="#practical-convergence-guidelines"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.6.4</span> Convergence guidelines<a class="anchor" aria-label="anchor" href="#convergence-guidelines"><i class="fas fa-link"></i></a>
 </h3>
-<p>A calibration run that meets all three criteria indicates that the retained ensemble is <em>informative</em> (high ESS), <em>internally consistent</em> (high <span class="math inline">\(A\)</span>), and <em>numerically stable</em> (moderate <span class="math inline">\(\mathbf{\tilde{w}}\)</span>), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table <a href="model-calibration-1.html#tab:calibration">4.1</a> with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>).</p>
+<p>A calibration run that meets all three criteria indicates that the retained ensemble is <em>informative</em> (high ESS), <em>internally consistent</em> (high <span class="math inline">\(A\)</span>), and <em>numerically stable</em> (moderate <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span>), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table <a href="model-calibration-1.html#tab:calibration">4.1</a> with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>).</p>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:calibration">Table 4.1: </span>Detials on convergence diagnostics with recommended thresholds and troubleshooting guidelines.</caption>
+<span id="tab:calibration">Table 4.1: </span>Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.</caption>
 <colgroup>
 <col width="63%">
 <col width="22%">
@@ -528,9 +528,9 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <li>
 <a class="nav-link" href="#model-convergence"><span class="header-section-number">4.6</span> Model convergence</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#effective-sample-size-ess"><span class="header-section-number">4.6.1</span> Effective sample size (ESS)</a></li>
-<li><a class="nav-link" href="#agreement-index-a"><span class="header-section-number">4.6.2</span> Agreement index \(A\)</a></li>
+<li><a class="nav-link" href="#agreement-index-a"><span class="header-section-number">4.6.2</span> Agreement index A</a></li>
 <li><a class="nav-link" href="#coefficient-of-variation-of-weights"><span class="header-section-number">4.6.3</span> Coefficient of variation of weights</a></li>
-<li><a class="nav-link" href="#practical-convergence-guidelines"><span class="header-section-number">4.6.4</span> Practical convergence guidelines</a></li>
+<li><a class="nav-link" href="#convergence-guidelines"><span class="header-section-number">4.6.4</span> Convergence guidelines</a></li>
 </ul>
 </li>
 <li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.7</span> Model Forecasting</a></li>

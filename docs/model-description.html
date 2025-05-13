@@ -1371,49 +1371,61 @@ Figure 3.24: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 </p>
 </div>
 </div>
-<div id="the-probability-of-spatial-transmission" class="section level3" number="3.6.4">
+<div id="the-spatial-hazard" class="section level3" number="3.6.4">
 <h3>
-<span class="header-section-number">3.6.4</span> The probability of spatial transmission<a class="anchor" aria-label="anchor" href="#the-probability-of-spatial-transmission"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.6.4</span> The spatial hazard<a class="anchor" aria-label="anchor" href="#the-spatial-hazard"><i class="fas fa-link"></i></a>
 </h3>
-<p>The likelihood of introductions of cholera from disparate locations is a major concern during cholera outbreaks. However, this can be difficult to characterize given the endemic dynamics and patterns of human movement. We include a few measures of spatial heterogeneity here and the first is a simple importation probability based on connectivity and the possibility of incoming infections. The basic probability of transmission from an origin <span class="math inline">\(i\)</span> to a particular destination <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span> is defined as:</p>
-<p><span class="math display" id="eq:prob">\[\begin{equation}
-p(i,j,t) = 1 - e^{-\beta_{jt}^{\text{hum}} (((1-\tau_j)S_{jt})/N_{jt}) \pi_{ij}\tau_iI_{it}}
-\tag{3.15}
-\end{equation}\]</span></p>
-</div>
-<div id="the-spatial-hazard" class="section level3" number="3.6.5">
-<h3>
-<span class="header-section-number">3.6.5</span> The spatial hazard<a class="anchor" aria-label="anchor" href="#the-spatial-hazard"><i class="fas fa-link"></i></a>
-</h3>
-<p>Although we are more concerned with endemic dynamics here, there are likely to be periods of time early in the rainy season where cholera cases and the rate of transmission is low enough for spatial spread to resemble epidemic dynamics for a time. During such times periods, we can estimate the arrival time of contagion for any location where cases are yet to be reported. We do this be estimating the spatial hazard of transmission:</p>
-<p><span class="math display" id="eq:hazard">\[\begin{equation}
-h(j,t) = \frac{
-\beta_{jt}^{\text{hum}} \Big(1 - \exp\big(-((1-\tau_j)S_{jt}/N_{jt}) \sum_{\forall i \not= j} \pi_{ij}\tau_i (I_{it}/N_{it}) \big) \Big)
+<p>Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by <a href="http://link.springer.com/10.1007/s10651-007-0059-3">Bjørnstad &amp; Grenfell (2008)</a>, where we give <span class="math inline">\(\mathcal{H}_{jt}\in(0,1)\)</span>, the daily probability that at least one new infection is introduced into destination <span class="math inline">\(j\)</span> on day <span class="math inline">\(t\)</span>. Adapting the notation of the human force of infection (Equation <a href="model-description.html#eq:foi-human">(3.2)</a>), the hazard is:
+<span class="math display">\[\begin{equation}
+\mathcal{H}_{jt}
+=
+\frac{
+  \beta^{\text{hum}}_{jt}\,
+  \Bigl[
+    1-\exp\!\Bigl(
+      -\dfrac{(1-\tau_j)\,
+        \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)}{N_{jt}}
+      \sum_{i\neq j}
+        \pi_{ij}\,\tau_i\,
+        \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
+    \Bigr)
+  \Bigr]
 }{
-1/\big(1 + \beta_{jt}^{\text{hum}} (1-\tau_j)S_{jt}\big)
+  1\,/\,\Bigl(
+    1+\beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
+      \bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)
+  \Bigr)
 }.
-\tag{3.16}
+\label{eq:spatial-hazard}
 \end{equation}\]</span></p>
-<p>And then normalizing to give the waiting time distribution for all locations:</p>
-<p><span class="math display" id="eq:waiting">\[\begin{equation}
-w(j,t) = h(j,T) \prod_{t=1}^{T-1}1-h(j,t).
-\tag{3.17}
-\end{equation}\]</span></p>
+<p>The term in square brackets converts a per-capita arrival rate into a per-day probability, while the denominator keeps <span class="math inline">\(\mathcal{H}_{jt}\)</span> bounded between
+0 and 1. The susceptible pool now explicitly includes individuals whose vaccine-derived immunity has waned
+<span class="math inline">\(\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)\)</span>, and both symptomatic and asymptomatic infections
+<span class="math inline">\((I_{1,it}+I_{2,it})\)</span> in origin <span class="math inline">\(i\)</span> contribute to the export pressure weighted by the gravity-model mobility terms <span class="math inline">\(\pi_{ij}\tau_i\)</span>.</p>
 </div>
-<div id="coupling-among-locations" class="section level3" number="3.6.6">
+<div id="coupling-among-locations" class="section level3" number="3.6.5">
 <h3>
-<span class="header-section-number">3.6.6</span> Coupling among locations<a class="anchor" aria-label="anchor" href="#coupling-among-locations"><i class="fas fa-link"></i></a>
+<span class="header-section-number">3.6.5</span> Coupling among locations<a class="anchor" aria-label="anchor" href="#coupling-among-locations"><i class="fas fa-link"></i></a>
 </h3>
-<p>Another measure of spatial heterogeneity is to quantify the coupling of disease dynamics among metapopulations using a correlation coefficient. Here, we use the definition of spatial correlation between locations <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> as <span class="math inline">\(C_{ij}\)</span> described in <a href="https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x">Keeling and Rohani (2002)</a>, which gives a measure of how similar infection dynamics are between locations.</p>
-<p><span class="math display" id="eq:correlation">\[\begin{equation}
-C_{ij} = \frac{
-( y_{it} - \bar{y}_i )( y_{jt} - \bar{y}_j )
+<p>To characterise how strongly infection dynamics in one country reflect those in another we follow the spatial–correlation metric of
+<a href="https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x">Keeling &amp; Rohani (2002)</a>.
+For each pair of locations <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> we compute
+<span class="math display">\[\begin{equation}
+\mathcal{C}_{ij}
+=
+\frac{
+  \bigl(y_{it}-\bar{y}_{i}\bigr)
+  \bigl(y_{jt}-\bar{y}_{j}\bigr)
 }{
-\sqrt{\text{var}(y_i) \text{var}(y_j)}
-}
-\tag{3.18}
-\end{equation}\]</span>
-Where <span class="math inline">\(y_{it} = I_{it}/N_i\)</span> and <span class="math inline">\(y_{jt} = I_{jt}/N_j\)</span>. Mean prevalence in each location is <span class="math inline">\(\bar{y_i} = \frac{1}{T} \sum_{t=1}^{T} y_{it}\)</span> and <span class="math inline">\(\bar{y_j} = \frac{1}{T} \sum_{t=1}^{T} y_{jt}\)</span>.</p>
+  \sqrt{\operatorname{var}(y_{i})\,\operatorname{var}(y_{j})}
+},
+\label{eq:correlation}
+\end{equation}\]</span></p>
+<p>where the prevalence time series are <span class="math inline">\(y_{it}=(I_{1,it}+I_{2,it})/N_{i}\)</span> and <span class="math inline">\(y_{jt}=(I_{1,jt}+I_{2,jt})/N_{j}\)</span>.
+Mean prevalence in each location is <span class="math inline">\(\bar{y}_{i}=\tfrac{1}{T}\sum_{t=1}^{T}y_{it}\)</span> and <span class="math inline">\(\bar{y}_{j}=\tfrac{1}{T}\sum_{t=1}^{T}y_{jt}\)</span>,
+with <span class="math inline">\(\operatorname{var}(y_{i})\)</span> and <span class="math inline">\(\operatorname{var}(y_{j})\)</span> calculated over the same interval <span class="math inline">\(T\)</span>. The coefficient <span class="math inline">\(C_{ij}\in[-1,1]\)</span>
+therefore measures the degree to which fluctuations in infection prevalence are synchronised between metapopulations, providing a complementary
+view of spatial heterogeneity alongside the importation hazard <span class="math inline">\(\mathcal{H}_{jt}\)</span>.</p>
 </div>
 </div>
 <div id="the-observation-process" class="section level2" number="3.7">
@@ -1567,7 +1579,7 @@ Figure 3.26: Proportion of suspected cholera cases that are true infections. Pan
 \\[3pt]
 D_{jt} &amp;= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
 \end{aligned}
-\tag{3.19}
+\tag{3.15}
 \end{equation}\]</span></p>
 <div class="inline-table"><table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
@@ -3206,7 +3218,7 @@ Zimbabwe
 <p>The reproductive number is a common metric of epidemic growth that represents the average number of secondary cases generated by a primary case at a specific time during an epidemic. We track how <span class="math inline">\(R\)</span> changes over time by estimating the instantaneous reproductive number <span class="math inline">\(R_t\)</span> as described in <a href="https://academic.oup.com/aje/article/178/9/1505/89262">Cori et al 2013</a>. We track <span class="math inline">\(R_t\)</span> across all metapopulations in the model to give <span class="math inline">\(R_{jt}\)</span> using the following formula:</p>
 <p><span class="math display" id="eq:R">\[\begin{equation}
 R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
-\tag{3.20}
+\tag{3.16}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(I_{jt}\)</span> is the number of new infections in destination <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span>, and
 <span class="math inline">\(g(\Delta t)\)</span> represents the probability value from the generation time distribution of cholera. This is accomplished by using the weighed sum in the denominator which is highly influenced by the generation time distribution.</p>
@@ -4194,9 +4206,8 @@ A key challenge in calibration is the incomplete or aggregated nature of the ava
 <li><a class="nav-link" href="#human-mobility-model"><span class="header-section-number">3.6.1</span> Human mobility model</a></li>
 <li><a class="nav-link" href="#estimating-the-departure-process"><span class="header-section-number">3.6.2</span> Estimating the departure process</a></li>
 <li><a class="nav-link" href="#estimating-the-diffusion-process"><span class="header-section-number">3.6.3</span> Estimating the diffusion process</a></li>
-<li><a class="nav-link" href="#the-probability-of-spatial-transmission"><span class="header-section-number">3.6.4</span> The probability of spatial transmission</a></li>
-<li><a class="nav-link" href="#the-spatial-hazard"><span class="header-section-number">3.6.5</span> The spatial hazard</a></li>
-<li><a class="nav-link" href="#coupling-among-locations"><span class="header-section-number">3.6.6</span> Coupling among locations</a></li>
+<li><a class="nav-link" href="#the-spatial-hazard"><span class="header-section-number">3.6.4</span> The spatial hazard</a></li>
+<li><a class="nav-link" href="#coupling-among-locations"><span class="header-section-number">3.6.5</span> Coupling among locations</a></li>
 </ul>
 </li>
 <li>

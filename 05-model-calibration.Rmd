@@ -258,7 +258,7 @@ adequate for stable posterior medians and 95 % credible intervals
 [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)).
 
 
-### Agreement index $A$
+### Agreement index *A*
 We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 4\}\) by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
 \begin{equation}
 A = \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
@@ -285,8 +285,8 @@ Beyond the first-moment metric of model agreement, we use a second-moment check 
 Large $\mathrm{CV}_\mathbf{\tilde{w}}$ warns that the variance within the best fitting subset of models may be high even if ESS and $A$ look satisfactory.  A common rule-of-thumb from [Kong et al. 1994](https://doi.org/10.1080/01621459.1994.10476469) is $\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2$ for comfortably balanced weights.
 
 
-### Practical convergence guidelines
-A calibration run that meets all three criteria indicates that the retained ensemble is *informative* (high ESS), *internally consistent* (high $A$), and *numerically stable* (moderate $\mathbf{\tilde{w}}$), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table \@ref(tab:calibration) with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \@ref(fig:likelihood-example)).
+### Convergence guidelines
+A calibration run that meets all three criteria indicates that the retained ensemble is *informative* (high ESS), *internally consistent* (high $A$), and *numerically stable* (moderate $\mathrm{CV}_\mathbf{\tilde{w}}$), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table \@ref(tab:calibration) with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \@ref(fig:likelihood-example)).
 
 ```{r calibration, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
@@ -319,7 +319,7 @@ kable(metric_tbl,
                     'Target range', 
                     #'Action if target missed', 
                     'Source'),
-      caption  = "Detials on convergence diagnostics with recommended thresholds and troubleshooting guidelines.")
+      caption  = "Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.")
 
 ```
 
