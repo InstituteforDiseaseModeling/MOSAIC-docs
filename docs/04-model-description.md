@@ -193,7 +193,7 @@ Using the model fitting methods described above, and the cluster-based approach 
 <p class="caption">(\#fig:seasonal-all)Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.</p>
 </div>
 
-<table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table" style="font-size: 11.75px; color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">(\#tab:seasonal-table)(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).</caption>
  <thead>
 <tr>
@@ -557,7 +557,7 @@ Since *V. cholerae* is transmitted through fecal contamination of water and othe
 
 To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$) in the environment-to-human force of infection ($\Psi_{jt}$). Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
 
-<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-striped table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:wash-weights)(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.</caption>
  <thead>
   <tr>
@@ -855,25 +855,30 @@ $(I_{1,it}+I_{2,it})$ in origin $i$ contribute to the export pressure weighted b
 
 ### Coupling among locations
 
-To characterise how strongly infection dynamics in one country reflect those in another we follow the spatial–correlation metric of
-[Keeling & Rohani (2002)](https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x).
-For each pair of locations $i$ and $j$ we compute
+To characterize how strongly infection dynamics in one country reflect those in another we follow the spatial–correlation metric of [Keeling & Rohani (2002)](https://onlinelibrary.wiley.com/doi/abs/10.1046/j.1461-0248.2002.00268.x). For each pair of locations $i$ and $j$ observed over days $t = \{1,\dots ,T\}$ we define the prevalence for each location over time as
 \begin{equation}
-\mathcal{C}_{ij} =
-\frac{
-  \left(y_{it}-\bar{y}_{i}\right)
-  \left(y_{jt}-\bar{y}_{j}\right)
-}{
-  \sqrt{\operatorname{var}\left(y_{i}\right)\,\operatorname{var}\left(y_{j}\right)}
-},
-\label{eq:correlation}
+y_{it} = \frac{I_{1,it}+I_{2,it}}{N_i}
+\qquad \text{and} \qquad
+y_{jt} = \frac{I_{1,jt}+I_{2,jt}}{N_j},
+\label{eq:location-prevalence}
+\end{equation}
+and the corresponding mean prevalence as  
+\begin{equation}
+\bar y_i = \frac{1}{T}\sum_{t=1}^{T} y_{it}
+\qquad \text{and} \qquad
+\bar y_j = \frac{1}{T}\sum_{t=1}^{T} y_{jt}.
+\label{eq:location-mean-prevalence}
 \end{equation}
 
-where the prevalence time series are $y_{it}=(I_{1,it}+I_{2,it})/N_{i}$ and $y_{jt}=(I_{1,jt}+I_{2,jt})/N_{j}$.
-Mean prevalence in each location is $\bar{y}_{i}=\tfrac{1}{T}\sum_{t=1}^{T}y_{it}$ and $\bar{y}_{j}=\tfrac{1}{T}\sum_{t=1}^{T}y_{jt}$,
-with $\operatorname{var}(y_{i})$ and $\operatorname{var}(y_{j})$ calculated over the same interval $T$. The coefficient $\mathcal{C}_{ij}\in[-1,1]$ 
-therefore measures the degree to which fluctuations in infection prevalence are synchronised between metapopulations, providing a complementary 
-view of spatial heterogeneity alongside the importation hazard $\mathcal{H}_{jt}$.
+Using these quantities, we write the *spatial–correlation coefficient* as a set of explicit sums:
+\begin{equation}
+\mathcal{C}_{ij} = 
+\frac{ \sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)\bigl(y_{jt}-\bar y_j\bigr) }
+     { \sqrt{\sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)^{2}}
+       \;\sqrt{\sum_{t=1}^{T}\bigl(y_{jt}-\bar y_j\bigr)^{2}} }.
+\label{eq:correlation}
+\end{equation}
+The coefficient $\mathcal{C}_{ij}\in[-1,1]$ therefore measures the degree to which fluctuations in infection prevalence are synchronized between metapopulations—providing a complementary view of spatial heterogeneity alongside the importation hazard $\mathcal{H}_{jt}$.
 
 
 
@@ -957,7 +962,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 \end{equation}
 
 
-<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:cfr)(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
  <thead>
   <tr>
@@ -1337,7 +1342,7 @@ D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}]
 
 The model includes basic demographic change by using reported birth and death rates for each of the $j$ countries, $b_j$ and $d_j$ respectively. These rates are static and defined by the United Nations Department of Economic and Social Affairs Population Division [World Population Prospects 2024](https://population.un.org/wpp/Download/Standard/CSV/). Values for $b_j$ and $d_j$ are derived from crude rates and converted to birth rate per day and death rate per day (shown in Table \@ref(tab:demographics)).
 
-<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:demographics)(\#tab:demographics)Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.</caption>
  <thead>
   <tr>
@@ -1683,18 +1688,8 @@ In total, the initial conditions reflect:
 
 ## Model calibration
 
-Model calibration is performed to fine-tune the hyperparameters and ensure the model accurately represents the observed data. Our calibration strategy involves:
+After the transmission model is fully specified, we tune its numerical parameters by maximizing the log-likelihood of the observed cholera cases and deaths in a Bayesian inference framework that uses brute-force random-sampling approach to parameter estimation. A detailed walk-through---including likelihood equations, importance-sampling weights, and convergence diagnostics---is provided on the dedicated [Model Calibration page](https://www.mosaicmod.org/model-calibration-1.html).
 
-- **Latin Hypercube Sampling (LHS):**  
-We use LHS to explore the parameter space efficiently. This method helps generate a diverse set of hyperparameter combinations for evaluation.
-
-- **Likelihood Fitting:**  
-For each set of hyperparameters, the model likelihood is computed based on the observed incidence and death data. The calibration process searches for the hyperparameter set that maximizes the model’s likelihood.
-
-- **Data Challenges:**  
-A key challenge in calibration is the incomplete or aggregated nature of the available data. To address this, we incorporate methods that allow flexible fitting even when data are sparse or reported at different temporal scales.
-
-By combining LHS and likelihood-based calibration, we aim to identify a robust set of hyperparameters that accurately capture both the temporal and spatial dynamics of cholera transmission in Sub-Saharan Africa.
 
 <div id="mosaic-table"></div>
 ## Table of MOSAIC framework countries
