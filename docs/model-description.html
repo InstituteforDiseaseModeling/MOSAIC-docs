@@ -7,7 +7,7 @@
 <title>3 Model description | MOSAIC: a spatial model of endemic cholera</title>
 <meta name="author" content="John R Giles">
 <meta name="description" content="Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of...">
-<meta name="generator" content="bookdown 0.40 with bs4_book()">
+<meta name="generator" content="bookdown 0.43 with bs4_book()">
 <meta property="og:title" content="3 Model description | MOSAIC: a spatial model of endemic cholera">
 <meta property="og:type" content="book">
 <meta property="og:description" content="Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of...">
@@ -72,10 +72,11 @@
 <li><a class="" href="data.html"><span class="header-section-number">2</span> Data</a></li>
 <li><a class="active" href="model-description.html"><span class="header-section-number">3</span> Model description</a></li>
 <li><a class="" href="model-calibration-1.html"><span class="header-section-number">4</span> Model calibration</a></li>
-<li><a class="" href="scenarios.html"><span class="header-section-number">5</span> Scenarios</a></li>
-<li><a class="" href="usage.html"><span class="header-section-number">6</span> Usage</a></li>
-<li><a class="" href="news.html"><span class="header-section-number">7</span> News</a></li>
-<li><a class="" href="references.html"><span class="header-section-number">8</span> References</a></li>
+<li><a class="" href="model-versions.html"><span class="header-section-number">5</span> Model versions</a></li>
+<li><a class="" href="scenarios.html"><span class="header-section-number">6</span> Scenarios</a></li>
+<li><a class="" href="usage.html"><span class="header-section-number">7</span> Usage</a></li>
+<li><a class="" href="news.html"><span class="header-section-number">8</span> News</a></li>
+<li><a class="" href="references.html"><span class="header-section-number">9</span> References</a></li>
 </ul>
 
         <div class="book-extra">
@@ -1375,32 +1376,25 @@ Figure 3.24: The diffusion process <span class="math inline">\(\pi_{ij}\)</span>
 <h3>
 <span class="header-section-number">3.6.4</span> The spatial hazard<a class="anchor" aria-label="anchor" href="#the-spatial-hazard"><i class="fas fa-link"></i></a>
 </h3>
-<p>Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by <a href="http://link.springer.com/10.1007/s10651-007-0059-3">Bjørnstad &amp; Grenfell (2008)</a>, where we give <span class="math inline">\(\mathcal{H}_{jt}\in(0,1)\)</span>, the daily probability that at least one new infection is introduced into destination <span class="math inline">\(j\)</span> on day <span class="math inline">\(t\)</span>. Adapting the notation of the human force of infection (Equation <a href="model-description.html#eq:foi-human">(3.2)</a>), the hazard is:
-<span class="math display">\[\begin{equation}
+<p>Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by <a href="http://link.springer.com/10.1007/s10651-007-0059-3">Bjørnstad &amp; Grenfell (2008)</a>. Let <span class="math inline">\(\mathcal{H}_{jt}\in(0,1)\)</span> be the daily probability that at least one new infection is introduced into destination <span class="math inline">\(j\)</span> on day <span class="math inline">\(t\)</span>. Adapting the notation of the human force of infection (Equation <a href="model-description.html#eq:foi-human">(3.2)</a>), we define
+<span class="math display" id="eq:spatial-hazard">\[\begin{equation}
 \mathcal{H}_{jt} =
 \frac{
   \beta^{\text{hum}}_{jt}\,
-  \left[
-    1-\exp\!\left(
-      -\dfrac{\left(1-\tau_j\right)\,
-        \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)}{N_{jt}}
-      \sum_{\substack{i=1\\ i\neq j}}^{J}
-        \pi_{ij}\,\tau_i\,
-        \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
-    \right)
-  \right]
+  \left[\,1-\exp\!\left(\!
+        -(1-\tau_j)\,
+        \dfrac{ S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt} }{ N_{jt} }
+        \sum_{i\neq j}
+          \pi_{ij}\,\tau_i\,
+          \dfrac{ I_{1,it}+I_{2,it} }{ N_{it} }
+      \right)\right]
 }{
-  1\,/\,\left(
-    1+\beta^{\text{hum}}_{jt}\,\left(1-\tau_j\right)\,
+  1 + \beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
       \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)
-  \right)
-}.
-\label{eq:spatial-hazard}
-\end{equation}\]</span></p>
-<p>The term in square brackets converts a per-capita arrival rate into a per-day probability, while the denominator keeps <span class="math inline">\(\mathcal{H}_{jt}\)</span> bounded between
-0 and 1. The susceptible pool now explicitly includes individuals whose vaccine-derived immunity has waned
-<span class="math inline">\(\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)\)</span>, and both symptomatic and asymptomatic infections
-<span class="math inline">\((I_{1,it}+I_{2,it})\)</span> in origin <span class="math inline">\(i\)</span> contribute to the export pressure weighted by the gravity-model mobility terms <span class="math inline">\(\pi_{ij}\tau_i\)</span>.</p>
+}
+\tag{3.15}
+\end{equation}\]</span>
+The square-bracket term converts a per-capita arrival rate into a per-day probability, while the denominator keeps <span class="math inline">\(\mathcal{H}_{jt}\)</span> strictly between 0 and 1. The susceptible pool explicitly includes individuals whose vaccine-derived immunity has waned <span class="math inline">\(\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)\)</span>, and both symptomatic and asymptomatic infections <span class="math inline">\((I_{1,it}+I_{2,it})\)</span> in origin <span class="math inline">\(i\)</span> contribute to the export pressure weighted by the gravity-model mobility terms <span class="math inline">\(\pi_{ij}\tau_i\)</span>.</p>
 </div>
 <div id="coupling-among-locations" class="section level3" number="3.6.5">
 <h3>
@@ -1413,19 +1407,19 @@ y_{it} = \frac{I_{1,it}+I_{2,it}}{N_i}
 y_{jt} = \frac{I_{1,jt}+I_{2,jt}}{N_j},
 \label{eq:location-prevalence}
 \end{equation}\]</span>
-and the corresponding mean prevalence as<br><span class="math display">\[\begin{equation}
+and the corresponding mean prevalence as<br><span class="math display" id="eq:location-mean-prevalence">\[\begin{equation}
 \bar y_i = \frac{1}{T}\sum_{t=1}^{T} y_{it}
 \qquad \text{and} \qquad
 \bar y_j = \frac{1}{T}\sum_{t=1}^{T} y_{jt}.
-\label{eq:location-mean-prevalence}
+\tag{3.16}
 \end{equation}\]</span></p>
-<p>Using these quantities, we write the <em>spatial–correlation coefficient</em> as a set of explicit sums:
-<span class="math display">\[\begin{equation}
+<p>Using these quantities, we write the spatial–correlation coefficient as a set of explicit sums:
+<span class="math display" id="eq:correlation">\[\begin{equation}
 \mathcal{C}_{ij} =
 \frac{ \sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)\bigl(y_{jt}-\bar y_j\bigr) }
      { \sqrt{\sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)^{2}}
        \;\sqrt{\sum_{t=1}^{T}\bigl(y_{jt}-\bar y_j\bigr)^{2}} }.
-\label{eq:correlation}
+\tag{3.17}
 \end{equation}\]</span>
 The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span> therefore measures the degree to which fluctuations in infection prevalence are synchronized between metapopulations—providing a complementary view of spatial heterogeneity alongside the importation hazard <span class="math inline">\(\mathcal{H}_{jt}\)</span>.</p>
 </div>
@@ -1581,7 +1575,7 @@ Figure 3.26: Proportion of suspected cholera cases that are true infections. Pan
 \\[3pt]
 D_{jt} &amp;= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
 \end{aligned}
-\tag{3.15}
+\tag{3.18}
 \end{equation}\]</span></p>
 <div class="inline-table"><table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
@@ -3220,7 +3214,7 @@ Zimbabwe
 <p>The reproductive number is a common metric of epidemic growth that represents the average number of secondary cases generated by a primary case at a specific time during an epidemic. We track how <span class="math inline">\(R\)</span> changes over time by estimating the instantaneous reproductive number <span class="math inline">\(R_t\)</span> as described in <a href="https://academic.oup.com/aje/article/178/9/1505/89262">Cori et al 2013</a>. We track <span class="math inline">\(R_t\)</span> across all metapopulations in the model to give <span class="math inline">\(R_{jt}\)</span> using the following formula:</p>
 <p><span class="math display" id="eq:R">\[\begin{equation}
 R_{jt} = \frac{I_{jt}}{\sum_{\Delta t=1}^{t} g(\Delta t) I_{j,t-\Delta t}}
-\tag{3.16}
+\tag{3.19}
 \end{equation}\]</span></p>
 <p>Where <span class="math inline">\(I_{jt}\)</span> is the number of new infections in destination <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span>, and
 <span class="math inline">\(g(\Delta t)\)</span> represents the probability value from the generation time distribution of cholera. This is accomplished by using the weighed sum in the denominator which is highly influenced by the generation time distribution.</p>

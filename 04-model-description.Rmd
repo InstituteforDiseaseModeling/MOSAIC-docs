@@ -710,34 +710,25 @@ knitr::include_graphics("figures/mobility_diffusion_pi.png")
 
 ### The spatial hazard
 
-Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3), where we give $\mathcal{H}_{jt}\in(0,1)$, the daily probability that at least one new infection is introduced into destination $j$ on day $t$. Adapting the notation of the human force of infection (Equation \@ref(eq:foi-human)), the hazard is:
+Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3). Let $\mathcal{H}_{jt}\in(0,1)$ be the daily probability that at least one new infection is introduced into destination $j$ on day $t$. Adapting the notation of the human force of infection (Equation \@ref(eq:foi-human)), we define
 \begin{equation}
 \mathcal{H}_{jt} =
 \frac{
   \beta^{\text{hum}}_{jt}\,
-  \left[
-    1-\exp\!\left(
-      -\dfrac{\left(1-\tau_j\right)\,
-        \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)}{N_{jt}}
-      \sum_{\substack{i=1\\ i\neq j}}^{J}
-        \pi_{ij}\,\tau_i\,
-        \dfrac{I_{1,it}+I_{2,it}}{N_{it}}
-    \right)
-  \right]
+  \left[\,1-\exp\!\left(\!
+        -(1-\tau_j)\,
+        \dfrac{ S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt} }{ N_{jt} }
+        \sum_{i\neq j}
+          \pi_{ij}\,\tau_i\,
+          \dfrac{ I_{1,it}+I_{2,it} }{ N_{it} }
+      \right)\right]
 }{
-  1\,/\,\left(
-    1+\beta^{\text{hum}}_{jt}\,\left(1-\tau_j\right)\,
+  1 + \beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
       \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)
-  \right)
-}.
-\label{eq:spatial-hazard}
+}
+(\#eq:spatial-hazard)
 \end{equation}
-
-The term in square brackets converts a per-capita arrival rate into a per-day probability, while the denominator keeps $\mathcal{H}_{jt}$ bounded between
-0 and 1. The susceptible pool now explicitly includes individuals whose vaccine-derived immunity has waned
-$\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)$, and both symptomatic and asymptomatic infections
-$(I_{1,it}+I_{2,it})$ in origin $i$ contribute to the export pressure weighted by the gravity-model mobility terms $\pi_{ij}\tau_i$.
-
+The square-bracket term converts a per-capita arrival rate into a per-day probability, while the denominator keeps $\mathcal{H}_{jt}$ strictly between 0 and 1. The susceptible pool explicitly includes individuals whose vaccine-derived immunity has waned $\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)$, and both symptomatic and asymptomatic infections $(I_{1,it}+I_{2,it})$ in origin $i$ contribute to the export pressure weighted by the gravity-model mobility terms $\pi_{ij}\tau_i$.
 
 
 ### Coupling among locations
@@ -754,16 +745,16 @@ and the corresponding mean prevalence as
 \bar y_i = \frac{1}{T}\sum_{t=1}^{T} y_{it}
 \qquad \text{and} \qquad
 \bar y_j = \frac{1}{T}\sum_{t=1}^{T} y_{jt}.
-\label{eq:location-mean-prevalence}
+(\#eq:location-mean-prevalence)
 \end{equation}
 
-Using these quantities, we write the *spatial–correlation coefficient* as a set of explicit sums:
+Using these quantities, we write the spatial–correlation coefficient as a set of explicit sums:
 \begin{equation}
 \mathcal{C}_{ij} = 
 \frac{ \sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)\bigl(y_{jt}-\bar y_j\bigr) }
      { \sqrt{\sum_{t=1}^{T}\bigl(y_{it}-\bar y_i\bigr)^{2}}
        \;\sqrt{\sum_{t=1}^{T}\bigl(y_{jt}-\bar y_j\bigr)^{2}} }.
-\label{eq:correlation}
+(\#eq:correlation)
 \end{equation}
 The coefficient $\mathcal{C}_{ij}\in[-1,1]$ therefore measures the degree to which fluctuations in infection prevalence are synchronized between metapopulations—providing a complementary view of spatial heterogeneity alongside the importation hazard $\mathcal{H}_{jt}$.
 

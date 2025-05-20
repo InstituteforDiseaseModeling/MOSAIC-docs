@@ -41,6 +41,9 @@ eq:M
 eq:gravity
 fig:mobility-departure
 fig:mobility-diffusion
+eq:spatial-hazard
+eq:location-mean-prevalence
+eq:correlation
 tab:symptomatic-table
 fig:symptomatic-fig
 fig:rho
