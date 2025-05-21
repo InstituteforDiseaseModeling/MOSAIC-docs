@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.5.20)  21 MAY 2025 10:46
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.5.20)  21 MAY 2025 14:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1230,14 +1230,25 @@ LaTeX Warning: Float too large for page by 122.7597pt on input line 1452.
 [60]
 
 [61]
+Underfull \hbox (badness 1348) in paragraph at lines 1470--1473
+\TU/lmr/m/n/10 symptomatic and asymptomatic cases—each weighted by $[]$ and by the
+ []
+
+File: figures/generation_time.png Graphic file (type bmp)
+<figures/generation_time.png>
+Missing character: There is no ≈ (U+2248) in font [lmroman10-regular]:mapping=tex-text;!
+Missing character: There is no ≈ (U+2248) in font [lmroman10-regular]:mapping=tex-text;!
+
 
 [62]
-Overfull \hbox (747.00998pt too wide) in paragraph at lines 1505--1590
+
+[63]
+Overfull \hbox (747.00998pt too wide) in paragraph at lines 1531--1616
  [][] 
  []
 
 
-Overfull \hbox (1019.38002pt too wide) in paragraph at lines 1596--1697
+Overfull \hbox (1019.38002pt too wide) in paragraph at lines 1622--1723
 [] 
  []
 
@@ -1246,20 +1257,20 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-[63]
-
 [64]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 
 [65]
-Overfull \vbox (104.69926pt too high) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
 [66]
-Overfull \hbox (1284.4101pt too wide) in paragraph at lines 1702--1795
+Overfull \vbox (104.69926pt too high) has occurred while \output is active []
+
+
+
+[67]
+Overfull \hbox (1284.4101pt too wide) in paragraph at lines 1728--1821
 [] 
  []
 
@@ -1268,174 +1279,176 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-[67]
+[68]
 Overfull \vbox (24.5655pt too high) has occurred while \output is active []
 
 
 
-[68]
-Overfull \hbox (2.11089pt too wide) in paragraph at lines 1807--1808
+[69]
+Overfull \hbox (2.11089pt too wide) in paragraph at lines 1833--1834
 []\TU/lmr/m/n/10 Term  
  []
 
 
-Overfull \hbox (6.47006pt too wide) in paragraph at lines 1809--1810
+Overfull \hbox (6.47006pt too wide) in paragraph at lines 1835--1836
 []\TU/lmr/m/n/10 Population  
  []
 
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1819--1819
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1845--1845
 []|$[][]$|  
  []
 
 
-Overfull \hbox (4.13007pt too wide) in paragraph at lines 1819--1819
+Overfull \hbox (4.13007pt too wide) in paragraph at lines 1845--1845
 []|\TU/lmr/m/n/10 Effectively 
  []
 
 
-Overfull \hbox (2.91008pt too wide) in paragraph at lines 1819--1819
+Overfull \hbox (2.91008pt too wide) in paragraph at lines 1845--1845
 [][][][][][] [] 
  []
 
 
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1819--1819
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1845--1845
 [] [][][][]$ 
  []
 
 
-Overfull \hbox (24.73405pt too wide) in paragraph at lines 1819--1819
+Overfull \hbox (24.73405pt too wide) in paragraph at lines 1845--1845
 [][][][][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1820--1820
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1846--1846
 []|$[][]$|  
  []
 
 
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1820--1820
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1846--1846
 [] [][][][]$ 
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1820--1820
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1846--1846
 [] [][][] [] 
  []
 
 
-Overfull \hbox (20.08606pt too wide) in paragraph at lines 1820--1820
+Overfull \hbox (20.08606pt too wide) in paragraph at lines 1846--1846
 [][][][][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1821--1821
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1847--1847
 []|$[][]$|  
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1821--1821
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1847--1847
 [] [][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1822--1822
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1848--1848
 []|$[][]$|  
  []
 
 
-Overfull \hbox (4.13007pt too wide) in paragraph at lines 1822--1822
+Overfull \hbox (4.13007pt too wide) in paragraph at lines 1848--1848
 []|\TU/lmr/m/n/10 Effectively 
  []
 
 
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1822--1822
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1848--1848
 [] [][][][]$|  
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1823--1823
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1849--1849
 []|$[][]$|  
  []
 
 
-Overfull \hbox (3.39006pt too wide) in paragraph at lines 1823--1823
+Overfull \hbox (3.39006pt too wide) in paragraph at lines 1849--1849
 [] [][][][]$ 
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1823--1823
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1849--1849
 [] [][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (10.2139pt too wide) in paragraph at lines 1824--1824
+Overfull \hbox (10.2139pt too wide) in paragraph at lines 1850--1850
 []|$[][]$|  
  []
 
 
-Overfull \hbox (6.38707pt too wide) in paragraph at lines 1824--1824
+Overfull \hbox (6.38707pt too wide) in paragraph at lines 1850--1850
 [] [][][] [] 
  []
 
 Missing character: There is no ⇒ (U+21D2) in font [lmroman10-regular]:mapping=tex-text;!
 
-Overfull \hbox (0.7849pt too wide) in paragraph at lines 1825--1825
+Overfull \hbox (0.7849pt too wide) in paragraph at lines 1851--1851
 []|$[][]$|  
  []
 
 
-Overfull \hbox (0.7849pt too wide) in paragraph at lines 1826--1826
+Overfull \hbox (0.7849pt too wide) in paragraph at lines 1852--1852
 []|$[][]$|  
  []
-
-[69]
 
 [70]
-Chapter 4.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 10.0pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 7.0pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
-(Font)              scaled to size 5.0pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 10.00092pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 7.00064pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
-(Font)              scaled to size 5.00046pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 9.99893pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 6.99925pt on input line 1835.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
-(Font)              scaled to size 4.99947pt on input line 1835.
 
+[71]
 
-[71
+[72
 
 ]
-Overfull \hbox (142.36165pt too wide) detected at line 1901
+Chapter 4.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
+(Font)              scaled to size 10.0pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
+(Font)              scaled to size 7.0pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/b/n' will be
+(Font)              scaled to size 5.0pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
+(Font)              scaled to size 10.00092pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
+(Font)              scaled to size 7.00064pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/b/n' will be
+(Font)              scaled to size 5.00046pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
+(Font)              scaled to size 9.99893pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
+(Font)              scaled to size 6.99925pt on input line 1861.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/b/n' will be
+(Font)              scaled to size 4.99947pt on input line 1861.
+
+
+[73]
+Overfull \hbox (142.36165pt too wide) detected at line 1927
 [][][][] [][][][] [] [] [][] []
  []
 
 
-Overfull \hbox (0.15002pt too wide) in paragraph at lines 1903--1904
+Overfull \hbox (0.15002pt too wide) in paragraph at lines 1929--1930
 []\TU/lmr/m/n/10 Note that each log-likelihood term is weighted three times — by a location weight
  []
 
 
 
-[72]
-Overfull \hbox (60.56639pt too wide) detected at line 1950
+[74]
+Overfull \hbox (60.56639pt too wide) detected at line 1976
 [][][][] [][]  []  []  [] [][][][] [] [][][] [] [] [][][][][] [] [] [][][][] [] [][] [] [][] []  [] [] [][] []  []
  []
 
@@ -1443,23 +1456,23 @@ Overfull \hbox (60.56639pt too wide) detected at line 1950
 
 
 Overfull \hbox (18.68564pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 4.3.  DISTRIBUTIONAL ASSUMPTIONS FOR LIKELIHOOD COMPONENTS \TU/lmr/m/n/10 73
+\TU/lmr/m/sl/10 4.3.  DISTRIBUTIONAL ASSUMPTIONS FOR LIKELIHOOD COMPONENTS \TU/lmr/m/n/10 75
  []
 
-[73]
+[75]
 
-[74]
-Underfull \hbox (badness 10000) in paragraph at lines 2025--2027
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2027--2029
+[76]
+Underfull \hbox (badness 10000) in paragraph at lines 2051--2053
 
  []
 
 
-Underfull \hbox (badness 1097) in paragraph at lines 2032--2032
+Underfull \hbox (badness 10000) in paragraph at lines 2053--2055
+
+ []
+
+
+Underfull \hbox (badness 1097) in paragraph at lines 2058--2058
 []\TU/lmr/bx/n/14.4 Estimating the Posterior Distribution of
  []
 
@@ -1467,15 +1480,15 @@ Underfull \hbox (badness 1097) in paragraph at lines 2032--2032
 
 
 Overfull \hbox (46.12344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 4.5.  ESTIMATING THE POSTERIOR DISTRIBUTION OF MODEL PARAMETERS \TU/lmr/m/n/10 75
+\TU/lmr/m/sl/10 4.5.  ESTIMATING THE POSTERIOR DISTRIBUTION OF MODEL PARAMETERS \TU/lmr/m/n/10 77
  []
 
-[75]
-
-[76]
-
 [77]
-Overfull \hbox (664.19006pt too wide) in paragraph at lines 2148--2163
+
+[78]
+
+[79]
+Overfull \hbox (664.19006pt too wide) in paragraph at lines 2174--2189
  [][] 
  []
 
@@ -1486,54 +1499,54 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-[78]
+[80]
 
-[79]
+[81]
 
-[80
+[82
 
 ]
 Chapter 5.
 
 
-[81]
+[83]
 
-[82]
+[84]
 Chapter 6.
 
 
-[83
+[85
 
 ]
 
-[84
+[86
 
 ]
 Chapter 7.
 
 
-[85]
+[87]
 
-[86
+[88
 
 ]
 Chapter 8.
 No file MOSAIC-docs.bbl.
 
 
-[87] (./MOSAIC-docs.aux)
+[89] (./MOSAIC-docs.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-04-29>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 23809 strings out of 472186
- 460980 string characters out of 5526477
- 1036068 words of memory out of 5000000
- 49952 multiletter control sequences out of 15000+600000
+ 23832 strings out of 472186
+ 461666 string characters out of 5526477
+ 1036668 words of memory out of 5000000
+ 49974 multiletter control sequences out of 15000+600000
  637852 words of font info for 137 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  90i,12n,114p,2001b,483s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on MOSAIC-docs.pdf (87 pages).
+Output written on MOSAIC-docs.pdf (89 pages).

@@ -54,7 +54,10 @@ tab:cfr
 fig:cfr-cases
 fig:cfr-beta
 tab:demographics
+eq:I-star
 eq:R
+eq:generation-time
+fig:generation-time
 tab:mosaic-table
 eq:theta
 eq:general-likelihood
@@ -95,7 +98,7 @@ suitability-dependent-decay-rate
 modeling-environmental-suitability
 environmental-data
 deep-learning-neural-network-model
-shedding-of-v.-cholerae
+sec:shedding
 recovery-rates
 water-sanitation-and-hygiene-wash
 immune-dynamics
@@ -113,7 +116,8 @@ rate-of-symptomatic-infection
 suspected-cases
 case-fatality-rate
 demographics-1
-the-reproductive-number
+the-effective-reproductive-number
+the-generation-time-distribution
 initial-conditions
 model-calibration
 table-of-mosaic-framework-countries
