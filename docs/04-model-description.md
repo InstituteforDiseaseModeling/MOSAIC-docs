@@ -819,29 +819,40 @@ The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG
 <p class="caption">(\#fig:mobility-diffusion)The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred.</p>
 </div>
 
-
-
 ### The spatial hazard
 
-Although cholera is endemic in the MOSAIC framework, infection can still be seeded across borders by infectious travelers. We quantify that risk with a spatial importation hazard similar to that described by [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3). Let $\mathcal{H}_{jt}\in(0,1)$ be the daily probability that at least one new infection is introduced into destination $j$ on day $t$. Adapting the notation of the human force of infection (Equation \@ref(eq:foi-human)), we define
+Although cholera is endemic in the MOSAIC framework, onward spread across sub-populations can occur whenever infectious individuals travel. We quantify this cross-border seeding risk with a spatial importation hazard adapted from [Bjørnstad & Grenfell (2008)](http://link.springer.com/10.1007/s10651-007-0059-3).
+
+Let $\mathcal{H}_{jt}\in[0,1]$ denote the daily probability that at least one new infection is introduced into destination location $j$ on day $t$. In our implementation the estimated travel probability and gravity-model weights are folded directly into the prevalence terms, and both local and non-local infectious contributions are included:
 \begin{equation}
 \mathcal{H}_{jt} =
-\frac{
-  \beta^{\text{hum}}_{jt}\,
-  \left[\,1-\exp\!\left(\!
-        -(1-\tau_j)\,
-        \dfrac{ S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt} }{ N_{jt} }
-        \sum_{i\neq j}
-          \pi_{ij}\,\tau_i\,
-          \dfrac{ I_{1,it}+I_{2,it} }{ N_{it} }
-      \right)\right]
-}{
-  1 + \beta^{\text{hum}}_{jt}\,(1-\tau_j)\,
-      \left(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\right)
-}
+\frac{\displaystyle
+  \beta_{jt}\,S^{*}_{jt}
+  \left[1-\exp\left(-x_{jt}\,\bar y_{jt}\right)\right]}
+     {\displaystyle 1+\beta_{jt}\,S^{*}_{jt}}
 (\#eq:spatial-hazard)
 \end{equation}
-The square-bracket term converts a per-capita arrival rate into a per-day probability, while the denominator keeps $\mathcal{H}_{jt}$ strictly between 0 and 1. The susceptible pool explicitly includes individuals whose vaccine-derived immunity has waned $\bigl(S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}\bigr)$, and both symptomatic and asymptomatic infections $(I_{1,it}+I_{2,it})$ in origin $i$ contribute to the export pressure weighted by the gravity-model mobility terms $\pi_{ij}\tau_i$.
+
+The locally susceptible pool is
+\begin{equation}
+S^{*}_{jt}
+  = \left(1-\tau_{j}\right)
+    \left(S_{jt}+V^{\mathrm{sus}}_{1,jt}+V^{\mathrm{sus}}_{2,jt}\right),
+(\#eq:susceptible-pool)
+\end{equation}
+where $\tau_{j}$ is the daily probability that a resident of $j$ travels outside the home location. The per-capita susceptible probability at the destination is therefore $x_{jt} = S^{*}_{jt}/N_{jt}$, with $N_{jt}$ the total population in location $j$ on day $t$.
+
+The gravity-weighted mean infection prevalence across the metapopulation is
+\begin{equation}
+\bar y_{jt} =
+\frac{\left(1-\tau_{j}\right)\left(I_{1,jt}+I_{2,jt}\right)
+      +\sum_{i\neq j}\tau_{i}\,\pi_{ij}\left(I_{1,it}+I_{2,it}\right)}
+     {\displaystyle \sum_{k} N_{kt}},
+(\#eq:grav-prevalence)
+\end{equation}
+where $I_{1,it}$ and $I_{2,it}$ denote symptomatic and asymptomatic infections in origin $i$.  These are weighted by the mobility matrix $\pi_{ij}$ and the travel probability $\tau_{i}$, and the denominator normalizes by the total metapopulation size $\sum_{k}N_{kt}$.
+
+In the numerator of Equation \@ref(eq:spatial-hazard) the factor $1-\exp(-x_{jt}\,\bar y_{jt})$ converts a per-capita arrival rate into a daily hazard, while the denominator $1+\beta_{jt}\,S^{*}_{jt}$ keeps $\mathcal{H}_{jt}$ strictly between 0 and 1. This formulation therefore yields the daily probability there is at least one human-derived infection in location $j$ on day $t$, conditional on the local susceptible pool and infection prevalence across all other locations. Note that this does not include infection hazard from the local environmental reservoir, however our aim is to include this in future versions.
 
 
 ### Coupling among locations

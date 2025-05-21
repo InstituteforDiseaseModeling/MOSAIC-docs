@@ -42,6 +42,8 @@ eq:gravity
 fig:mobility-departure
 fig:mobility-diffusion
 eq:spatial-hazard
+eq:susceptible-pool
+eq:grav-prevalence
 eq:location-mean-prevalence
 eq:correlation
 tab:symptomatic-table
