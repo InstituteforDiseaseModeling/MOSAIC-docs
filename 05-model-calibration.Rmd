@@ -190,7 +190,7 @@ All three representations report $R^2$ from the stochastic median of their respe
 ## Estimating the Posterior Distribution of Model Parameters
 
 To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights using the $\Delta \text{AIC}$ with a practical cut–off of $\Delta=4$ and retain the IS for a subset of supported models as described in the steps below:
+$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into a legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights using the $\Delta \text{AIC}$ with a practical cut–off of $\Delta \le 6$ and retain the IS for a subset of supported models as described in the steps below:
 
 ### Compute $\Delta \text{AIC}$ for every draw
 
@@ -279,7 +279,7 @@ Note that the location, time, and outcome shape weights $w_j, w_t, w_{\text{case
 
 
 ### Agreement index *A*
-We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 4\}\) by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
+We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 6\}\) by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
 \begin{equation}
 A = 
 \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
@@ -289,7 +289,7 @@ H(\mathbf{\tilde{w}})
 -\sum_{i\in\mathcal B}\tilde w_i\,\log\tilde w_i.
 (\#eq:agreement)
 \end{equation}
-Note that by definition $A \in \{0,1\}$ because $0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|$. When $A=1$, all weights are equal ($\tilde w_i = 1/|\mathcal B|$) and there is a high degree of consensus in the sense that all models share similar fit. When $A=0$, a single model dominates ($\tilde w_i = 1$) for one model run $i$ and zero for the rest), which gives poor consensus among the subset of best models $\mathcal B$.
+Note that by definition $A \in [0,1]$ because $0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|$. When $A=1$, all weights are equal ($\tilde w_i = 1/|\mathcal B|$) and there is a high degree of consensus in the sense that all models share similar fit. When $A=0$, a single model dominates ($\tilde w_i = 1$) for one model run $i$ and zero for the rest), which gives poor consensus among the subset of best models $\mathcal B$.
 
 
 ### Coefficient of variation of weights
@@ -306,7 +306,7 @@ Large $\mathrm{CV}_\mathbf{\tilde{w}}$ warns that the variance within the best f
 
 
 ### Convergence guidelines
-A calibration run that meets all three criteria indicates that the retained ensemble is *informative* (high ESS), *internally consistent* (high $A$), and *numerically stable* (moderate $\mathrm{CV}_\mathbf{\tilde{w}}$), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table \@ref(tab:calibration) with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \@ref(fig:likelihood-example)).
+A calibration run that meets all three criteria indicates that the retained ensemble is *informative* (high ESS), *internally consistent* (high $A$), and *numerically stable* (moderate $\mathrm{CV}_\mathbf{\tilde{w}}$), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Our targets for successful model calibration are shown in Table \@ref(tab:calibration) with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \@ref(fig:likelihood-example)).
 
 ```{r calibration, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
