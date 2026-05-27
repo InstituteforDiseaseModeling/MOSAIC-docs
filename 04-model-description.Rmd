@@ -565,40 +565,23 @@ knitr::include_graphics("figures/vaccination_maps.png")
 
 
 ### Immunity from vaccination
-The impacts of Oral Cholera Vaccine (OCV) campaigns is incorporated into the model through the Vaccinated compartment (V). The rate that individuals are effectively vaccinated is defined as $\phi\nu_t$, where $\nu_t$ is the number of OCV doses administered in location $j$ at time $t$ and $\phi$ is the estimated vaccine effectiveness. The vaccination rate $\nu_{jt}$ is not an estimated quantity. Rather, it is directly defined by the reported number of OCV doses administered as described above. Note that there is just one vaccinated compartment at this time, though future model versions may include $V_1$ an $V_2$ compartments to explore two dose vaccination strategies or to emulate more complex waning patterns.
+The impacts of Oral Cholera Vaccine (OCV) campaigns are incorporated into the model through two vaccinated compartments, $V_1$ (one-dose recipients) and $V_2$ (two-dose recipients), as introduced in the [system of difference equations](#eq:system). Vaccine effectiveness $\phi_1, \phi_2$ acts at the moment of dose delivery: of the $\nu_{1,jt}$ first doses delivered on day $t$, the $\phi_1 \nu_{1,jt}$ *effective* fraction enter $V_1$ while the $(1-\phi_1)\nu_{1,jt}$ ineffective fraction leave the recipient in the source compartment. The same logic applies to second doses with effectiveness $\phi_2$. Waning brings vaccinated individuals back to $S$ at rates $\omega_1, \omega_2$ per day.
 
-The evidence for waning immunity comes from 4 cohort studies (Table \@ref(tab:effectiveness-papers)) from Bangladesh ([Qadri et al 2016](https://www.nejm.org/doi/full/10.1056/NEJMoa1510330) and [2018](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(18)30108-7/fulltext)), South Sudan ([Azman et al 2016](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext)), and Democratic Republic of Congo ([Malembaka et al 2024](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00742-9/fulltext)). 
+To set priors for the effectiveness and waning rates, we draw on the systematic review and meta-analysis of [Xu et al. 2025](https://doi.org/10.1016/S2214-109X(25)00107-X) (*Lancet Global Health*), which pools estimates from cohort studies in Bangladesh, South Sudan, and the Democratic Republic of Congo --- including the underlying studies used in earlier MOSAIC versions (Qadri et al. 2016 and 2018, Azman et al. 2016, Malembaka et al. 2024) --- to derive central values and uncertainty intervals for one-dose and two-dose vaccine effectiveness and the corresponding waning rates. Fit to Beta and Gamma distributions on the basis of the reported quantiles, the priors are:
 
-
-```{r effectiveness-papers, echo=FALSE}
-
-df <- read.csv(file.path(getwd(), "tables/vaccine_effectiveness_data.csv"), stringsAsFactors = FALSE)
-
-# Display the table using knitr::kable
-knitr::kable(
-     df, 
-     col.names = c("Effectiveness", "Upper CI", "Lower CI", "Day (midpoint)", "Day (min)", "Day (max)", "Source"), 
-     caption = "Summary of Effectiveness Data"
-) 
-```
-
-We estimated vaccine effectiveness and waning immunity by fitting an exponential decay model to the reported effectiveness of one dose OCV in these studies using the following formulation:
-
-\begin{equation} 
-\text{Proportion immune}\ t \ \text{days after vaccination} = \phi \times (1 - \omega) ^ {t-t_{\text{vaccination}}}
-(\#eq:omega)
-\end{equation}
-
-Where $\phi$ is the effectiveness of one dose OCV, and the based on this specification, it is also the initial proportion immune directly after vaccination. The decay rate parameter $\omega$ is the rate at which initial vaccine derived immunity decays per day post vaccination, and $t$ and $t_{\text{vaccination}}$ are the time (in days) the function is evaluated at and the time of vaccination respectively. When we fitted the model to the data from the cohort studies shown in Table (\@ref(tab:effectiveness-papers)) we found that $\omega = 0.00057$ ($0-0.0019$ 95% CI), which gives a mean estimate of 4.8 years for vaccine derived immune duration with unreasonably large confidence intervals (1.4 years to infinite immunity). However, the point estimate of 4.8 years is consistent with anecdotes that one dose OCV is effective for up to at least 3 years.
-
-The wide confidence intervals are likely due to the wide range of reported estimates for proportion immune after a short duration in the 7--90 days range ([Azman et al 2016](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(16)30211-X/fulltext) and [Qadri et al 2016](https://www.nejm.org/doi/full/10.1056/NEJMoa1510330)). Therefore, we chose to use the point estimate of $\omega$ and incorporate uncertainty based on the initial proportion immune (i.e. vaccine effectiveness $\phi$) shortly after vaccination. Using the decay model in Equation \@ref(eq:omega) we estimated $\phi$ to be $0.64$ ($0.32-0.96$ 95% CI). We then fit a Beta distribution to the quantiles of $\phi$ by minimizing the sums of squares using the Nelder-Mead optimization algorithm to render the following distribution (shown in Figure \@ref(fig:effectiveness)B):
-
-\begin{equation} 
-\phi \sim \text{Beta}(4.57, 2.41).
+$$
+\begin{aligned}
+\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \mathbf{\text{(one-dose effectiveness, mean} \approx 0.78)},\\
+\phi_2 \ \sim\ & \text{Beta}(115.10,\ 35.32) \quad \mathbf{\text{(two-dose effectiveness, mean} \approx 0.77)},\\
+\omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \mathbf{\text{(one-dose waning, mean duration} \approx 3.7 \ \text{years})},\\
+\omega_2 \ \sim\ & \text{Gamma}(2.71,\ 5{,}079.24) \quad \mathbf{\text{(two-dose waning, mean duration} \approx 5.1 \ \text{years})}.
+\end{aligned}
 (\#eq:effectiveness)
-\end{equation}
+$$
 
-```{r effectiveness, echo=FALSE, fig.align='center', out.width="102%", fig.cap="This is vaccine effectiveness"}
+The two-dose schedule slightly extends the mean duration of protection relative to the one-dose schedule, but its effectiveness at the time of delivery is essentially the same in the pooled estimate. The modest difference between $\phi_1$ and $\phi_2$ should not be over-interpreted, since the two-dose evidence base is thinner than the one-dose evidence base and the cohort studies underlying the meta-analysis differ in their populations and follow-up windows.
+
+```{r effectiveness, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distributions for one-dose and two-dose vaccine effectiveness ($\\phi_1, \\phi_2$) and waning rates ($\\omega_1, \\omega_2$) from the [Xu et al. 2025](https://doi.org/10.1016/S2214-109X(25)00107-X) meta-analysis. The Beta priors for effectiveness are concentrated near approximately 0.78, while the Gamma priors for waning correspond to mean durations of approximately 3.7 and 5.1 years for one and two doses respectively."}
 knitr::include_graphics("figures/vaccine_effectiveness.png")
 ```
 
