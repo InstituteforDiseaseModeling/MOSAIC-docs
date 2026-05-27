@@ -402,6 +402,24 @@ knitr::include_graphics("figures/suitability_by_country.png")
 ```
 
 
+### Infectious dose ($\kappa$)
+
+The half-saturation constant $\kappa$ in Equation \@ref(eq:foi-environment) is the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Historical cholera transmission models have fixed $\kappa = 10^6$ cells, a value traceable to the unbuffered water-only volunteer studies of Hornick et al. 1971 and adopted by convention in subsequent modelling work (e.g. [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Modern re-analyses of buffered-exposure volunteer studies --- in which sodium bicarbonate neutralises gastric acid, more representative of typical endemic exposure through food or contaminated drinking water --- consistently support a substantially lower central estimate of approximately $10^5$ CFU, with considerable between-study heterogeneity.
+
+To reflect this evidence base we compiled a meta-analysis of 13 published infectious-dose estimates spanning direct human-volunteer challenge studies (Hornick et al. 1971, Cash et al. 1974, Levine et al. 1981, Levine et al. 1988, Tacket et al. 1999), Beta-Poisson QMRA fits (Haas, Rose & Gerba 1999), expert-review summaries (Kaper et al. 1995, [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)), and values adopted by convention in cholera transmission models ([Codeço 2001](https://doi.org/10.1186/1471-2334-1-1), [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Each source is weighted by its evidentiary quality and relevance to the endemic, buffered-exposure context: direct volunteer challenge studies receive a weight of 1.0, while expert reviews and QMRA syntheses receive weights between 0 and 0.5. A weighted lognormal is then fit by maximum-likelihood on the log10 scale:
+
+$$
+\kappa \sim \text{Lognormal}(11.77,\ 1.82).
+(\#eq:kappa)
+$$
+
+The resulting prior has a median of approximately $1.3 \times 10^5$ CFU and a 95% credible interval of approximately $3.6 \times 10^3$ to $4.6 \times 10^6$ CFU (Figure \@ref(fig:kappa-prior)). This is consistent with the lower modern-era central estimate while preserving the order-of-magnitude uncertainty that the volunteer-study literature genuinely reflects.
+
+```{r kappa-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distribution for the environmental half-saturation constant $\\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight."}
+knitr::include_graphics("figures/kappa_prior.png")
+```
+
+
 ### Shedding of *V. cholerae* {#sec:shedding}
 
 The rate at which infected individuals shed *Vibrio cholerae* into the environment is a critical factor influencing cholera transmission dynamics. Shedding rates vary widely depending on the severity of infection, the host immune response, and environmental conditions. To reflect this heterogeneity, the model distinguishes between two types of infected individuals:
