@@ -252,9 +252,22 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 \end{equation}
 Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
 subset.  In dynamic Bayesian models an ESS $\gtrsim\!500$–$1000$ is generally
-adequate for stable posterior medians and 95 % credible intervals
+adequate for stable posterior medians and 95% credible intervals
 ([Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/);
 [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)).
+
+The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \@ref(eq:ess) within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
+
+The Akaike weights in Equation \@ref(eq:aic-weights) are a special case of a broader *Gibbs-posterior* weighting scheme ([Bissiri *et al.* 2016](https://doi.org/10.1111/rssb.12158)) of the form
+
+\begin{equation}
+\tilde{w}_i \;=\; \frac{\exp\!\big(-w_{\text{gibbs}}\, x_i\big)}{\sum_{j=1}^{n_{\text{sim}}} \exp\!\big(-w_{\text{gibbs}}\, x_j\big)},
+(\#eq:gibbs-weights)
+\end{equation}
+
+where $x_i$ is a generic loss (lower is better) and $w_{\text{gibbs}} \ge 0$ is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting $x_i = \Delta_i$ and $w_{\text{gibbs}} = 1/2$ recovers Equation \@ref(eq:aic-weights) exactly; setting $x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ and $w_{\text{gibbs}} = 1$ recovers normalised likelihood weights. The Gibbs formulation is used internally to allow the calibration pipeline to fall back to a softer weight scheme when a $\Delta\text{AIC}$ cut-off would otherwise truncate too many draws.
+
+Note that the location, time, and outcome shape weights $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ that enter the log-likelihood in Equation \@ref(eq:total-log-likelihood-2) are normalised to make their contributions comparable across components: each shape weight is rescaled by $N_{\text{obs}} / N_{\text{component}}$, where $N_{\text{obs}}$ is the count of non-NA surveillance observations and $N_{\text{component}}$ is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.
 
 
 ### Agreement index *A*
