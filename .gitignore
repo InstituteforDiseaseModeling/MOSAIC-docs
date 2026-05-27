@@ -2,3 +2,19 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# macOS
+.DS_Store
+
+# bookdown / knitr intermediates at repo root
+/render*.rds
+
+# LaTeX intermediates at repo root (canonical build is in docs/)
+/*.aux
+/*.toc
+/*.tex
+/*.log
+/MOSAIC-docs.pdf
+
+# but keep the source preamble
+!/preamble.tex
