@@ -6,20 +6,28 @@ Here we describe the methods of MOSAIC version 1.0. This model version provides 
 
 The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map) and the [Table of MOSAIC framework countries](#mosaic-table).
 
-<div class="figure" style="text-align: center">
-<img src="figures/africa_map.png" alt="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue." width="100%" />
-<p class="caption">(\#fig:map)A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/africa_map} 
+
+}
+
+\caption{A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue.}(\#fig:map)
+\end{figure}
 
 
 ## Transmission dynamics
 
 The model has a metapopulation structure with familiar compartments for Susceptible, Exposed, Infected, and Recovered individuals with SEIRS dynamics. The model also contains compartments for one- and two-dose vaccination ($V_1$ and $V_2$) and Water & environment based transmission (W) which we refer to as SVEIWRS.
 
-<div class="figure" style="text-align: center">
-<img src="diagrams/v_0_5.drawio.png" alt="This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths)." width="100%" />
-<p class="caption">(\#fig:diagram)This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths).</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{diagrams/v_0_5.drawio} 
+
+}
+
+\caption{This diagram of the SVEIWRS (Susceptible-Vaccinated-Exposed-Infected-Water/environmental-Recovered-Susceptible) model shows model compartments as circles with rate parameters displayed. The primary data sources the model is fit to are shown as square nodes (Vaccination data, and reported cases and deaths).}(\#fig:diagram)
+\end{figure}
 
 The SVEIWRS metapopulation model, shown in Figure \@ref(fig:diagram), is governed by the following difference equations. Vaccination is delivered proportionally across a configurable set of eligible source compartments $\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}$ (default: all five), with effective doses transferring the recipient to $V_1$ and ineffective doses remaining in the source compartment. We write $N^{\text{src}}_{jt} = \sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$ for the total population eligible for first-dose vaccination, which serves as the denominator of the per-compartment dose-allocation fraction:
 
@@ -131,247 +139,109 @@ Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at
 
 We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
 
-<div class="figure" style="text-align: center">
-<img src="figures/seasonal_transmission_example_MOZ.png" alt="Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series fucntions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines." width="100%" />
-<p class="caption">(\#fig:seasonal-example)Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series fucntions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/seasonal_transmission_example_MOZ} 
+
+}
+
+\caption{Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series fucntions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines.}(\#fig:seasonal-example)
+\end{figure}
 
 
 For countries with no reported case data, we inferred seasonal dynamics using the fitted wave function of a neighboring country with available case data. The selected neighbor was chosen from the same cluster of countries (grouped hierarchically into four clusters based on precipitation seasonality using [Ward's method](https://en.wikipedia.org/wiki/Ward%27s_method); see Figure \@ref(fig:seasonal-cluster)) that had the highest correlation in seasonal precipitation with the country lacking case data. In the rare event that no country with reported case data was found within the same seasonal cluster, we expanded the search to the 10 nearest neighbors and continued expanding by adding the next nearest neighbor until a match was found.
 
-<div class="figure" style="text-align: center">
-<img src="figures/seasonal_precip_ward.D2_cluster.png" alt="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases." width="100%" />
-<p class="caption">(\#fig:seasonal-cluster)A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/seasonal_precip_ward.D2_cluster} 
+
+}
+
+\caption{A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.}(\#fig:seasonal-cluster)
+\end{figure}
 
 Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure \@ref(fig:seasonal-all), with the corresponding Fourier model coefficients presented in Table \@ref(tab:seasonal-table).
 
-<div class="figure" style="text-align: center">
-<img src="figures/seasonal_transmission_all.png" alt="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases." width="100%" />
-<p class="caption">(\#fig:seasonal-all)Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.</p>
-</div>
+\begin{figure}
 
-<table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
-<caption style="font-size: initial !important;">(\#tab:seasonal-table)(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).</caption>
- <thead>
-<tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Fourier Coefficients</div></th>
-</tr>
-  <tr>
-   <th style="text-align:left;"> Country </th>
-   <th style="text-align:left;"> $a_1$ </th>
-   <th style="text-align:left;"> $a_2$ </th>
-   <th style="text-align:left;"> $b_1$ </th>
-   <th style="text-align:left;"> $b_2$ </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> Angola </td>
-   <td style="text-align:left;"> -0.06 (-0.23 to 0.1) </td>
-   <td style="text-align:left;"> -0.46 (-0.63 to -0.29) </td>
-   <td style="text-align:left;"> 0.63 (0.46 to 0.8) </td>
-   <td style="text-align:left;"> -0.44 (-0.61 to -0.28) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Benin </td>
-   <td style="text-align:left;"> 0.17 (-0.01 to 0.35) </td>
-   <td style="text-align:left;"> -0.58 (-0.76 to -0.4) </td>
-   <td style="text-align:left;"> -1.29 (-1.47 to -1.11) </td>
-   <td style="text-align:left;"> -0.36 (-0.54 to -0.18) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burkina Faso </td>
-   <td style="text-align:left;"> -1.67 (-2.1 to -1.23) </td>
-   <td style="text-align:left;"> 0.91 (0.46 to 1.35) </td>
-   <td style="text-align:left;"> -0.77 (-1.21 to -0.33) </td>
-   <td style="text-align:left;"> 0.86 (0.42 to 1.3) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:left;"> 0.21 (0.09 to 0.32) </td>
-   <td style="text-align:left;"> -0.32 (-0.44 to -0.2) </td>
-   <td style="text-align:left;"> -0.75 (-0.86 to -0.63) </td>
-   <td style="text-align:left;"> -0.16 (-0.28 to -0.05) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:left;"> -0.47 (-0.58 to -0.37) </td>
-   <td style="text-align:left;"> -0.37 (-0.48 to -0.26) </td>
-   <td style="text-align:left;"> 0.03 (-0.08 to 0.14) </td>
-   <td style="text-align:left;"> 0.13 (0.03 to 0.24) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Central African Republic </td>
-   <td style="text-align:left;"> -1.62 (-2.02 to -1.22) </td>
-   <td style="text-align:left;"> 0.62 (0.21 to 1.03) </td>
-   <td style="text-align:left;"> -1.16 (-1.57 to -0.75) </td>
-   <td style="text-align:left;"> 1.7 (1.29 to 2.1) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chad </td>
-   <td style="text-align:left;"> -0.18 (-0.45 to 0.09) </td>
-   <td style="text-align:left;"> -1.35 (-1.62 to -1.08) </td>
-   <td style="text-align:left;"> -1.83 (-2.1 to -1.56) </td>
-   <td style="text-align:left;"> 0.21 (-0.06 to 0.47) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Congo </td>
-   <td style="text-align:left;"> -0.8 (-1.03 to -0.57) </td>
-   <td style="text-align:left;"> 0.06 (-0.17 to 0.3) </td>
-   <td style="text-align:left;"> -0.63 (-0.86 to -0.4) </td>
-   <td style="text-align:left;"> 1.31 (1.08 to 1.54) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Côte d’Ivoire </td>
-   <td style="text-align:left;"> 1.12 (0.79 to 1.44) </td>
-   <td style="text-align:left;"> 0.7 (0.38 to 1.03) </td>
-   <td style="text-align:left;"> 0.55 (0.22 to 0.87) </td>
-   <td style="text-align:left;"> 0.73 (0.41 to 1.05) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> DRC </td>
-   <td style="text-align:left;"> 0.1 (0.06 to 0.14) </td>
-   <td style="text-align:left;"> -0.07 (-0.11 to -0.03) </td>
-   <td style="text-align:left;"> -0.12 (-0.16 to -0.08) </td>
-   <td style="text-align:left;"> 0.05 (0.01 to 0.09) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:left;"> -0.45 (-0.53 to -0.38) </td>
-   <td style="text-align:left;"> -0.3 (-0.37 to -0.22) </td>
-   <td style="text-align:left;"> 0.12 (0.04 to 0.19) </td>
-   <td style="text-align:left;"> 0.2 (0.13 to 0.28) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:left;"> -0.43 (-0.69 to -0.18) </td>
-   <td style="text-align:left;"> -0.89 (-1.14 to -0.64) </td>
-   <td style="text-align:left;"> -1.64 (-1.89 to -1.39) </td>
-   <td style="text-align:left;"> 0.59 (0.34 to 0.84) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea </td>
-   <td style="text-align:left;"> -1.1 (-1.41 to -0.78) </td>
-   <td style="text-align:left;"> -0.22 (-0.53 to 0.09) </td>
-   <td style="text-align:left;"> -1.22 (-1.53 to -0.91) </td>
-   <td style="text-align:left;"> 1.43 (1.13 to 1.74) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:left;"> 0.15 (0.04 to 0.26) </td>
-   <td style="text-align:left;"> -0.02 (-0.13 to 0.1) </td>
-   <td style="text-align:left;"> 0.62 (0.51 to 0.73) </td>
-   <td style="text-align:left;"> -0.31 (-0.42 to -0.2) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Liberia </td>
-   <td style="text-align:left;"> 0.07 (-0.03 to 0.16) </td>
-   <td style="text-align:left;"> -0.38 (-0.48 to -0.29) </td>
-   <td style="text-align:left;"> 0.3 (0.21 to 0.4) </td>
-   <td style="text-align:left;"> -0.16 (-0.26 to -0.07) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:left;"> 1.28 (1.02 to 1.54) </td>
-   <td style="text-align:left;"> 0.42 (0.16 to 0.68) </td>
-   <td style="text-align:left;"> 0.99 (0.73 to 1.25) </td>
-   <td style="text-align:left;"> 1.11 (0.85 to 1.37) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:left;"> 0.46 (0.31 to 0.61) </td>
-   <td style="text-align:left;"> -0.65 (-0.8 to -0.5) </td>
-   <td style="text-align:left;"> 1.15 (1 to 1.3) </td>
-   <td style="text-align:left;"> 0.15 (0 to 0.29) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:left;"> 1.59 (1.42 to 1.76) </td>
-   <td style="text-align:left;"> 0.82 (0.65 to 0.99) </td>
-   <td style="text-align:left;"> 0.55 (0.38 to 0.72) </td>
-   <td style="text-align:left;"> 0.42 (0.25 to 0.59) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Niger </td>
-   <td style="text-align:left;"> -0.84 (-1.04 to -0.65) </td>
-   <td style="text-align:left;"> -0.51 (-0.71 to -0.32) </td>
-   <td style="text-align:left;"> -1.22 (-1.41 to -1.02) </td>
-   <td style="text-align:left;"> 0.87 (0.67 to 1.06) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:left;"> -0.77 (-0.87 to -0.67) </td>
-   <td style="text-align:left;"> -0.21 (-0.31 to -0.12) </td>
-   <td style="text-align:left;"> -0.67 (-0.77 to -0.57) </td>
-   <td style="text-align:left;"> 0.42 (0.32 to 0.52) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:left;"> -0.37 (-0.64 to -0.09) </td>
-   <td style="text-align:left;"> -1.06 (-1.34 to -0.78) </td>
-   <td style="text-align:left;"> 1.32 (1.04 to 1.59) </td>
-   <td style="text-align:left;"> -0.54 (-0.81 to -0.27) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Sierra Leone </td>
-   <td style="text-align:left;"> -0.9 (-1.15 to -0.66) </td>
-   <td style="text-align:left;"> -0.25 (-0.5 to -0.01) </td>
-   <td style="text-align:left;"> -1.14 (-1.38 to -0.9) </td>
-   <td style="text-align:left;"> 1.34 (1.1 to 1.58) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:left;"> -0.37 (-0.46 to -0.28) </td>
-   <td style="text-align:left;"> -0.27 (-0.37 to -0.18) </td>
-   <td style="text-align:left;"> 0.86 (0.77 to 0.96) </td>
-   <td style="text-align:left;"> -0.24 (-0.33 to -0.15) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:left;"> 0.01 (-0.12 to 0.14) </td>
-   <td style="text-align:left;"> 0.29 (0.16 to 0.42) </td>
-   <td style="text-align:left;"> 0.6 (0.47 to 0.73) </td>
-   <td style="text-align:left;"> -0.06 (-0.19 to 0.07) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:left;"> 0.55 (0.48 to 0.63) </td>
-   <td style="text-align:left;"> -0.11 (-0.18 to -0.03) </td>
-   <td style="text-align:left;"> -0.38 (-0.45 to -0.3) </td>
-   <td style="text-align:left;"> -0.07 (-0.14 to 0.01) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Togo </td>
-   <td style="text-align:left;"> 0.81 (0.5 to 1.11) </td>
-   <td style="text-align:left;"> -0.71 (-1.02 to -0.41) </td>
-   <td style="text-align:left;"> -1.43 (-1.74 to -1.13) </td>
-   <td style="text-align:left;"> -0.89 (-1.19 to -0.59) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:left;"> 0.37 (0.11 to 0.63) </td>
-   <td style="text-align:left;"> -0.36 (-0.61 to -0.1) </td>
-   <td style="text-align:left;"> 0.91 (0.65 to 1.16) </td>
-   <td style="text-align:left;"> 0.72 (0.47 to 0.98) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:left;"> 1.36 (1.12 to 1.6) </td>
-   <td style="text-align:left;"> 0.65 (0.41 to 0.89) </td>
-   <td style="text-align:left;"> 0.65 (0.41 to 0.89) </td>
-   <td style="text-align:left;"> 0.7 (0.46 to 0.94) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:left;"> 0.66 (0.51 to 0.81) </td>
-   <td style="text-align:left;"> -0.12 (-0.28 to 0.03) </td>
-   <td style="text-align:left;"> -0.04 (-0.19 to 0.12) </td>
-   <td style="text-align:left;"> 0.09 (-0.06 to 0.24) </td>
-  </tr>
-</tbody>
-</table>
+{\centering \includegraphics[width=1\linewidth]{figures/seasonal_transmission_all} 
+
+}
+
+\caption{Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.}(\#fig:seasonal-all)
+\end{figure}
+
+\begin{table}[!h]
+\centering
+\caption{(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).}
+\centering
+\fontsize{11.75}{13.75}\selectfont
+\begin{tabular}[t]{l|l|l|l|l}
+\hline
+\multicolumn{1}{c|}{ } & \multicolumn{4}{c}{Fourier Coefficients} \\
+\cline{2-5}
+Country & $a_1$ & $a_2$ & $b_1$ & $b_2$\\
+\hline
+Angola & -0.06 (-0.23 to 0.1) & -0.46 (-0.63 to -0.29) & 0.63 (0.46 to 0.8) & -0.44 (-0.61 to -0.28)\\
+\hline
+Benin & 0.17 (-0.01 to 0.35) & -0.58 (-0.76 to -0.4) & -1.29 (-1.47 to -1.11) & -0.36 (-0.54 to -0.18)\\
+\hline
+Burkina Faso & -1.67 (-2.1 to -1.23) & 0.91 (0.46 to 1.35) & -0.77 (-1.21 to -0.33) & 0.86 (0.42 to 1.3)\\
+\hline
+Burundi & 0.21 (0.09 to 0.32) & -0.32 (-0.44 to -0.2) & -0.75 (-0.86 to -0.63) & -0.16 (-0.28 to -0.05)\\
+\hline
+Cameroon & -0.47 (-0.58 to -0.37) & -0.37 (-0.48 to -0.26) & 0.03 (-0.08 to 0.14) & 0.13 (0.03 to 0.24)\\
+\hline
+Central African Republic & -1.62 (-2.02 to -1.22) & 0.62 (0.21 to 1.03) & -1.16 (-1.57 to -0.75) & 1.7 (1.29 to 2.1)\\
+\hline
+Chad & -0.18 (-0.45 to 0.09) & -1.35 (-1.62 to -1.08) & -1.83 (-2.1 to -1.56) & 0.21 (-0.06 to 0.47)\\
+\hline
+Congo & -0.8 (-1.03 to -0.57) & 0.06 (-0.17 to 0.3) & -0.63 (-0.86 to -0.4) & 1.31 (1.08 to 1.54)\\
+\hline
+Côte d’Ivoire & 1.12 (0.79 to 1.44) & 0.7 (0.38 to 1.03) & 0.55 (0.22 to 0.87) & 0.73 (0.41 to 1.05)\\
+\hline
+DRC & 0.1 (0.06 to 0.14) & -0.07 (-0.11 to -0.03) & -0.12 (-0.16 to -0.08) & 0.05 (0.01 to 0.09)\\
+\hline
+Ethiopia & -0.45 (-0.53 to -0.38) & -0.3 (-0.37 to -0.22) & 0.12 (0.04 to 0.19) & 0.2 (0.13 to 0.28)\\
+\hline
+Ghana & -0.43 (-0.69 to -0.18) & -0.89 (-1.14 to -0.64) & -1.64 (-1.89 to -1.39) & 0.59 (0.34 to 0.84)\\
+\hline
+Guinea & -1.1 (-1.41 to -0.78) & -0.22 (-0.53 to 0.09) & -1.22 (-1.53 to -0.91) & 1.43 (1.13 to 1.74)\\
+\hline
+Kenya & 0.15 (0.04 to 0.26) & -0.02 (-0.13 to 0.1) & 0.62 (0.51 to 0.73) & -0.31 (-0.42 to -0.2)\\
+\hline
+Liberia & 0.07 (-0.03 to 0.16) & -0.38 (-0.48 to -0.29) & 0.3 (0.21 to 0.4) & -0.16 (-0.26 to -0.07)\\
+\hline
+Malawi & 1.28 (1.02 to 1.54) & 0.42 (0.16 to 0.68) & 0.99 (0.73 to 1.25) & 1.11 (0.85 to 1.37)\\
+\hline
+Mozambique & 0.46 (0.31 to 0.61) & -0.65 (-0.8 to -0.5) & 1.15 (1 to 1.3) & 0.15 (0 to 0.29)\\
+\hline
+Namibia & 1.59 (1.42 to 1.76) & 0.82 (0.65 to 0.99) & 0.55 (0.38 to 0.72) & 0.42 (0.25 to 0.59)\\
+\hline
+Niger & -0.84 (-1.04 to -0.65) & -0.51 (-0.71 to -0.32) & -1.22 (-1.41 to -1.02) & 0.87 (0.67 to 1.06)\\
+\hline
+Nigeria & -0.77 (-0.87 to -0.67) & -0.21 (-0.31 to -0.12) & -0.67 (-0.77 to -0.57) & 0.42 (0.32 to 0.52)\\
+\hline
+Rwanda & -0.37 (-0.64 to -0.09) & -1.06 (-1.34 to -0.78) & 1.32 (1.04 to 1.59) & -0.54 (-0.81 to -0.27)\\
+\hline
+Sierra Leone & -0.9 (-1.15 to -0.66) & -0.25 (-0.5 to -0.01) & -1.14 (-1.38 to -0.9) & 1.34 (1.1 to 1.58)\\
+\hline
+Somalia & -0.37 (-0.46 to -0.28) & -0.27 (-0.37 to -0.18) & 0.86 (0.77 to 0.96) & -0.24 (-0.33 to -0.15)\\
+\hline
+South Sudan & 0.01 (-0.12 to 0.14) & 0.29 (0.16 to 0.42) & 0.6 (0.47 to 0.73) & -0.06 (-0.19 to 0.07)\\
+\hline
+Tanzania & 0.55 (0.48 to 0.63) & -0.11 (-0.18 to -0.03) & -0.38 (-0.45 to -0.3) & -0.07 (-0.14 to 0.01)\\
+\hline
+Togo & 0.81 (0.5 to 1.11) & -0.71 (-1.02 to -0.41) & -1.43 (-1.74 to -1.13) & -0.89 (-1.19 to -0.59)\\
+\hline
+Uganda & 0.37 (0.11 to 0.63) & -0.36 (-0.61 to -0.1) & 0.91 (0.65 to 1.16) & 0.72 (0.47 to 0.98)\\
+\hline
+Zambia & 1.36 (1.12 to 1.6) & 0.65 (0.41 to 0.89) & 0.65 (0.41 to 0.89) & 0.7 (0.46 to 0.94)\\
+\hline
+Zimbabwe & 0.66 (0.51 to 0.81) & -0.12 (-0.28 to 0.03) & -0.04 (-0.19 to 0.12) & 0.09 (-0.06 to 0.24)\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -418,10 +288,14 @@ $$
 
 The four-argument truncated normals are notated $\text{Truncnorm}(\mu, \sigma, a, b)$ with mean $\mu$, standard deviation $\sigma$, and support $[a, b]$. Using truncated normals (rather than Uniform priors on $s_1, s_2$ as in earlier MOSAIC versions) prevents posterior drift toward boundary values during the staged calibration described in the [Model Calibration](https://www.mosaicmod.org/model-calibration-1.html) page.
 
-<div class="figure" style="text-align: center">
-<img src="figures/vibrio_decay_rate.png" alt="Relationship between environmental suitability ($\psi_{jt}$) and the survival and decay rate of *V. cholerae* in the environment ($\delta_{jt}$). The five curves correspond to alternative shape choices for the cumulative-Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$: Linear $(s_1{=}1, s_2{=}1)$, Concave $(s_1{=}1, s_2{=}5)$, Convex $(s_1{=}5, s_2{=}1)$, Sigmoidal $(s_1{=}5, s_2{=}5)$, and Arcsine $(s_1{=}0.5, s_2{=}0.5)$. The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate $\delta_{jt} = 1/\text{days}(\psi_{jt})$. The horizontal dashed lines are placed at the modal values of the two MOSAIC priors: $\text{days}_{\text{short}} \approx 16$ days at low suitability (the mode of $\text{Truncnorm}(16, 7, 0.01, 60)$) and $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}} \approx 16 + 180 = 196$ days at high suitability." width="100%" />
-<p class="caption">(\#fig:vibrio-decay-rate)Relationship between environmental suitability ($\psi_{jt}$) and the survival and decay rate of *V. cholerae* in the environment ($\delta_{jt}$). The five curves correspond to alternative shape choices for the cumulative-Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$: Linear $(s_1{=}1, s_2{=}1)$, Concave $(s_1{=}1, s_2{=}5)$, Convex $(s_1{=}5, s_2{=}1)$, Sigmoidal $(s_1{=}5, s_2{=}5)$, and Arcsine $(s_1{=}0.5, s_2{=}0.5)$. The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate $\delta_{jt} = 1/\text{days}(\psi_{jt})$. The horizontal dashed lines are placed at the modal values of the two MOSAIC priors: $\text{days}_{\text{short}} \approx 16$ days at low suitability (the mode of $\text{Truncnorm}(16, 7, 0.01, 60)$) and $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}} \approx 16 + 180 = 196$ days at high suitability.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/vibrio_decay_rate} 
+
+}
+
+\caption{Relationship between environmental suitability ($\psi_{jt}$) and the survival and decay rate of *V. cholerae* in the environment ($\delta_{jt}$). The five curves correspond to alternative shape choices for the cumulative-Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$: Linear $(s_1{=}1, s_2{=}1)$, Concave $(s_1{=}1, s_2{=}5)$, Convex $(s_1{=}5, s_2{=}1)$, Sigmoidal $(s_1{=}5, s_2{=}5)$, and Arcsine $(s_1{=}0.5, s_2{=}0.5)$. The primary y-axis shows survival time in days; the secondary y-axis shows the corresponding decay rate $\delta_{jt} = 1/\text{days}(\psi_{jt})$. The horizontal dashed lines are placed at the modal values of the two MOSAIC priors: $\text{days}_{\text{short}} \approx 16$ days at low suitability (the mode of $\text{Truncnorm}(16, 7, 0.01, 60)$) and $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}} \approx 16 + 180 = 196$ days at high suitability.}(\#fig:vibrio-decay-rate)
+\end{figure}
 
 ### Modeling environmental suitability
 
@@ -431,44 +305,78 @@ The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) a
 
 Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.
 
-<div class="figure" style="text-align: center">
-<img src="figures/climate_data_MOZ_weekly.png" alt="Climate data acquired from the OpenMeteo data API. Data were collected from 30 uniformly distributed points across each country and then aggregated to give weekly values of 17 climate variable from 1970 to 2030." width="100%" />
-<p class="caption">(\#fig:climate-data-moz)Climate data acquired from the OpenMeteo data API. Data were collected from 30 uniformly distributed points across each country and then aggregated to give weekly values of 17 climate variable from 1970 to 2030.</p>
-</div>
+\begin{figure}
 
-<div class="figure" style="text-align: center">
-<img src="figures/climate_data_ENSO_weekly.png" alt="Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM)." width="100%" />
-<p class="caption">(\#fig:climate-data-enso)Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).</p>
-</div>
+{\centering \includegraphics[width=1\linewidth]{figures/climate_data_MOZ_weekly} 
 
+}
 
+\caption{Climate data acquired from the OpenMeteo data API. Data were collected from 30 uniformly distributed points across each country and then aggregated to give weekly values of 17 climate variable from 1970 to 2030.}(\#fig:climate-data-moz)
+\end{figure}
 
-Table: (\#tab:climate-data-variables)A full list of covariates and their sources used in the LSTM RNN model to predict the environmental suitability of *V. cholerae* ($\psi_{jt}$).
+\begin{figure}
 
-|Covariate                      |Description                                    |Source                                               |
-|:------------------------------|:----------------------------------------------|:----------------------------------------------------|
-|temperature_2m_mean            |Average temperature at 2 meters                |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|temperature_2m_max             |Maximum temperature at 2 meters                |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|temperature_2m_min             |Minimum temperature at 2 meters                |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|wind_speed_10m_mean            |Average wind speed at 10 meters                |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|wind_speed_10m_max             |Maximum wind speed at 10 meters                |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|cloud_cover_mean               |Mean cloud cover                               |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|shortwave_radiation_sum        |Total shortwave radiation                      |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|relative_humidity_2m_mean      |Mean relative humidity at 2 meters             |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|relative_humidity_2m_max       |Maximum relative humidity at 2 meters          |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|relative_humidity_2m_min       |Minimum relative humidity at 2 meters          |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|dew_point_2m_mean              |Mean dew point at 2 meters                     |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|dew_point_2m_min               |Minimum dew point at 2 meters                  |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|dew_point_2m_max               |Maximum dew point at 2 meters                  |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|precipitation_sum              |Total precipitation                            |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|pressure_msl_mean              |Mean sea level pressure                        |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|soil_moisture_0_to_10cm_mean   |Mean soil moisture at 0 to 10 cm               |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|et0_fao_evapotranspiration_sum |Total evapotranspiration (FAO method)          |OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs|
-|DMI                            |Dipole Mode Index (DMI)                        |[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)|
-|ENSO3                          |El Niño Southern Oscillation (ENSO) - Region 3 |[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)|
-|ENSO34                         |ENSO - Region 3.4                              |[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)|
-|ENSO4                          |ENSO - Region 4                                |[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)|
-|elevation                      |Mean elevation                                 |[Amazon Web Services Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)|
+{\centering \includegraphics[width=1\linewidth]{figures/climate_data_ENSO_weekly} 
+
+}
+
+\caption{Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).}(\#fig:climate-data-enso)
+\end{figure}
+
+\begin{table}
+
+\caption{(\#tab:climate-data-variables)A full list of covariates and their sources used in the LSTM RNN model to predict the environmental suitability of *V. cholerae* ($\psi_{jt}$).}
+\centering
+\begin{tabular}[t]{l|l|l}
+\hline
+Covariate & Description & Source\\
+\hline
+temperature\_2m\_mean & Average temperature at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+temperature\_2m\_max & Maximum temperature at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+temperature\_2m\_min & Minimum temperature at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+wind\_speed\_10m\_mean & Average wind speed at 10 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+wind\_speed\_10m\_max & Maximum wind speed at 10 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+cloud\_cover\_mean & Mean cloud cover & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+shortwave\_radiation\_sum & Total shortwave radiation & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+relative\_humidity\_2m\_mean & Mean relative humidity at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+relative\_humidity\_2m\_max & Maximum relative humidity at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+relative\_humidity\_2m\_min & Minimum relative humidity at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+dew\_point\_2m\_mean & Mean dew point at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+dew\_point\_2m\_min & Minimum dew point at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+dew\_point\_2m\_max & Maximum dew point at 2 meters & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+precipitation\_sum & Total precipitation & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+pressure\_msl\_mean & Mean sea level pressure & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+soil\_moisture\_0\_to\_10cm\_mean & Mean soil moisture at 0 to 10 cm & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+et0\_fao\_evapotranspiration\_sum & Total evapotranspiration (FAO method) & OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs\\
+\hline
+DMI & Dipole Mode Index (DMI) & [NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/\#region=NINO4\&region=NINO3\&region=NINO34)\\
+\hline
+ENSO3 & El Niño Southern Oscillation (ENSO) - Region 3 & [NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/\#region=NINO4\&region=NINO3\&region=NINO34)\\
+\hline
+ENSO34 & ENSO - Region 3.4 & [NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/\#region=NINO4\&region=NINO3\&region=NINO34)\\
+\hline
+ENSO4 & ENSO - Region 4 & [NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/\#region=NINO4\&region=NINO3\&region=NINO34)\\
+\hline
+elevation & Mean elevation & [Amazon Web Services Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -480,10 +388,14 @@ As mentioned above, we model environmental suitability $\psi_{jt}$ using a Long 
 
 The model was fitted to reported case counts that were converted to a binary variable using a threshold of 200 reported cases per week. Given delays in reporting and likely lead times for environmental suitability ahead of transmission and case reporting, we also set the preceding one week to be suitable and in cases where there were two consecutive weeks of >200 cases per week, we assumed that the preceding two weeks were also suitable. See Figure \@ref(fig:cases-binary) for an example of how reported case counts are converted to a binary variable representing presumed environmental suitability for *V. cholerae*.
 
-<div class="figure" style="text-align: center">
-<img src="figures/cases_binary.png" alt="Reported cases converted to binary variable for modeling environmental suitability." width="100%" />
-<p class="caption">(\#fig:cases-binary)Reported cases converted to binary variable for modeling environmental suitability.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/cases_binary} 
+
+}
+
+\caption{Reported cases converted to binary variable for modeling environmental suitability.}(\#fig:cases-binary)
+\end{figure}
 
 
 The model is a Long Short-Term Memory (LSTM) neural network designed for binary classification, where environmental suitability, $\psi_{jt}$, is modeled as a function of the hidden state $h_t$ and hidden bias term $b_h$. Specifically, $\psi_{jt}$ is defined by a sigmoid activation function applied to the linear combination of the hidden state $h_t$ and the bias $b_h$ which if given by the 3 layers of the LSTM model:
@@ -503,24 +415,36 @@ The deep learning LSTM model consists of three stacked LSTM-RNN layers. The firs
 
 To fit the LSTM model to data, we modified the learning rate by applying an exponential decay schedule that started at 0.001 and decayed by a factor of 0.9 every 10,000 steps to enable smoother convergence. The model was compiled using the Adam optimizer with this learning rate schedule, along with binary cross-entropy as the loss function and accuracy as the evaluation metric. The model was trained for a maximum of 200 epochs with a batch size of 1024. We allowed model fitting to stop early with a patience parameter of 10 which halts training if no improvement is observed in validation accuracy for 10 consecutive epochs. To train the model we set aside 20% of the observed data for validation and also used 20% of the training data for model fitting. The training history, including loss and accuracy, was monitored over the course of training and gave a final test accuracy of 0.73 and a final test loss of 0.56 (see Figure \@ref(fig:lstm-model-fit)).
 
-<div class="figure" style="text-align: center">
-<img src="figures/suitability_LSTM_fit.png" alt="Model performance on training and validation data." width="100%" />
-<p class="caption">(\#fig:lstm-model-fit)Model performance on training and validation data.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/suitability_LSTM_fit} 
+
+}
+
+\caption{Model performance on training and validation data.}(\#fig:lstm-model-fit)
+\end{figure}
 
 After model training was completed, we predicted the values of environmental suitability $\psi_{jt}$ across all time steps for each location. Predictions start in January 1970 and go up to 5 months past the present date (currently February 2025). Given the amount of noise in the model predictions, we added a simple LOESS spline with logit transformation to smooth model predictions over time and give a more stable value of $\psi_{jt}$ when incorporating it into other model features (e.g. Equations \@ref(eq:beta2) and \@ref(eq:delta)). The resulting model predictions are shown for an example country such as Mozambique in Figure \@ref(fig:psi-prediction-data) which compares model predictions to the original case counts and the binary classification. Predicitons for all model locations are shown in a simplified view in Figure \@ref(fig:psi-prediction-countries).
 
 *Also, please note that this initial version of the model is fitted to a rather small amount of data. Model hyper parameters were specifically chosen to reduce overfitting. Therefore, we recommend to not over-interpret the time series predictions of the model at this early stage since they are likely to change and improve as more historical incidence data is included in future versions.*
 
-<div class="figure" style="text-align: center">
-<img src="figures/suitability_cases_MOZ.png" alt="The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon." width="100%" />
-<p class="caption">(\#fig:psi-prediction-data)The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.</p>
-</div>
+\begin{figure}
 
-<div class="figure" style="text-align: center">
-<img src="figures/suitability_by_country.png" alt="The smoothed LSTM model predictions (lines) and binary suitability classification (shaded areas) over time for all countries in the MOSAIC framework. Orange lines show forecasts beyond the current date. With ENSO and DMI covariates included in the model, forecasts are limited to 5 months." width="100%" />
-<p class="caption">(\#fig:psi-prediction-countries)The smoothed LSTM model predictions (lines) and binary suitability classification (shaded areas) over time for all countries in the MOSAIC framework. Orange lines show forecasts beyond the current date. With ENSO and DMI covariates included in the model, forecasts are limited to 5 months.</p>
-</div>
+{\centering \includegraphics[width=1\linewidth]{figures/suitability_cases_MOZ} 
+
+}
+
+\caption{The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.}(\#fig:psi-prediction-data)
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/suitability_by_country} 
+
+}
+
+\caption{The smoothed LSTM model predictions (lines) and binary suitability classification (shaded areas) over time for all countries in the MOSAIC framework. Orange lines show forecasts beyond the current date. With ENSO and DMI covariates included in the model, forecasts are limited to 5 months.}(\#fig:psi-prediction-countries)
+\end{figure}
 
 #### Calibration of suitability to surveillance ($\psi^{\ast}_{jt}$)
 
@@ -546,8 +470,7 @@ $$
 The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior allows the baseline odds to shift by approximately a factor of $e^{2.5} \approx 12$ on either side of unity; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
 
 
-<div id="infectious-dose-kappa"></div>
-### Infectious dose ($\kappa$)
+### Infectious dose ($\kappa$) {#infectious-dose-kappa}
 
 The half-saturation constant $\kappa$ in Equation \@ref(eq:foi-environment) is the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Historical cholera transmission models have fixed $\kappa = 10^6$ cells, a value traceable to the unbuffered water-only volunteer studies of [Hornick et al. 1971](https://pubmed.ncbi.nlm.nih.gov/5286453/) and adopted by convention in subsequent modelling work (e.g. [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Modern re-analyses of buffered-exposure volunteer studies --- in which sodium bicarbonate neutralises gastric acid, more representative of typical endemic exposure through food or contaminated drinking water --- consistently support a substantially lower central estimate of approximately $10^5$ CFU, with considerable between-study heterogeneity.
 
@@ -560,10 +483,14 @@ $$
 
 The resulting prior has a median of approximately $1.3 \times 10^5$ CFU and a 95% credible interval of approximately $3.6 \times 10^3$ to $4.6 \times 10^6$ CFU (Figure \@ref(fig:kappa-prior)). This is consistent with the lower modern-era central estimate while preserving the order-of-magnitude uncertainty that the volunteer-study literature genuinely reflects.
 
-<div class="figure" style="text-align: center">
-<img src="figures/kappa_prior.png" alt="Prior distribution for the environmental half-saturation constant $\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight." width="100%" />
-<p class="caption">(\#fig:kappa-prior)Prior distribution for the environmental half-saturation constant $\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/kappa_prior} 
+
+}
+
+\caption{Prior distribution for the environmental half-saturation constant $\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50\%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight.}(\#fig:kappa-prior)
+\end{figure}
 
 
 ### Shedding of *V. cholerae* {#sec:shedding}
@@ -592,15 +519,23 @@ $$
 
 The medians of these priors correspond to approximately $1.4 \times 10^{11}$ *V. cholerae* cells per symptomatic person per day, a ratio of approximately 75 between symptomatic and asymptomatic shedding, and therefore approximately $1.9 \times 10^9$ cells per asymptomatic person per day (Figures \@ref(fig:zeta1-prior) and \@ref(fig:zeta-ratio-prior)). These central values are several orders of magnitude larger than the older Frame-B Uniform priors used in MOSAIC v0.1, but they are biologically anchored to the volumetric scale of *V. cholerae* shedding observed in clinical studies. The 95% credible intervals span the full range of values reported across the studies in the table below.
 
-<div class="figure" style="text-align: center">
-<img src="figures/zeta_1_prior.png" alt="Prior distribution for the symptomatic shedding rate $\zeta_1$ (cells per symptomatic person per day, log scale). The lognormal fit is weighted by severity class and anchored to per-person-per-day rates derived from *V. cholerae* stool concentrations and time-averaged stool volumes from 14 literature sources. Points and bars show the literature anchors and their reported bounds." width="100%" />
-<p class="caption">(\#fig:zeta1-prior)Prior distribution for the symptomatic shedding rate $\zeta_1$ (cells per symptomatic person per day, log scale). The lognormal fit is weighted by severity class and anchored to per-person-per-day rates derived from *V. cholerae* stool concentrations and time-averaged stool volumes from 14 literature sources. Points and bars show the literature anchors and their reported bounds.</p>
-</div>
+\begin{figure}
 
-<div class="figure" style="text-align: center">
-<img src="figures/zeta_ratio_prior.png" alt="Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals)." width="100%" />
-<p class="caption">(\#fig:zeta-ratio-prior)Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals).</p>
-</div>
+{\centering \includegraphics[width=1\linewidth]{figures/zeta_1_prior} 
+
+}
+
+\caption{Prior distribution for the symptomatic shedding rate $\zeta_1$ (cells per symptomatic person per day, log scale). The lognormal fit is weighted by severity class and anchored to per-person-per-day rates derived from *V. cholerae* stool concentrations and time-averaged stool volumes from 14 literature sources. Points and bars show the literature anchors and their reported bounds.}(\#fig:zeta1-prior)
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/zeta_ratio_prior} 
+
+}
+
+\caption{Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals).}(\#fig:zeta-ratio-prior)
+\end{figure}
 
 The table below summarizes key published estimates and assumptions regarding *V. cholerae* and related bacterial shedding rates:
 
@@ -649,10 +584,14 @@ $$
 
 These parameterisations reflect the empirical difference in shedding durations by symptom status reported in the cholera literature and are consistent with the environmental shedding structure of the model and with the per-day formulation of $\zeta_1$ and $\zeta_2$ in [Section \@ref(sec:shedding)](#sec:shedding).
 
-<div class="figure" style="text-align: center">
-<img src="figures/recovery_rates.png" alt="Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model." width="100%" />
-<p class="caption">(\#fig:recovery-rates)Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/recovery_rates} 
+
+}
+
+\caption{Estimated shedding duration (x-axis) for symptomatic and asymptomatic *V. cholerae* infections. Shaded bars indicate the assumed range of plausible durations; solid vertical lines mark the mean value for each group. These durations are used to derive recovery rates ($\gamma_1$ and $\gamma_2$) as the inverse of duration and parameterize the infectious period in the MOSAIC transmission model.}(\#fig:recovery-rates)
+\end{figure}
 
 ### WAter, Sanitation, and Hygiene (WASH) 
 
@@ -660,61 +599,52 @@ Since *V. cholerae* is transmitted through fecal contamination of water and othe
 
 To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$) in the environment-to-human force of infection ($\Psi_{jt}$). Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
 
-<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:wash-weights)(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> WASH variable </th>
-   <th style="text-align:right;"> Optimized weight </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> Piped Water </td>
-   <td style="text-align:right;"> 0.356 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Septic or Sewer Sanitation </td>
-   <td style="text-align:right;"> 0.014 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Other Improved Water </td>
-   <td style="text-align:right;"> 0.000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Other Improved Sanitation </td>
-   <td style="text-align:right;"> 0.000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Surface Water </td>
-   <td style="text-align:right;"> 0.504 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Unimproved Sanitation </td>
-   <td style="text-align:right;"> 0.000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Unimproved Water </td>
-   <td style="text-align:right;"> 0.000 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Open Defecation </td>
-   <td style="text-align:right;"> 0.126 </td>
-  </tr>
-</tbody>
-</table>
+\begin{table}
+\centering
+\caption{(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.}
+\centering
+\begin{tabular}[t]{l|r}
+\hline
+WASH variable & Optimized weight\\
+\hline
+Piped Water & 0.356\\
+\hline
+Septic or Sewer Sanitation & 0.014\\
+\hline
+Other Improved Water & 0.000\\
+\hline
+Other Improved Sanitation & 0.000\\
+\hline
+Surface Water & 0.504\\
+\hline
+Unimproved Sanitation & 0.000\\
+\hline
+Unimproved Water & 0.000\\
+\hline
+Open Defecation & 0.126\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/wash_incidence_correlation.png" alt="Relationship between WASH variables and cholera incidences." width="100%" />
-<p class="caption">(\#fig:wash-incidence)Relationship between WASH variables and cholera incidences.</p>
-</div>
+\begin{figure}
 
-<div class="figure" style="text-align: center">
-<img src="figures/wash_index_by_country.png" alt="The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries." width="100%" />
-<p class="caption">(\#fig:wash-country)The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries.</p>
-</div>
+{\centering \includegraphics[width=1\linewidth]{figures/wash_incidence_correlation} 
+
+}
+
+\caption{Relationship between WASH variables and cholera incidences.}(\#fig:wash-incidence)
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/wash_index_by_country} 
+
+}
+
+\caption{The optimized weighted mean of WASH variables for AFRO countries. Countries labeled in orange denote countries with an imputed weighted mean WASH variable. Imputed values are the weighted mean from the 3 most similar countries.}(\#fig:wash-country)
+\end{figure}
 
 
 
@@ -740,20 +670,32 @@ We separate $\nu_{jt}$ into first doses $\nu_{1,jt}$ and second doses $\nu_{2,jt
 
 See Figure \@ref(fig:vaccination-example) for an example of OCV distribution using a maximum daily vaccination rate of 100,000. The resulting time series for each country is shown in Figure \@ref(fig:vaccination-countries), with current totals based on the WHO ICG data displayed in Figure \@ref(fig:vaccination-maps).
 
-<div class="figure" style="text-align: center">
-<img src="figures/vaccination_example_ZMB.png" alt="Example of the estimated vaccination rate during an OCV campaign." width="100%" />
-<p class="caption">(\#fig:vaccination-example)Example of the estimated vaccination rate during an OCV campaign.</p>
-</div>
+\begin{figure}
 
-<div class="figure" style="text-align: center">
-<img src="figures/vaccination_by_country.png" alt="The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard." width="100%" />
-<p class="caption">(\#fig:vaccination-countries)The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard.</p>
-</div>
+{\centering \includegraphics[width=1\linewidth]{figures/vaccination_example_ZMB} 
 
-<div class="figure" style="text-align: center">
-<img src="figures/vaccination_maps.png" alt="The total cumulative number of OCV doses distributed through the WHO ICG from 2016 to present day." width="100%" />
-<p class="caption">(\#fig:vaccination-maps)The total cumulative number of OCV doses distributed through the WHO ICG from 2016 to present day.</p>
-</div>
+}
+
+\caption{Example of the estimated vaccination rate during an OCV campaign.}(\#fig:vaccination-example)
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/vaccination_by_country} 
+
+}
+
+\caption{The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard.}(\#fig:vaccination-countries)
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/vaccination_maps} 
+
+}
+
+\caption{The total cumulative number of OCV doses distributed through the WHO ICG from 2016 to present day.}(\#fig:vaccination-maps)
+\end{figure}
 
 
 
@@ -780,10 +722,14 @@ $$
 
 After applying the constraint, the initial effectiveness is identical at the mode (both schedules reach approximately 0.79 immediately after the last dose), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is $\log(2) / \omega_1 \approx 984$ days $\approx 2.7$ years, while the modal two-dose half-life is $\log(2) / \omega_2 \approx 1939$ days $\approx 5.3$ years (roughly twice as long). The Gamma posterior for $\omega_2$ is also more positively skewed (Figure \@ref(fig:effectiveness)F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95% CI bounds at later follow-up.
 
-<div class="figure" style="text-align: center">
-<img src="figures/vaccine_all_combined.png" alt="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\text{VE}_k(t) = \phi_k \exp(-\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\phi_2 \ge \phi_1$. Panels B and E show the Beta priors for the initial effectiveness $\phi_1, \phi_2$; panels C and F show the Gamma priors for the daily waning rates $\omega_1, \omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit." width="100%" />
-<p class="caption">(\#fig:effectiveness)Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\text{VE}_k(t) = \phi_k \exp(-\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\phi_2 \ge \phi_1$. Panels B and E show the Beta priors for the initial effectiveness $\phi_1, \phi_2$; panels C and F show the Gamma priors for the daily waning rates $\omega_1, \omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/vaccine_all_combined} 
+
+}
+
+\caption{Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\text{VE}_k(t) = \phi_k \exp(-\omega_k t)$ (solid line) and 95\% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95\% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\phi_2 \ge \phi_1$. Panels B and E show the Beta priors for the initial effectiveness $\phi_1, \phi_2$; panels C and F show the Gamma priors for the daily waning rates $\omega_1, \omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95\% CI bounds carried over from the data fit.}(\#fig:effectiveness)
+\end{figure}
 
 ### Immunity from natural infection
 
@@ -794,15 +740,22 @@ $$
 $$
 Where we make the necessary and simplifying assumption that within 0--90 days after natural infection with *V. cholerae*, individuals are 95--99% immune. We fit this model to reported data from [Ali et al (2011)](https://doi.org/10.1093/infdis/jir416) and [Clemens et al (1991)](https://www.sciencedirect.com/science/article/pii/0140673691902076) (see Table \@ref(tab:immunity-sources)).
 
+\begin{table}
 
-
-Table: (\#tab:immunity-sources)Sources for the duration of immunity fro natural infection.
-
-|  Day| Effectiveness| Upper CI| Lower CI|Source               |
-|----:|-------------:|--------:|--------:|:--------------------|
-|   90|          0.95|     0.95|     0.95|Assumption           |
-| 1080|          0.65|     0.81|     0.37|[Ali et al (2011)](https://doi.org/10.1093/infdis/jir416)|
-| 1260|          0.61|     0.81|     0.21|[Clemens et al (1991)](https://www.sciencedirect.com/science/article/pii/0140673691902076)|
+\caption{(\#tab:immunity-sources)Sources for the duration of immunity fro natural infection.}
+\centering
+\begin{tabular}[t]{r|r|r|r|l}
+\hline
+Day & Effectiveness & Upper CI & Lower CI & Source\\
+\hline
+90 & 0.95 & 0.95 & 0.95 & Assumption\\
+\hline
+1080 & 0.65 & 0.81 & 0.37 & [Ali et al (2011)](https://doi.org/10.1093/infdis/jir416)\\
+\hline
+1260 & 0.61 & 0.81 & 0.21 & [Clemens et al (1991)](https://www.sciencedirect.com/science/article/pii/0140673691902076)\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -814,10 +767,14 @@ $$
 
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/immune_decay.png" alt="The duration of immunity after natural infection with *V. cholerae*." width="100%" />
-<p class="caption">(\#fig:immune-decay)The duration of immunity after natural infection with *V. cholerae*.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/immune_decay} 
+
+}
+
+\caption{The duration of immunity after natural infection with *V. cholerae*.}(\#fig:immune-decay)
+\end{figure}
 
 
 
@@ -826,14 +783,22 @@ $$
 
 The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
 
-<div class="figure" style="text-align: center">
-<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per day in 2017 among all countries." width="100%" />
-<p class="caption">(\#fig:mobility-data)The average number of air passengers per day in 2017 among all countries.</p>
-</div>
-<div class="figure" style="text-align: center">
-<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per day in 2017." width="100%" />
-<p class="caption">(\#fig:mobility-network)A network map showing the average number of air passengers per day in 2017.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/mobility_flight_data} 
+
+}
+
+\caption{The average number of air passengers per day in 2017 among all countries.}(\#fig:mobility-data)
+\end{figure}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/mobility_network} 
+
+}
+
+\caption{A network map showing the average number of air passengers per day in 2017.}(\#fig:mobility-network)
+\end{figure}
 
 
 
@@ -900,16 +865,24 @@ $$
 
 The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG](https://www.oag.com/flight-data-sets) using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
-<div class="figure" style="text-align: center">
-<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day." width="100%" />
-<p class="caption">(\#fig:mobility-departure)The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/mobility_travel_prob_tau} 
+
+}
+
+\caption{The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95\% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.}(\#fig:mobility-departure)
+\end{figure}
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/mobility_diffusion_pi.png" alt="The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred." width="100%" />
-<p class="caption">(\#fig:mobility-diffusion)The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/mobility_diffusion_pi} 
+
+}
+
+\caption{The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred.}(\#fig:mobility-diffusion)
+\end{figure}
 
 ### The spatial hazard
 
@@ -990,31 +963,46 @@ To provide a reasonably informed prior for the proportion of infections that are
 \end{equation}
 
 
+\begin{table}
 
-
-Table: (\#tab:symptomatic-table)Summary of Studies on Cholera Immunity
-
-|  Mean| Low CI| High CI|Location        |Source                 |Note                                             |
-|-----:|------:|-------:|:---------------|:----------------------|:------------------------------------------------|
-| 0.570|     NA|      NA|NA              |[Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)|Review                                           |
-|    NA|  1.000|   0.250|NA              |[Lueng & Matrajt (2021)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0009383)|Review                                           |
-|    NA|  0.600|   0.200|Endemic regions |[Harris et al (2012)](https://www.sciencedirect.com/science/article/pii/S014067361260436X)|Review                                           |
-| 0.238|  0.250|   0.227|Haiti           |[Finger et al (2024)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/)|Sero-survey and clinical data                    |
-| 0.213|  0.231|   0.194|Haiti           |[Jackson et al (2013)](https://www.ajtmh.org/view/journals/tpmd/89/4/article-p654.xml)|Cross-sectional sero-survey                      |
-| 0.204|     NA|      NA|Pakistan        |[Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17)|Sero-survey during epidemic; El Tor Ogawa strain |
-| 0.371|     NA|      NA|Pakistan        |[Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17)|Sero-survey during epidemic; Inaba strain        |
-| 0.184|  0.256|   0.112|Bangladesh      |[Harris et al (2008)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221)|Household cohort; mean of all age groups         |
-| 0.001|  0.000|   0.001|Bangladesh      |[Hegde et al (2024)](https://www.nature.com/articles/s41591-024-02810-4)|Sero-survey and clinical data                    |
+\caption{(\#tab:symptomatic-table)Summary of Studies on Cholera Immunity}
+\centering
+\begin{tabular}[t]{r|r|r|l|l|l}
+\hline
+Mean & Low CI & High CI & Location & Source & Note\\
+\hline
+0.570 & NA & NA & NA & [Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) & Review\\
+\hline
+NA & 1.000 & 0.250 & NA & [Lueng \& Matrajt (2021)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0009383) & Review\\
+\hline
+NA & 0.600 & 0.200 & Endemic regions & [Harris et al (2012)](https://www.sciencedirect.com/science/article/pii/S014067361260436X) & Review\\
+\hline
+0.238 & 0.250 & 0.227 & Haiti & [Finger et al (2024)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/) & Sero-survey and clinical data\\
+\hline
+0.213 & 0.231 & 0.194 & Haiti & [Jackson et al (2013)](https://www.ajtmh.org/view/journals/tpmd/89/4/article-p654.xml) & Cross-sectional sero-survey\\
+\hline
+0.204 & NA & NA & Pakistan & [Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17) & Sero-survey during epidemic; El Tor Ogawa strain\\
+\hline
+0.371 & NA & NA & Pakistan & [Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17) & Sero-survey during epidemic; Inaba strain\\
+\hline
+0.184 & 0.256 & 0.112 & Bangladesh & [Harris et al (2008)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221) & Household cohort; mean of all age groups\\
+\hline
+0.001 & 0.000 & 0.001 & Bangladesh & [Hegde et al (2024)](https://www.nature.com/articles/s41591-024-02810-4) & Sero-survey and clinical data\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
 
 The prior distribution for $\sigma$ is plotted in Figure \@ref(fig:symptomatic-fig)A with the reported values of the proportion symptomatic from previous studies shown in \@ref(fig:symptomatic-fig)B.
 
-<div class="figure" style="text-align: left">
-<img src="figures/proportion_symptomatic.png" alt="Proportion of infections that are symptomatic." width="103%" />
-<p class="caption">(\#fig:symptomatic-fig)Proportion of infections that are symptomatic.</p>
-</div>
+\begin{figure}
+
+\includegraphics[width=1.03\linewidth]{figures/proportion_symptomatic} \hfill{}
+
+\caption{Proportion of infections that are symptomatic.}(\#fig:symptomatic-fig)
+\end{figure}
 
 
 ### Suspected cases, reported cases, and deaths
@@ -1075,10 +1063,14 @@ $$
 
 The mean death-detection rate of approximately 0.60 reflects the surveillance-capture estimate of [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*; note this is the cholera-deaths-surveillance paper, distinct from the [Finger et al. 2024](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/) Haiti sero-survey cited above in the symptomatic-proportion subsection). Reported deaths are modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection that follows.
 
-<div class="figure" style="text-align: center">
-<img src="figures/suspected_cases.png" alt="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings." width="100%" />
-<p class="caption">(\#fig:rho)Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/suspected_cases} 
+
+}
+
+\caption{Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings.}(\#fig:rho)
+\end{figure}
 
 
 ### Case fatality rate {#case-fatality-rate}
@@ -1116,368 +1108,105 @@ $$
 Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49) and consumed by MOSAIC-pkg from version 0.30.2.
 
 
-<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:cfr)(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Country </th>
-   <th style="text-align:right;"> Cases (2014-2024) </th>
-   <th style="text-align:right;"> Deaths (2014-2024) </th>
-   <th style="text-align:right;"> CFR </th>
-   <th style="text-align:right;"> CFR Lower </th>
-   <th style="text-align:right;"> CFR Upper </th>
-   <th style="text-align:right;"> Beta Shape1 </th>
-   <th style="text-align:right;"> Beta Shape2 </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> AFRO Region </td>
-   <td style="text-align:right;"> 1127096 </td>
-   <td style="text-align:right;"> 21721 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 3100 </td>
-   <td style="text-align:right;"> 85 </td>
-   <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.034 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.924 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 5250 </td>
-   <td style="text-align:right;"> 38 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.005 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.934 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Benin </td>
-   <td style="text-align:right;"> 3617 </td>
-   <td style="text-align:right;"> 56 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.906 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burkina Faso </td>
-   <td style="text-align:right;"> 7 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cote d'Ivoire </td>
-   <td style="text-align:right;"> 446 </td>
-   <td style="text-align:right;"> 18 </td>
-   <td style="text-align:right;"> 0.040 </td>
-   <td style="text-align:right;"> 0.024 </td>
-   <td style="text-align:right;"> 0.063 </td>
-   <td style="text-align:right;"> 0.013 </td>
-   <td style="text-align:right;"> 1.863 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 29897 </td>
-   <td style="text-align:right;"> 925 </td>
-   <td style="text-align:right;"> 0.031 </td>
-   <td style="text-align:right;"> 0.029 </td>
-   <td style="text-align:right;"> 0.033 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.931 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 306023 </td>
-   <td style="text-align:right;"> 5809 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Congo </td>
-   <td style="text-align:right;"> 359 </td>
-   <td style="text-align:right;"> 30 </td>
-   <td style="text-align:right;"> 0.084 </td>
-   <td style="text-align:right;"> 0.057 </td>
-   <td style="text-align:right;"> 0.117 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 1.906 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:right;"> 46877 </td>
-   <td style="text-align:right;"> 660 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.013 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.893 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:right;"> 29814 </td>
-   <td style="text-align:right;"> 251 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.925 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea-Bissau </td>
-   <td style="text-align:right;"> 11 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:right;"> 47343 </td>
-   <td style="text-align:right;"> 678 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.013 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.920 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Liberia </td>
-   <td style="text-align:right;"> 580 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.938 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mali </td>
-   <td style="text-align:right;"> 12 </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 83417 </td>
-   <td style="text-align:right;"> 351 </td>
-   <td style="text-align:right;"> 0.004 </td>
-   <td style="text-align:right;"> 0.004 </td>
-   <td style="text-align:right;"> 0.005 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.893 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 63625 </td>
-   <td style="text-align:right;"> 1864 </td>
-   <td style="text-align:right;"> 0.029 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.031 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.886 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:right;"> 634 </td>
-   <td style="text-align:right;"> 13 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.011 </td>
-   <td style="text-align:right;"> 0.035 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.913 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Niger </td>
-   <td style="text-align:right;"> 11639 </td>
-   <td style="text-align:right;"> 334 </td>
-   <td style="text-align:right;"> 0.029 </td>
-   <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.032 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.901 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 241522 </td>
-   <td style="text-align:right;"> 6521 </td>
-   <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.894 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:right;"> 472 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.928 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Sudan </td>
-   <td style="text-align:right;"> 362 </td>
-   <td style="text-align:right;"> 11 </td>
-   <td style="text-align:right;"> 0.030 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.054 </td>
-   <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 1.855 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:right;"> 134839 </td>
-   <td style="text-align:right;"> 1849 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.013 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.906 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 34635 </td>
-   <td style="text-align:right;"> 705 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.907 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Eswatini </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chad </td>
-   <td style="text-align:right;"> 1359 </td>
-   <td style="text-align:right;"> 90 </td>
-   <td style="text-align:right;"> 0.066 </td>
-   <td style="text-align:right;"> 0.054 </td>
-   <td style="text-align:right;"> 0.081 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 1.857 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Togo </td>
-   <td style="text-align:right;"> 405 </td>
-   <td style="text-align:right;"> 19 </td>
-   <td style="text-align:right;"> 0.047 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.072 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 1.866 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:right;"> 33830 </td>
-   <td style="text-align:right;"> 524 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.017 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.913 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:right;"> 9110 </td>
-   <td style="text-align:right;"> 176 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.017 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.904 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> South Africa </td>
-   <td style="text-align:right;"> 1392 </td>
-   <td style="text-align:right;"> 47 </td>
-   <td style="text-align:right;"> 0.034 </td>
-   <td style="text-align:right;"> 0.025 </td>
-   <td style="text-align:right;"> 0.045 </td>
-   <td style="text-align:right;"> 0.012 </td>
-   <td style="text-align:right;"> 2.008 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 11136 </td>
-   <td style="text-align:right;"> 269 </td>
-   <td style="text-align:right;"> 0.024 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.891 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:right;"> 25380 </td>
-   <td style="text-align:right;"> 392 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.017 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.927 </td>
-  </tr>
-</tbody>
-</table>
+\begin{table}
+\centering
+\caption{(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries}
+\centering
+\begin{tabular}[t]{l|r|r|r|r|r|r|r}
+\hline
+Country & Cases (2014-2024) & Deaths (2014-2024) & CFR & CFR Lower & CFR Upper & Beta Shape1 & Beta Shape2\\
+\hline
+AFRO Region & 1127096 & 21721 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Angola & 3100 & 85 & 0.027 & 0.022 & 0.034 & 0.010 & 1.924\\
+\hline
+Burundi & 5250 & 38 & 0.007 & 0.005 & 0.010 & 0.007 & 1.934\\
+\hline
+Benin & 3617 & 56 & 0.015 & 0.012 & 0.020 & 0.008 & 1.906\\
+\hline
+Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Cote d'Ivoire & 446 & 18 & 0.040 & 0.024 & 0.063 & 0.013 & 1.863\\
+\hline
+Cameroon & 29897 & 925 & 0.031 & 0.029 & 0.033 & 0.010 & 1.931\\
+\hline
+Democratic Republic of Congo & 306023 & 5809 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+\hline
+Congo & 359 & 30 & 0.084 & 0.057 & 0.117 & 0.019 & 1.906\\
+\hline
+Ethiopia & 46877 & 660 & 0.014 & 0.013 & 0.015 & 0.008 & 1.893\\
+\hline
+Ghana & 29814 & 251 & 0.008 & 0.007 & 0.010 & 0.007 & 1.925\\
+\hline
+Guinea & 1 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Kenya & 47343 & 678 & 0.014 & 0.013 & 0.015 & 0.008 & 1.920\\
+\hline
+Liberia & 580 & 0 & 0.000 & 0.000 & 0.006 & 0.006 & 1.938\\
+\hline
+Mali & 12 & 4 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Mozambique & 83417 & 351 & 0.004 & 0.004 & 0.005 & 0.006 & 1.893\\
+\hline
+Malawi & 63625 & 1864 & 0.029 & 0.028 & 0.031 & 0.010 & 1.886\\
+\hline
+Namibia & 634 & 13 & 0.021 & 0.011 & 0.035 & 0.010 & 1.913\\
+\hline
+Niger & 11639 & 334 & 0.029 & 0.026 & 0.032 & 0.010 & 1.901\\
+\hline
+Nigeria & 241522 & 6521 & 0.027 & 0.026 & 0.028 & 0.009 & 1.894\\
+\hline
+Rwanda & 472 & 0 & 0.000 & 0.000 & 0.008 & 0.006 & 1.928\\
+\hline
+Sudan & 362 & 11 & 0.030 & 0.015 & 0.054 & 0.012 & 1.855\\
+\hline
+Somalia & 134839 & 1849 & 0.014 & 0.013 & 0.014 & 0.008 & 1.906\\
+\hline
+South Sudan & 34635 & 705 & 0.020 & 0.019 & 0.022 & 0.009 & 1.907\\
+\hline
+Eswatini & 2 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+\hline
+Chad & 1359 & 90 & 0.066 & 0.054 & 0.081 & 0.015 & 1.857\\
+\hline
+Togo & 405 & 19 & 0.047 & 0.028 & 0.072 & 0.014 & 1.866\\
+\hline
+Tanzania & 33830 & 524 & 0.015 & 0.014 & 0.017 & 0.008 & 1.913\\
+\hline
+Uganda & 9110 & 176 & 0.019 & 0.017 & 0.022 & 0.009 & 1.904\\
+\hline
+South Africa & 1392 & 47 & 0.034 & 0.025 & 0.045 & 0.012 & 2.008\\
+\hline
+Zambia & 11136 & 269 & 0.024 & 0.021 & 0.027 & 0.009 & 1.891\\
+\hline
+Zimbabwe & 25380 & 392 & 0.015 & 0.014 & 0.017 & 0.008 & 1.927\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%" />
-<p class="caption">(\#fig:cfr-cases)Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/case_fatality_ratio_and_cases_total_by_country} 
+
+}
+
+\caption{Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95\% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.}(\#fig:cfr-cases)
+\end{figure}
 
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue." width="95%" />
-<p class="caption">(\#fig:cfr-beta)Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=0.95\linewidth]{figures/case_fatality_ratio_beta_distributions} 
+
+}
+
+\caption{Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2\%) in black, Congo with the highest CFR (7\%) in red, and South Sudan with the lowest CFR (0.1\%) in blue.}(\#fig:cfr-beta)
+\end{figure}
 
 
 
@@ -1486,307 +1215,112 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 
 The model includes basic demographic change by using reported birth and death rates for each of the $j$ countries, $b_j$ and $d_j$ respectively. These rates are static and defined by the United Nations Department of Economic and Social Affairs Population Division [World Population Prospects 2024](https://population.un.org/wpp/Download/Standard/CSV/). Values for $b_j$ and $d_j$ are derived from crude rates and converted to birth rate per day and death rate per day (shown in Table \@ref(tab:demographics)).
 
-<table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:demographics)(\#tab:demographics)Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Country </th>
-   <th style="text-align:right;"> Population </th>
-   <th style="text-align:right;"> Birth rate </th>
-   <th style="text-align:right;"> Death rate </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> Algeria </td>
-   <td style="text-align:right;"> 45831343 </td>
-   <td style="text-align:right;"> 0.0000542 </td>
-   <td style="text-align:right;"> 1.28e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 36186956 </td>
-   <td style="text-align:right;"> 0.0001046 </td>
-   <td style="text-align:right;"> 1.93e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Benin </td>
-   <td style="text-align:right;"> 13934166 </td>
-   <td style="text-align:right;"> 0.0000940 </td>
-   <td style="text-align:right;"> 2.44e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Botswana </td>
-   <td style="text-align:right;"> 2459937 </td>
-   <td style="text-align:right;"> 0.0000683 </td>
-   <td style="text-align:right;"> 1.58e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burkina Faso </td>
-   <td style="text-align:right;"> 22765636 </td>
-   <td style="text-align:right;"> 0.0000877 </td>
-   <td style="text-align:right;"> 2.21e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 13503998 </td>
-   <td style="text-align:right;"> 0.0000935 </td>
-   <td style="text-align:right;"> 1.87e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 27997833 </td>
-   <td style="text-align:right;"> 0.0000937 </td>
-   <td style="text-align:right;"> 1.99e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cape Verde </td>
-   <td style="text-align:right;"> 521047 </td>
-   <td style="text-align:right;"> 0.0000339 </td>
-   <td style="text-align:right;"> 1.39e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Central African Republic </td>
-   <td style="text-align:right;"> 5064592 </td>
-   <td style="text-align:right;"> 0.0001292 </td>
-   <td style="text-align:right;"> 2.63e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chad </td>
-   <td style="text-align:right;"> 18767684 </td>
-   <td style="text-align:right;"> 0.0001196 </td>
-   <td style="text-align:right;"> 3.11e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Comoros </td>
-   <td style="text-align:right;"> 842267 </td>
-   <td style="text-align:right;"> 0.0000793 </td>
-   <td style="text-align:right;"> 1.99e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Congo </td>
-   <td style="text-align:right;"> 6108142 </td>
-   <td style="text-align:right;"> 0.0000849 </td>
-   <td style="text-align:right;"> 1.74e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Côte d’Ivoire </td>
-   <td style="text-align:right;"> 30783520 </td>
-   <td style="text-align:right;"> 0.0000887 </td>
-   <td style="text-align:right;"> 2.12e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 104063312 </td>
-   <td style="text-align:right;"> 0.0001150 </td>
-   <td style="text-align:right;"> 2.37e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Equatorial Guinea </td>
-   <td style="text-align:right;"> 1825480 </td>
-   <td style="text-align:right;"> 0.0000821 </td>
-   <td style="text-align:right;"> 2.18e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Eritrea </td>
-   <td style="text-align:right;"> 3438999 </td>
-   <td style="text-align:right;"> 0.0000789 </td>
-   <td style="text-align:right;"> 1.67e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Eswatini </td>
-   <td style="text-align:right;"> 1224706 </td>
-   <td style="text-align:right;"> 0.0000663 </td>
-   <td style="text-align:right;"> 2.12e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:right;"> 127028360 </td>
-   <td style="text-align:right;"> 0.0000886 </td>
-   <td style="text-align:right;"> 1.65e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Gabon </td>
-   <td style="text-align:right;"> 2457715 </td>
-   <td style="text-align:right;"> 0.0000766 </td>
-   <td style="text-align:right;"> 1.74e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Gambia </td>
-   <td style="text-align:right;"> 2666786 </td>
-   <td style="text-align:right;"> 0.0000843 </td>
-   <td style="text-align:right;"> 1.74e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:right;"> 33467371 </td>
-   <td style="text-align:right;"> 0.0000728 </td>
-   <td style="text-align:right;"> 1.95e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea </td>
-   <td style="text-align:right;"> 14229395 </td>
-   <td style="text-align:right;"> 0.0000939 </td>
-   <td style="text-align:right;"> 2.53e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea-Bissau </td>
-   <td style="text-align:right;"> 2129290 </td>
-   <td style="text-align:right;"> 0.0000832 </td>
-   <td style="text-align:right;"> 1.95e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:right;"> 54793511 </td>
-   <td style="text-align:right;"> 0.0000750 </td>
-   <td style="text-align:right;"> 2.00e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Lesotho </td>
-   <td style="text-align:right;"> 2298496 </td>
-   <td style="text-align:right;"> 0.0000664 </td>
-   <td style="text-align:right;"> 2.93e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Liberia </td>
-   <td style="text-align:right;"> 5432670 </td>
-   <td style="text-align:right;"> 0.0000858 </td>
-   <td style="text-align:right;"> 2.24e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Madagascar </td>
-   <td style="text-align:right;"> 30813475 </td>
-   <td style="text-align:right;"> 0.0000890 </td>
-   <td style="text-align:right;"> 2.09e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 20832833 </td>
-   <td style="text-align:right;"> 0.0000871 </td>
-   <td style="text-align:right;"> 1.49e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mali </td>
-   <td style="text-align:right;"> 23415909 </td>
-   <td style="text-align:right;"> 0.0001113 </td>
-   <td style="text-align:right;"> 2.40e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mauritania </td>
-   <td style="text-align:right;"> 4948362 </td>
-   <td style="text-align:right;"> 0.0000957 </td>
-   <td style="text-align:right;"> 1.54e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mauritius </td>
-   <td style="text-align:right;"> 1274659 </td>
-   <td style="text-align:right;"> 0.0000254 </td>
-   <td style="text-align:right;"> 2.39e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 33140626 </td>
-   <td style="text-align:right;"> 0.0001042 </td>
-   <td style="text-align:right;"> 1.95e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:right;"> 2928037 </td>
-   <td style="text-align:right;"> 0.0000718 </td>
-   <td style="text-align:right;"> 1.71e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Niger </td>
-   <td style="text-align:right;"> 25727295 </td>
-   <td style="text-align:right;"> 0.0001167 </td>
-   <td style="text-align:right;"> 2.47e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 225494749 </td>
-   <td style="text-align:right;"> 0.0000912 </td>
-   <td style="text-align:right;"> 3.25e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:right;"> 13802596 </td>
-   <td style="text-align:right;"> 0.0000785 </td>
-   <td style="text-align:right;"> 1.64e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> São Tomé &amp; Príncipe </td>
-   <td style="text-align:right;"> 228558 </td>
-   <td style="text-align:right;"> 0.0000780 </td>
-   <td style="text-align:right;"> 1.54e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Senegal </td>
-   <td style="text-align:right;"> 17867073 </td>
-   <td style="text-align:right;"> 0.0000816 </td>
-   <td style="text-align:right;"> 1.55e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Seychelles </td>
-   <td style="text-align:right;"> 126694 </td>
-   <td style="text-align:right;"> 0.0000377 </td>
-   <td style="text-align:right;"> 2.27e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Sierra Leone </td>
-   <td style="text-align:right;"> 8368119 </td>
-   <td style="text-align:right;"> 0.0000848 </td>
-   <td style="text-align:right;"> 2.30e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:right;"> 18031404 </td>
-   <td style="text-align:right;"> 0.0001198 </td>
-   <td style="text-align:right;"> 2.74e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> South Africa </td>
-   <td style="text-align:right;"> 62796883 </td>
-   <td style="text-align:right;"> 0.0000518 </td>
-   <td style="text-align:right;"> 2.55e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 11146895 </td>
-   <td style="text-align:right;"> 0.0000807 </td>
-   <td style="text-align:right;"> 2.71e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:right;"> 65657004 </td>
-   <td style="text-align:right;"> 0.0000979 </td>
-   <td style="text-align:right;"> 1.61e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Togo </td>
-   <td style="text-align:right;"> 9196283 </td>
-   <td style="text-align:right;"> 0.0000863 </td>
-   <td style="text-align:right;"> 2.13e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:right;"> 47981110 </td>
-   <td style="text-align:right;"> 0.0000978 </td>
-   <td style="text-align:right;"> 1.35e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 20430382 </td>
-   <td style="text-align:right;"> 0.0000919 </td>
-   <td style="text-align:right;"> 1.45e-05 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:right;"> 16203259 </td>
-   <td style="text-align:right;"> 0.0000840 </td>
-   <td style="text-align:right;"> 2.10e-05 </td>
-  </tr>
-</tbody>
-</table>
+\begin{table}
+\centering
+\caption{(\#tab:demographics)Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.}
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+Country & Population & Birth rate & Death rate\\
+\hline
+Algeria & 45831343 & 0.0000542 & 1.28e-05\\
+\hline
+Angola & 36186956 & 0.0001046 & 1.93e-05\\
+\hline
+Benin & 13934166 & 0.0000940 & 2.44e-05\\
+\hline
+Botswana & 2459937 & 0.0000683 & 1.58e-05\\
+\hline
+Burkina Faso & 22765636 & 0.0000877 & 2.21e-05\\
+\hline
+Burundi & 13503998 & 0.0000935 & 1.87e-05\\
+\hline
+Cameroon & 27997833 & 0.0000937 & 1.99e-05\\
+\hline
+Cape Verde & 521047 & 0.0000339 & 1.39e-05\\
+\hline
+Central African Republic & 5064592 & 0.0001292 & 2.63e-05\\
+\hline
+Chad & 18767684 & 0.0001196 & 3.11e-05\\
+\hline
+Comoros & 842267 & 0.0000793 & 1.99e-05\\
+\hline
+Congo & 6108142 & 0.0000849 & 1.74e-05\\
+\hline
+Côte d’Ivoire & 30783520 & 0.0000887 & 2.12e-05\\
+\hline
+Democratic Republic of Congo & 104063312 & 0.0001150 & 2.37e-05\\
+\hline
+Equatorial Guinea & 1825480 & 0.0000821 & 2.18e-05\\
+\hline
+Eritrea & 3438999 & 0.0000789 & 1.67e-05\\
+\hline
+Eswatini & 1224706 & 0.0000663 & 2.12e-05\\
+\hline
+Ethiopia & 127028360 & 0.0000886 & 1.65e-05\\
+\hline
+Gabon & 2457715 & 0.0000766 & 1.74e-05\\
+\hline
+Gambia & 2666786 & 0.0000843 & 1.74e-05\\
+\hline
+Ghana & 33467371 & 0.0000728 & 1.95e-05\\
+\hline
+Guinea & 14229395 & 0.0000939 & 2.53e-05\\
+\hline
+Guinea-Bissau & 2129290 & 0.0000832 & 1.95e-05\\
+\hline
+Kenya & 54793511 & 0.0000750 & 2.00e-05\\
+\hline
+Lesotho & 2298496 & 0.0000664 & 2.93e-05\\
+\hline
+Liberia & 5432670 & 0.0000858 & 2.24e-05\\
+\hline
+Madagascar & 30813475 & 0.0000890 & 2.09e-05\\
+\hline
+Malawi & 20832833 & 0.0000871 & 1.49e-05\\
+\hline
+Mali & 23415909 & 0.0001113 & 2.40e-05\\
+\hline
+Mauritania & 4948362 & 0.0000957 & 1.54e-05\\
+\hline
+Mauritius & 1274659 & 0.0000254 & 2.39e-05\\
+\hline
+Mozambique & 33140626 & 0.0001042 & 1.95e-05\\
+\hline
+Namibia & 2928037 & 0.0000718 & 1.71e-05\\
+\hline
+Niger & 25727295 & 0.0001167 & 2.47e-05\\
+\hline
+Nigeria & 225494749 & 0.0000912 & 3.25e-05\\
+\hline
+Rwanda & 13802596 & 0.0000785 & 1.64e-05\\
+\hline
+São Tomé \& Príncipe & 228558 & 0.0000780 & 1.54e-05\\
+\hline
+Senegal & 17867073 & 0.0000816 & 1.55e-05\\
+\hline
+Seychelles & 126694 & 0.0000377 & 2.27e-05\\
+\hline
+Sierra Leone & 8368119 & 0.0000848 & 2.30e-05\\
+\hline
+Somalia & 18031404 & 0.0001198 & 2.74e-05\\
+\hline
+South Africa & 62796883 & 0.0000518 & 2.55e-05\\
+\hline
+South Sudan & 11146895 & 0.0000807 & 2.71e-05\\
+\hline
+Tanzania & 65657004 & 0.0000979 & 1.61e-05\\
+\hline
+Togo & 9196283 & 0.0000863 & 2.13e-05\\
+\hline
+Uganda & 47981110 & 0.0000978 & 1.35e-05\\
+\hline
+Zambia & 20430382 & 0.0000919 & 1.45e-05\\
+\hline
+Zimbabwe & 16203259 & 0.0000840 & 2.10e-05\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -2067,10 +1601,14 @@ location-specific, time-varying estimates of the effective reproductive number.
 
 
 
-<div class="figure" style="text-align: center">
-<img src="figures/generation_time.png" alt="Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$." width="95%" />
-<p class="caption">(\#fig:generation-time)Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$.</p>
-</div>
+\begin{figure}
+
+{\centering \includegraphics[width=0.95\linewidth]{figures/generation_time} 
+
+}
+
+\caption{Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 \% credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$.}(\#fig:generation-time)
+\end{figure}
 
 
 
@@ -2115,52 +1653,96 @@ After the transmission model is fully specified, we tune its numerical parameter
 
 <div id="mosaic-table"></div>
 ## Table of MOSAIC framework countries
+\begin{table}
 
-
-Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
-
-|ISO |Country                          |Region          |Cholera News                                   |
-|:---|:--------------------------------|:---------------|:----------------------------------------------|
-|BDI |Burundi                          |Eastern Africa  |[Cholera News: Burundi](https://news.google.com/search?q=Cholera+Burundi&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|ERI |Eritrea                          |Eastern Africa  |[Cholera News: Eritrea](https://news.google.com/search?q=Cholera+Eritrea&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|ETH |Ethiopia                         |Eastern Africa  |[Cholera News: Ethiopia](https://news.google.com/search?q=Cholera+Ethiopia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|KEN |Kenya                            |Eastern Africa  |[Cholera News: Kenya](https://news.google.com/search?q=Cholera+Kenya&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|MWI |Malawi                           |Eastern Africa  |[Cholera News: Malawi](https://news.google.com/search?q=Cholera+Malawi&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|MOZ |Mozambique                       |Eastern Africa  |[Cholera News: Mozambique](https://news.google.com/search?q=Cholera+Mozambique&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|RWA |Rwanda                           |Eastern Africa  |[Cholera News: Rwanda](https://news.google.com/search?q=Cholera+Rwanda&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|SOM |Somalia                          |Eastern Africa  |[Cholera News: Somalia](https://news.google.com/search?q=Cholera+Somalia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|SSD |South Sudan                      |Eastern Africa  |[Cholera News: South Sudan](https://news.google.com/search?q=Cholera+South+Sudan&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|TZA |Tanzania                         |Eastern Africa  |[Cholera News: Tanzania](https://news.google.com/search?q=Cholera+Tanzania&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|UGA |Uganda                           |Eastern Africa  |[Cholera News: Uganda](https://news.google.com/search?q=Cholera+Uganda&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|ZMB |Zambia                           |Eastern Africa  |[Cholera News: Zambia](https://news.google.com/search?q=Cholera+Zambia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|ZWE |Zimbabwe                         |Eastern Africa  |[Cholera News: Zimbabwe](https://news.google.com/search?q=Cholera+Zimbabwe&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|AGO |Angola                           |Middle Africa   |[Cholera News: Angola](https://news.google.com/search?q=Cholera+Angola&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|CMR |Cameroon                         |Middle Africa   |[Cholera News: Cameroon](https://news.google.com/search?q=Cholera+Cameroon&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|CAF |Central African Republic         |Middle Africa   |[Cholera News: Central African Republic](https://news.google.com/search?q=Cholera+Central+African+Republic&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|TCD |Chad                             |Middle Africa   |[Cholera News: Chad](https://news.google.com/search?q=Cholera+Chad&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|COD |Democratic Republic of the Congo |Middle Africa   |[Cholera News: Democratic Republic of the Congo](https://news.google.com/search?q=Cholera+Democratic+Republic+of+the+Congo&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GNQ |Equatorial Guinea                |Middle Africa   |[Cholera News: Equatorial Guinea](https://news.google.com/search?q=Cholera+Equatorial+Guinea&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GAB |Gabon                            |Middle Africa   |[Cholera News: Gabon](https://news.google.com/search?q=Cholera+Gabon&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|COG |Republic of the Congo            |Middle Africa   |[Cholera News: Republic of the Congo](https://news.google.com/search?q=Cholera+Republic+of+the+Congo&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|BWA |Botswana                         |Southern Africa |[Cholera News: Botswana](https://news.google.com/search?q=Cholera+Botswana&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|SWZ |Kingdom of eSwatini              |Southern Africa |[Cholera News: Kingdom of eSwatini](https://news.google.com/search?q=Cholera+Kingdom+of+eSwatini&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|NAM |Namibia                          |Southern Africa |[Cholera News: Namibia](https://news.google.com/search?q=Cholera+Namibia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|ZAF |South Africa                     |Southern Africa |[Cholera News: South Africa](https://news.google.com/search?q=Cholera+South+Africa&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|BEN |Benin                            |Western Africa  |[Cholera News: Benin](https://news.google.com/search?q=Cholera+Benin&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|BFA |Burkina Faso                     |Western Africa  |[Cholera News: Burkina Faso](https://news.google.com/search?q=Cholera+Burkina+Faso&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|CIV |Côte d'Ivoire                    |Western Africa  |[Cholera News: Côte d'Ivoire](https://news.google.com/search?q=Cholera+Côte+d'Ivoire&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GHA |Ghana                            |Western Africa  |[Cholera News: Ghana](https://news.google.com/search?q=Cholera+Ghana&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GIN |Guinea                           |Western Africa  |[Cholera News: Guinea](https://news.google.com/search?q=Cholera+Guinea&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GNB |Guinea-Bissau                    |Western Africa  |[Cholera News: Guinea-Bissau](https://news.google.com/search?q=Cholera+Guinea-Bissau&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|LBR |Liberia                          |Western Africa  |[Cholera News: Liberia](https://news.google.com/search?q=Cholera+Liberia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|MLI |Mali                             |Western Africa  |[Cholera News: Mali](https://news.google.com/search?q=Cholera+Mali&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|MRT |Mauritania                       |Western Africa  |[Cholera News: Mauritania](https://news.google.com/search?q=Cholera+Mauritania&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|NER |Niger                            |Western Africa  |[Cholera News: Niger](https://news.google.com/search?q=Cholera+Niger&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|NGA |Nigeria                          |Western Africa  |[Cholera News: Nigeria](https://news.google.com/search?q=Cholera+Nigeria&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|SEN |Senegal                          |Western Africa  |[Cholera News: Senegal](https://news.google.com/search?q=Cholera+Senegal&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|SLE |Sierra Leone                     |Western Africa  |[Cholera News: Sierra Leone](https://news.google.com/search?q=Cholera+Sierra+Leone&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|GMB |The Gambia                       |Western Africa  |[Cholera News: The Gambia](https://news.google.com/search?q=Cholera+The+Gambia&hl=en-US&gl=US&ceid=US:en&sort=date)|
-|TGO |Togo                             |Western Africa  |[Cholera News: Togo](https://news.google.com/search?q=Cholera+Togo&hl=en-US&gl=US&ceid=US:en&sort=date)|
+\caption{(\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News}
+\centering
+\begin{tabular}[t]{l|l|l|l}
+\hline
+ISO & Country & Region & Cholera News\\
+\hline
+BDI & Burundi & Eastern Africa & [Cholera News: Burundi](https://news.google.com/search?q=Cholera+Burundi\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+ERI & Eritrea & Eastern Africa & [Cholera News: Eritrea](https://news.google.com/search?q=Cholera+Eritrea\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+ETH & Ethiopia & Eastern Africa & [Cholera News: Ethiopia](https://news.google.com/search?q=Cholera+Ethiopia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+KEN & Kenya & Eastern Africa & [Cholera News: Kenya](https://news.google.com/search?q=Cholera+Kenya\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+MWI & Malawi & Eastern Africa & [Cholera News: Malawi](https://news.google.com/search?q=Cholera+Malawi\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+MOZ & Mozambique & Eastern Africa & [Cholera News: Mozambique](https://news.google.com/search?q=Cholera+Mozambique\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+RWA & Rwanda & Eastern Africa & [Cholera News: Rwanda](https://news.google.com/search?q=Cholera+Rwanda\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+SOM & Somalia & Eastern Africa & [Cholera News: Somalia](https://news.google.com/search?q=Cholera+Somalia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+SSD & South Sudan & Eastern Africa & [Cholera News: South Sudan](https://news.google.com/search?q=Cholera+South+Sudan\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+TZA & Tanzania & Eastern Africa & [Cholera News: Tanzania](https://news.google.com/search?q=Cholera+Tanzania\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+UGA & Uganda & Eastern Africa & [Cholera News: Uganda](https://news.google.com/search?q=Cholera+Uganda\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+ZMB & Zambia & Eastern Africa & [Cholera News: Zambia](https://news.google.com/search?q=Cholera+Zambia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+ZWE & Zimbabwe & Eastern Africa & [Cholera News: Zimbabwe](https://news.google.com/search?q=Cholera+Zimbabwe\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+AGO & Angola & Middle Africa & [Cholera News: Angola](https://news.google.com/search?q=Cholera+Angola\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+CMR & Cameroon & Middle Africa & [Cholera News: Cameroon](https://news.google.com/search?q=Cholera+Cameroon\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+CAF & Central African Republic & Middle Africa & [Cholera News: Central African Republic](https://news.google.com/search?q=Cholera+Central+African+Republic\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+TCD & Chad & Middle Africa & [Cholera News: Chad](https://news.google.com/search?q=Cholera+Chad\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+COD & Democratic Republic of the Congo & Middle Africa & [Cholera News: Democratic Republic of the Congo](https://news.google.com/search?q=Cholera+Democratic+Republic+of+the+Congo\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GNQ & Equatorial Guinea & Middle Africa & [Cholera News: Equatorial Guinea](https://news.google.com/search?q=Cholera+Equatorial+Guinea\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GAB & Gabon & Middle Africa & [Cholera News: Gabon](https://news.google.com/search?q=Cholera+Gabon\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+COG & Republic of the Congo & Middle Africa & [Cholera News: Republic of the Congo](https://news.google.com/search?q=Cholera+Republic+of+the+Congo\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+BWA & Botswana & Southern Africa & [Cholera News: Botswana](https://news.google.com/search?q=Cholera+Botswana\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+SWZ & Kingdom of eSwatini & Southern Africa & [Cholera News: Kingdom of eSwatini](https://news.google.com/search?q=Cholera+Kingdom+of+eSwatini\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+NAM & Namibia & Southern Africa & [Cholera News: Namibia](https://news.google.com/search?q=Cholera+Namibia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+ZAF & South Africa & Southern Africa & [Cholera News: South Africa](https://news.google.com/search?q=Cholera+South+Africa\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+BEN & Benin & Western Africa & [Cholera News: Benin](https://news.google.com/search?q=Cholera+Benin\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+BFA & Burkina Faso & Western Africa & [Cholera News: Burkina Faso](https://news.google.com/search?q=Cholera+Burkina+Faso\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+CIV & Côte d'Ivoire & Western Africa & [Cholera News: Côte d'Ivoire](https://news.google.com/search?q=Cholera+Côte+d'Ivoire\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GHA & Ghana & Western Africa & [Cholera News: Ghana](https://news.google.com/search?q=Cholera+Ghana\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GIN & Guinea & Western Africa & [Cholera News: Guinea](https://news.google.com/search?q=Cholera+Guinea\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GNB & Guinea-Bissau & Western Africa & [Cholera News: Guinea-Bissau](https://news.google.com/search?q=Cholera+Guinea-Bissau\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+LBR & Liberia & Western Africa & [Cholera News: Liberia](https://news.google.com/search?q=Cholera+Liberia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+MLI & Mali & Western Africa & [Cholera News: Mali](https://news.google.com/search?q=Cholera+Mali\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+MRT & Mauritania & Western Africa & [Cholera News: Mauritania](https://news.google.com/search?q=Cholera+Mauritania\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+NER & Niger & Western Africa & [Cholera News: Niger](https://news.google.com/search?q=Cholera+Niger\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+NGA & Nigeria & Western Africa & [Cholera News: Nigeria](https://news.google.com/search?q=Cholera+Nigeria\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+SEN & Senegal & Western Africa & [Cholera News: Senegal](https://news.google.com/search?q=Cholera+Senegal\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+SLE & Sierra Leone & Western Africa & [Cholera News: Sierra Leone](https://news.google.com/search?q=Cholera+Sierra+Leone\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+GMB & The Gambia & Western Africa & [Cholera News: The Gambia](https://news.google.com/search?q=Cholera+The+Gambia\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+TGO & Togo & Western Africa & [Cholera News: Togo](https://news.google.com/search?q=Cholera+Togo\&hl=en-US\&gl=US\&ceid=US:en\&sort=date)\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -2168,88 +1750,166 @@ Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
 ## Table of model parameters
 
 
+\begin{tabular}{l|l|l|l}
+\hline
+Parameter & Description & Distribution & Source\\
+\hline
+\$i\$ & Index representing the origin metapopulation. &  & \\
+\hline
+\$j\$ & Index representing the destination metapopulation. &  & \\
+\hline
+\$t\$ & Time step (one week). &  & \\
+\hline
+\$b\_\{jt\}\$ & Birth rate of population \$j\$. &  & [UN World Population Prospects](https://population.un.org/wpp/)\\
+\hline
+\$d\_\{jt\}\$ & Mortality rate of population \$j\$. &  & [UN World Population Prospects](https://population.un.org/wpp/)\\
+\hline
+\$N\_\{jt\}\$ & Population size of destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$S\_\{jt\}\$ & Number of susceptible individuals in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$V\_\{1,jt\}\$ & Number of individuals with one-dose vaccination in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$V\_\{2,jt\}\$ & Number of individuals with two-dose vaccination in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$I\_\{1,jt\}\$ & Number of symptomatic infected individuals in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$I\_\{2,jt\}\$ & Number of asymptomatic infected individuals in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$W\_\{jt\}\$ & Amount of *V. cholerae* in the environment in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$R\_\{jt\}\$ & Number of recovered (immune) individuals in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$\textbackslash{}Lambda\_\{j,t+1\}\$ & Human-to-human force of infection in destination \$j\$ at time \$t+1\$. &  & \\
+\hline
+\$\textbackslash{}Psi\_\{j,t+1\}\$ & Environment-to-human force of infection in destination \$j\$ at time \$t+1\$. &  & \\
+\hline
+\$\textbackslash{}iota\$ & The incubation period of cholera infection & \$1.4 \textbackslash{} \textbackslash{}text\{days\} \textbackslash{} (1.3–1.6 \textbackslash{} 95\textbackslash{}\% \textbackslash{}text\{CI\})\$ & [Azman et al 2013](http://www.sciencedirect.com/science/article/pii/S0163445312003477)\\
+\hline
+\$\textbackslash{}phi\_1\$ & Vaccine effectiveness of one-dose OCV. &  & \\
+\hline
+\$\textbackslash{}phi\_2\$ & Vaccine effectiveness of two-dose OCV. &  & \\
+\hline
+\$\textbackslash{}nu\_\{jt\}\$ & Vaccination rate (OCV doses administered) in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$\textbackslash{}omega\_1\$ & Waning immunity rate of vaccinated individuals with one-dose OCV. &  & \\
+\hline
+\$\textbackslash{}omega\_2\$ & Waning immunity rate of vaccinated individuals with two-dose OCV. &  & \\
+\hline
+\$\textbackslash{}varepsilon\$ & Waning immunity rate of recovered individuals. &  & \\
+\hline
+\$\textbackslash{}gamma\_1\$ & Recovery rate of symptomatic infected individuals. &  & \\
+\hline
+\$\textbackslash{}gamma\_2\$ & Recovery rate of asymptomatic infected individuals. &  & \\
+\hline
+\$\textbackslash{}mu\_\{j,t\}\$ & Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into \$\textbackslash{}mu\_\{j,0\}, \textbackslash{}mu\_\{j,1\}, \textbackslash{}mu\_\{j,\textbackslash{}text\{epi\}\}\$; see \textbackslash{}@ref(eq:mu-jt). &  & \\
+\hline
+\$\textbackslash{}sigma\$ & Proportion of infections that are symptomatic. &  & \\
+\hline
+\$\textbackslash{}rho\$ & Care-seeking rate: probability a true symptomatic infection is reported as a suspected case. &  & \\
+\hline
+\$\textbackslash{}zeta\_1\$ & Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals. & \$\textbackslash{}text\{Lognormal\}(25.65, 2.46)\$ & <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>\\
+\hline
+\$\textbackslash{}zeta\_2\$ & Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as \$\textbackslash{}zeta\_1/\textbackslash{}zeta\_\{\textbackslash{}text\{ratio\}\}\$. & Derived from \$\textbackslash{}zeta\_1\$ and \$\textbackslash{}zeta\_\{\textbackslash{}text\{ratio\}\}\$ & <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>\\
+\hline
+\$\textbackslash{}delta\$ & Environmental decay rate of *V. cholerae*. & Determined dynamically in model based on \$\textbackslash{}psi\_\{jt\}\$. & \\
+\hline
+\$\textbackslash{}delta\_\{\textbackslash{}text\{min\}\}\$ & Minimum decay rate when \$\textbackslash{}psi\_\{jt\}=0\$. & \$0.333 \textbackslash{} (3 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
+\hline
+\$\textbackslash{}delta\_\{\textbackslash{}text\{max\}\}\$ & Maximum decay rate when \$\textbackslash{}psi\_\{jt\}=1\$. & \$0.011 \textbackslash{} (90 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
+\hline
+\$\textbackslash{}psi\_\{jt\}\$ & Environmental suitability of *V. cholerae* in destination \$j\$ at time \$t\$. & Estimated by LSTM-RNN model. & \\
+\hline
+\$\textbackslash{}beta\_\{j0\}\textasciicircum{}\{\textbackslash{}text\{hum\}\}\$ & Baseline human-to-human transmission rate in destination \$j\$. &  & \\
+\hline
+\$\textbackslash{}beta\_\{jt\}\textasciicircum{}\{\textbackslash{}text\{hum\}\}\$ & Seasonal human-to-human transmission rate in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$\textbackslash{}beta\_\{j0\}\textasciicircum{}\{\textbackslash{}text\{env\}\}\$ & Baseline environment-to-human transmission rate in destination \$j\$. &  & \\
+\hline
+\$\textbackslash{}beta\_\{jt\}\textasciicircum{}\{\textbackslash{}text\{env\}\}\$ & Environment-to-human transmission rate in destination \$j\$ at time \$t\$. &  & \\
+\hline
+\$a\_1\$ & First Fourier cosine coefficient for seasonality. & See Table \textbackslash{}@ref(tab:seasonal-table). & [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)\\
+\hline
+\$b\_1\$ & First Fourier sine coefficient for seasonality. & See Table \textbackslash{}@ref(tab:seasonal-table). & [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)\\
+\hline
+\$a\_2\$ & Second Fourier cosine coefficient for seasonality. & See Table \textbackslash{}@ref(tab:seasonal-table). & [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)\\
+\hline
+\$b\_2\$ & Second Fourier sine coefficient for seasonality. & See Table \textbackslash{}@ref(tab:seasonal-table). & [Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)\\
+\hline
+\$p\$ & Period of the seasonal cycle (set to days). & \$365\$ & \\
+\hline
+\$\textbackslash{}alpha\_1\$ & Exponent on infectious individuals in the force of infection numerator. & \$0.95\$ & [Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)\\
+\hline
+\$\textbackslash{}alpha\_2\$ & Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. & \$0.95\$ & [McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)\\
+\hline
+\$\textbackslash{}tau\_i\$ & Probability an individual departs from origin \$i\$. &  & \\
+\hline
+\$\textbackslash{}pi\_\{ij\}\$ & Probability of travel from origin \$i\$ to destination \$j\$ given departure. &  & \\
+\hline
+\$\textbackslash{}theta\_\{j\}\$ & Proportion with adequate WASH in destination \$j\$. & See Figure \textbackslash{}@ref(fig:wash-country). & [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)\\
+\hline
+\$\textbackslash{}kappa\$ & Concentration of *V. cholerae* (cells/mL) required for 50\% infection probability. & \$\textbackslash{}text\{Lognormal\}(11.77, 1.82)\$ & Meta-analysis (see \textbackslash{}@ref(eq:kappa))\\
+\hline
+\end{tabular}
 
-|Parameter                 |Description                                                                                                                                                                 |Distribution                                          |Source                                                                        |
-|:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------|:-----------------------------------------------------------------------------|
-|$i$                       |Index representing the origin metapopulation.                                                                                                                               |                                                      |                                                                              |
-|$j$                       |Index representing the destination metapopulation.                                                                                                                          |                                                      |                                                                              |
-|$t$                       |Time step (one week).                                                                                                                                                       |                                                      |                                                                              |
-|$b_{jt}$                  |Birth rate of population $j$.                                                                                                                                               |                                                      |[UN World Population Prospects](https://population.un.org/wpp/)               |
-|$d_{jt}$                  |Mortality rate of population $j$.                                                                                                                                           |                                                      |[UN World Population Prospects](https://population.un.org/wpp/)               |
-|$N_{jt}$                  |Population size of destination $j$ at time $t$.                                                                                                                             |                                                      |                                                                              |
-|$S_{jt}$                  |Number of susceptible individuals in destination $j$ at time $t$.                                                                                                           |                                                      |                                                                              |
-|$V_{1,jt}$                |Number of individuals with one-dose vaccination in destination $j$ at time $t$.                                                                                             |                                                      |                                                                              |
-|$V_{2,jt}$                |Number of individuals with two-dose vaccination in destination $j$ at time $t$.                                                                                             |                                                      |                                                                              |
-|$I_{1,jt}$                |Number of symptomatic infected individuals in destination $j$ at time $t$.                                                                                                  |                                                      |                                                                              |
-|$I_{2,jt}$                |Number of asymptomatic infected individuals in destination $j$ at time $t$.                                                                                                 |                                                      |                                                                              |
-|$W_{jt}$                  |Amount of *V. cholerae* in the environment in destination $j$ at time $t$.                                                                                                  |                                                      |                                                                              |
-|$R_{jt}$                  |Number of recovered (immune) individuals in destination $j$ at time $t$.                                                                                                    |                                                      |                                                                              |
-|$\Lambda_{j,t+1}$         |Human-to-human force of infection in destination $j$ at time $t+1$.                                                                                                         |                                                      |                                                                              |
-|$\Psi_{j,t+1}$            |Environment-to-human force of infection in destination $j$ at time $t+1$.                                                                                                   |                                                      |                                                                              |
-|$\iota$                   |The incubation period of cholera infection                                                                                                                                  |$1.4 \ \text{days} \ (1.3–1.6 \ 95\% \text{CI})$      |[Azman et al 2013](http://www.sciencedirect.com/science/article/pii/S0163445312003477)|
-|$\phi_1$                  |Vaccine effectiveness of one-dose OCV.                                                                                                                                      |                                                      |                                                                              |
-|$\phi_2$                  |Vaccine effectiveness of two-dose OCV.                                                                                                                                      |                                                      |                                                                              |
-|$\nu_{jt}$                |Vaccination rate (OCV doses administered) in destination $j$ at time $t$.                                                                                                   |                                                      |                                                                              |
-|$\omega_1$                |Waning immunity rate of vaccinated individuals with one-dose OCV.                                                                                                           |                                                      |                                                                              |
-|$\omega_2$                |Waning immunity rate of vaccinated individuals with two-dose OCV.                                                                                                           |                                                      |                                                                              |
-|$\varepsilon$             |Waning immunity rate of recovered individuals.                                                                                                                              |                                                      |                                                                              |
-|$\gamma_1$                |Recovery rate of symptomatic infected individuals.                                                                                                                          |                                                      |                                                                              |
-|$\gamma_2$                |Recovery rate of asymptomatic infected individuals.                                                                                                                         |                                                      |                                                                              |
-|$\mu_{j,t}$               |Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}$; see \@ref(eq:mu-jt). |                                                      |                                                                              |
-|$\sigma$                  |Proportion of infections that are symptomatic.                                                                                                                              |                                                      |                                                                              |
-|$\rho$                    |Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.                                                                                |                                                      |                                                                              |
-|$\zeta_1$                 |Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.                                                                           |$\text{Lognormal}(25.65, 2.46)$                       |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
-|$\zeta_2$                 |Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as $\zeta_1/\zeta_{\text{ratio}}$.                              |Derived from $\zeta_1$ and $\zeta_{\text{ratio}}$     |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
-|$\delta$                  |Environmental decay rate of *V. cholerae*.                                                                                                                                  |Determined dynamically in model based on $\psi_{jt}$. |                                                                              |
-|$\delta_{\text{min}}$     |Minimum decay rate when $\psi_{jt}=0$.                                                                                                                                      |$0.333 \ (3 \ \text{days})$                           |                                                                              |
-|$\delta_{\text{max}}$     |Maximum decay rate when $\psi_{jt}=1$.                                                                                                                                      |$0.011 \ (90 \ \text{days})$                          |                                                                              |
-|$\psi_{jt}$               |Environmental suitability of *V. cholerae* in destination $j$ at time $t$.                                                                                                  |Estimated by LSTM-RNN model.                          |                                                                              |
-|$\beta_{j0}^{\text{hum}}$ |Baseline human-to-human transmission rate in destination $j$.                                                                                                               |                                                      |                                                                              |
-|$\beta_{jt}^{\text{hum}}$ |Seasonal human-to-human transmission rate in destination $j$ at time $t$.                                                                                                   |                                                      |                                                                              |
-|$\beta_{j0}^{\text{env}}$ |Baseline environment-to-human transmission rate in destination $j$.                                                                                                         |                                                      |                                                                              |
-|$\beta_{jt}^{\text{env}}$ |Environment-to-human transmission rate in destination $j$ at time $t$.                                                                                                      |                                                      |                                                                              |
-|$a_1$                     |First Fourier cosine coefficient for seasonality.                                                                                                                           |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$b_1$                     |First Fourier sine coefficient for seasonality.                                                                                                                             |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$a_2$                     |Second Fourier cosine coefficient for seasonality.                                                                                                                          |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$b_2$                     |Second Fourier sine coefficient for seasonality.                                                                                                                            |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$p$                       |Period of the seasonal cycle (set to days).                                                                                                                                 |$365$                                                 |                                                                              |
-|$\alpha_1$                |Exponent on infectious individuals in the force of infection numerator.                                                                                                     |$0.95$                                                |[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)|
-|$\alpha_2$                |Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence.                                                      |$0.95$                                                |[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)              |
-|$\tau_i$                  |Probability an individual departs from origin $i$.                                                                                                                          |                                                      |                                                                              |
-|$\pi_{ij}$                |Probability of travel from origin $i$ to destination $j$ given departure.                                                                                                   |                                                      |                                                                              |
-|$\theta_{j}$              |Proportion with adequate WASH in destination $j$.                                                                                                                           |See Figure \@ref(fig:wash-country).                   |[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)                  |
-|$\kappa$                  |Concentration of *V. cholerae* (cells/mL) required for 50% infection probability.                                                                                           |$\text{Lognormal}(11.77, 1.82)$                       |Meta-analysis (see \@ref(eq:kappa))                                           |
+\begin{table}
 
-
-
-Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC v1.0.
-
-|Parameter                     |Description                                                                                                                                   |Distribution                                                      |Source                                                                                              |
-|:-----------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
-|$\nu_{1,jt}$                  |First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.                                                          |Derived from GTFCC OCV campaign data.                             |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                              |
-|$\nu_{2,jt}$                  |Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.                                         |Derived from GTFCC OCV campaign data.                             |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                              |
-|$\mathcal{V}^{\text{src}}$    |Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$).                                                  |Default: $\{S, E, I_1, I_2, R\}$.                                 |laser-cholera issue #42.                                                                            |
-|$N^{\text{src}}_{jt}$         |Total population eligible for first-dose vaccination on day $t$: $\sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$.                              |Computed.                                                         |Computed from compartment populations.                                                              |
-|$\zeta_{\text{ratio}}$        |Symptomatic-to-asymptomatic shedding ratio $\zeta_1/\zeta_2$.                                                                                 |$\text{Lognormal}(4.31, 4.39)$                                    |Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)                    |
-|$\text{days}_{\text{short}}$  |Survival time of *V. cholerae* at low environmental suitability ($\psi_{jt}\!\to\!0$).                                                        |$\text{Truncnorm}(16, 7, 0.01, 60)$                               |Literature anchor; staged calibration.                                                              |
-|$\text{days}_{\text{long}}$   |Survival time at high environmental suitability ($\psi_{jt}\!\to\!1$). Derived as $\text{days}_{\text{short}} + \text{days}_{\text{spread}}$. |Derived.                                                          |Algebraic.                                                                                          |
-|$\text{days}_{\text{spread}}$ |Algebraic spread between minimum and maximum *V. cholerae* survival time.                                                                     |$\text{Truncnorm}(180, 95, 1, 365)$                               |Literature anchor; staged calibration.                                                              |
-|$s_1, s_2$                    |Shape parameters of the cumulative Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$ for the decay rate.              |$\text{Truncnorm}(3, 5, 0.1, 10)$ each                            |Bayesian regularisation (v0.26).                                                                    |
-|$\psi^{\ast}_{jt}$            |Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see \@ref(eq:psi-star).      |Computed (Eq. \@ref(eq:psi-star)).                                |Computed (per-country logit calibration).                                                           |
-|$a_{\psi^{\ast},j}$           |Per-country shape/gain parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                            |$\text{Truncnorm}(1, 1, 0, \infty)$                               |Per-country posterior (calibration).                                                                |
-|$b_{\psi^{\ast},j}$           |Per-country scale/offset parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                          |$\mathcal{N}(0, 2.5)$                                             |Per-country posterior (calibration).                                                                |
-|$z_{\psi^{\ast},j}$           |Per-country EWMA smoothing weight ($z = 1$: no smoothing).                                                                                    |$\text{Beta}(2, 1)$                                               |Per-country posterior; Beta(2,1) tightening from v0.28.5.                                           |
-|$k_{\psi^{\ast},j}$           |Per-country time offset in days for the $\psi \to \psi^{\ast}$ calibration.                                                                   |$\text{Truncnorm}(0, 25, -90, 90)$                                |Per-country posterior (calibration).                                                                |
-|$\eta_j$                      |Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).                                                          |$\text{Truncnorm}$ per country, capped at 0.01.                   |Per-country historical median epidemic prevalence.                                                  |
-|$\chi^{\text{end}}$           |Positive predictive value of a suspected cholera case during endemic periods.                                                                 |$\text{Beta}(5.43, 5.01)$                                         |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286) |
-|$\chi^{\text{epi}}$           |Positive predictive value of a suspected cholera case during epidemic periods.                                                                |$\text{Beta}(4.79, 1.53)$                                         |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286) |
-|$\rho_{\text{deaths}}$        |Probability that a true cholera death is captured by surveillance.                                                                            |$\text{Beta}(3, 2)$                                               |Finger et al. 2024 surveillance-capture estimate.                                                   |
-|$l_{\text{cases}}$            |Reporting lag in days from symptom onset to case reporting.                                                                                   |$\text{Truncnorm}(1, 1.5, 0, 7)$ days                             |Surveillance reporting practice.                                                                    |
-|$l_{\text{deaths}}$           |Reporting lag in days from symptom onset to death reporting.                                                                                  |$\text{Truncnorm}(4, 3, 1, 14)$ days                              |Surveillance reporting practice.                                                                    |
-|$\mu_{j,0}$                   |Baseline daily mortality hazard $\mu_{j,0}$ in destination $j$.                                                                               |$\text{Gamma}$ per country (e.g., AGO: $\text{Gamma}(4, 482.6)$). |Derived from reported CFR via $\mu_{j,0} \approx \text{CFR}^{\text{reported}}_j \cdot \rho / \chi$. |
-|$\mu_{j,1}$                   |Proportional time-trend factor for $\mu_{j,t}$ over the simulation period.                                                                    |$\mathcal{N}(0, 0.05)$                                            |Weakly informative.                                                                                 |
-|$\mu_{j,\text{epi}}$          |Proportional increase in $\mu_{j,t}$ during epidemic periods.                                                                                 |$\text{Gamma}(1, 2)$                                              |Reflects typical surge-period IFR increase.                                                         |
-|$w_{\text{gibbs}}$            |Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter).                                              |Calibration control parameter.                                    |[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)                                           |
+\caption{(\#tab:params)Parameters added or substantially reparameterised in MOSAIC v1.0.}
+\centering
+\begin{tabular}[t]{l|l|l|l}
+\hline
+Parameter & Description & Distribution & Source\\
+\hline
+\$\textbackslash{}nu\_\{1,jt\}\$ & First-dose vaccination rate (deterministic delivery) in destination \$j\$ at time \$t\$. & Derived from GTFCC OCV campaign data. & [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)\\
+\hline
+\$\textbackslash{}nu\_\{2,jt\}\$ & Second-dose vaccination rate in destination \$j\$ at time \$t\$; restricted to existing \$V\_1\$ recipients. & Derived from GTFCC OCV campaign data. & [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)\\
+\hline
+\$\textbackslash{}mathcal\{V\}\textasciicircum{}\{\textbackslash{}text\{src\}\}\$ & Set of compartments eligible for first-dose vaccination (subset of \$\textbackslash{}\{S, E, I\_1, I\_2, R\textbackslash{}\}\$). & Default: \$\textbackslash{}\{S, E, I\_1, I\_2, R\textbackslash{}\}\$. & laser-cholera issue \#42.\\
+\hline
+\$N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Total population eligible for first-dose vaccination on day \$t\$: \$\textbackslash{}sum\_\{X \textbackslash{}in \textbackslash{}mathcal\{V\}\textasciicircum{}\{\textbackslash{}text\{src\}\}\} X\_\{jt\}\$. & Computed. & Computed from compartment populations.\\
+\hline
+\$\textbackslash{}zeta\_\{\textbackslash{}text\{ratio\}\}\$ & Symptomatic-to-asymptomatic shedding ratio \$\textbackslash{}zeta\_1/\textbackslash{}zeta\_2\$. & \$\textbackslash{}text\{Lognormal\}(4.31, 4.39)\$ & Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)\\
+\hline
+\$\textbackslash{}text\{days\}\_\{\textbackslash{}text\{short\}\}\$ & Survival time of *V. cholerae* at low environmental suitability (\$\textbackslash{}psi\_\{jt\}\textbackslash{}!\textbackslash{}to\textbackslash{}!0\$). & \$\textbackslash{}text\{Truncnorm\}(16, 7, 0.01, 60)\$ & Literature anchor; staged calibration.\\
+\hline
+\$\textbackslash{}text\{days\}\_\{\textbackslash{}text\{long\}\}\$ & Survival time at high environmental suitability (\$\textbackslash{}psi\_\{jt\}\textbackslash{}!\textbackslash{}to\textbackslash{}!1\$). Derived as \$\textbackslash{}text\{days\}\_\{\textbackslash{}text\{short\}\} + \textbackslash{}text\{days\}\_\{\textbackslash{}text\{spread\}\}\$. & Derived. & Algebraic.\\
+\hline
+\$\textbackslash{}text\{days\}\_\{\textbackslash{}text\{spread\}\}\$ & Algebraic spread between minimum and maximum *V. cholerae* survival time. & \$\textbackslash{}text\{Truncnorm\}(180, 95, 1, 365)\$ & Literature anchor; staged calibration.\\
+\hline
+\$s\_1, s\_2\$ & Shape parameters of the cumulative Beta transformation \$f(\textbackslash{}psi\_\{jt\}) = \textbackslash{}text\{pbeta\}(\textbackslash{}psi\_\{jt\}\textbackslash{}mid s\_1, s\_2)\$ for the decay rate. & \$\textbackslash{}text\{Truncnorm\}(3, 5, 0.1, 10)\$ each & Bayesian regularisation (v0.26).\\
+\hline
+\$\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\_\{jt\}\$ & Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see \textbackslash{}@ref(eq:psi-star). & Computed (Eq. \textbackslash{}@ref(eq:psi-star)). & Computed (per-country logit calibration).\\
+\hline
+\$a\_\{\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\},j\}\$ & Per-country shape/gain parameter for the \$\textbackslash{}psi \textbackslash{}to \textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\$ logit calibration. & \$\textbackslash{}text\{Truncnorm\}(1, 1, 0, \textbackslash{}infty)\$ & Per-country posterior (calibration).\\
+\hline
+\$b\_\{\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\},j\}\$ & Per-country scale/offset parameter for the \$\textbackslash{}psi \textbackslash{}to \textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\$ logit calibration. & \$\textbackslash{}mathcal\{N\}(0, 2.5)\$ & Per-country posterior (calibration).\\
+\hline
+\$z\_\{\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\},j\}\$ & Per-country EWMA smoothing weight (\$z = 1\$: no smoothing). & \$\textbackslash{}text\{Beta\}(2, 1)\$ & Per-country posterior; Beta(2,1) tightening from v0.28.5.\\
+\hline
+\$k\_\{\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\},j\}\$ & Per-country time offset in days for the \$\textbackslash{}psi \textbackslash{}to \textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\$ calibration. & \$\textbackslash{}text\{Truncnorm\}(0, 25, -90, 90)\$ & Per-country posterior (calibration).\\
+\hline
+\$\textbackslash{}eta\_j\$ & Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N). & \$\textbackslash{}text\{Truncnorm\}\$ per country, capped at 0.01. & Per-country historical median epidemic prevalence.\\
+\hline
+\$\textbackslash{}chi\textasciicircum{}\{\textbackslash{}text\{end\}\}\$ & Positive predictive value of a suspected cholera case during endemic periods. & \$\textbackslash{}text\{Beta\}(5.43, 5.01)\$ & [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)\\
+\hline
+\$\textbackslash{}chi\textasciicircum{}\{\textbackslash{}text\{epi\}\}\$ & Positive predictive value of a suspected cholera case during epidemic periods. & \$\textbackslash{}text\{Beta\}(4.79, 1.53)\$ & [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)\\
+\hline
+\$\textbackslash{}rho\_\{\textbackslash{}text\{deaths\}\}\$ & Probability that a true cholera death is captured by surveillance. & \$\textbackslash{}text\{Beta\}(3, 2)\$ & Finger et al. 2024 surveillance-capture estimate.\\
+\hline
+\$l\_\{\textbackslash{}text\{cases\}\}\$ & Reporting lag in days from symptom onset to case reporting. & \$\textbackslash{}text\{Truncnorm\}(1, 1.5, 0, 7)\$ days & Surveillance reporting practice.\\
+\hline
+\$l\_\{\textbackslash{}text\{deaths\}\}\$ & Reporting lag in days from symptom onset to death reporting. & \$\textbackslash{}text\{Truncnorm\}(4, 3, 1, 14)\$ days & Surveillance reporting practice.\\
+\hline
+\$\textbackslash{}mu\_\{j,0\}\$ & Baseline daily mortality hazard \$\textbackslash{}mu\_\{j,0\}\$ in destination \$j\$. & \$\textbackslash{}text\{Gamma\}\$ per country (e.g., AGO: \$\textbackslash{}text\{Gamma\}(4, 482.6)\$). & Derived from reported CFR via \$\textbackslash{}mu\_\{j,0\} \textbackslash{}approx \textbackslash{}text\{CFR\}\textasciicircum{}\{\textbackslash{}text\{reported\}\}\_j \textbackslash{}cdot \textbackslash{}rho / \textbackslash{}chi\$.\\
+\hline
+\$\textbackslash{}mu\_\{j,1\}\$ & Proportional time-trend factor for \$\textbackslash{}mu\_\{j,t\}\$ over the simulation period. & \$\textbackslash{}mathcal\{N\}(0, 0.05)\$ & Weakly informative.\\
+\hline
+\$\textbackslash{}mu\_\{j,\textbackslash{}text\{epi\}\}\$ & Proportional increase in \$\textbackslash{}mu\_\{j,t\}\$ during epidemic periods. & \$\textbackslash{}text\{Gamma\}(1, 2)\$ & Reflects typical surge-period IFR increase.\\
+\hline
+\$w\_\{\textbackslash{}text\{gibbs\}\}\$ & Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter). & Calibration control parameter. & [Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -2260,53 +1920,99 @@ Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC
 ## Table of stochastic transitions
 
 
-
-|Term                                                 |Description                                                                                      |Stochastic.Transition                                                                                                                                                                                                     |
-|:----------------------------------------------------|:------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|**$\mathbf{S}$ (susceptible)**                       |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ b_{jt} N_{jt}$                                    |New individuals entering the susceptible class from births.                                      |$\text{Pois}\big( N_{jt}b_{jt} \big)$                                                                                                                                                                                     |
-|$+ \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                      |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
-|$+ \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                             |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
-|$+ \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                             |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
-|$- \phi_1 \nu_{1,jt} S_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $S$ for $V_1$.                                                     |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot S_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \Lambda_{j,t+1}$                                  |Human-to-human force of infection on the susceptible class.                                      |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{hum}} ((1-\tau_{j})(I_{1,jt}+I_{2,jt}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_i(I_{1,it}+I_{2,it})))^{\alpha_1} / N_{jt}^{\alpha_2}}\big)\Big)$ |
-|$- \Psi_{j,t+1}$                                     |Environment-to-human force of infection on the susceptible class.                                |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{env}} (1-\theta_j) W_{jt} / (\kappa+W_{jt})}\big)\Big)$                                                                                           |
-|$- d_{jt} S_{jt}$                                    |Background death among susceptible individuals.                                                  |$\text{Binom}\big( S_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
-|**$\mathbf{V_1}$ (one-dose OCV)**                    |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \phi_1 \nu_{1,jt}$                                |Effective first doses entering $V_1$ from all source compartments.                               |$\text{round}\!\big( \phi_1 \nu_{1,jt} \big)$                                                                                                                                                                             |
-|$- \phi_2 \nu_{2,jt}$                                |Effective second doses leaving $V_1$ for $V_2$.                                                  |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
-|$- \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                             |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
-|$- d_{jt} V_{1,jt}$                                  |Background death among one-dose vaccinated individuals.                                          |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{V_2}$ (two-dose OCV)**                    |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \phi_2 \nu_{2,jt}$                                |Effective second doses entering $V_2$ from $V_1$.                                                |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
-|$- \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                             |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
-|$- d_{jt} V_{2,jt}$                                  |Background death among two-dose vaccinated individuals.                                          |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{E}$ (exposed)**                           |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \Lambda_{j,t+1} + \Psi_{j,t+1}$                   |Total force of infection on the susceptible class entering the exposed class.                    |$\Lambda_{j,t+1} + \Psi_{j,t+1}$                                                                                                                                                                                          |
-|$- \phi_1 \nu_{1,jt} E_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $E$ for $V_1$.                                                     |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot E_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \iota E_{jt}$                                     |Progression of exposed individuals to the infectious class.                                      |$\text{Binom}\big( E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                                      |
-|$- d_{jt} E_{jt}$                                    |Background death among exposed individuals.                                                      |$\text{Binom}\big( E_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
-|**$\mathbf{I_1}$ (symptomatic)**                     |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \sigma\,\iota\,E_{jt}$                            |Exposed individuals progressing to symptomatic infection.                                        |$\text{Binom}\big( \sigma E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                               |
-|$- \phi_1 \nu_{1,jt} I_{1,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_1$ for $V_1$.                                                   |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{1,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
-|$- \gamma_1 I_{1,jt}$                                |Recovery from symptomatic infection.                                                             |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
-|$- \mu_{j,t} I_{1,jt}$                               |Cholera-attributable mortality among symptomatic individuals (dynamic IFR, see \@ref(eq:mu-jt)). |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\mu_{j,t}) \big)$                                                                                                                                                                |
-|$- d_{jt} I_{1,jt}$                                  |Background death among individuals with symptomatic infection.                                   |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{I_2}$ (asymptomatic)**                    |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ (1-\sigma)\,\iota\,E_{jt}$                        |Exposed individuals progressing to asymptomatic infection.                                       |$\text{Binom}\big( (1-\sigma) E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                           |
-|$- \phi_1 \nu_{1,jt} I_{2,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_2$ for $V_1$.                                                   |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{2,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
-|$- \gamma_2 I_{2,jt}$                                |Recovery from asymptomatic infection.                                                            |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
-|$- d_{jt} I_{2,jt}$                                  |Background death among individuals with asymptomatic infection.                                  |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{W}$ (environment)**                       |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \zeta_1 I_{1,jt}$                                 |Cells shed into the environment by symptomatic individuals.                                      |$\text{Pois}\big( \zeta_1 I_{1,jt} \big)$                                                                                                                                                                                 |
-|$+ \zeta_2 I_{2,jt}$                                 |Cells shed into the environment by asymptomatic individuals.                                     |$\text{Pois}\big( \zeta_2 I_{2,jt} \big)$                                                                                                                                                                                 |
-|$- \delta_{jt} W_{jt}$                               |Decay of viable *V. cholerae* in the environment.                                                |$\text{Pois}\big( \delta_{jt} W_{jt} \big)$                                                                                                                                                                               |
-|**$\mathbf{R}$ (recovered)**                         |                                                                                                 |                                                                                                                                                                                                                          |
-|$+ \gamma_1 I_{1,jt}$                                |Recovery of individuals with symptomatic infection.                                              |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
-|$+ \gamma_2 I_{2,jt}$                                |Recovery of individuals with asymptomatic infection.                                             |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
-|$- \phi_1 \nu_{1,jt} R_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $R$ for $V_1$.                                                     |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot R_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                      |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
-|$- d_{jt} R_{jt}$                                    |Background death among recovered individuals.                                                    |$\text{Binom}\big( R_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
+\begin{tabular}{l|l|l}
+\hline
+Term & Description & Stochastic.Transition\\
+\hline
+**\$\textbackslash{}mathbf\{S\}\$ (susceptible)** &  & \\
+\hline
+\$+ b\_\{jt\} N\_\{jt\}\$ & New individuals entering the susceptible class from births. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( N\_\{jt\}b\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$+ \textbackslash{}varepsilon R\_\{jt\}\$ & Loss of immunity for recovered individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( R\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}varepsilon) \textbackslash{}big)\$\\
+\hline
+\$+ \textbackslash{}omega\_1 V\_\{1,jt\}\$ & Waning of one-dose vaccine immunity (return to \$S\$). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}omega\_1) \textbackslash{}big)\$\\
+\hline
+\$+ \textbackslash{}omega\_2 V\_\{2,jt\}\$ & Waning of two-dose vaccine immunity (return to \$S\$). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}omega\_2) \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} S\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Effective first doses leaving \$S\$ for \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}cdot S\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}Lambda\_\{j,t+1\}\$ & Human-to-human force of infection on the susceptible class. & \$\textbackslash{}text\{Binom\}\textbackslash{}Big((1-\textbackslash{}tau\_\{j\})S\_\{jt\},\textbackslash{} 1 - \textbackslash{}exp\textbackslash{}big(\{-\textbackslash{}beta\_\{jt\}\textasciicircum{}\{\textbackslash{}text\{hum\}\} ((1-\textbackslash{}tau\_\{j\})(I\_\{1,jt\}+I\_\{2,jt\}) + \textbackslash{}sum\_\{\textbackslash{}forall i \textbackslash{}not= j\} (\textbackslash{}pi\_\{ij\}\textbackslash{}tau\_i(I\_\{1,it\}+I\_\{2,it\})))\textasciicircum{}\{\textbackslash{}alpha\_1\} / N\_\{jt\}\textasciicircum{}\{\textbackslash{}alpha\_2\}\}\textbackslash{}big)\textbackslash{}Big)\$\\
+\hline
+\$- \textbackslash{}Psi\_\{j,t+1\}\$ & Environment-to-human force of infection on the susceptible class. & \$\textbackslash{}text\{Binom\}\textbackslash{}Big((1-\textbackslash{}tau\_\{j\})S\_\{jt\},\textbackslash{} 1 - \textbackslash{}exp\textbackslash{}big(\{-\textbackslash{}beta\_\{jt\}\textasciicircum{}\{\textbackslash{}text\{env\}\} (1-\textbackslash{}theta\_j) W\_\{jt\} / (\textbackslash{}kappa+W\_\{jt\})\}\textbackslash{}big)\textbackslash{}Big)\$\\
+\hline
+\$- d\_\{jt\} S\_\{jt\}\$ & Background death among susceptible individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( S\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{V\_1\}\$ (one-dose OCV)** &  & \\
+\hline
+\$+ \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\}\$ & Effective first doses entering \$V\_1\$ from all source compartments. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}phi\_2 \textbackslash{}nu\_\{2,jt\}\$ & Effective second doses leaving \$V\_1\$ for \$V\_2\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_2 \textbackslash{}nu\_\{2,jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}omega\_1 V\_\{1,jt\}\$ & Waning of one-dose vaccine immunity (return to \$S\$). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}omega\_1) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} V\_\{1,jt\}\$ & Background death among one-dose vaccinated individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{V\_2\}\$ (two-dose OCV)** &  & \\
+\hline
+\$+ \textbackslash{}phi\_2 \textbackslash{}nu\_\{2,jt\}\$ & Effective second doses entering \$V\_2\$ from \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_2 \textbackslash{}nu\_\{2,jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}omega\_2 V\_\{2,jt\}\$ & Waning of two-dose vaccine immunity (return to \$S\$). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}omega\_2) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} V\_\{2,jt\}\$ & Background death among two-dose vaccinated individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( V\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{E\}\$ (exposed)** &  & \\
+\hline
+\$+ \textbackslash{}Lambda\_\{j,t+1\} + \textbackslash{}Psi\_\{j,t+1\}\$ & Total force of infection on the susceptible class entering the exposed class. & \$\textbackslash{}Lambda\_\{j,t+1\} + \textbackslash{}Psi\_\{j,t+1\}\$\\
+\hline
+\$- \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} E\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Effective first doses leaving \$E\$ for \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}cdot E\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}iota E\_\{jt\}\$ & Progression of exposed individuals to the infectious class. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( E\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}iota) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} E\_\{jt\}\$ & Background death among exposed individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( E\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{I\_1\}\$ (symptomatic)** &  & \\
+\hline
+\$+ \textbackslash{}sigma\textbackslash{},\textbackslash{}iota\textbackslash{},E\_\{jt\}\$ & Exposed individuals progressing to symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( \textbackslash{}sigma E\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}iota) \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} I\_\{1,jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Effective first doses leaving \$I\_1\$ for \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}cdot I\_\{1,jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}gamma\_1 I\_\{1,jt\}\$ & Recovery from symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}gamma\_1) \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}mu\_\{j,t\} I\_\{1,jt\}\$ & Cholera-attributable mortality among symptomatic individuals (dynamic IFR, see \textbackslash{}@ref(eq:mu-jt)). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}mu\_\{j,t\}) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} I\_\{1,jt\}\$ & Background death among individuals with symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{I\_2\}\$ (asymptomatic)** &  & \\
+\hline
+\$+ (1-\textbackslash{}sigma)\textbackslash{},\textbackslash{}iota\textbackslash{},E\_\{jt\}\$ & Exposed individuals progressing to asymptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( (1-\textbackslash{}sigma) E\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}iota) \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} I\_\{2,jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Effective first doses leaving \$I\_2\$ for \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}cdot I\_\{2,jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}gamma\_2 I\_\{2,jt\}\$ & Recovery from asymptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}gamma\_2) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} I\_\{2,jt\}\$ & Background death among individuals with asymptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{W\}\$ (environment)** &  & \\
+\hline
+\$+ \textbackslash{}zeta\_1 I\_\{1,jt\}\$ & Cells shed into the environment by symptomatic individuals. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_1 I\_\{1,jt\} \textbackslash{}big)\$\\
+\hline
+\$+ \textbackslash{}zeta\_2 I\_\{2,jt\}\$ & Cells shed into the environment by asymptomatic individuals. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_2 I\_\{2,jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}delta\_\{jt\} W\_\{jt\}\$ & Decay of viable *V. cholerae* in the environment. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}delta\_\{jt\} W\_\{jt\} \textbackslash{}big)\$\\
+\hline
+**\$\textbackslash{}mathbf\{R\}\$ (recovered)** &  & \\
+\hline
+\$+ \textbackslash{}gamma\_1 I\_\{1,jt\}\$ & Recovery of individuals with symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}gamma\_1) \textbackslash{}big)\$\\
+\hline
+\$+ \textbackslash{}gamma\_2 I\_\{2,jt\}\$ & Recovery of individuals with asymptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{2,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}gamma\_2) \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} R\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\}\$ & Effective first doses leaving \$R\$ for \$V\_1\$. & \$\textbackslash{}text\{round\}\textbackslash{}!\textbackslash{}big( \textbackslash{}phi\_1 \textbackslash{}nu\_\{1,jt\} \textbackslash{}cdot R\_\{jt\} / N\textasciicircum{}\{\textbackslash{}text\{src\}\}\_\{jt\} \textbackslash{}big)\$\\
+\hline
+\$- \textbackslash{}varepsilon R\_\{jt\}\$ & Loss of immunity for recovered individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( R\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}varepsilon) \textbackslash{}big)\$\\
+\hline
+\$- d\_\{jt\} R\_\{jt\}\$ & Background death among recovered individuals. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( R\_\{jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
+\hline
+\end{tabular}
 
 
 

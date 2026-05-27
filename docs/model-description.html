@@ -1015,9 +1015,6 @@ k_{\psi^{\ast},j} \ \sim\ &amp; \text{Truncnorm}(0,\ 25,\ -90,\ 90).
 \tag{3.10}
 \]</span></p>
 <p>The shape prior is centred on the identity transformation <span class="math inline">\(a_{\psi^{\ast},j} = 1\)</span>; the offset prior allows the baseline odds to shift by approximately a factor of <span class="math inline">\(e^{2.5} \approx 12\)</span> on either side of unity; the smoothing prior <span class="math inline">\(z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)\)</span> has its mode at <span class="math inline">\(z = 1\)</span> (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset <span class="math inline">\(k_{\psi^{\ast},j}\)</span> permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity <span class="math inline">\(\psi^{\ast}_{jt}\)</span> enters the model wherever the raw LSTM output <span class="math inline">\(\psi_{jt}\)</span> would otherwise be used (Equations <a href="model-description.html#eq:beta2">(3.5)</a> and <a href="model-description.html#eq:delta">(3.6)</a>). A diagnostic plot comparing <span class="math inline">\(\psi_{jt}\)</span> and <span class="math inline">\(\psi^{\ast}_{jt}\)</span> for each location is produced by <code>plot_psi_star_diagnostic()</code> in the calibration pipeline.</p>
-<div id="infectious-dose-kappa">
-
-</div>
 </div>
 </div>
 <div id="infectious-dose-kappa" class="section level3" number="3.4.3">

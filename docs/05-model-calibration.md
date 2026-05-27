@@ -308,24 +308,37 @@ Large $\mathrm{CV}_\mathbf{\tilde{w}}$ warns that the variance within the best f
 ### Convergence guidelines
 A calibration run that meets all three criteria indicates that the retained ensemble is *informative* (high ESS), *internally consistent* (high $A$), and *numerically stable* (moderate $\mathrm{CV}_\mathbf{\tilde{w}}$), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table \@ref(tab:calibration) with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \@ref(fig:likelihood-example)).
 
+\begin{table}
+
+\caption{(\#tab:calibration)Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.}
+\centering
+\begin{tabular}[t]{l|l|r}
+\hline
+Metric & Target range & Source\\
+\hline
+\$\textbackslash{}Delta\$AIC cut-off & \$\textbackslash{}le 6 \textbackslash{} \textbackslash{}left(p\textbackslash{}! \textbackslash{}approx \textbackslash{}! 0.05\textbackslash{}right)\$ & [Burnham \& Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)\\
+\hline
+Effective Sample Size \$\textbackslash{}left(\textbackslash{}widehat\{\textbackslash{}text\{ESS\}\}\textbackslash{}right)\$ & \$\textbackslash{}gt 500\$ & [Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)\\
+\hline
+ & \$\textbackslash{}gt 1000\$ & [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)\\
+\hline
+Agreement Index \$\textbackslash{}left(A\textbackslash{}right)\$ & \$\textbackslash{}gt 0.7 \textbackslash{} \textbackslash{}text\{or\} \textbackslash{} 0.8\$ & [Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)\\
+\hline
+Weight Coefficient of Variation \$\textbackslash{}left(\textbackslash{}mathrm\{CV\}\_\{\textbackslash{}tilde\{\textbackslash{}mathbf w\}\} \textbackslash{}right)\$ & \$\textbackslash{}lt 1 \textbackslash{} \textbackslash{}text\{or\} \textbackslash{} 2\$ & [Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)\\
+\hline
+\end{tabular}
+\end{table}
 
 
-Table: (\#tab:calibration)Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.
 
-|Metric                                                                          |Target range                               |                  Source|
-|:-------------------------------------------------------------------------------|:------------------------------------------|-----------------------:|
-|$\Delta$AIC cut-off                                                             |$\le 6 \ \left(p\! \approx \! 0.05\right)$ |[Burnham & Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)|
-|Effective Sample Size $\left(\widehat{\text{ESS}}\right)$                       |$\gt 500$                                  |[Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)|
-|                                                                                |$\gt 1000$                                 |[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)|
-|Agreement Index $\left(A\right)$                                                |$\gt 0.7 \ \text{or} \ 0.8$                |[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)|
-|Weight Coefficient of Variation $\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)$ |$\lt 1 \ \text{or} \ 2$                    |[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)|
+\begin{figure}
 
+{\centering \includegraphics[width=0.95\linewidth]{figures/likelihood_example} 
 
+}
 
-<div class="figure" style="text-align: center">
-<img src="figures/likelihood_example.png" alt="Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green." width="95%" />
-<p class="caption">(\#fig:likelihood-example)Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green.</p>
-</div>
+\caption{Example log-Likelihood curve for a sample of 2000 model simulations. Log-likelihood values are sorted from minimum to maximum with the model simulation giving the maximum likelihood highlighted in green.}(\#fig:likelihood-example)
+\end{figure}
 
 
 

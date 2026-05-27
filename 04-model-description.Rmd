@@ -396,8 +396,7 @@ $$
 The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior allows the baseline odds to shift by approximately a factor of $e^{2.5} \approx 12$ on either side of unity; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
 
 
-<div id="infectious-dose-kappa"></div>
-### Infectious dose ($\kappa$)
+### Infectious dose ($\kappa$) {#infectious-dose-kappa}
 
 The half-saturation constant $\kappa$ in Equation \@ref(eq:foi-environment) is the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Historical cholera transmission models have fixed $\kappa = 10^6$ cells, a value traceable to the unbuffered water-only volunteer studies of [Hornick et al. 1971](https://pubmed.ncbi.nlm.nih.gov/5286453/) and adopted by convention in subsequent modelling work (e.g. [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Modern re-analyses of buffered-exposure volunteer studies --- in which sodium bicarbonate neutralises gastric acid, more representative of typical endemic exposure through food or contaminated drinking water --- consistently support a substantially lower central estimate of approximately $10^5$ CFU, with considerable between-study heterogeneity.
 
