@@ -1,0 +1,25 @@
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DKRGVPD7GE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DKRGVPD7GE');
+</script>
+
+# Model versions
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl <- data.frame(
+     Version = c("v0.1", "v1.0", "v2.0", "v3.0"),
+     Description = c("**Past:** Initial beta release in R. Established the SVEIWRS compartmental structure, the mobility and environmental transmission terms, and the observation process.  Used to scope data sources and parameter priors prior to the LASER port.",
+                     "**Current:** First production implementation. The transmission engine runs in the Python [laser-cholera](https://github.com/InstituteforDiseaseModeling/laser-cholera) metapopulation model, driven by the R [MOSAIC](https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg) package for data assembly, parameter sampling, and Bayesian calibration via Dask. Priors for all biological parameters are now literature-derived (shedding, ID~50~, decay, CFR), and the calibration pipeline produces best, medioid, and ensemble forecasts with importance-sampling weights, effective sample size, and agreement-index diagnostics.",
+                     "**Future:** Maximizing the metapopulation approach. District-level data and improvements to model fitting via hierarchical likelihoods.",
+                     "**Future:** Agent-based component with richer immune dynamics, including biphasic vaccine waning and individual-level exposure history.")
+)
+knitr::kable(tbl, caption = "Current and future planned model versions with brief descriptions.")
+
+```
+
