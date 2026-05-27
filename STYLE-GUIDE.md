@@ -61,6 +61,16 @@ These are the canonical assignments used throughout the model description. Do no
 | $\Lambda_{j,t+1}, \Psi_{j,t+1}$ | Human / environmental force of infection (uppercase) |
 | $\boldsymbol{\Theta}$ | Parameter vector (bold italic uppercase theta) |
 | $\mathcal{L}, \mathcal{B}, \mathcal{H}_{jt}, \mathcal{C}_{ij}, \mathcal{G}, \mathcal{z}$ | Calligraphic: likelihood, best subset, hazard, coupling, generation interval, shedding ratio |
+| $\mathcal{V}^{\text{src}}$ | Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$); code-name `nu_jt_sources` |
+| $\zeta_{\text{ratio}}$ | Symptomatic-to-asymptomatic shedding ratio, $\zeta_1 / \zeta_2$ |
+| $\chi^{\text{end}}, \chi^{\text{epi}}$ | Diagnostic / reporting rate in endemic vs. epidemic periods |
+| $\rho_{\text{deaths}}$ | Death detection rate (analogous to $\rho$ for cases) |
+| $\eta_j$ | Per-location epidemic prevalence threshold (epidemic-trigger Isym/N) |
+| $l_{\text{cases}}, l_{\text{deaths}}$ | Reporting lag in days for cases / deaths |
+| $\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}$ | Decomposed IFR: baseline, linear-trend factor, epidemic-period multiplier |
+| $\text{days}_{\text{short}}, \text{days}_{\text{long}}, \text{days}_{\text{spread}}$ | Environmental survival times; $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}}$ |
+| $\psi^{\ast}_{jt}$ | EWMA-smoothed environmental suitability (raw output is $\psi_{jt}$) |
+| $a_{\psi^{\ast}}, b_{\psi^{\ast}}, z_{\psi^{\ast}}, k_{\psi^{\ast}}$ | Shape parameters for the $\psi \to \psi^{\ast}$ transformation |
 
 **Rule on introducing new symbols.** When MOSAIC-pkg adds a parameter without an existing math symbol (e.g., `rho_deaths`, `nu_jt_sources`), **propose** a candidate in the editing thread and **pause for approval** before writing it into a `.Rmd`. Do not silently invent notation.
 
