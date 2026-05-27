@@ -159,22 +159,21 @@ combined_param_values$country_name[combined_param_values$country_name == "Democr
 
 # Filter the data to only include 'cases' response and select relevant parameters
 filtered_param_values_cases <- combined_param_values %>%
-     filter(response == "cases", parameter %in% c("a1", "a2", "b1", "b2"), is.na(inferred_from_neighbor)) %>%
+     filter(response == "cases", parameter %in% c("a_1", "a_2", "b_1", "b_2"), is.na(inferred_from_neighbor)) %>%
      select(country_name, country_iso_code, parameter, mean, ci_lo, ci_hi)
 
-# Spread the parameters to create columns for a1, a2, b1, b2
+# Spread the parameters to create columns for a_1, a_2, b_1, b_2
 table_data_cases <- filtered_param_values_cases %>%
      mutate(ci = paste0(round(mean, 2), " (", round(ci_lo, 2), " to ", round(ci_hi, 2), ")")) %>%
      select(country_name, parameter, ci) %>%
-     spread(key = parameter, value = ci) %>%
-     rename(a1 = a1, a2 = a2, b1 = b1, b2 = b2)
+     spread(key = parameter, value = ci)
 
 # Display the data in the desired column order
 final_table_data_cases <- table_data_cases %>%
-     select(country_name, a1, a2, b1, b2)
+     select(country_name, a_1, a_2, b_1, b_2)
 
 # Display the final data as a kable table with reduced text size, math fonts for parameters, and row shading
-kable(final_table_data_cases, 
+kable(final_table_data_cases,
       col.names = c("Country", "$a_1$", "$a_2$", "$b_1$", "$b_2$"),
       escape = FALSE) %>%
      kable_styling(font_size = 11.75, latex_options = "hold_position", full_width = FALSE) %>%

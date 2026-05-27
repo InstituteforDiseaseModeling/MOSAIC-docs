@@ -256,7 +256,7 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 \left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
 \right]^{-1}.
-\label{eq:ess}
+(\#eq:ess)
 \end{equation}
 Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
 subset.  In dynamic Bayesian models an ESS $\gtrsim\!500$–$1000$ is generally
