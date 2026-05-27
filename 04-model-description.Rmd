@@ -981,29 +981,39 @@ knitr::include_graphics("figures/suspected_cases.png")
 ```
 
 
-### Case fatality rate
+### Case fatality rate {#case-fatality-rate}
 
-The Case Fatality Rate (CFR) among symptomatic infections was calculated using reported cases and deaths data from January 2021 to August 2024. The data were collated from various issues of the WHO Weekly Epidemiological Record the Global Cholera and Acute Watery Diarrhea (AWD) Dashboard (see Data section) which provide annual aggregations of reported cholera cases and deaths. We then used the Binomial exact test ([`binom.test`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R) to calculate the mean probability for the number of deaths (successes) given the number of reported cases (sample size), and the [Clopper-Pearson method](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Clopper%E2%80%93Pearson_interval) for calculating the binomial confidence intervals. We then fit Beta distributions to the mean CFR and 95% confidence intervals calculated for each country using least squares and the Nelder-Mead algorithm to give the distributional uncertainty around the CFR estimate for each country ($\mu_j$).
-
-$$
-\mu_j \sim \text{Beta}(s_{1,j}, s_{2,j})
-$$
-
-Where $s_{1,i}$ and $s_{2,j}$ are the two positive shape parameters of the Beta distribution estimated for destination $j$. By definition $\mu_j$ is the CFR for reported cases which are a subset of the total number of infections. Therefore, to infer the total number of deaths attributable to cholera infection, we assume that the CFR of observed cases is proportionally equivalent to the CFR of all cases and then calculate total deaths $D$ as follows:
+In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatality ratio* (IFR) implemented as a per-day mortality hazard among symptomatic infections. The hazard $\mu_{j,t}$ is the rate at which a symptomatic individual in location $j$ dies from cholera on day $t$, and the corresponding per-day death-transition probability is $1 - e^{-\mu_{j,t}}$ (see the [Table of stochastic transitions](#transitions-table)). It is factored into three multiplicative components: a per-location baseline $\mu_{j,0}$, a linear time-trend factor $\mu_{j,1}$ that captures slow drift in case-management quality over the simulation period, and an epidemic-period factor $\mu_{j,\text{epi}}$ that captures higher mortality during outbreak surges (e.g. when treatment infrastructure is overwhelmed):
 
 \begin{equation}
-\begin{aligned}
-\text{CFR}_{\text{observed}} &= \text{CFR}_{\text{total}}\\
-\\[3pt]
-\frac{[\text{observed deaths}]}{[\text{observed cases}]} &= 
-\frac{[\text{total deaths}]}{[\text{all infections}]}\\
-\\[3pt]
-\text{total deaths} &= \frac{[\text{observed deaths}] \times [\text{true infections}]}{[\text{observed cases}]}\\
-\\[3pt]
-D_{jt} &= \frac{ [\sigma\rho\mu_j I_{jt}] \times [I_{jt}] }{ [\sigma\rho I_{jt}] }
-\end{aligned}
-(\#eq:deaths)
+\mu_{j,t} \;=\; \mu_{j,0} \,\big(1 + \mu_{j,1}\, t^{\dagger}\big)\,\Big(1 + \mu_{j,\text{epi}} \cdot \mathbb{1}\!\big[\,I_{1,\,j,t - l_{\text{cases}}} \big/ N_{j,\,t - l_{\text{cases}}} > \eta_j\,\big]\Big),
+(\#eq:mu-jt)
 \end{equation}
+
+where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
+
+The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, while $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera. The reported CFR is therefore the true daily mortality scaled by the relative reporting rates of cases versus deaths:
+
+$$
+\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi}.
+(\#eq:mu-baseline-derivation)
+$$
+
+Country-specific reported CFRs and Clopper-Pearson 95% confidence intervals are calculated from the surveillance record using the [Binomial exact test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)$ with mean approximately 0.0083 per day, which corresponds to an integrated CFR of roughly 8% over a typical 10-day symptomatic infectious period. Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+
+The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
+
+$$
+\mu_{j,1} \sim \mathcal{N}(0,\ 0.05).
+$$
+
+The epidemic factor is a non-negative Gamma prior with a mean of 0.5, reflecting the approximately 50% increase in cholera CFR typically observed during outbreak surges:
+
+$$
+\mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
+$$
+
+Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49) and consumed by MOSAIC-pkg from version 0.30.2.
 
 
 ```{r cfr, echo=FALSE, message=FALSE, warning=FALSE}
