@@ -415,6 +415,29 @@ knitr::include_graphics("figures/suitability_cases_MOZ.png")
 knitr::include_graphics("figures/suitability_by_country.png")
 ```
 
+#### Calibration of suitability to surveillance ($\psi^{\ast}_{jt}$)
+
+The raw LSTM output $\psi_{jt}$ captures the climate-driven *potential* for *V. cholerae* survival and transmission, but the relationship between this potential and the observed surveillance signal varies by location. In some countries epidemics peak shortly after suitability peaks, while in others there is a lag of several weeks; in some countries the climate-driven seasonality is sharper than the cholera-case signal, while in others it is flatter. Re-training the LSTM to fit case data directly would overfit the sparse surveillance record, so we instead apply a per-location *logit affine calibration* with an optional time offset and causal exponential moving average:
+
+\begin{equation}
+\psi^{\ast}_{jt} = z_{\psi^{\ast},j}\, \sigma\!\big(a_{\psi^{\ast},j}\, \text{logit}\big(\psi_{j,\,t - k_{\psi^{\ast},j}}\big) + b_{\psi^{\ast},j}\big) + (1 - z_{\psi^{\ast},j})\, \psi^{\ast}_{j,t-1},
+(\#eq:psi-star)
+\end{equation}
+
+where $\sigma(\cdot)$ is the logistic function and $\text{logit}(\cdot)$ its inverse. Equivalently, in odds-space the affine step is $\text{odds}^{\ast}_t = e^{b_{\psi^{\ast},j}} \cdot (\text{odds}_t)^{a_{\psi^{\ast},j}}$, so $a_{\psi^{\ast},j} > 1$ sharpens peaks and $a_{\psi^{\ast},j} < 1$ flattens them, while $b_{\psi^{\ast},j}$ shifts the baseline odds up or down. The four calibration parameters have the following priors, fit independently per country:
+
+$$
+\begin{aligned}
+a_{\psi^{\ast},j} \ \sim\ & \text{Truncnorm}(1,\ 1,\ 0,\ \infty),\\
+b_{\psi^{\ast},j} \ \sim\ & \mathcal{N}(0,\ 2.5),\\
+z_{\psi^{\ast},j} \ \sim\ & \text{Beta}(2,\ 1),\\
+k_{\psi^{\ast},j} \ \sim\ & \text{Truncnorm}(0,\ 25,\ -90,\ 90).
+\end{aligned}
+(\#eq:psi-star-priors)
+$$
+
+The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior allows the baseline odds to shift by approximately a factor of $e^{2.5} \approx 12$ on either side of unity; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
+
 
 ### Infectious dose ($\kappa$)
 
