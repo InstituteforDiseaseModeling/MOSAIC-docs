@@ -7,7 +7,7 @@
 <title>4 Model calibration | MOSAIC: a spatial model of endemic cholera</title>
 <meta name="author" content="John R Giles">
 <meta name="description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
-<meta name="generator" content="bookdown 0.43 with bs4_book()">
+<meta name="generator" content="bookdown 0.46 with bs4_book()">
 <meta property="og:title" content="4 Model calibration | MOSAIC: a spatial model of endemic cholera">
 <meta property="og:type" content="book">
 <meta property="og:description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
@@ -16,7 +16,7 @@
 <meta name="twitter:description" content="4.1 Bayesian Likelihood Approach The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model...">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
-<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.8.0/transition.js"></script><script src="libs/bs3compat-0.8.0/tabs.js"></script><script src="libs/bs3compat-0.8.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.10.0/transition.js"></script><script src="libs/bs3compat-0.10.0/tabs.js"></script><script src="libs/bs3compat-0.10.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
 <script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
     
@@ -72,10 +72,11 @@
 <li><a class="" href="data.html"><span class="header-section-number">2</span> Data</a></li>
 <li><a class="" href="model-description.html"><span class="header-section-number">3</span> Model description</a></li>
 <li><a class="active" href="model-calibration-1.html"><span class="header-section-number">4</span> Model calibration</a></li>
-<li><a class="" href="scenarios.html"><span class="header-section-number">5</span> Scenarios</a></li>
-<li><a class="" href="usage.html"><span class="header-section-number">6</span> Usage</a></li>
-<li><a class="" href="news.html"><span class="header-section-number">7</span> News</a></li>
-<li><a class="" href="references.html"><span class="header-section-number">8</span> References</a></li>
+<li><a class="" href="model-versions.html"><span class="header-section-number">5</span> Model versions</a></li>
+<li><a class="" href="scenarios.html"><span class="header-section-number">6</span> Scenarios</a></li>
+<li><a class="" href="code.html"><span class="header-section-number">7</span> Code</a></li>
+<li><a class="" href="news.html"><span class="header-section-number">8</span> News</a></li>
+<li><a class="" href="references.html"><span class="header-section-number">9</span> References</a></li>
 </ul>
 
         <div class="book-extra">
@@ -280,6 +281,7 @@ of each location, time step, and outcome on the overall fit.</p>
 <p>The MOSAIC calibration relies on a <em>brute-force random sampling</em> (BFRS) workflow with importance-sampling for estimating posterior parameter distributions. The BFRS approach is deliberately simple, fully parallelisable, and maps directly onto the informative priors which have been painstakingly estimated a priori (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
 <p>Unlike <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is small because the LASER modelling engine, whose fast, metapopulation implementation can evaluate each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> parameter draw in milliseconds.</p>
 <p>Relative to <a href="https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any">Latin-hypercube</a> or <a href="https://en.wikipedia.org/wiki/Sobol_sequence">Sobol sequence</a> sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with LASER’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.</p>
+<p>In practice, the BFRS workflow is executed in two phases. A <em>broad exploration phase</em> draws <span class="math inline">\(n_{\text{sim}}^{(1)}\)</span> parameter vectors directly from the prior to identify the high-likelihood region of the parameter space. A <em>fine-tuning phase</em> then refines the posterior by drawing <span class="math inline">\(n_{\text{sim}}^{(2)}\)</span> additional vectors from an updated proposal distribution centred on the retained subset of the exploration phase, repeating until the convergence diagnostics in the <a href="model-calibration-1.html#model-convergence">Model convergence</a> section are satisfied or a maximum number of fine-tuning batches is reached. Across both phases, the LASER simulations are dispatched to a Dask <code>LocalCluster</code> (or an Azure-style cluster for production runs), with several thousand parameter vectors evaluated in parallel. To prevent fork-related deadlocks between the Numba JIT inside laser-cholera and the Dask worker pool, the thread-count environment variables (<code>TBB_NUM_THREADS</code>, <code>NUMBA_NUM_THREADS</code>, <code>OMP_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code>) are pinned to 1 in each worker before the LASER engine is imported.</p>
 <p>The steps below summarise how this BFRS workflow is turned into a practical calibration routine—moving from prior draws, through model simulation and likelihood evaluation, to the identification of the best-fitting parameter set.</p>
 <ol style="list-style-type: decimal">
 <li><em>Generate reproducible parameter sample</em></li>
@@ -294,18 +296,15 @@ of each location, time step, and outcome on the overall fit.</p>
 </ol>
 <p>For each of the <span class="math inline">\(n_{\text{sim}} \times n_{\text{iter}}\)</span> internal iterations, compute the total <em>negative</em> log-likelihood <span class="math inline">\(-\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> via Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>.</p>
 <ol start="4" style="list-style-type: decimal">
-<li><em>Post-processing end-points</em></li>
+<li><em>Posterior summaries and representative-model selection</em></li>
 </ol>
+<p>After all <span class="math inline">\(n_{\text{sim}}\)</span> parameter vectors have been scored, the calibration pipeline produces three complementary representations of the posterior:</p>
 <ul>
-<li>
-<em>Posterior parameter distributions</em> – convert all log-likelihoods to importance weights for estimating marginal posteriors (next section).<br>
-</li>
-<li>
-<em>Bayesian model averaging</em> – use the weighted ensemble to generate probabilistic forecasts.<br>
-</li>
-<li>
-<em>Best-fit scenario set</em> – select <span class="math inline">\(\hat{\boldsymbol{\Theta}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]\)</span> for deterministic scenario and counter-factual analyses.</li>
+<li><p><em>Posterior parameter distributions</em> — the truncated importance weights <span class="math inline">\(\tilde w_i\)</span> (Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation <a href="model-calibration-1.html#eq:weighted-posterior">(4.12)</a>). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.</p></li>
+<li><p><em>Ensemble forecast</em> — for each of <span class="math inline">\(n_{\text{iter}}^{\text{ens}}\)</span> stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.</p></li>
+<li><p><em>Best and medioid representative models</em> — two deterministic summaries of the ensemble are also produced for scenario analysis. The <em>best model</em> is the parameter vector with the highest log-likelihood, <span class="math inline">\(\hat{\boldsymbol{\Theta}}^{\text{best}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]\)</span>. The <em>medioid model</em> is the parameter vector closest (in weighted Mahalanobis distance) to the importance-sampling-weighted posterior centroid, providing a statistical representative that is less affected by stochastic excursions of the maximum-likelihood point than <span class="math inline">\(\hat{\boldsymbol{\Theta}}^{\text{best}}\)</span>. Both representatives are simulated for <span class="math inline">\(n_{\text{iter}}^{\text{best}}\)</span> stochastic realisations (default 100), so their reported coverage is directly comparable to the ensemble.</p></li>
 </ul>
+<p>All three representations report <span class="math inline">\(R^2\)</span> from the stochastic median of their respective trajectories rather than from a separate deterministic LASER call, so they are directly comparable across the prediction set. The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of <span class="math inline">\(A_{\text{best}} = 0.70\)</span> and a maximum weight coefficient of variation of <span class="math inline">\(\mathrm{CV}_{\tilde w,\text{best}} = 1.0\)</span>, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.</p>
 </div>
 <div id="estimating-the-posterior-distribution-of-model-parameters" class="section level2" number="4.5">
 <h2>
@@ -383,18 +382,26 @@ measures the variability of the retained models and detects extremely skewed mod
 </h3>
 <p>Since the BFRS draws are independent of <span class="math inline">\(P(\boldsymbol{\Theta})\)</span>, ESS plays
 the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We employ the specification of the ESS in <a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a> using the <span class="math inline">\(\Delta \text{AIC}\)</span>-truncated model weights <span class="math inline">\(\tilde w_i\)</span> from Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>:
-<span class="math display">\[\begin{equation}
+<span class="math display" id="eq:ess">\[\begin{equation}
 \widehat{\text{ESS}} =
 \left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
 \right]^{-1}.
-\label{eq:ess}
+\tag{4.13}
 \end{equation}\]</span>
 Because discarded model runs have <span class="math inline">\(\tilde{w}_i=0\)</span>, ESS reflects only the retained
 subset. In dynamic Bayesian models an ESS <span class="math inline">\(\gtrsim\!500\)</span>–<span class="math inline">\(1000\)</span> is generally
-adequate for stable posterior medians and 95 % credible intervals
+adequate for stable posterior medians and 95% credible intervals
 (<a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a>;
 <a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>).</p>
+<p>The aggregate <span class="math inline">\(\widehat{\text{ESS}}\)</span> above measures the joint information retained across the full parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. To diagnose whether the posterior on any <em>individual</em> parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter’s draws into 100 equally weighted bins on its prior support and applies Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> within each bin, with the grid scaled adaptively to the parameter’s effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.</p>
+<p>The Akaike weights in Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a> are a special case of a broader <em>Gibbs-posterior</em> weighting scheme (<a href="https://doi.org/10.1111/rssb.12158">Bissiri <em>et al.</em> 2016</a>) of the form</p>
+<p><span class="math display" id="eq:gibbs-weights">\[\begin{equation}
+\tilde{w}_i \;=\; \frac{\exp\!\big(-w_{\text{gibbs}}\, x_i\big)}{\sum_{j=1}^{n_{\text{sim}}} \exp\!\big(-w_{\text{gibbs}}\, x_j\big)},
+\tag{4.14}
+\end{equation}\]</span></p>
+<p>where <span class="math inline">\(x_i\)</span> is a generic loss (lower is better) and <span class="math inline">\(w_{\text{gibbs}} \ge 0\)</span> is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting <span class="math inline">\(x_i = \Delta_i\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1/2\)</span> recovers Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a> exactly; setting <span class="math inline">\(x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1\)</span> recovers normalised likelihood weights. The Gibbs formulation is used internally to allow the calibration pipeline to fall back to a softer weight scheme when a <span class="math inline">\(\Delta\text{AIC}\)</span> cut-off would otherwise truncate too many draws.</p>
+<p>Note that the location, time, and outcome shape weights <span class="math inline">\(w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}\)</span> that enter the log-likelihood in Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a> are normalised to make their contributions comparable across components: each shape weight is rescaled by <span class="math inline">\(N_{\text{obs}} / N_{\text{component}}\)</span>, where <span class="math inline">\(N_{\text{obs}}\)</span> is the count of non-NA surveillance observations and <span class="math inline">\(N_{\text{component}}\)</span> is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.</p>
 </div>
 <div id="agreement-index-a" class="section level3" number="4.6.2">
 <h3>
@@ -408,7 +415,7 @@ A =
 H(\mathbf{\tilde{w}})
 =
 -\sum_{i\in\mathcal B}\tilde w_i\,\log\tilde w_i.
-\tag{4.13}
+\tag{4.15}
 \end{equation}\]</span>
 Note that by definition <span class="math inline">\(A \in \{0,1\}\)</span> because <span class="math inline">\(0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|\)</span>. When <span class="math inline">\(A=1\)</span>, all weights are equal (<span class="math inline">\(\tilde w_i = 1/|\mathcal B|\)</span>) and there is a high degree of consensus in the sense that all models share similar fit. When <span class="math inline">\(A=0\)</span>, a single model dominates (<span class="math inline">\(\tilde w_i = 1\)</span>) for one model run <span class="math inline">\(i\)</span> and zero for the rest), which gives poor consensus among the subset of best models <span class="math inline">\(\mathcal B\)</span>.</p>
 </div>
@@ -423,7 +430,7 @@ Note that by definition <span class="math inline">\(A \in \{0,1\}\)</span> becau
 {\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
-\tag{4.14}
+\tag{4.16}
 \end{equation}\]</span>
 Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights.</p>
 </div>
@@ -485,15 +492,23 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 </div>
 </div>
 </div>
-<div id="model-forecasting" class="section level2" number="4.7">
+<div id="calibration-outputs-and-diagnostics" class="section level2" number="4.7">
 <h2>
-<span class="header-section-number">4.7</span> Model Forecasting<a class="anchor" aria-label="anchor" href="#model-forecasting"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.7</span> Calibration outputs and diagnostics<a class="anchor" aria-label="anchor" href="#calibration-outputs-and-diagnostics"><i class="fas fa-link"></i></a>
+</h2>
+<p>A single call to <code>run_MOSAIC()</code> produces a structured output tree under <code>3_results/</code>. Per-location prediction CSVs are written to <code>3_results/predictions/</code>, and figures are written to <code>3_results/figures/</code> with diagnostic plots collected in a dedicated <code>diagnostics/</code> subtree. Keeping data files and figures in separate subtrees lets downstream consumers re-render visualisations without re-running the calibration.</p>
+<p>Three diagnostic plot families are produced automatically. <code>plot_model_distributions()</code> produces a marginal prior-versus-posterior panel for every fitted parameter, with six parameters (<code>kappa</code>, <code>zeta_1</code>, <code>zeta_2</code>, <code>zeta_ratio</code>, <code>prop_E_initial</code>, <code>prop_I_initial</code>) drawn on a log10 x-axis to handle their multi-decade prior support; the change-of-variables <span class="math inline">\(f_Y(\log_{10} x) = f_X(x) \, x \, \ln 10\)</span> is applied to the density values so that the visible peaks correspond to the modes of the original-scale density. <code>plot_psi_star_diagnostic()</code> produces a per-location overlay of the raw LSTM suitability <span class="math inline">\(\psi_{jt}\)</span> and the calibrated <span class="math inline">\(\psi^{\ast}_{jt}\)</span> from Equation <a href="model-description.html#eq:psi-star">(3.9)</a>, with the mean reduction in suitability reported in the subtitle. <code>plot_model_likelihood()</code> plots the log-likelihood as a function of accumulated parameter draws, displaying the diminishing-returns curve referenced in Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>.</p>
+<p>The marginal prior/posterior plots are particularly useful for spotting calibration pathologies. A near-delta posterior on the boundary of a uniform or truncated-normal prior typically indicates an under-informative shape that should be re-specified; a near-uniform posterior typically indicates the data carry little information about that parameter. Both warrant a check against the importance-sampling weights before any forecast is released.</p>
+</div>
+<div id="model-forecasting" class="section level2" number="4.8">
+<h2>
+<span class="header-section-number">4.8</span> Model Forecasting<a class="anchor" aria-label="anchor" href="#model-forecasting"><i class="fas fa-link"></i></a>
 </h2>
 <p>This section is in development.</p>
 </div>
-<div id="scenarios-and-counter-factuals" class="section level2" number="4.8">
+<div id="scenarios-and-counter-factuals" class="section level2" number="4.9">
 <h2>
-<span class="header-section-number">4.8</span> Scenarios and Counter Factuals<a class="anchor" aria-label="anchor" href="#scenarios-and-counter-factuals"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.9</span> Scenarios and Counter Factuals<a class="anchor" aria-label="anchor" href="#scenarios-and-counter-factuals"><i class="fas fa-link"></i></a>
 </h2>
 <p>This section is in development.</p>
 
@@ -509,7 +524,7 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 </div>
   <div class="chapter-nav">
 <div class="prev"><a href="model-description.html"><span class="header-section-number">3</span> Model description</a></div>
-<div class="next"><a href="scenarios.html"><span class="header-section-number">5</span> Scenarios</a></div>
+<div class="next"><a href="model-versions.html"><span class="header-section-number">5</span> Model versions</a></div>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
@@ -538,8 +553,9 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <li><a class="nav-link" href="#convergence-guidelines"><span class="header-section-number">4.6.4</span> Convergence guidelines</a></li>
 </ul>
 </li>
-<li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.7</span> Model Forecasting</a></li>
-<li><a class="nav-link" href="#scenarios-and-counter-factuals"><span class="header-section-number">4.8</span> Scenarios and Counter Factuals</a></li>
+<li><a class="nav-link" href="#calibration-outputs-and-diagnostics"><span class="header-section-number">4.7</span> Calibration outputs and diagnostics</a></li>
+<li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.8</span> Model Forecasting</a></li>
+<li><a class="nav-link" href="#scenarios-and-counter-factuals"><span class="header-section-number">4.9</span> Scenarios and Counter Factuals</a></li>
 </ul>
 
       <div class="book-extra">

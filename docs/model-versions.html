@@ -6,17 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>5 Model versions | MOSAIC: a spatial model of endemic cholera</title>
 <meta name="author" content="John R Giles">
-<meta name="description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Current: Beta version of the model to establish mechanisms and links to data. Basic SIR...">
-<meta name="generator" content="bookdown 0.43 with bs4_book()">
+<meta name="description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Past: Initial beta release in R. Established the SVEIWRS compartmental structure, the...">
+<meta name="generator" content="bookdown 0.46 with bs4_book()">
 <meta property="og:title" content="5 Model versions | MOSAIC: a spatial model of endemic cholera">
 <meta property="og:type" content="book">
-<meta property="og:description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Current: Beta version of the model to establish mechanisms and links to data. Basic SIR...">
+<meta property="og:description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Past: Initial beta release in R. Established the SVEIWRS compartmental structure, the...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="5 Model versions | MOSAIC: a spatial model of endemic cholera">
-<meta name="twitter:description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Current: Beta version of the model to establish mechanisms and links to data. Basic SIR...">
+<meta name="twitter:description" content="Table 5.1: Current and future planned model versions with brief descriptions. Version Description v0.1 Past: Initial beta release in R. Established the SVEIWRS compartmental structure, the...">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
-<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.8.0/transition.js"></script><script src="libs/bs3compat-0.8.0/tabs.js"></script><script src="libs/bs3compat-0.8.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.10.0/transition.js"></script><script src="libs/bs3compat-0.10.0/tabs.js"></script><script src="libs/bs3compat-0.10.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
 <script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
     
@@ -74,7 +74,7 @@
 <li><a class="" href="model-calibration-1.html"><span class="header-section-number">4</span> Model calibration</a></li>
 <li><a class="active" href="model-versions.html"><span class="header-section-number">5</span> Model versions</a></li>
 <li><a class="" href="scenarios.html"><span class="header-section-number">6</span> Scenarios</a></li>
-<li><a class="" href="usage.html"><span class="header-section-number">7</span> Usage</a></li>
+<li><a class="" href="code.html"><span class="header-section-number">7</span> Code</a></li>
 <li><a class="" href="news.html"><span class="header-section-number">8</span> News</a></li>
 <li><a class="" href="references.html"><span class="header-section-number">9</span> References</a></li>
 </ul>
@@ -92,8 +92,8 @@
 <caption>
 <span id="tab:unnamed-chunk-1">Table 5.1: </span>Current and future planned model versions with brief descriptions.</caption>
 <colgroup>
-<col width="3%">
-<col width="96%">
+<col width="1%">
+<col width="98%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Version</th>
@@ -103,22 +103,22 @@
 <tr class="odd">
 <td align="left">v0.1</td>
 <td align="left">
-<strong>Current:</strong> Beta version of the model to establish mechanisms and links to data. Basic SIR dynamics with mobility, vaccination, environmental transmission, and an observation process.</td>
+<strong>Past:</strong> Initial beta release in R. Established the SVEIWRS compartmental structure, the mobility and environmental transmission terms, and the observation process. Used to scope data sources and parameter priors prior to the LASER port.</td>
 </tr>
 <tr class="even">
 <td align="left">v1.0</td>
 <td align="left">
-<strong>Future:</strong> First implementation in LASER. Model definition is the same. Improvements to data sources and model adjustments to new data.</td>
+<strong>Current:</strong> First production implementation. The transmission engine runs in the Python <a href="https://github.com/InstituteforDiseaseModeling/laser-cholera">laser-cholera</a> metapopulation model, driven by the R <a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg">MOSAIC</a> package for data assembly, parameter sampling, and Bayesian calibration via Dask. Priors for all biological parameters are now literature-derived (shedding, ID<sub>50</sub>, decay, CFR), and the calibration pipeline produces best, medioid, and ensemble forecasts with importance-sampling weights, effective sample size, and agreement-index diagnostics.</td>
 </tr>
 <tr class="odd">
 <td align="left">v2.0</td>
 <td align="left">
-<strong>Future:</strong> Maximizing metapopulation approach. District level data and improvements to model fitting and hierarchical likelihoods. Likely in LASER, but could still have an R implementation at this point.</td>
+<strong>Future:</strong> Maximizing the metapopulation approach. District-level data and improvements to model fitting via hierarchical likelihoods.</td>
 </tr>
 <tr class="even">
 <td align="left">v3.0</td>
 <td align="left">
-<strong>Future:</strong> Agent-based component with better immune dynamics.</td>
+<strong>Future:</strong> Agent-based component with richer immune dynamics, including biphasic vaccine waning and individual-level exposure history.</td>
 </tr>
 </tbody>
 </table></div>

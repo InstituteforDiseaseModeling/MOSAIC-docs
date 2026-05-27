@@ -42,9 +42,12 @@ Human mobility patterns significantly influence cholera transmission. Relevant d
 
 ## Climate Data
 
-Climate conditions, including temperature, precipitation, and extreme weather events, play a critical role in cholera dynamics. These are captured through:
+Climate conditions, including temperature, precipitation, soil moisture, and extreme weather events, play a critical role in cholera dynamics. We assemble climate inputs from two upstream pipelines that we maintain alongside MOSAIC:
 
-- **OpenMeteo Historical Weather Data API**: This API ([link](https://open-meteo.com/en/docs/historical-weather-api)) offers access to historical climate data, which is essential for modeling the environmental factors influencing cholera outbreaks.
+- **[open-meteo-pipeline](https://github.com/InstituteforDiseaseModeling/open-meteo-pipeline)**: a production pipeline that pulls daily-resolution variables from the [OpenMeteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api) and the [OpenMeteo Climate Change API](https://open-meteo.com/en/docs/climate-api) for 30 uniformly distributed points within each MOSAIC country, splices ERA5 reanalysis with [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) projections, spatially averages to the country level, and writes daily and weekly parquet files. MOSAIC reads these via `process_open_meteo_data()`. Variables include 2 m air temperature, dew point, relative humidity, 10 m wind, mean sea level pressure, cloud cover, shortwave radiation, precipitation, soil moisture at 0–7 cm (loaded as `soil_moisture_0_to_10cm_mean` for backward compatibility with the LSTM training data), and FAO evapotranspiration.
+- **[enso-data](https://github.com/InstituteforDiseaseModeling/enso-data)**: a compiled time-series of the Indian Ocean Dipole Mode Index (DMI) and the Niño3, Niño3.4, and Niño4 indices of the El Niño Southern Oscillation (ENSO), updated from the National Oceanic and Atmospheric Administration ([NOAA](https://psl.noaa.gov/enso/)) and the Australian Bureau of Meteorology ([BOM](http://www.bom.gov.au/climate/ocean/outlooks/)). MOSAIC reads these via `process_enso_data()`. The ENSO and DMI indices provide leading signals for environmental suitability over a 5-month forecast horizon.
+
+Together these two pipelines supply the 24 covariates used by the LSTM model for environmental suitability $\psi_{jt}$ (see the [Model Description](https://www.mosaicmod.org/model-description.html#modeling-environmental-suitability) page).
 
 ### Storms and Floods
 

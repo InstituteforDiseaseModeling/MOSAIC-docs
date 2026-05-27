@@ -33,7 +33,7 @@ nocite: '@*'
 \
 
 <center><span style="color:#FF6347; font-size:13px;">*
-Website under development. Last compiled on 2025-05-21 at  02:30 PM PDT.
+Website under development. Last compiled on 2026-05-26 at  07:08 PM PDT.
 *</span></center>
 
 ## Welcome {-}
@@ -42,7 +42,7 @@ Welcome to the **Metapopulation Outbreak Simulation with Agent-based Implementat
 
 ## Contact {-}
 
-MOSAIC is developed by a team of researchers at the Institute for Disease Modeling (IDM) dedicated to developing modeling methods and software tools that help decision-makers understand and respond to infectious disease outbreaks. This website is currently maintained by John Giles ([`@gilesjohnr`](https://github.com/gilesjohnr)). For general questions, contact John Giles (john.giles@gatesfoundation.org), Jillian Gauld (jillian.gauld@gatesfoundation.org), and/or Rajiv Sodhi (rajiv.sodhi@gatesfoundation.org). 
+MOSAIC is developed by a team of researchers at the Institute for Disease Modeling (IDM) dedicated to developing modeling methods and software tools that help decision-makers understand and respond to infectious disease outbreaks. This website is currently maintained by John Giles ([`@gilesjohnr`](https://github.com/gilesjohnr)). For general questions, contact John Giles (john.giles@gatesfoundation.org), Jillian Gauld (jillian.gauld@gatesfoundation.org), and/or Rajiv Sodhi (rajiv.sodhi@gatesfoundation.org). The MOSAIC R package also benefits from contributions by Christopher Lorton, Tony Ting, Dejan Lukacevic, and Meikang Wu.
 
 ## Funding {-}
 

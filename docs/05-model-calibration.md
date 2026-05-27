@@ -158,6 +158,8 @@ Unlike [Markov-Chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Mon
 
 Relative to [Latin-hypercube](https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any) or [Sobol sequence](https://en.wikipedia.org/wiki/Sobol_sequence) sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with LASER’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.
 
+In practice, the BFRS workflow is executed in two phases. A *broad exploration phase* draws $n_{\text{sim}}^{(1)}$ parameter vectors directly from the prior to identify the high-likelihood region of the parameter space. A *fine-tuning phase* then refines the posterior by drawing $n_{\text{sim}}^{(2)}$ additional vectors from an updated proposal distribution centred on the retained subset of the exploration phase, repeating until the convergence diagnostics in the [Model convergence](#model-convergence) section are satisfied or a maximum number of fine-tuning batches is reached. Across both phases, the LASER simulations are dispatched to a Dask `LocalCluster` (or an Azure-style cluster for production runs), with several thousand parameter vectors evaluated in parallel. To prevent fork-related deadlocks between the Numba JIT inside laser-cholera and the Dask worker pool, the thread-count environment variables (`TBB_NUM_THREADS`, `NUMBA_NUM_THREADS`, `OMP_NUM_THREADS`, `MKL_NUM_THREADS`, `OPENBLAS_NUM_THREADS`) are pinned to 1 in each worker before the LASER engine is imported.
+
 The steps below summarise how this BFRS workflow is turned into a practical calibration routine—moving from prior draws, through model simulation and likelihood evaluation, to the identification of the best-fitting parameter set.
 
 1. *Generate reproducible parameter sample*
@@ -172,11 +174,17 @@ The transitions between most model compartments are stochastic, so for each inde
 
 For each of the $n_{\text{sim}} \times n_{\text{iter}}$ internal iterations, compute the total *negative* log-likelihood $-\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ via Equation \@ref(eq:total-log-likelihood-2).
 
-4. *Post-processing end-points*  
+4. *Posterior summaries and representative-model selection*
 
-- *Posterior parameter distributions* – convert all log-likelihoods to importance weights for estimating marginal posteriors (next section).  
-- *Bayesian model averaging* – use the weighted ensemble to generate probabilistic forecasts.  
-- *Best-fit scenario set* – select $\hat{\boldsymbol{\Theta}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]$ for deterministic scenario and counter-factual analyses.
+After all $n_{\text{sim}}$ parameter vectors have been scored, the calibration pipeline produces three complementary representations of the posterior:
+
+- *Posterior parameter distributions* --- the truncated importance weights $\tilde w_i$ (Equation \@ref(eq:aic-weights)) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation \@ref(eq:weighted-posterior)). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.
+
+- *Ensemble forecast* --- for each of $n_{\text{iter}}^{\text{ens}}$ stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.
+
+- *Best and medioid representative models* --- two deterministic summaries of the ensemble are also produced for scenario analysis. The *best model* is the parameter vector with the highest log-likelihood, $\hat{\boldsymbol{\Theta}}^{\text{best}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]$. The *medioid model* is the parameter vector closest (in weighted Mahalanobis distance) to the importance-sampling-weighted posterior centroid, providing a statistical representative that is less affected by stochastic excursions of the maximum-likelihood point than $\hat{\boldsymbol{\Theta}}^{\text{best}}$. Both representatives are simulated for $n_{\text{iter}}^{\text{best}}$ stochastic realisations (default 100), so their reported coverage is directly comparable to the ensemble.
+
+All three representations report $R^2$ from the stochastic median of their respective trajectories rather than from a separate deterministic LASER call, so they are directly comparable across the prediction set. The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of $A_{\text{best}} = 0.70$ and a maximum weight coefficient of variation of $\mathrm{CV}_{\tilde w,\text{best}} = 1.0$, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.
 
 
 ## Estimating the Posterior Distribution of Model Parameters
@@ -248,13 +256,26 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 \left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
 \right]^{-1}.
-\label{eq:ess}
+(\#eq:ess)
 \end{equation}
 Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
 subset.  In dynamic Bayesian models an ESS $\gtrsim\!500$–$1000$ is generally
-adequate for stable posterior medians and 95 % credible intervals
+adequate for stable posterior medians and 95% credible intervals
 ([Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/);
 [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)).
+
+The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \@ref(eq:ess) within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
+
+The Akaike weights in Equation \@ref(eq:aic-weights) are a special case of a broader *Gibbs-posterior* weighting scheme ([Bissiri *et al.* 2016](https://doi.org/10.1111/rssb.12158)) of the form
+
+\begin{equation}
+\tilde{w}_i \;=\; \frac{\exp\!\big(-w_{\text{gibbs}}\, x_i\big)}{\sum_{j=1}^{n_{\text{sim}}} \exp\!\big(-w_{\text{gibbs}}\, x_j\big)},
+(\#eq:gibbs-weights)
+\end{equation}
+
+where $x_i$ is a generic loss (lower is better) and $w_{\text{gibbs}} \ge 0$ is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting $x_i = \Delta_i$ and $w_{\text{gibbs}} = 1/2$ recovers Equation \@ref(eq:aic-weights) exactly; setting $x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ and $w_{\text{gibbs}} = 1$ recovers normalised likelihood weights. The Gibbs formulation is used internally to allow the calibration pipeline to fall back to a softer weight scheme when a $\Delta\text{AIC}$ cut-off would otherwise truncate too many draws.
+
+Note that the location, time, and outcome shape weights $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ that enter the log-likelihood in Equation \@ref(eq:total-log-likelihood-2) are normalised to make their contributions comparable across components: each shape weight is rescaled by $N_{\text{obs}} / N_{\text{component}}$, where $N_{\text{obs}}$ is the count of non-NA surveillance observations and $N_{\text{component}}$ is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.
 
 
 ### Agreement index *A*
@@ -307,6 +328,15 @@ Table: (\#tab:calibration)Details on convergence diagnostics with recommended th
 </div>
 
 
+
+
+## Calibration outputs and diagnostics
+
+A single call to `run_MOSAIC()` produces a structured output tree under `3_results/`. Per-location prediction CSVs are written to `3_results/predictions/`, and figures are written to `3_results/figures/` with diagnostic plots collected in a dedicated `diagnostics/` subtree. Keeping data files and figures in separate subtrees lets downstream consumers re-render visualisations without re-running the calibration.
+
+Three diagnostic plot families are produced automatically. `plot_model_distributions()` produces a marginal prior-versus-posterior panel for every fitted parameter, with six parameters (`kappa`, `zeta_1`, `zeta_2`, `zeta_ratio`, `prop_E_initial`, `prop_I_initial`) drawn on a log10 x-axis to handle their multi-decade prior support; the change-of-variables $f_Y(\log_{10} x) = f_X(x) \, x \, \ln 10$ is applied to the density values so that the visible peaks correspond to the modes of the original-scale density. `plot_psi_star_diagnostic()` produces a per-location overlay of the raw LSTM suitability $\psi_{jt}$ and the calibrated $\psi^{\ast}_{jt}$ from Equation \@ref(eq:psi-star), with the mean reduction in suitability reported in the subtitle. `plot_model_likelihood()` plots the log-likelihood as a function of accumulated parameter draws, displaying the diminishing-returns curve referenced in Figure \@ref(fig:likelihood-example).
+
+The marginal prior/posterior plots are particularly useful for spotting calibration pathologies. A near-delta posterior on the boundary of a uniform or truncated-normal prior typically indicates an under-informative shape that should be re-specified; a near-uniform posterior typically indicates the data carry little information about that parameter. Both warrant a check against the importance-sampling weights before any forecast is released.
 
 
 ## Model Forecasting
