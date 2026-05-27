@@ -569,22 +569,28 @@ knitr::include_graphics("figures/vaccination_maps.png")
 ### Immunity from vaccination
 The impacts of Oral Cholera Vaccine (OCV) campaigns are incorporated into the model through two vaccinated compartments, $V_1$ (one-dose recipients) and $V_2$ (two-dose recipients), as introduced in the [system of difference equations](#eq:system). Vaccine effectiveness $\phi_1, \phi_2$ acts at the moment of dose delivery: of the $\nu_{1,jt}$ first doses delivered on day $t$, the $\phi_1 \nu_{1,jt}$ *effective* fraction enter $V_1$ while the $(1-\phi_1)\nu_{1,jt}$ ineffective fraction leave the recipient in the source compartment. The same logic applies to second doses with effectiveness $\phi_2$. Waning brings vaccinated individuals back to $S$ at rates $\omega_1, \omega_2$ per day.
 
-To set priors for the effectiveness and waning rates, we draw on the systematic review and meta-analysis of [Xu et al. 2025](https://doi.org/10.1016/S2214-109X(25)00107-X) (*Lancet Global Health*), which pools estimates from cohort studies in Bangladesh, South Sudan, and the Democratic Republic of Congo --- including the underlying studies used in earlier MOSAIC versions (Qadri et al. 2016 and 2018, Azman et al. 2016, Malembaka et al. 2024) --- to derive central values and uncertainty intervals for one-dose and two-dose vaccine effectiveness and the corresponding waning rates. Fit to Beta and Gamma distributions on the basis of the reported quantiles, the priors are:
+To set priors for the effectiveness and waning rates, we draw on the systematic review and meta-regression of [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) (medRxiv preprint; published 2025 in *Lancet Global Health* as [Xu et al. 2025](https://doi.org/10.1016/S2214-109X(25)00107-X)), which pools cohort studies in Bangladesh, South Sudan, and the Democratic Republic of Congo --- including the underlying studies used in earlier MOSAIC versions (Qadri et al. 2016 and 2018, Azman et al. 2016, Malembaka et al. 2024) --- to produce time-varying effectiveness estimates with confidence intervals at five follow-up points for the one-dose schedule (6, 12, 18, 24, 30 months) and four for the two-dose schedule (12, 24, 36, 48 months). We fit an exponential-decay model
+
+$$
+\text{VE}_k(t) = \phi_k \exp(-\omega_k\, t)
+$$
+
+separately to the mean, lower, and upper effectiveness curves for each dose regimen $k \in \{1,2\}$ using Levenberg--Marquardt nonlinear least squares (the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library), then moment-match the point estimate and 95% CI of each parameter to a Beta prior (for $\phi$) or a Gamma prior (for $\omega$). The resulting priors are:
 
 $$
 \begin{aligned}
-\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mean} \approx 0.78\text{)},\\
-\phi_2 \ \sim\ & \text{Beta}(115.10,\ 35.32) \quad \text{(two-dose effectiveness, mean} \approx 0.77\text{)},\\
-\omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mean duration} \approx 3.7 \ \text{years)},\\
-\omega_2 \ \sim\ & \text{Gamma}(2.71,\ 5{,}079.24) \quad \text{(two-dose waning, mean duration} \approx 5.1 \ \text{years)}.
+\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mode} \approx 0.79\text{)},\\
+\phi_2 \ \sim\ & \text{Beta}(115.10,\ 35.32) \quad \text{(two-dose effectiveness, mode} \approx 0.77\text{)},\\
+\omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mode} \approx 0.00070\ \text{day}^{-1}\text{)},\\
+\omega_2 \ \sim\ & \text{Gamma}(2.71,\ 5{,}079.24) \quad \text{(two-dose waning, mode} \approx 0.00034\ \text{day}^{-1}\text{)}.
 \end{aligned}
 (\#eq:effectiveness)
 $$
 
-The two-dose schedule slightly extends the mean duration of protection relative to the one-dose schedule, but its effectiveness at the time of delivery is essentially the same in the pooled estimate. The modest difference between $\phi_1$ and $\phi_2$ should not be over-interpreted, since the two-dose evidence base is thinner than the one-dose evidence base and the cohort studies underlying the meta-analysis differ in their populations and follow-up windows.
+The initial effectiveness at the time of delivery is essentially the same for the one-dose and two-dose schedules (both close to 0.77--0.79), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is $\log(2) / \omega_1 \approx 990$ days $\approx 2.7$ years, while the modal two-dose half-life is $\log(2) / \omega_2 \approx 2040$ days $\approx 5.6$ years (roughly twice as long). The Gamma posterior for $\omega_2$ is also more positively skewed (Figure \@ref(fig:effectiveness)F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95% CI bounds at later follow-up.
 
-```{r effectiveness, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distributions for one-dose and two-dose vaccine effectiveness ($\\phi_1, \\phi_2$) and waning rates ($\\omega_1, \\omega_2$) from the [Xu et al. 2025](https://doi.org/10.1016/S2214-109X(25)00107-X) meta-analysis. The Beta priors for effectiveness are concentrated near approximately 0.78, while the Gamma priors for waning correspond to mean durations of approximately 3.7 and 5.1 years for one and two doses respectively."}
-knitr::include_graphics("figures/vaccine_effectiveness.png")
+```{r effectiveness, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\\text{VE}_k(t) = \\phi_k \\exp(-\\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. Panels B and E show the Beta priors for the initial effectiveness $\\phi_1, \\phi_2$; panels C and F show the Gamma priors for the daily waning rates $\\omega_1, \\omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit."}
+knitr::include_graphics("figures/vaccine_effectiveness_combined.png")
 ```
 
 ### Immunity from natural infection
