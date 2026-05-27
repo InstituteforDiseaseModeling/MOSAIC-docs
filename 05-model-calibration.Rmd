@@ -352,6 +352,15 @@ knitr::include_graphics("figures/likelihood_example.png")
 
 
 
+## Calibration outputs and diagnostics
+
+A single call to `run_MOSAIC()` produces a structured output tree under `3_results/`. Per-location prediction CSVs are written to `3_results/predictions/`, and figures are written to `3_results/figures/` with diagnostic plots collected in a dedicated `diagnostics/` subtree. Keeping data files and figures in separate subtrees lets downstream consumers re-render visualisations without re-running the calibration.
+
+Three diagnostic plot families are produced automatically. `plot_model_distributions()` produces a marginal prior-versus-posterior panel for every fitted parameter, with six parameters (`kappa`, `zeta_1`, `zeta_2`, `zeta_ratio`, `prop_E_initial`, `prop_I_initial`) drawn on a log10 x-axis to handle their multi-decade prior support; the change-of-variables $f_Y(\log_{10} x) = f_X(x) \, x \, \ln 10$ is applied to the density values so that the visible peaks correspond to the modes of the original-scale density. `plot_psi_star_diagnostic()` produces a per-location overlay of the raw LSTM suitability $\psi_{jt}$ and the calibrated $\psi^{\ast}_{jt}$ from Equation \@ref(eq:psi-star), with the mean reduction in suitability reported in the subtitle. `plot_model_likelihood()` plots the log-likelihood as a function of accumulated parameter draws, displaying the diminishing-returns curve referenced in Figure \@ref(fig:likelihood-example).
+
+The marginal prior/posterior plots are particularly useful for spotting calibration pathologies. A near-delta posterior on the boundary of a uniform or truncated-normal prior typically indicates an under-informative shape that should be re-specified; a near-uniform posterior typically indicates the data carry little information about that parameter. Both warrant a check against the importance-sampling weights before any forecast is released.
+
+
 ## Model Forecasting
 
 This section is in development.
