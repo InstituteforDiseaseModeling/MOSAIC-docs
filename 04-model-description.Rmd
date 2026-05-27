@@ -1423,7 +1423,7 @@ tbl <- data.frame(
           "$\\varepsilon$", # Parameter: varepsilon (waning immunity rate of recovered individuals)
           "$\\gamma_1$",    # Parameter: gamma_1 (recovery rate of symptomatic infected individuals)
           "$\\gamma_2$",    # Parameter: gamma_2 (recovery rate of asymptomatic infected individuals)
-          "$\\mu$",         # Parameter: mu (mortality rate due to *V. cholerae* infection)
+          "$\\mu_{j,t}$",   # Parameter: mu_{j,t} (dynamic IFR; see eq:mu-jt)
           "$\\sigma$",      # Parameter: sigma (proportion of infections that are symptomatic)
           "$\\rho$",        # Parameter: rho (proportion of suspected cases that are true infections)
           "$\\zeta_1$",     # Parameter: zeta_1 (shedding rate by symptomatic individuals)
@@ -1473,11 +1473,11 @@ tbl <- data.frame(
           "Waning immunity rate of recovered individuals.",                                  # varepsilon
           "Recovery rate of symptomatic infected individuals.",                              # gamma_1
           "Recovery rate of asymptomatic infected individuals.",                             # gamma_2
-          "Mortality rate due to *V. cholerae* infection.",                                    # mu
+          "Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\\mu_{j,0}, \\mu_{j,1}, \\mu_{j,\\text{epi}}$; see \\@ref(eq:mu-jt).",  # mu_jt
           "Proportion of infections that are symptomatic.",                                  # sigma
-          "Proportion of suspected cases that are true infections.",                         # rho
-          "Shedding rate of *V. cholerae* by symptomatic individuals.",                        # zeta_1
-          "Shedding rate of *V. cholerae* by asymptomatic individuals.",                       # zeta_2
+          "Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.",  # rho
+          "Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.",  # zeta_1
+          "Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as $\\zeta_1/\\zeta_{\\text{ratio}}$.",  # zeta_2
           "Environmental decay rate of *V. cholerae*.",                                        # delta
           "Minimum decay rate when $\\psi_{jt}=0$.",                                           # delta_min
           "Maximum decay rate when $\\psi_{jt}=1$.",                                           # delta_max
@@ -1526,8 +1526,8 @@ tbl <- data.frame(
           "",        # mu
           "",        # sigma
           "",        # rho
-          "$0.1\\mbox{-}10$",  # zeta_1
-          "$0.1\\mbox{-}10$",  # zeta_2
+          "$\\text{Lognormal}(25.65, 2.46)$",  # zeta_1
+          "Derived from $\\zeta_1$ and $\\zeta_{\\text{ratio}}$",  # zeta_2
           "Determined dynamically in model based on $\\psi_{jt}$.",        # delta
           "$0.333 \\ (3 \\ \\text{days})$",        # delta_min
           "$0.011 \\ (90 \\ \\text{days})$",        # delta_max
@@ -1546,7 +1546,7 @@ tbl <- data.frame(
           "",        # tau_i
           "",        # pi_{ij}
           "See Figure \\@ref(fig:wash-country).",        # theta_j
-          "$10^5\\mbox{-}10^6$"  # kappa
+          "$\\text{Lognormal}(11.77, 1.82)$"  # kappa
      ),
      Source = c(
           "",        # i
@@ -1596,12 +1596,124 @@ tbl <- data.frame(
           "",        # tau_i
           "",        # pi_{ij}
           "[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)",        # theta_j
-          "[Fung 2014](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/)"   # kappa
+          "Meta-analysis (see \\@ref(eq:kappa))"   # kappa
      )
 )
 
 
 kable(tbl)
+
+
+# Parameters added in MOSAIC v1.0 (priors and dynamics introduced in laser-cholera 0.12 and MOSAIC-pkg 0.22-0.30)
+tbl2 <- data.frame(
+     Parameter = c(
+          "$\\nu_{1,jt}$",
+          "$\\nu_{2,jt}$",
+          "$\\mathcal{V}^{\\text{src}}$",
+          "$N^{\\text{src}}_{jt}$",
+          "$\\zeta_{\\text{ratio}}$",
+          "$\\text{days}_{\\text{short}}$",
+          "$\\text{days}_{\\text{long}}$",
+          "$\\text{days}_{\\text{spread}}$",
+          "$s_1, s_2$",
+          "$\\psi^{\\ast}_{jt}$",
+          "$a_{\\psi^{\\ast},j}$",
+          "$b_{\\psi^{\\ast},j}$",
+          "$z_{\\psi^{\\ast},j}$",
+          "$k_{\\psi^{\\ast},j}$",
+          "$\\eta_j$",
+          "$\\chi^{\\text{end}}$",
+          "$\\chi^{\\text{epi}}$",
+          "$\\rho_{\\text{deaths}}$",
+          "$l_{\\text{cases}}$",
+          "$l_{\\text{deaths}}$",
+          "$\\mu_{j,0}$",
+          "$\\mu_{j,1}$",
+          "$\\mu_{j,\\text{epi}}$",
+          "$w_{\\text{gibbs}}$"
+     ),
+     Description = c(
+          "First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.",
+          "Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.",
+          "Set of compartments eligible for first-dose vaccination (subset of $\\{S, E, I_1, I_2, R\\}$).",
+          "Total population eligible for first-dose vaccination on day $t$: $\\sum_{X \\in \\mathcal{V}^{\\text{src}}} X_{jt}$.",
+          "Symptomatic-to-asymptomatic shedding ratio $\\zeta_1/\\zeta_2$.",
+          "Survival time of *V. cholerae* at low environmental suitability ($\\psi_{jt}\\!\\to\\!0$).",
+          "Survival time at high environmental suitability ($\\psi_{jt}\\!\\to\\!1$). Derived as $\\text{days}_{\\text{short}} + \\text{days}_{\\text{spread}}$.",
+          "Algebraic spread between minimum and maximum *V. cholerae* survival time.",
+          "Shape parameters of the cumulative Beta transformation $f(\\psi_{jt}) = \\text{pbeta}(\\psi_{jt}\\mid s_1, s_2)$ for the decay rate.",
+          "Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see \\@ref(eq:psi-star).",
+          "Per-country shape/gain parameter for the $\\psi \\to \\psi^{\\ast}$ logit calibration.",
+          "Per-country scale/offset parameter for the $\\psi \\to \\psi^{\\ast}$ logit calibration.",
+          "Per-country EWMA smoothing weight ($z = 1$: no smoothing).",
+          "Per-country time offset in days for the $\\psi \\to \\psi^{\\ast}$ calibration.",
+          "Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).",
+          "Positive predictive value of a suspected cholera case during endemic periods.",
+          "Positive predictive value of a suspected cholera case during epidemic periods.",
+          "Probability that a true cholera death is captured by surveillance.",
+          "Reporting lag in days from symptom onset to case reporting.",
+          "Reporting lag in days from symptom onset to death reporting.",
+          "Baseline daily mortality hazard $\\mu_{j,0}$ in destination $j$.",
+          "Proportional time-trend factor for $\\mu_{j,t}$ over the simulation period.",
+          "Proportional increase in $\\mu_{j,t}$ during epidemic periods.",
+          "Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter)."
+     ),
+     Distribution = c(
+          "Derived from GTFCC OCV campaign data.",
+          "Derived from GTFCC OCV campaign data.",
+          "Default: $\\{S, E, I_1, I_2, R\\}$.",
+          "Computed.",
+          "$\\text{Lognormal}(4.31, 4.39)$",
+          "$\\text{Truncnorm}(16, 7, 0.01, 60)$",
+          "Derived.",
+          "$\\text{Truncnorm}(180, 95, 1, 365)$",
+          "$\\text{Truncnorm}(3, 5, 0.1, 10)$ each",
+          "Computed (Eq. \\@ref(eq:psi-star)).",
+          "$\\text{Truncnorm}(1, 1, 0, \\infty)$",
+          "$\\mathcal{N}(0, 2.5)$",
+          "$\\text{Beta}(2, 1)$",
+          "$\\text{Truncnorm}(0, 25, -90, 90)$",
+          "$\\text{Truncnorm}$ per country, capped at 0.01.",
+          "$\\text{Beta}(5.43, 5.01)$",
+          "$\\text{Beta}(4.79, 1.53)$",
+          "$\\text{Beta}(3, 2)$",
+          "$\\text{Truncnorm}(1, 1.5, 0, 7)$ days",
+          "$\\text{Truncnorm}(4, 3, 1, 14)$ days",
+          "$\\text{Gamma}$ per country (e.g., AGO: $\\text{Gamma}(4, 482.6)$).",
+          "$\\mathcal{N}(0, 0.05)$",
+          "$\\text{Gamma}(1, 2)$",
+          "Calibration control parameter."
+     ),
+     Source = c(
+          "[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)",
+          "[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)",
+          "laser-cholera issue #42.",
+          "Computed from compartment populations.",
+          "Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)",
+          "Literature anchor; staged calibration.",
+          "Algebraic.",
+          "Literature anchor; staged calibration.",
+          "Bayesian regularisation (v0.26).",
+          "Computed (per-country logit calibration).",
+          "Per-country posterior (calibration).",
+          "Per-country posterior (calibration).",
+          "Per-country posterior; Beta(2,1) tightening from v0.28.5.",
+          "Per-country posterior (calibration).",
+          "Per-country historical median epidemic prevalence.",
+          "[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)",
+          "[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)",
+          "Finger et al. 2024 surveillance-capture estimate.",
+          "Surveillance reporting practice.",
+          "Surveillance reporting practice.",
+          "Derived from reported CFR via $\\mu_{j,0} \\approx \\text{CFR}^{\\text{reported}}_j \\cdot \\rho / \\chi$.",
+          "Weakly informative.",
+          "Reflects typical surge-period IFR increase.",
+          "[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)"
+     ),
+     stringsAsFactors = FALSE
+)
+
+kable(tbl2, caption = "Parameters added or substantially reparameterised in MOSAIC v1.0.")
 
 ```
 
