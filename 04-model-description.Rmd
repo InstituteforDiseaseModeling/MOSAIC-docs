@@ -918,14 +918,65 @@ knitr::include_graphics("figures/proportion_symptomatic.png")
 ```
 
 
-### Suspected cases
-The clinical presentation of diarrheal diseases is often similar across various pathogens, which can lead to systematic biases in the reported number of cholera cases. It is anticipated that the number of suspected cholera cases is related to the actual number of infections by a factor of \(1/\rho\), where \(\rho\) represents the proportion of suspected cases that are true infections. To adjust for this bias, we use estimates from the meta-analysis by [Weins et al. (2023)](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which suggests that suspected cholera cases outnumber true infections by approximately 2 to 1, with a mean across studies indicating that 52% (24-80% 95% CI) of suspected cases are actual cholera infections. A higher estimate was reported for ourbreak settings (78%, 40-99% 95% CI). To account for the variability in this estimate, we fit a Beta distribution to the reported quantiles using a least squares approach and the Nelder-Mead algorithm, resulting in the prior distribution shown in Figure \@ref(fig:rho)B:
+### Suspected cases, reported cases, and deaths
+
+The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence $I_{1,jt}$ in the model. We resolve this with a two-stage observation model. In the *care-seeking* stage, a true symptomatic infection is presented to the surveillance system as a suspected case with probability $\rho$. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
 
 \begin{equation}
-\rho \sim \text{Beta}(4.79, 1.53).
+\text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\rho \cdot I_{1,\,j,t - l_{\text{cases}}}}{\chi_{jt}^{\text{eff}}} \,\right],
+(\#eq:reported-cases)
 \end{equation}
 
-```{r rho, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="Proportion of suspected cholera cases that are true infections. Panel A shows the 'low' assumption which estimates across all settings: $\\rho \\sim \\text{Beta}(5.43, 5.01)$. Panel B shows the 'high' assumption where the estimate reflects high-quality studies during outbreaks: $\\rho \\sim \\text{Beta}(4.79, 1.53)$"}
+where $\rho$ enters the numerator as the forward (care-seeking) rate and $\chi_{jt}^{\text{eff}}$ enters the denominator as the back-correction for the PPV: this is the unique relationship consistent with $P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text{suspected}) = P(\text{suspected}\mid\text{true})\,P(\text{true})$. The effective PPV $\chi_{jt}^{\text{eff}}$ switches between an endemic and an epidemic value depending on whether local prevalence is below or above a per-location threshold $\eta_j$:
+
+\begin{equation}
+\chi_{jt}^{\text{eff}} =
+\begin{cases}
+\chi^{\text{end}}, & \text{if} \ \ I_{1,\,j,t - l_{\text{cases}}} \big/ N_{j,\,t - l_{\text{cases}}} < \eta_j,\\[3pt]
+\chi^{\text{epi}}, & \text{otherwise}.
+\end{cases}
+(\#eq:chi-eff)
+\end{equation}
+
+The prior on the care-seeking rate $\rho$ is derived from the GEMS multi-country case-ascertainment study together with the meta-analysis by Wiens et al. 2025, fit to a Beta distribution by least-squares:
+
+$$
+\rho \sim \text{Beta}(6.81,\ 17.89),
+(\#eq:rho)
+$$
+
+corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.78 during outbreaks. Fit to Beta distributions by least-squares:
+
+$$
+\begin{aligned}
+\chi^{\text{end}} \ \sim\ & \text{Beta}(5.43,\ 5.01) \quad \mathbf{\text{(endemic PPV, mean} \approx 0.52)},\\
+\chi^{\text{epi}} \ \sim\ & \text{Beta}(4.79,\ 1.53) \quad \mathbf{\text{(epidemic PPV, mean} \approx 0.76)}.
+\end{aligned}
+(\#eq:chi-priors)
+$$
+
+The lower endemic PPV reflects the higher background rate of acute watery diarrhoea from other pathogens that is misclassified as cholera in non-outbreak settings, while the epidemic PPV is informed by laboratory-confirmed outbreak studies. The case reporting lag is a small truncated-normal prior:
+
+$$
+l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \mathbf{\text{(days)}}.
+(\#eq:reporting-lag-cases)
+$$
+
+The epidemic threshold $\eta_j$ is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country's observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).
+
+A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag from symptom onset is $l_{\text{deaths}}$:
+
+$$
+\begin{aligned}
+\rho_{\text{deaths}} \ \sim\ & \text{Beta}(3,\ 2) \quad \mathbf{\text{(mean} \approx 0.60)},\\
+l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \mathbf{\text{(days)}}.
+\end{aligned}
+(\#eq:rho-deaths)
+$$
+
+The mean death-detection rate of approximately 0.60 reflects the surveillance-capture estimate of Finger et al. 2024. Reported deaths are modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection that follows.
+
+```{r rho, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\\rho$ controls how many true symptomatic infections present as suspected cases ($\\rho \\sim \\text{Beta}(6.81, 17.89)$, mean $\\approx 0.28$). The endemic and epidemic positive predictive values $\\chi^{\\text{end}}$ and $\\chi^{\\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\\approx 0.52$) is substantially lower than the epidemic PPV (mean $\\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings."}
 knitr::include_graphics("figures/suspected_cases.png")
 ```
 
