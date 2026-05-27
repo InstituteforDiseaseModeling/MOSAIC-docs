@@ -583,9 +583,9 @@ Rather than treating $\zeta_1$ and $\zeta_2$ as independent draws --- which can 
 
 $$
 \begin{aligned}
-\zeta_1 \ \sim \ &\text{Lognormal}(25.65,\ 2.46) \quad \mathbf{\text{(symptomatic shedding)}},\\
-\zeta_{\text{ratio}} \ \sim \ &\text{Lognormal}(4.31,\ 4.39) \quad \mathbf{\text{(symptomatic-to-asymptomatic ratio)}},\\
-\zeta_2 \ = \ & \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \mathbf{\text{(asymptomatic shedding, derived)}}.
+\zeta_1 \ \sim \ &\text{Lognormal}(25.65,\ 2.46) \quad \text{(symptomatic shedding)},\\
+\zeta_{\text{ratio}} \ \sim \ &\text{Lognormal}(4.31,\ 4.39) \quad \text{(symptomatic-to-asymptomatic ratio)},\\
+\zeta_2 \ = \ & \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \text{(asymptomatic shedding, derived)}.
 \end{aligned}
 (\#eq:shedding)
 $$
@@ -764,10 +764,10 @@ To set priors for the effectiveness and waning rates, we draw on the systematic 
 
 $$
 \begin{aligned}
-\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \mathbf{\text{(one-dose effectiveness, mean} \approx 0.78)},\\
-\phi_2 \ \sim\ & \text{Beta}(115.10,\ 35.32) \quad \mathbf{\text{(two-dose effectiveness, mean} \approx 0.77)},\\
-\omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \mathbf{\text{(one-dose waning, mean duration} \approx 3.7 \ \text{years})},\\
-\omega_2 \ \sim\ & \text{Gamma}(2.71,\ 5{,}079.24) \quad \mathbf{\text{(two-dose waning, mean duration} \approx 5.1 \ \text{years})}.
+\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mean} \approx 0.78\text{)},\\
+\phi_2 \ \sim\ & \text{Beta}(115.10,\ 35.32) \quad \text{(two-dose effectiveness, mean} \approx 0.77\text{)},\\
+\omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mean duration} \approx 3.7 \ \text{years)},\\
+\omega_2 \ \sim\ & \text{Gamma}(2.71,\ 5{,}079.24) \quad \text{(two-dose waning, mean duration} \approx 5.1 \ \text{years)}.
 \end{aligned}
 (\#eq:effectiveness)
 $$
@@ -1042,8 +1042,8 @@ corresponding to a mean of approximately 0.28 (i.e. roughly one in four true sym
 
 $$
 \begin{aligned}
-\chi^{\text{end}} \ \sim\ & \text{Beta}(5.43,\ 5.01) \quad \mathbf{\text{(endemic PPV, mean} \approx 0.52)},\\
-\chi^{\text{epi}} \ \sim\ & \text{Beta}(4.79,\ 1.53) \quad \mathbf{\text{(epidemic PPV, mean} \approx 0.76)}.
+\chi^{\text{end}} \ \sim\ & \text{Beta}(5.43,\ 5.01) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
+\chi^{\text{epi}} \ \sim\ & \text{Beta}(4.79,\ 1.53) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
 \end{aligned}
 (\#eq:chi-priors)
 $$
@@ -1051,7 +1051,7 @@ $$
 The lower endemic PPV reflects the higher background rate of acute watery diarrhoea from other pathogens that is misclassified as cholera in non-outbreak settings, while the epidemic PPV is informed by laboratory-confirmed outbreak studies. The case reporting lag is a small truncated-normal prior:
 
 $$
-l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \mathbf{\text{(days)}}.
+l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \text{(days)}.
 (\#eq:reporting-lag-cases)
 $$
 
@@ -1061,8 +1061,8 @@ A parallel observation process applies to cholera-attributable deaths. The proba
 
 $$
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(3,\ 2) \quad \mathbf{\text{(mean} \approx 0.60)},\\
-l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \mathbf{\text{(days)}}.
+\rho_{\text{deaths}} \ \sim\ & \text{Beta}(3,\ 2) \quad \text{(mean} \approx 0.60\text{)},\\
+l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
 \end{aligned}
 (\#eq:rho-deaths)
 $$

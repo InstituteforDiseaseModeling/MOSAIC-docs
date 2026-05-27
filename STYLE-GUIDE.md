@@ -71,6 +71,7 @@ These are the canonical assignments used throughout the model description. Do no
 | $\text{days}_{\text{short}}, \text{days}_{\text{long}}, \text{days}_{\text{spread}}$ | Environmental survival times; $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}}$ |
 | $\psi^{\ast}_{jt}$ | EWMA-smoothed environmental suitability (raw output is $\psi_{jt}$) |
 | $a_{\psi^{\ast}}, b_{\psi^{\ast}}, z_{\psi^{\ast}}, k_{\psi^{\ast}}$ | Shape parameters for the $\psi \to \psi^{\ast}$ transformation |
+| $w_{\text{gibbs}}$ | Gibbs-weight inverse temperature for the calibration ensemble (code-name `eta` in MOSAIC-pkg; renamed in the docs to match the existing $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ weight family) |
 
 **Rule on introducing new symbols.** When MOSAIC-pkg adds a parameter without an existing math symbol (e.g., `rho_deaths`, `nu_jt_sources`), **propose** a candidate in the editing thread and **pause for approval** before writing it into a `.Rmd`. Do not silently invent notation.
 
@@ -169,10 +170,22 @@ Methodology is narrated in first-person plural: *"we describe", "we used", "we e
 
 ### 2.4 Bold
 
-- Equation system labels: `\mathbf{\text{Susceptible population:}}`
+- Equation system labels: `\mathbf{\text{Susceptible population:}}` (the bold section divider inside a multi-line aligned system).
 - Parameter sub-headings in prose: `**Symptomatic individuals ($\gamma_1$):**`
 - Stochastic-transitions row headers: `**$\mathbf{S}$ (susceptible)**`
 - Interpretation emphasis on a single word: `**slowest**`, `**high**`, `**low**`
+
+**Do NOT bold the parenthetical annotation that labels a distribution.** Use plain `\text{}` (italic-on-roman-style math text), not `\mathbf{\text{}}`:
+
+```latex
+\chi^{\text{epi}} \sim \text{Beta}(4.79, 1.53) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
+```
+
+Not:
+
+```latex
+\chi^{\text{epi}} \sim \text{Beta}(4.79, 1.53) \quad \mathbf{\text{(epidemic PPV, mean} \approx 0.76)}.
+```
 
 ### 2.5 Citations
 

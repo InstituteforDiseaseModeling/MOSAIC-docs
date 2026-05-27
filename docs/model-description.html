@@ -1053,9 +1053,9 @@ Figure 3.13: Prior distribution for the environmental half-saturation constant <
 <p>Rather than treating <span class="math inline">\(\zeta_1\)</span> and <span class="math inline">\(\zeta_2\)</span> as independent draws — which can produce samples with <span class="math inline">\(\zeta_1 &lt; \zeta_2\)</span> contrary to biology — we sample <span class="math inline">\(\zeta_1\)</span> together with a shedding ratio <span class="math inline">\(\zeta_{\text{ratio}} = \zeta_1 / \zeta_2\)</span> and derive <span class="math inline">\(\zeta_2\)</span> algebraically. The ratio prior combines two complementary literature channels via precision-weighting on the log scale: a <em>direct channel</em> using published symptomatic-to-asymptomatic ratios such as the household transmission odds ratio of <a href="https://doi.org/10.64898/2026.01.09.26343785">Smith et al. 2026</a> (approximately 1.6), the paired stool concentrations of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/">Nelson et al. 2009</a> (approximately <span class="math inline">\(10^5\)</span>), and modelling anchors from <a href="https://doi.org/10.1073/pnas.1102149108">Chao et al. 2011</a> and <a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002509">Finger et al. 2018</a>; and a <em>derived channel</em> obtained as the closed-form ratio of the independent <span class="math inline">\(\zeta_1\)</span> and <span class="math inline">\(\zeta_2\)</span> lognormals. The resulting priors are:</p>
 <p><span class="math display" id="eq:shedding">\[
 \begin{aligned}
-\zeta_1 \ \sim \ &amp;\text{Lognormal}(25.65,\ 2.46) \quad \mathbf{\text{(symptomatic shedding)}},\\
-\zeta_{\text{ratio}} \ \sim \ &amp;\text{Lognormal}(4.31,\ 4.39) \quad \mathbf{\text{(symptomatic-to-asymptomatic ratio)}},\\
-\zeta_2 \ = \ &amp; \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \mathbf{\text{(asymptomatic shedding, derived)}}.
+\zeta_1 \ \sim \ &amp;\text{Lognormal}(25.65,\ 2.46) \quad \text{(symptomatic shedding)},\\
+\zeta_{\text{ratio}} \ \sim \ &amp;\text{Lognormal}(4.31,\ 4.39) \quad \text{(symptomatic-to-asymptomatic ratio)},\\
+\zeta_2 \ = \ &amp; \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \text{(asymptomatic shedding, derived)}.
 \end{aligned}
 \tag{3.12}
 \]</span></p>
@@ -1352,10 +1352,10 @@ Figure 3.21: The total cumulative number of OCV doses distributed through the WH
 <p>To set priors for the effectiveness and waning rates, we draw on the systematic review and meta-analysis of <a href="https://doi.org/10.1016/S2214-109X(25)00107-X">Xu et al. 2025</a> (<em>Lancet Global Health</em>), which pools estimates from cohort studies in Bangladesh, South Sudan, and the Democratic Republic of Congo — including the underlying studies used in earlier MOSAIC versions (Qadri et al. 2016 and 2018, Azman et al. 2016, Malembaka et al. 2024) — to derive central values and uncertainty intervals for one-dose and two-dose vaccine effectiveness and the corresponding waning rates. Fit to Beta and Gamma distributions on the basis of the reported quantiles, the priors are:</p>
 <p><span class="math display" id="eq:effectiveness">\[
 \begin{aligned}
-\phi_1 \ \sim\ &amp; \text{Beta}(91.84,\ 25.49) \quad \mathbf{\text{(one-dose effectiveness, mean} \approx 0.78)},\\
-\phi_2 \ \sim\ &amp; \text{Beta}(115.10,\ 35.32) \quad \mathbf{\text{(two-dose effectiveness, mean} \approx 0.77)},\\
-\omega_1 \ \sim\ &amp; \text{Gamma}(23.33,\ 31{,}693.83) \quad \mathbf{\text{(one-dose waning, mean duration} \approx 3.7 \ \text{years})},\\
-\omega_2 \ \sim\ &amp; \text{Gamma}(2.71,\ 5{,}079.24) \quad \mathbf{\text{(two-dose waning, mean duration} \approx 5.1 \ \text{years})}.
+\phi_1 \ \sim\ &amp; \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mean} \approx 0.78\text{)},\\
+\phi_2 \ \sim\ &amp; \text{Beta}(115.10,\ 35.32) \quad \text{(two-dose effectiveness, mean} \approx 0.77\text{)},\\
+\omega_1 \ \sim\ &amp; \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mean duration} \approx 3.7 \ \text{years)},\\
+\omega_2 \ \sim\ &amp; \text{Gamma}(2.71,\ 5{,}079.24) \quad \text{(two-dose waning, mean duration} \approx 5.1 \ \text{years)}.
 \end{aligned}
 \tag{3.13}
 \]</span></p>
@@ -1721,22 +1721,22 @@ Figure 3.28: Proportion of infections that are symptomatic.
 <p>corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of <a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286">Wiens et al. 2023</a>, which reports suspected-case PPVs of approximately 0.52 across all settings and 0.78 during outbreaks. Fit to Beta distributions by least-squares:</p>
 <p><span class="math display" id="eq:chi-priors">\[
 \begin{aligned}
-\chi^{\text{end}} \ \sim\ &amp; \text{Beta}(5.43,\ 5.01) \quad \mathbf{\text{(endemic PPV, mean} \approx 0.52)},\\
-\chi^{\text{epi}} \ \sim\ &amp; \text{Beta}(4.79,\ 1.53) \quad \mathbf{\text{(epidemic PPV, mean} \approx 0.76)}.
+\chi^{\text{end}} \ \sim\ &amp; \text{Beta}(5.43,\ 5.01) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
+\chi^{\text{epi}} \ \sim\ &amp; \text{Beta}(4.79,\ 1.53) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
 \end{aligned}
 \tag{3.24}
 \]</span></p>
 <p>The lower endemic PPV reflects the higher background rate of acute watery diarrhoea from other pathogens that is misclassified as cholera in non-outbreak settings, while the epidemic PPV is informed by laboratory-confirmed outbreak studies. The case reporting lag is a small truncated-normal prior:</p>
 <p><span class="math display" id="eq:reporting-lag-cases">\[
-l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \mathbf{\text{(days)}}.
+l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \text{(days)}.
 \tag{3.25}
 \]</span></p>
 <p>The epidemic threshold <span class="math inline">\(\eta_j\)</span> is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country’s observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).</p>
 <p>A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is <span class="math inline">\(\rho_{\text{deaths}}\)</span>, and the reporting lag from symptom onset is <span class="math inline">\(l_{\text{deaths}}\)</span>:</p>
 <p><span class="math display" id="eq:rho-deaths">\[
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ &amp; \text{Beta}(3,\ 2) \quad \mathbf{\text{(mean} \approx 0.60)},\\
-l_{\text{deaths}} \ \sim\ &amp; \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \mathbf{\text{(days)}}.
+\rho_{\text{deaths}} \ \sim\ &amp; \text{Beta}(3,\ 2) \quad \text{(mean} \approx 0.60\text{)},\\
+l_{\text{deaths}} \ \sim\ &amp; \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
 \end{aligned}
 \tag{3.26}
 \]</span></p>
