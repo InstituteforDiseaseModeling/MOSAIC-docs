@@ -409,26 +409,32 @@ The rate at which infected individuals shed *Vibrio cholerae* into the environme
 - Symptomatic individuals ($I_1$), who tend to shed substantially more bacteria for longer due to more severe gastrointestinal symptoms;
 - Asymptomatic individuals ($I_2$), who shed less per capita and for a shorter period of time, but may contribute significantly to environmental contamination due to their larger numbers.
 
-According to the modeling study done by  [Fung et al. (2014)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/), estimates of *V. cholerae* shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, [Nelson et al. (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) report that individuals may shed between $10^3$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in asymptomatic cases and up to $10^{12}$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in severe symptomatic infections. While these quantities are slightly different from the $\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$ units used in cholera transmission models, it implies that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.
+According to the modeling study done by  [Fung et al. (2014)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/), estimates of *V. cholerae* shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, [Nelson et al. (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) report that individuals may shed between $10^3$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in asymptomatic cases and up to $10^{12}$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in severe symptomatic infections, implying that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.
 
-To account for the uncertainty in levels of *V. cholerae* shedding, we collated a short list of studies that either report empirical findings or modeling analyses that set priors for shedding parameters. These sources reflect a wide range of assumptions and contexts, but nonetheless provide a spectrum of estimated *V. cholerae* shedding rates that we can use to inform our model (see the [table of shedding parameters below](#shedding-table) below).
+The shedding-rate parameters $\zeta_1$ and $\zeta_2$ enter the environmental reservoir update as cells deposited per infected person per day (see Equation \@ref(eq:system)). Earlier MOSAIC versions parameterised shedding as a concentration ($\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$), but in the current LASER implementation the reservoir $W$ tracks absolute *V. cholerae* cells and the half-saturation constant $\kappa$ is expressed in the same absolute units. Under the assumption that watery stool has approximately the density of water, the two specifications differ only by whether the daily stool-volume integral is absorbed into $\zeta_k$ or left implicit.
 
-We currently assume that shedding rates are constant and drawn from independent uniform distributions in units of $\mathbf{\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}}$, which is consistent with the frequently cited sources for shedding rates of [Codeço 2001](https://doi.org/10.1186/1471-2334-1-1) and others:
+To set priors that span the genuine biological range, we performed a literature meta-analysis. For $\zeta_1$ we assembled per-person-per-day anchors from 14 primary sources reporting *V. cholerae* concentrations in cholera stool (e.g. [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/), [Harris et al. 2012](https://www.sciencedirect.com/science/article/pii/S014067361260436X), [Kaper et al. 1995](https://journals.asm.org/doi/10.1128/cmr.8.1.48-86.1995), [Merrell et al. 2002](https://www.nature.com/articles/nature00778)) and converted each anchor to a daily rate using time-averaged stool volumes for severe (8 L/day), moderate (4 L/day), and mild (0.5 L/day) infections. A severity-weighted pool --- using a default mix of 20% severe, 40% moderate, and 40% mild, consistent with [Harris et al. 2012](https://www.sciencedirect.com/science/article/pii/S014067361260436X) --- is fit by weighted maximum-likelihood on the log scale. For $\zeta_2$ the evidence base is thin (essentially [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) and the [Kaper et al. 1995](https://journals.asm.org/doi/10.1128/cmr.8.1.48-86.1995) expert review); the prior therefore applies a hard floor of $\sigma_{\log} \ge 2$ to honestly reflect that only one primary source contributes.
+
+Rather than treating $\zeta_1$ and $\zeta_2$ as independent draws --- which can produce samples with $\zeta_1 < \zeta_2$ contrary to biology --- we sample $\zeta_1$ together with a shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$ and derive $\zeta_2$ algebraically. The ratio prior combines two complementary literature channels via precision-weighting on the log scale: a *direct channel* using published symptomatic-to-asymptomatic ratios such as the household transmission odds ratio of [Smith et al. 2026](https://doi.org/10.1101/2026.01.01.2600001) (approximately 1.6), the paired stool concentrations of [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) (approximately $10^5$), and modelling anchors from [Chao et al. 2011](https://www.pnas.org/doi/10.1073/pnas.1102149108) and [Finger et al. 2018](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002509); and a *derived channel* obtained as the closed-form ratio of the independent $\zeta_1$ and $\zeta_2$ lognormals. The resulting priors are:
 
 $$
 \begin{aligned}
-\zeta_1 \ \sim \ &\text{Uniform}(10^4,\ 10^{8}) \quad \mathbf{\text{(symptomatic shedding)}},\\
-\zeta_2 \ \sim \ &\text{Uniform}(0.01,\ 10^3) \quad \mathbf{\text{(asymptomatic shedding)}}.
+\zeta_1 \ \sim \ &\text{Lognormal}(25.65,\ 2.46) \quad \mathbf{\text{(symptomatic shedding)}},\\
+\zeta_{\text{ratio}} \ \sim \ &\text{Lognormal}(4.31,\ 4.39) \quad \mathbf{\text{(symptomatic-to-asymptomatic ratio)}},\\
+\zeta_2 \ = \ & \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \mathbf{\text{(asymptomatic shedding, derived)}}.
 \end{aligned}
 (\#eq:shedding)
 $$
 
-The definition of these priors assumes that:
+The medians of these priors correspond to approximately $1.4 \times 10^{11}$ *V. cholerae* cells per symptomatic person per day, a ratio of approximately 75 between symptomatic and asymptomatic shedding, and therefore approximately $1.9 \times 10^9$ cells per asymptomatic person per day (Figures \@ref(fig:zeta1-prior) and \@ref(fig:zeta-ratio-prior)). These central values are several orders of magnitude larger than the older Frame-B Uniform priors used in MOSAIC v0.1, but they are biologically anchored to the volumetric scale of *V. cholerae* shedding observed in clinical studies. The 95% credible intervals span the full range of values reported across the studies in the table below.
 
-1) the watery stool of infected individuals has approximately the same density as water (1kg/L), such that $10^5 \text{cells}~\text{g}^{-1}\text{day}^{-1} \approx 10^5 \text{cells}~\text{mL}^{-1}\text{person}^{-1}\text{day}^{-1}$, and
-2) shedding in symptomatic individuals is always greater than that of asymptomatic individuals with the potential to be many orders of magnitude greater.
+```{r zeta1-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distribution for the symptomatic shedding rate $\\zeta_1$ (cells per symptomatic person per day, log scale). The lognormal fit is weighted by severity class and anchored to per-person-per-day rates derived from *V. cholerae* stool concentrations and time-averaged stool volumes from 14 literature sources. Points and bars show the literature anchors and their reported bounds."}
+knitr::include_graphics("figures/zeta_1_prior.png")
+```
 
-These priors also reflect the observed variability in the literature while preserving identifiability in model fitting. The upper bound for symptomatic shedding ($10^8$) is conservative relative to extreme values (e.g., $10^{12}$ cells/L in rice water stool), but comfortably spans values seen in both clinical observations and theoretical models. The lower bound ($10^4$) ensures that small but still epidemiologically significant shedding is captured. For asymptomatic individuals, the range of 0.01 to $10^3$ $\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$ captures both low empirical estimates (e.g. [Mosley et al. 1968](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2554681/)) and broader assumptions made in cholera transmission models (e.g. [Codeço 2001](https://doi.org/10.1186/1471-2334-1-1)). The range of these priors therefore provides sufficient flexibility to represent both high-intensity shedding in severe cases and low-level contributions distributed across a larger number of asymptomatic individuals.
+```{r zeta-ratio-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\\zeta_{\\text{ratio}} = \\zeta_1 / \\zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\\zeta_1$ and $\\zeta_2$ marginal lognormals)."}
+knitr::include_graphics("figures/zeta_ratio_prior.png")
+```
 
 The table below summarizes key published estimates and assumptions regarding *V. cholerae* and related bacterial shedding rates:
 
@@ -980,6 +986,155 @@ knitr::kable(
 ```
 
 
+
+
+## The basic reproductive number \(R_{0,j}\)
+
+To evaluate the *intrinsic* transmission potential of *Vibrio cholerae* in each country \(j\), we compute a location‐specific basic reproductive number.  Vaccination, susceptible depletion, and cross-border travel are set to zero; only baseline contact rates and local WASH coverage remain.
+
+### Effective removal rate
+
+The mean infectious period combines symptomatic (\(\gamma_1^{-1}\)) and asymptomatic (\(\gamma_2^{-1}\)) durations, weighted by the symptomatic proportion \(\sigma\):
+
+\[
+\gamma_{\mathrm{eff}}
+  = \left[\frac{\sigma}{\gamma_1}
+          +\frac{1-\sigma}{\gamma_2}\right]^{-1}.
+\]
+
+### Worst-case environmental persistence
+
+Following the “upper-bound” convention for \(R_0\), the pathogen-decay rate is fixed at its **slowest** plausible value:
+
+\[
+\widehat{\delta}_j
+  = \frac{1}{\text{days}_{\max}}
+  = \frac{1}{90}\;\text{day}^{-1},
+\]
+
+corresponding to a 90-day survival time in water.
+
+### Decomposition of \(R_{0,j}\)
+
+*Human-to-human contribution*
+
+\[
+R_{0,j}^{\text{hum}}
+  = \beta_{j0}^{\text{hum}}
+    \left[\frac{\sigma}{\gamma_1}
+          +\frac{1-\sigma}{\gamma_2}\right].
+\]
+
+*Environment-to-human contribution*
+
+\[
+R_{0,j}^{\text{env}}
+  = \frac{\beta_{j0}^{\text{env}}\,(1-\theta_j)^{2}}
+         {\kappa\,\widehat{\delta}_j}
+    \left[\zeta_1\frac{\sigma}{\gamma_1}
+          +\zeta_2\frac{1-\sigma}{\gamma_2}\right].
+\]
+
+*Total basic reproductive number*
+
+\[
+R_{0,j}
+  = R_{0,j}^{\text{hum}} + R_{0,j}^{\text{env}}.
+\]
+
+### Interpretation
+
+* **\(R_{0,j}^{\text{hum}}\)** dominates in settings with high baseline contact (\(\beta_{j0}^{\text{hum}}\)) and short infectious periods.  
+* **\(R_{0,j}^{\text{env}}\)** grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j = 1/90\)).  
+  Because the WASH factor appears squared, improving basic services reduces both contamination and ingestion, driving \(R_{0,j}^{\text{env}}\) down rapidly.
+
+These patch-specific numbers provide an upper ceiling for every effective reproductive number reported later in the analysis.
+
+
+
+
+### Intrinsic effective reproductive number \(R_{jt}^{\mathrm{intr}}\)
+
+The **intrinsic** reproductive number measures the secondary cases produced *within* location \(j\) when only resident–resident transmission pathways are active.
+
+*Susceptible fraction*  
+\[
+f_{jt}
+  = (1-\tau_j)\,
+    \frac{S_{jt}+V^{\text{sus}}_{1,jt}+V^{\text{sus}}_{2,jt}}{N_{jt}} .
+\]
+
+*Effective removal rate*  
+\[
+\gamma_{\mathrm{eff}}
+  = \left[\frac{\sigma}{\gamma_1}
+          +\frac{1-\sigma}{\gamma_2}\right]^{-1}.
+\]
+
+*Environmental decay*  
+\[
+\delta_{jt}
+  = \frac{1}{\text{days}_{\text{short}}
+             +\text{pbeta}(\psi_{jt}\,|\,s_1,s_2)
+              \bigl(\text{days}_{\text{long}}-\text{days}_{\text{short}}\bigr)} .
+\]
+
+*Analytic expression*  
+\[
+R_{jt}^{\mathrm{intr}}
+  = f_{jt}\Bigl[
+        \beta_{jt}^{\text{hum}}
+        \Bigl(\frac{\sigma}{\gamma_1}
+              +\frac{1-\sigma}{\gamma_2}\Bigr)
+      + \frac{\beta_{jt}^{\text{env}}\,(1-\theta_j)^{2}}
+             {\kappa\,\delta_{jt}}
+        \Bigl(\zeta_1\frac{\sigma}{\gamma_1}
+              +\zeta_2\frac{1-\sigma}{\gamma_2}\Bigr)
+    \Bigr].
+\]
+
+When \(R_{jt}^{\mathrm{intr}}<1\) local transmission would fade out in the absence of new importations.
+
+---
+
+### Extrinsic effective reproductive number \(R_{jt}^{\mathrm{extr}}\)
+
+The **extrinsic** number augments the human‐to‐human term with infections sparked by visiting infectious travellers.
+
+*Relative imported prevalence*  
+\[
+I^{\ast}_{jt}
+  = \frac{\sum_{i\neq j}\tau_i\pi_{ij}\bigl(I_{1,it}+I_{2,it}\bigr)}
+         {(1-\tau_j)\bigl(I_{1,jt}+I_{2,jt}\bigr)} .
+\]
+
+*Analytic expression*  
+\[
+R_{jt}^{\mathrm{extr}}
+  = f_{jt}\Bigl[
+        \beta_{jt}^{\text{hum}}
+        \bigl(1+I^{\ast}_{jt}\bigr)
+        \Bigl(\frac{\sigma}{\gamma_1}
+              +\frac{1-\sigma}{\gamma_2}\Bigr)
+      + \frac{\beta_{jt}^{\text{env}}\,(1-\theta_j)^{2}}
+             {\kappa\,\delta_{jt}}
+        \Bigl(\zeta_1\frac{\sigma}{\gamma_1}
+              +\zeta_2\frac{1-\sigma}{\gamma_2}\Bigr)
+    \Bigr].
+\]
+
+*Key points*
+
+* \(R_{jt}^{\mathrm{extr}} \ge R_{jt}^{\mathrm{intr}}\); equality holds when imported prevalence is negligible \((I^{\ast}_{jt}\approx0)\).
+* Both measures are bounded above by the local basic value \(R_{0,j}\); cross-border seeding accelerates observed growth but cannot raise per-case offspring beyond the worst-case ceiling set by local parameters.
+
+
+
+
+
+
+
+
 ## The effective reproductive number
 
 The effective reproductive number $R_t$ quantifies epidemic growth by capturing the average number of secondary infections generated by a primary case at time $t$. We estimate $R_t$ and account for our two infectious classes *symptomatic $I_{1}$* and *asymptomatic $I_{2}$* by 
@@ -1005,12 +1160,107 @@ The denominator aggregates the recent infectiousness contributed by past symptom
 
 ### The generation time distribution
 
-The generation time distribution is the time between when an individual becomes infected and when they infect others. We model this quantity with a Gamma distribution whose mean is approximately 5 days:
+The generation time distribution is the time between when an individual becomes infected and when they infect others. To keep the MOSAIC framework internally consistent, we derive the intrinsic generation interval $\mathcal{G}$ from the same timing parameters that govern the infectious state transitions. Where, $\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission}\, \right)$ as in [Anderson & May 1992](https://www.google.com/books/edition/Infectious_Diseases_of_Humans/HT0--xXBguQC?hl=en) and is assumed to be Gamma distributed. 
+\begin{equation}
+\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission}\, \right)\\
+\Bigg\Updownarrow \\
+\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission} + \text{decay in environment}\, \right)
+(\#eq:gen-time-range)
+\end{equation}
+We combine the latent period $\iota$ and the two infectious periods (symptomatic $I_1$ and asymptomatic $I_2$) with removal rates $\gamma_1$ and $\gamma_2$. Because only a proportion $\sigma$ of new infections become symptomatic, the mean infectious period of a randomly chosen case is the weighted harmonic mean of the two class-specific durations.
+\begin{equation}
+\gamma_{\mathrm{eff}}
+  = \left[\,\tfrac{\sigma}{\gamma_{1}} + \tfrac{1-\sigma}{\gamma_{2}}\right]^{-1}
+(\#eq:gamma-eff)
+\end{equation}
+Under these assumptions the we approximate $\mathcal{G}$ with a Gamma distribution and derive its first two moments as
+\begin{equation}
+\mathbb{E}[\mathcal{G}] \;=\; \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}}
+\qquad \text{and} \qquad
+\mathbb{V}[\mathcal{G}] \;=\; \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}}.
+(\#eq:generation-time-moments)
+\end{equation}
+Where the shape ($s$) and rate ($r$) parameters that match these moments are
+\begin{equation}
+s = \frac{\mathbb{E}[\mathcal{G}]^{2}}{\mathbb{V}[\mathcal{G}]}
+\qquad \text{and} \qquad
+r = \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]}.
+(\#eq:gamma-shape-rate)
+\end{equation}
+The resulting $\mathrm{Gamma}(s,r)$ kernel gives the $g(\Delta t)$ function which is tabulated at each daily time-step and employed in the renewal equation for the effective reproductive number $R_{jt}$ in Equation \@ref(eq:R). 
+
+Because $s$ and $r$ depend solely on $\iota,\,\gamma_{1},\,\gamma_{2}$, and $\sigma$, they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the the generation time distribution and the model’s epidemiological parameters. We also compare our internal derivation of the generation time distribution with those 
+
+We model this quantity with a Gamma distribution whose mean is approximately 5 days:
 \begin{equation}
 g(\cdot) \sim \text{Gamma}(2.5, 0.5).
 (\#eq:generation-time)
 \end{equation}
-Here, shape $= 2.5$, rate $= 0.5$, and the mean is given by $\text{shape} / \text{rate} \approx 5$ days (variance $= \text{shape} / \text{rate}^2 \approx 10$ days). Previous studies have used a mean of 5 days ([Kahn et al. 2020](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7060667/) and [Azman 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4880069/)); however, means of 3, 5, 7, or 10 days are also plausible ([Azman 2012](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0001901)).
+Here, shape $= 2.5$, rate $= 0.5$, and the mean is given by $\text{shape} / \text{rate} \approx 5$ days (variance $= \text{shape} / \text{rate}^2 \approx 10$ days). Previous studies have used a mean of 5 days; however, means of 3, 5, 7, or 10 days are also plausible ([Azman 2012]()).
+
+
+### Generation-time distribution (latent + infectious + environmental delay)
+
+For applications that emphasise **environment-to-human transmission** we adopt a
+minimal analytic extension of the latent-plus-infectious heuristic:
+
+\[
+\mathcal{G}=L+T+E ,
+\]
+
+where  
+
+* \(L\sim\mathrm{Exp}(\iota)\) is the **latent (incubation) period**;  
+* \(T\) is the waiting time from onset of infectiousness to a potential secondary case **within the host**, modelled as exponential with *effective* removal rate  
+  \[
+  \gamma_{\mathrm{eff}}
+    =\Bigl[\tfrac{\sigma}{\gamma_{1}}+\tfrac{1-\sigma}{\gamma_{2}}\Bigr]^{-1};
+  \tag{1}
+  \]
+* \(E\sim\mathrm{Exp}(\delta_{jt})\) is an **environmental delay** that captures the survival of *V.* *cholerae* in water at location \(j\) and day \(t\); the decay rate \(\delta_{jt}\) is given by Eq. \@ref(eq:delta) and varies with the suitability index \(\psi_{jt}\).
+
+Assuming independence of the three exponential clocks, the first two moments are
+
+\[
+\mathbb{E}[\mathcal{G}]
+   = \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}} + \frac{1}{\delta_{jt}}
+\qquad\text{and}\qquad
+\mathbb{V}[\mathcal{G}]
+   = \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}} + \frac{1}{\delta_{jt}^{2}}.
+\tag{2}
+\]
+
+Moment–matching to a Gamma distribution \(\text{Gamma}(s_{jt},r_{jt})\) yields
+
+\[
+s_{jt} \;=\; \frac{\bigl(\mathbb{E}[\mathcal{G}]\bigr)^{2}}{\mathbb{V}[\mathcal{G}]}
+\quad\text{and}\quad
+r_{jt} \;=\; \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]},
+\tag{3}
+\]
+
+so both **shape** \(s_{jt}\) and **rate** \(r_{jt}\) evolve in time and space
+through \(\delta_{jt}\).  
+When suitability is **high** \((\psi_{jt}\!\to\!1 \;\Rightarrow\; \delta_{jt}\!\to\!\delta_{\min})\) the extra
+delay lengthens the mean generation interval and can inflate \(R_{jt}\);
+when suitability is **low** the term \(1/\delta_{jt}\) shrinks towards zero and the kernel converges to the purely human-to-human specification.
+
+> **Interpretation.**  
+> This formulation assumes that *every* successful transmission is mediated
+> by an environmental survival step; direct person-to-person contacts are
+> implicitly folded into \(\gamma_{\mathrm{eff}}\).
+> Empirically, it therefore provides an **upper-bound** on the true mean
+> generation time when waterborne spread dominates, and only a mild
+> adjustment (≤ ≈ 2 d) when \(\psi_{jt}\) is low.
+
+The daily table \(g_{jt}(\Delta t)\) derived from \(\text{Gamma}(s_{jt},r_{jt})\)
+is passed to the *parametric* renewal equation, enabling
+location-specific, time-varying estimates of the effective reproductive number.
+
+
+
+
+
 
 ```{r generation-time, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$.'}
 knitr::include_graphics("figures/generation_time.png")
