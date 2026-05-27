@@ -1329,24 +1329,35 @@ knitr::include_graphics("figures/generation_time.png")
 
 ## Initial conditions
 
-Since the first version of the model begins in January 2023 (to leverage available weekly data), we must estimate the initial state of population immunity. Our approach is as follows:
+The first MOSAIC version begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
 
-1. **Reported Cases and Infections:**  
-We start by using historical data to determine the total number of reported cholera cases for a given location over the previous *X* years. Because only symptomatic cases are reported, we multiply the reported case counts by \(1/\sigma\) (where \(\sigma\) is the proportion of infections that are symptomatic) to approximate the total number of infections.
+### Vaccinated initial conditions ($V_1, V_2$)
 
-2. **Natural Immunity:**  
-Next, we estimate the number of individuals who acquired immunity through natural infection during the past *X* years. This involves adjusting the total infections by accounting for immune decay, governed by the parameter \(\varepsilon\).
+The proportions in $V_1$ and $V_2$ at $t = 0$ are derived from each country's OCV campaign history as recorded in the [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc). Reported deliveries are classified by vaccine product: Euvichol-S deliveries contribute to the $V_1$ pool (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to $V_1$ and $V_2$ according to the campaign's reported dose-1 and dose-2 split. Each historical campaign contributes a residual immune fraction at $t = 0$, calculated as the cumulative effective coverage multiplied by an exponential waning factor $e^{-\omega_k \Delta t}$ where $\omega_k$ is the per-dose waning rate (Equation \@ref(eq:effectiveness)) and $\Delta t$ is the elapsed time since the campaign. The aggregate per-country immune fraction is capped at 70% coverage, consistent with reported maximum reachable coverage in mass-administration settings (Abubakar et al. 2018). The mean and standard deviation are then moment-matched to Beta priors with coefficient of variation 0.40 to honestly reflect campaign-record uncertainty:
 
-3. **Vaccine-derived Immunity:**  
-We also sum the total number of vaccinations administered over the past *X* years. This number is adjusted by the vaccine effectiveness (denoted \(\phi\)) and the waning immunity rate (\(\omega\)) to estimate the current number of individuals with vaccine-derived immunity.
+$$
+\text{prop}V_{1,j} \sim \text{Beta}(s_{1,j}^{V_1},\ s_{2,j}^{V_1}), \quad \text{prop}V_{2,j} \sim \text{Beta}(s_{1,j}^{V_2},\ s_{2,j}^{V_2}),
+$$
 
-4. **Deconvolution:**  
-Finally, we combine these estimates using a deconvolution approach based on the estimated immune decay parameters (from both vaccination and natural infection) to set the model’s initial conditions.
+with shape parameters $(s_1, s_2)$ derived per country (e.g. for Mozambique the $V_1$ prior mean is approximately 0.016, reflecting the residual one-dose immunity from the 2022--2023 OCV response). Per-country prior means range from effectively zero (countries with no reported recent campaigns) to several percent of the population (countries with multiple recent reactive campaigns). This replaces the static Beta priors used in earlier MOSAIC versions, which placed identical, weakly informative shapes on $V_1$ and $V_2$ regardless of country history.
 
-In total, the initial conditions reflect:
-- The estimated total number infected (backed out from reported cases),
-- The number immune due to natural infection, and
-- The number immune from past vaccination campaigns.
+### Susceptible and recovered initial conditions ($S, R$)
+
+The proportion in $R$ at $t = 0$ is derived from the cumulative reported cholera incidence over the years preceding 1 January 2023, scaled by $1/\sigma$ to back out the total number of true infections, then adjusted by the natural-immunity waning rate $\varepsilon$ to give the surviving immune fraction at $t = 0$. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
+
+The proportion in $S$ is then derived as the residual once the other five proportions have been placed:
+
+$$
+\text{prop}S_{,j} = 1 - \text{prop}V_{1,j} - \text{prop}V_{2,j} - \text{prop}R_{,j} - \text{prop}E_{,j} - \text{prop}I_{,j},
+$$
+
+and the resulting per-country values are fit to a Beta prior. Across the 40 MOSAIC countries the prior mean for $\text{prop}S$ ranges from approximately 0.39 to 0.98 with a standard deviation of 0.11, with the lowest values in countries with the highest combined vaccine-derived and natural immunity.
+
+### Exposed and infected initial conditions ($E, I_1, I_2$)
+
+The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported case count in the weeks leading up to 1 January 2023, scaled by the observation pipeline (Equation \@ref(eq:reported-cases)) to back out the true infectious population. The $E$ and $I$ priors are placed on the log scale with relatively wide support to reflect the substantial uncertainty in the immediate pre-start state. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ using the symptomatic proportion $\sigma$.
+
+After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country's $t = 0$ population.
 
 ---
 
