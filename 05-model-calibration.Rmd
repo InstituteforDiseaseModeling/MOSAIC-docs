@@ -293,16 +293,16 @@ Note that by definition $A \in [0,1]$ because $0 \;\le\; H(\mathbf{\tilde{w}})\;
 
 
 ### Coefficient of variation of weights
-Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
+Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights, defined as the sample standard deviation of the truncated weights divided by their mean:
 \begin{equation}
 \mathrm{CV}_\mathbf{\tilde{w}} =
-\frac{\sqrt{\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
+\frac{\sqrt{\tfrac{1}{|\mathcal B|}\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
 {\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
 (\#eq:cvw)
 \end{equation}
-Large $\mathrm{CV}_\mathbf{\tilde{w}}$ warns that the variance within the best fitting subset of models may be high even if ESS and $A$ look satisfactory.  A common rule-of-thumb from [Kong et al. 1994](https://doi.org/10.1080/01621459.1994.10476469) is $\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2$ for comfortably balanced weights.
+Large $\mathrm{CV}_\mathbf{\tilde{w}}$ warns that the variance within the best fitting subset of models may be high even if ESS and $A$ look satisfactory. A common rule-of-thumb from [Kong et al. 1994](https://doi.org/10.1080/01621459.1994.10476469) is $\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2$ for comfortably balanced weights. (Note: with $\tilde w$ normalised to sum to one over $\mathcal B$, $\bar w = 1/|\mathcal B|$ by construction.)
 
 
 ### Convergence guidelines
@@ -329,7 +329,7 @@ metric_tbl <- data.frame(
      #                      "Increase $n_{\\text{sim}}$, reduce number of fitted parameters, increase $\\mathrm{CV}_w$ to 3, severe skew suggests instability"),
      
      Source             = c("[Burnham & Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)",
-                            "[Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)",
+                            "[Gelman et al. 2014](https://sites.stat.columbia.edu/gelman/book/)",
                             "[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)",
                             "[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)",
                             "[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)")

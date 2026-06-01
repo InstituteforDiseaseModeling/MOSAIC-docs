@@ -102,7 +102,7 @@ The environmental force of infection $\Psi_{j,t+1}$ at location $j$ and time $t+
 (\#eq:foi-environment)
 \end{equation}
 
-Here, $\beta_{jt}^{\text{hum}}$ and $\beta_{jt}^{\text{env}}$ are the human-to-human and environment-to-human transmission rates; $\tau_i$ is the probability of departing origin location $i$; $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]); $\theta_j$ is the proportion of the population at location $j$ with at least basic access to Water, Sanitation, and Hygiene (WASH); and $\kappa$ is the *V. cholerae* concentration associated with a 50% probability of infection (see [Infectious dose ($\kappa$)](#infectious-dose-kappa)). Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIRWS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats $V_1$ and $V_2$ as fully protected for the duration of immunity.
+Here, $\beta_{jt}^{\text{hum}}$ and $\beta_{jt}^{\text{env}}$ are the human-to-human and environment-to-human transmission rates; $\tau_i$ is the probability of departing origin location $i$; $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]); $\theta_j$ is the proportion of the population at location $j$ with at least basic access to Water, Sanitation, and Hygiene (WASH); and $\kappa$ is the *V. cholerae* concentration associated with a 50% probability of infection (see [Infectious dose ($\kappa$)](#infectious-dose-kappa)). Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIWRS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats $V_1$ and $V_2$ as fully protected for the duration of immunity.
 
 Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see [Ross 2007](https://www.google.com/books/edition/Introduction_to_Probability_Models/1uxBwhAb_zYC?hl=en)). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$:
 
@@ -140,8 +140,8 @@ We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) u
 For countries with no reported case data, we inferred seasonal dynamics using the fitted wave function of a neighboring country with available case data. The selected neighbor was chosen from the same cluster of countries (grouped hierarchically into four clusters based on precipitation seasonality using [Ward's method](https://en.wikipedia.org/wiki/Ward%27s_method); see Figure \@ref(fig:seasonal-cluster)) that had the highest correlation in seasonal precipitation with the country lacking case data. In the rare event that no country with reported case data was found within the same seasonal cluster, we expanded the search to the 10 nearest neighbors and continued expanding by adding the next nearest neighbor until a match was found.
 
 <div class="figure" style="text-align: center">
-<img src="figures/seasonal_precip_ward.D2_cluster.png" alt="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases." width="100%" />
-<p class="caption">(\#fig:seasonal-cluster)A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.</p>
+<img src="figures/seasonal_precip_ward.D2_cluster.png" alt="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases." width="100%" />
+<p class="caption">(\#fig:seasonal-cluster)A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.</p>
 </div>
 
 Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure \@ref(fig:seasonal-all), with the corresponding Fourier model coefficients presented in Table \@ref(tab:seasonal-table).
@@ -388,7 +388,7 @@ To capture the impacts of climate-drivers on cholera transmission, we have inclu
 (\#eq:beta2)
 \end{equation}
 
-This formulation effectively scales the base environmental transmission rate $\beta_{jt}^{\text{env}}$ so that it varies over time according to the climatically driven model of suitability. Note that, unlike the the cosine wave function of $\beta_{jt}^{\text{hum}}$, this temporal term can increase or decrease over time following multi-annual cycles.
+This formulation effectively scales the base environmental transmission rate $\beta_{j0}^{\text{env}}$ so that the realised rate $\beta_{jt}^{\text{env}}$ varies over time according to the climatically driven model of suitability. Note that, unlike the cosine wave function of $\beta_{jt}^{\text{hum}}$, this temporal term can increase or decrease over time following multi-annual cycles.
 
 
 ### Suitability-dependent decay rate
@@ -427,7 +427,7 @@ The four-argument truncated normals are notated $\text{Truncnorm}(\mu, \sigma, a
 
 #### Environmental data
 
-The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) and rate of decay of *V. cholerae* in the environment (Equation \@ref(eq:delta)) is driven by the parameter $\psi_{jt}$, which we refer to as environmental suitability. The parameter $\psi_{jt}$ is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 24 covariates which include 19 historical and forecasted climate variables under the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) climate model. Covariates also include 4 large-scale climate drivers such as the Indian Ocean Dipole Mode Index (DMI), and the El Niño Southern Oscillation (ENSO) from 3 different Pacific Ocean regions. We also included a location specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \@ref(fig:climate-data-moz) and DMI and ENSO variables in Figure \@ref(fig:climate-data-enso). A list of all covariates and their sources can be seen in Table \@ref(tab:climate-data-variables).
+The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) and rate of decay of *V. cholerae* in the environment (Equation \@ref(eq:delta)) is driven by the parameter $\psi_{jt}$, which we refer to as environmental suitability. The parameter $\psi_{jt}$ is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 22 covariates: 17 historical and forecasted climate variables drawn from the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) climate model, 4 large-scale climate drivers (the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from three Pacific Ocean regions — Niño3, Niño3.4, and Niño4), and 1 location-specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \@ref(fig:climate-data-moz) and DMI and ENSO variables in Figure \@ref(fig:climate-data-enso). A list of all covariates and their sources can be seen in Table \@ref(tab:climate-data-variables).
 
 Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.
 
@@ -437,8 +437,8 @@ Note that while the 19 climate variables offer forecasts up to 2030 and beyond, 
 </div>
 
 <div class="figure" style="text-align: center">
-<img src="figures/climate_data_ENSO_weekly.png" alt="Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM)." width="100%" />
-<p class="caption">(\#fig:climate-data-enso)Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).</p>
+<img src="figures/climate_data_ENSO_weekly.png" alt="Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacific). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM)." width="100%" />
+<p class="caption">(\#fig:climate-data-enso)Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacific). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).</p>
 </div>
 
 
@@ -513,8 +513,8 @@ After model training was completed, we predicted the values of environmental sui
 *Also, please note that this initial version of the model is fitted to a rather small amount of data. Model hyper parameters were specifically chosen to reduce overfitting. Therefore, we recommend to not over-interpret the time series predictions of the model at this early stage since they are likely to change and improve as more historical incidence data is included in future versions.*
 
 <div class="figure" style="text-align: center">
-<img src="figures/suitability_cases_MOZ.png" alt="The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon." width="100%" />
-<p class="caption">(\#fig:psi-prediction-data)The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.</p>
+<img src="figures/suitability_cases_MOZ.png" alt="The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and the shaded areas show the binary classification used to characterize environmental suitability. Raw model predictions are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon." width="100%" />
+<p class="caption">(\#fig:psi-prediction-data)The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and the shaded areas show the binary classification used to characterize environmental suitability. Raw model predictions are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.</p>
 </div>
 
 <div class="figure" style="text-align: center">
@@ -733,7 +733,7 @@ To estimate the past and current vaccination rates, we sourced data on reported 
 
 *As a result, our current estimates of the OCV vaccination rate likely underestimate total OCV coverage. We are working to expand our data sources to better reflect the full number of OCV doses distributed in SSA and will update the results here as soon as these are available.*
 
-To translate the reported number of OCV doses into the model parameter $\nu_{jt}$, we take the number of doses shipped and the reported start date of the vaccination campaign, distributing the doses over subsequent days according to a maximum daily vaccination rate. Therefore, the vaccination rate $\nu_t$ is not an estimated quantity, it is defined by the reported number of OCV doses administered with a assumption about the daily rate of distribution for an OCV campaign:
+To translate the reported number of OCV doses into the model parameter $\nu_{jt}$, we take the number of doses shipped and the reported start date of the vaccination campaign, distributing the doses over subsequent days according to a maximum daily vaccination rate. Therefore, the vaccination rate $\nu_t$ is not an estimated quantity, it is defined by the reported number of OCV doses administered with an assumption about the daily rate of distribution for an OCV campaign:
 
 $$
 \nu_{jt} = f\big(\text{reported OCV doses distributed}_{jt} \ | \ \text{daily distribution rate}\big).
@@ -755,8 +755,8 @@ See Figure \@ref(fig:vaccination-example) for an example of OCV distribution usi
 </div>
 
 <div class="figure" style="text-align: center">
-<img src="figures/vaccination_by_country.png" alt="The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard." width="100%" />
-<p class="caption">(\#fig:vaccination-countries)The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard.</p>
+<img src="figures/vaccination_by_country.png" alt="The estimated vaccination coverage across all countries with reported vaccination data on the WHO ICG dashboard." width="100%" />
+<p class="caption">(\#fig:vaccination-countries)The estimated vaccination coverage across all countries with reported vaccination data on the WHO ICG dashboard.</p>
 </div>
 
 <div class="figure" style="text-align: center">
@@ -807,7 +807,7 @@ Where we make the necessary and simplifying assumption that within 0--90 days af
 
 
 
-Table: (\#tab:immunity-sources)Sources for the duration of immunity fro natural infection.
+Table: (\#tab:immunity-sources)Sources for the duration of immunity from natural infection.
 
 |  Day| Effectiveness| Upper CI| Lower CI|Source               |
 |----:|-------------:|--------:|--------:|:--------------------|
@@ -820,7 +820,7 @@ Table: (\#tab:immunity-sources)Sources for the duration of immunity fro natural 
 We estimated the mean immune decay to be $\bar\varepsilon \approx 3.9 \times 10^{-4}$ day$^{-1}$, equivalent to a mean immune duration of approximately 7 years as shown in Figure \@ref(fig:immune-decay)A. This is slightly longer than previous modeling work estimating the duration of immunity to be approximately 5 years ([King et al. 2008](https://www.nature.com/articles/nature07084)). Uncertainty around $\varepsilon$ in the model is represented by a lognormal prior parameterised on the natural scale by the mean and standard deviation (matching the convention used in `priors_default.json`), as shown in Figure \@ref(fig:immune-decay)B:
 
 $$
-\varepsilon \sim \text{Lognormal}\big(\text{mean} = 3.9 \times 10^{-4},\ \text{sd} = 4.0 \times 10^{-4}\big) \ \ \text{day}^{-1}.
+\varepsilon \sim \text{Lognormal}\big(\text{mean} = 3.9 \times 10^{-4},\ \text{sd} = 2.0 \times 10^{-4}\big) \ \ \text{day}^{-1}.
 $$
 
 
@@ -835,7 +835,7 @@ $$
 
 ## Spatial dynamics
 
-The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
+The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
 
 <div class="figure" style="text-align: center">
 <img src="figures/mobility_flight_data.png" alt="The average number of air passengers per day in 2017 among all countries." width="100%" />
@@ -992,7 +992,7 @@ The coefficient $\mathcal{C}_{ij}\in[-1,1]$ therefore measures the degree to whi
 
 The presentation of infection with *V. cholerae* can be extremely variable. The severity of infection depends many factors such as the amount of the infectious dose, the age of the host, the level of immunity of the host either through vaccination or previous infection, and naivety to the particular strain of *V. cholerae*. Additional circumstantial factors such as nutritional status and overall pathogen burden may also impact infection severity. At the population level, the observed proportion of infections that are symptomatic is also dependent on the endemicity of cholera in the region. Highly endemic areas (e.g. parts of Bangladesh; [Hegde et al 2024](https://www.nature.com/articles/s41591-024-02810-4)) may have a very low proportion of symptomatic infections due to many previous exposures. Inversely, populations that are largely naive to *V. cholerae* will exhibit a relatively higher proportion of symptomatic infections (e.g. Haiti; [Finger et al 2024](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/)).
 
-Accounting for all of these nuances in the first version of this model not possible, but we can past studies do contain some information that can help to set some sensible bounds on our definition for the proportion of infections that are symptomatic ($\sigma$). So we have compiled a short list of studies that have done sero-surveys and cohort studies to assess the likelihood of symptomatic infections in different locations and displayed those results in Table (\@ref(tab:symptomatic-table)).  
+Accounting for all of these nuances in the first version of the model is not possible, but past studies do contain useful information that can help set sensible bounds on the proportion of infections that are symptomatic ($\sigma$). We have therefore compiled a short list of sero-surveys and cohort studies that assess the likelihood of symptomatic infection in different locations, summarised in Table \@ref(tab:symptomatic-table).
 
 To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combine mean and confidence intervals of all studies in Table \@ref(tab:symptomatic-table) and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion $\sigma$ is:
 
@@ -1061,7 +1061,7 @@ $$
 (\#eq:rho)
 $$
 
-corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.78 during outbreaks. Fit to Beta distributions by least-squares:
+corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
 
 $$
 \begin{aligned}
@@ -1109,14 +1109,14 @@ In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatali
 
 where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
 
-The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, while $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera. The reported CFR is therefore the true daily mortality scaled by the relative reporting rates of cases versus deaths:
+The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, while $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera. In steady state, the daily reported CFR (reported deaths / reported cases on day $t$) equals the per-day true mortality scaled by the relative reporting rates of cases versus deaths, so the per-day baseline mortality rate is recovered as:
 
 $$
-\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi}.
+\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi},
 (\#eq:mu-baseline-derivation)
 $$
 
-Country-specific reported CFRs and Clopper-Pearson 95% confidence intervals are calculated from the surveillance record using the [Binomial exact test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)$ with mean approximately 0.0083 per day, which corresponds to an integrated CFR of roughly 8% over a typical 10-day symptomatic infectious period. Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+with units of day$^{-1}$ when $\text{CFR}^{\text{reported}}_{j}$ is interpreted as the daily ratio of reported deaths to reported cases. In practice the derivation uses $\chi^{\text{epi}}$ because the reported-CFR window for most countries is dominated by outbreak periods. Country-specific reported CFRs and Clopper-Pearson 95% confidence intervals are calculated from the surveillance record using the [Binomial exact test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the reported CFR is approximately 2.7% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)$ with mean approximately 0.0083 per day, corresponding to an integrated CFR of roughly 8% over a typical 10-day symptomatic infectious period (i.e. $1 - e^{-0.0083 \times 10}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
 
 The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
 
@@ -1150,33 +1150,33 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 <tbody>
   <tr>
    <td style="text-align:left;"> AFRO Region </td>
-   <td style="text-align:right;"> 1127096 </td>
-   <td style="text-align:right;"> 21721 </td>
+   <td style="text-align:right;"> 1135678 </td>
+   <td style="text-align:right;"> 21942 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 3100 </td>
-   <td style="text-align:right;"> 85 </td>
+   <td style="text-align:right;"> 3942 </td>
+   <td style="text-align:right;"> 108 </td>
    <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.022 </td>
-   <td style="text-align:right;"> 0.034 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.924 </td>
+   <td style="text-align:right;"> 1.931 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 5250 </td>
-   <td style="text-align:right;"> 38 </td>
+   <td style="text-align:right;"> 5621 </td>
+   <td style="text-align:right;"> 40 </td>
    <td style="text-align:right;"> 0.007 </td>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.010 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.934 </td>
+   <td style="text-align:right;"> 1.918 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Benin </td>
@@ -1196,7 +1196,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cote d'Ivoire </td>
@@ -1220,23 +1220,23 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 306023 </td>
-   <td style="text-align:right;"> 5809 </td>
+   <td style="text-align:right;"> 310792 </td>
+   <td style="text-align:right;"> 5992 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Congo </td>
-   <td style="text-align:right;"> 359 </td>
-   <td style="text-align:right;"> 30 </td>
-   <td style="text-align:right;"> 0.084 </td>
-   <td style="text-align:right;"> 0.057 </td>
-   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 435 </td>
+   <td style="text-align:right;"> 36 </td>
+   <td style="text-align:right;"> 0.083 </td>
+   <td style="text-align:right;"> 0.059 </td>
+   <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 1.906 </td>
+   <td style="text-align:right;"> 1.905 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ethiopia </td>
@@ -1266,7 +1266,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Guinea-Bissau </td>
@@ -1276,7 +1276,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
@@ -1306,37 +1306,37 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 83417 </td>
+   <td style="text-align:right;"> 84144 </td>
    <td style="text-align:right;"> 351 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.893 </td>
+   <td style="text-align:right;"> 1.894 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 63625 </td>
-   <td style="text-align:right;"> 1864 </td>
+   <td style="text-align:right;"> 63879 </td>
+   <td style="text-align:right;"> 1859 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 0.030 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.886 </td>
+   <td style="text-align:right;"> 1.879 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:right;"> 634 </td>
+   <td style="text-align:right;"> 698 </td>
    <td style="text-align:right;"> 13 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.011 </td>
-   <td style="text-align:right;"> 0.035 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.913 </td>
+   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 1.912 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Niger </td>
@@ -1360,13 +1360,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:right;"> 472 </td>
+   <td style="text-align:right;"> 478 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.928 </td>
+   <td style="text-align:right;"> 1.919 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Sudan </td>
@@ -1390,13 +1390,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 34635 </td>
-   <td style="text-align:right;"> 705 </td>
+   <td style="text-align:right;"> 35871 </td>
+   <td style="text-align:right;"> 715 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.022 </td>
+   <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.907 </td>
+   <td style="text-align:right;"> 1.914 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Eswatini </td>
@@ -1406,7 +1406,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.909 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Chad </td>
@@ -1460,13 +1460,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 11136 </td>
-   <td style="text-align:right;"> 269 </td>
+   <td style="text-align:right;"> 11373 </td>
+   <td style="text-align:right;"> 271 </td>
    <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.891 </td>
+   <td style="text-align:right;"> 1.892 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
@@ -1504,7 +1504,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 The model includes basic demographic change by using reported birth and death rates for each of the $j$ countries, $b_j$ and $d_j$ respectively. These rates are static and defined by the United Nations Department of Economic and Social Affairs Population Division [World Population Prospects 2024](https://population.un.org/wpp/Download/Standard/CSV/). Values for $b_j$ and $d_j$ are derived from crude rates and converted to birth rate per day and death rate per day (shown in Table \@ref(tab:demographics)).
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:demographics)(\#tab:demographics)Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.</caption>
+<caption>(\#tab:demographics)(\#tab:demographics)Demographics for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculated from crude birth and death rates from UN World Population Prospects 2024.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Country </th>
@@ -1826,15 +1826,15 @@ The mean infectious period combines symptomatic (\(\gamma_1^{-1}\)) and asymptom
 
 ### Worst-case environmental persistence
 
-Following the “upper-bound” convention for \(R_0\), the pathogen-decay rate is fixed at its **slowest** plausible value:
+Following the "upper-bound" convention for \(R_0\), the pathogen-decay rate is fixed at its **slowest** plausible value, taken as the modal upper bound of the v1.0 decay prior $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}}$:
 
 \[
 \widehat{\delta}_j
-  = \frac{1}{\text{days}_{\max}}
-  = \frac{1}{90}\;\text{day}^{-1},
+  = \frac{1}{\text{days}_{\text{long}}}
+  \approx \frac{1}{196}\;\text{day}^{-1},
 \]
 
-corresponding to a 90-day survival time in water.
+corresponding to a survival time of approximately 196 days in water (16-day mode of $\text{days}_{\text{short}}$ plus 180-day mode of $\text{days}_{\text{spread}}$; see Equation \@ref(eq:decay-priors)).
 
 ### Decomposition of \(R_{0,j}\)
 
@@ -1867,7 +1867,7 @@ R_{0,j}
 ### Interpretation
 
 * **\(R_{0,j}^{\text{hum}}\)** dominates in settings with high baseline contact (\(\beta_{j0}^{\text{hum}}\)) and short infectious periods.  
-* **\(R_{0,j}^{\text{env}}\)** grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j = 1/90\)).  
+* **\(R_{0,j}^{\text{env}}\)** grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j \approx 1/196\)).
   Because the WASH factor appears squared, improving basic services reduces both contamination and ingestion, driving \(R_{0,j}^{\text{env}}\) down rapidly.
 
 These patch-specific numbers provide an upper ceiling for every effective reproductive number reported later in the analysis.
@@ -2011,7 +2011,7 @@ r = \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]}.
 \end{equation}
 The resulting $\mathrm{Gamma}(s,r)$ kernel gives the $g(\Delta t)$ function which is tabulated at each daily time-step and employed in the renewal equation for the effective reproductive number $R_{jt}$ in Equation \@ref(eq:R). 
 
-Because $s$ and $r$ depend solely on $\iota,\,\gamma_{1},\,\gamma_{2}$, and $\sigma$, they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the the generation time distribution and the model’s epidemiological parameters. We also compare our internal derivation of the generation time distribution with those 
+Because $s$ and $r$ depend solely on $\iota,\,\gamma_{1},\,\gamma_{2}$, and $\sigma$, they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the generation time distribution and the model's epidemiological parameters.
 
 In practice we tabulate the renewal kernel as a Gamma distribution with mean equal to the prior-mean generation interval (approximately 5 days under the default $\iota, \gamma_1, \gamma_2, \sigma$ values) and rate fixed at $1/10$. With these conventions, `get_generation_time_distribution()` in MOSAIC-pkg sets the shape parameter as $\text{mean}/10$:
 \begin{equation}
@@ -2131,7 +2131,7 @@ After the transmission model is fully specified, we tune its numerical parameter
 ## Table of MOSAIC framework countries
 
 
-Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
+Table: (\#tab:mosaic-table)List of MOSAIC Countries with Cholera News
 
 |ISO |Country                          |Region          |Cholera News                                   |
 |:---|:--------------------------------|:---------------|:----------------------------------------------|
@@ -2215,8 +2215,8 @@ Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
 |$\zeta_1$                 |Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.                                                                                                                                 |$\text{Lognormal}(25.65, 2.46)$                       |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
 |$\zeta_2$                 |Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as $\zeta_1/\zeta_{\text{ratio}}$.                                                                                    |Derived from $\zeta_1$ and $\zeta_{\text{ratio}}$     |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
 |$\delta$                  |Environmental decay rate of *V. cholerae*.                                                                                                                                                                                        |Determined dynamically in model based on $\psi_{jt}$. |                                                                              |
-|$\delta_{\text{min}}$     |Minimum decay rate when $\psi_{jt}=0$.                                                                                                                                                                                            |$0.333 \ (3 \ \text{days})$                           |                                                                              |
-|$\delta_{\text{max}}$     |Maximum decay rate when $\psi_{jt}=1$.                                                                                                                                                                                            |$0.011 \ (90 \ \text{days})$                          |                                                                              |
+|$\delta_{\text{min}}$     |Minimum decay rate (longest *V. cholerae* survival), reached at $\psi_{jt}=1$; equals $1/\text{days}_{\text{long}}$.                                                                                                              |$\approx 0.0051 \ (196 \ \text{days})$                |                                                                              |
+|$\delta_{\text{max}}$     |Maximum decay rate (shortest *V. cholerae* survival), reached at $\psi_{jt}=0$; equals $1/\text{days}_{\text{short}}$.                                                                                                            |$\approx 0.063 \ (16 \ \text{days})$                  |                                                                              |
 |$\psi_{jt}$               |Environmental suitability of *V. cholerae* in destination $j$ at time $t$.                                                                                                                                                        |Estimated by LSTM-RNN model.                          |                                                                              |
 |$\beta_{j0}^{\text{hum}}$ |Baseline human-to-human transmission rate in destination $j$.                                                                                                                                                                     |                                                      |                                                                              |
 |$\beta_{jt}^{\text{hum}}$ |Seasonal human-to-human transmission rate in destination $j$ at time $t$.                                                                                                                                                         |                                                      |                                                                              |
@@ -2232,7 +2232,7 @@ Table: (\#tab:mosaic-table)Listof MOSAIC Countries with Cholera News
 |$\tau_i$                  |Probability an individual departs from origin $i$.                                                                                                                                                                                |                                                      |                                                                              |
 |$\pi_{ij}$                |Probability of travel from origin $i$ to destination $j$ given departure.                                                                                                                                                         |                                                      |                                                                              |
 |$\theta_{j}$              |Proportion with adequate WASH in destination $j$.                                                                                                                                                                                 |See Figure \@ref(fig:wash-country).                   |[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)                  |
-|$\kappa$                  |Concentration of *V. cholerae* (cells/mL) required for 50% infection probability.                                                                                                                                                 |$\text{Lognormal}(11.77, 1.82)$                       |Meta-analysis (see \@ref(eq:kappa))                                           |
+|$\kappa$                  |Number of *V. cholerae* cells required for 50% per-contact infection probability. In MOSAIC v1.0 expressed in absolute cells (matching the units of $W$); see [Infectious dose ($\kappa$)](#infectious-dose-kappa).               |$\text{Lognormal}(11.77, 1.82)$                       |Meta-analysis (see \@ref(eq:kappa))                                           |
 
 
 
@@ -2334,4 +2334,4 @@ Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC
 | $\text{doses}^{(1)}_{j,t}$ | Total first doses delivered on day $t$ | $\text{doses}^{(1)}_{j,t} = \nu_{1,jt}$ | Tracking-only patch counter; sum across $t$ approximates the reported OCV-campaign total. |
 | $\text{doses}^{(2)}_{j,t}$ | Total second doses delivered on day $t$ | $\text{doses}^{(2)}_{j,t} = \nu_{2,jt}$ | Tracking-only patch counter; capped at the current $V_1$ population. |
 
-In the simplified SVEIRWS structure introduced in laser-cholera 0.12, only the *effective* fraction of each delivered dose enters $V_1$ or $V_2$; ineffective doses are returned (notionally) to the source compartment without changing anyone's compartment membership. Total dose counts on day $t$ are tracked separately as $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ for comparison with reported OCV-campaign data; these counters are stored as patch-level vectors of length $T_{\text{total}}$ and are not used in the model dynamics.
+In the simplified SVEIWRS structure introduced in laser-cholera 0.12, only the *effective* fraction of each delivered dose enters $V_1$ or $V_2$; ineffective doses are returned (notionally) to the source compartment without changing anyone's compartment membership. Total dose counts on day $t$ are tracked separately as $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ for comparison with reported OCV-campaign data; these counters are stored as patch-level vectors of length $T_{\text{total}}$ and are not used in the model dynamics.

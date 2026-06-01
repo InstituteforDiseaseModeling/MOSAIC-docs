@@ -423,16 +423,16 @@ Note that by definition <span class="math inline">\(A \in [0,1]\)</span> because
 <h3>
 <span class="header-section-number">4.6.3</span> Coefficient of variation of weights<a class="anchor" aria-label="anchor" href="#coefficient-of-variation-of-weights"><i class="fas fa-link"></i></a>
 </h3>
-<p>Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
+<p>Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights, defined as the sample standard deviation of the truncated weights divided by their mean:
 <span class="math display" id="eq:cvw">\[\begin{equation}
 \mathrm{CV}_\mathbf{\tilde{w}} =
-\frac{\sqrt{\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
+\frac{\sqrt{\tfrac{1}{|\mathcal B|}\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
 {\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
 \tag{4.16}
 \end{equation}\]</span>
-Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights.</p>
+Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights. (Note: with <span class="math inline">\(\tilde w\)</span> normalised to sum to one over <span class="math inline">\(\mathcal B\)</span>, <span class="math inline">\(\bar w = 1/|\mathcal B|\)</span> by construction.)</p>
 </div>
 <div id="convergence-guidelines" class="section level3" number="4.6.4">
 <h3>
@@ -463,7 +463,7 @@ Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns 
 <td align="left">Effective Sample Size <span class="math inline">\(\left(\widehat{\text{ESS}}\right)\)</span>
 </td>
 <td align="left"><span class="math inline">\(\gt 500\)</span></td>
-<td align="right"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelamn et al 2014</a></td>
+<td align="right"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelman et al. 2014</a></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>

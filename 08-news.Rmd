@@ -10,7 +10,7 @@
 
 # News
 
-## November 25, 2024 --- The MOSAIC framework presented at ASMTH 2024 {-}
+## November 25, 2024 --- The MOSAIC framework presented at ASTMH 2024 {-}
 
 John Giles presented the MOSAIC modeling framework in a talk entitled "*Cholera modeling capacity at IDM:
 leveraging diverse data streams for scenarios and forecasting*" at the American Society of Tropical Medicine and Hygiene (ASTMH) on November 14, 2024 as part the symposium entitled "*Infectious Disease Surveillance and Modeling in LMIC’s: From Data Collection to Forecasting*".
