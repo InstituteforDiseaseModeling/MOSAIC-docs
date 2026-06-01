@@ -152,7 +152,7 @@ Using the model fitting methods described above, and the cluster-based approach 
 </div>
 
 <table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
-<caption style="font-size: initial !important;">(\#tab:seasonal-table)(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).</caption>
+<caption style="font-size: initial !important;">(\#tab:seasonal-table)Estimated coefficients for the truncated Fourier model in Equation \@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \@ref(fig:seasonal-all).</caption>
  <thead>
 <tr>
 <th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
@@ -664,7 +664,7 @@ Since *V. cholerae* is transmitted through fecal contamination of water and othe
 To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$). WASH enters the model twice: as an attenuation on environmental *exposure* in the environment-to-human force of infection $\Psi_{jt}$ (Equation \@ref(eq:foi-environment)), and as an attenuation on environmental *contamination* in the shedding term of the reservoir update $W_{j,t+1}$ (Equation \@ref(eq:system)). These two effects act on opposite sides of the environmental transmission cycle but share the same WASH infrastructure (piped water, sanitation), and their product yields the $(1-\theta_j)^2$ factor in the environmental component of $R_{0,j}$ derived in the *Decomposition of $R_{0,j}$* subsection below. Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
 
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:wash-weights)(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.</caption>
+<caption>(\#tab:wash-weights)Table of optimized weights used to calculate the single mean WASH index for all countries.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> WASH variable </th>
@@ -1134,7 +1134,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:cfr)(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
+<caption>(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Country </th>
@@ -1504,7 +1504,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 The model includes basic demographic change by using reported birth and death rates for each of the $j$ countries, $b_j$ and $d_j$ respectively. These rates are static and defined by the United Nations Department of Economic and Social Affairs Population Division [World Population Prospects 2024](https://population.un.org/wpp/Download/Standard/CSV/). Values for $b_j$ and $d_j$ are derived from crude rates and converted to birth rate per day and death rate per day (shown in Table \@ref(tab:demographics)).
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:demographics)(\#tab:demographics)Demographics for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculated from crude birth and death rates from UN World Population Prospects 2024.</caption>
+<caption>(\#tab:demographics)Demographics for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculated from crude birth and death rates from UN World Population Prospects 2024.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Country </th>

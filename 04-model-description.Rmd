@@ -172,8 +172,7 @@ table_data_cases <- filtered_param_values_cases %>%
 final_table_data_cases <- table_data_cases %>%
      select(country_name, a_1, a_2, b_1, b_2)
 
-# Display the final data as a kable table with reduced text size, math fonts for parameters, and row shading
-kable(final_table_data_cases,
+kableExtra::kbl(final_table_data_cases,
       col.names = c("Country", "$a_1$", "$a_2$", "$b_1$", "$b_2$"),
       caption = "Estimated coefficients for the truncated Fourier model in Equation \\@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \\@ref(fig:seasonal-all).",
       escape = FALSE) %>%
@@ -515,9 +514,9 @@ library(kableExtra)
 
 df <- read.csv(file.path(getwd(), "tables/WASH_data_weights.csv"), stringsAsFactors = FALSE)
 
-knitr::kable(
-     df, 
-     col.names = c("WASH variable", "Optimized weight"), 
+kableExtra::kbl(
+     df,
+     col.names = c("WASH variable", "Optimized weight"),
      caption = "Table of optimized weights used to calculate the single mean WASH index for all countries."
 ) %>%
      kable_styling(full_width = FALSE,
@@ -1022,8 +1021,8 @@ cfr_table <- filtered_data[, c("country", "cases_total", "deaths_total", "cfr", 
 cfr_table[, c("cases_total", "deaths_total", "cfr", "cfr_lo", "cfr_hi", "shape1", "shape2")] <- 
      round(cfr_table[, c("cases_total", "deaths_total", "cfr", "cfr_lo", "cfr_hi", "shape1", "shape2")], 3)
 
-knitr::kable(cfr_table, 
-             caption = "CFR Values and Beta Shape Parameters for AFRO Countries", 
+kableExtra::kbl(cfr_table,
+             caption = "CFR Values and Beta Shape Parameters for AFRO Countries",
              col.names = c("Country", "Cases (2014-2024)", "Deaths (2014-2024)", "CFR", "CFR Lower", "CFR Upper", "Beta Shape1", "Beta Shape2")) %>%
      kable_styling(full_width = FALSE,
                    bootstrap_options = c("hover", "condensed"))
@@ -1061,8 +1060,8 @@ dem <- dem[,c("country", "population", "birth_rate_per_day", "death_rate_per_day
 
 row.names(dem) <- NULL
 
-knitr::kable(
-     dem, 
+kableExtra::kbl(
+     dem,
      caption = "Demographics for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculated from crude birth and death rates from UN World Population Prospects 2024.",
      col.names = c("Country", "Population", "Birth rate", "Death rate")
 ) %>%
