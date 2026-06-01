@@ -331,19 +331,19 @@ of each location, time step, and outcome on the overall fit.</p>
 <h3>
 <span class="header-section-number">4.5.2</span> Assign truncated importance weights<a class="anchor" aria-label="anchor" href="#assign-truncated-importance-weights"><i class="fas fa-link"></i></a>
 </h3>
-<p>Since the BFRS method generates a large ensemble of candidate parameter sets <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we reduce the influence of poorly fitting models by truncating the importance weights using a <span class="math inline">\(\Delta \text{AIC}\)</span> cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior.
+<p>Since the BFRS method generates a large ensemble of candidate parameter sets <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we reduce the influence of poorly fitting models by truncating the importance weights using a <span class="math inline">\(\Delta \text{AIC}\)</span> cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior. We first compute raw (un-normalised) weights:
 <span class="math display" id="eq:aic-weights">\[\begin{equation}
-\tilde{w}_i \;=\;
+w_i^{\text{raw}} \;=\;
 \begin{cases}
 \exp\!\left[-\tfrac12 \Delta_i\right], &amp; \Delta_i \le 6,\\[6pt]
 0, &amp; \Delta_i &gt; 6,
 \end{cases}
-\qquad \text{and} \qquad
+\qquad \text{and then normalise:} \qquad
 \tilde{w}_i \;=\;
-\dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
+\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j^{\text{raw}}}.
 \tag{4.11}
 \end{equation}\]</span>
-The threshold of <span class="math inline">\(\Delta_i \le 6\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(p_i = \exp(-\Delta_i/2) \approx 0.05\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (Burnham &amp; Anderson <a href="https://doi.org/10.1007/b97636">2002</a> and <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">2004</a>). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.</p>
+The threshold of <span class="math inline">\(\Delta_i \le 6\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(p_i = \exp(-\Delta_i/2) \approx 0.05\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (Burnham &amp; Anderson <a href="https://doi.org/10.1007/b97636">2002</a> and <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">2004</a>). Since every MOSAIC simulation has the same number of estimated parameters <span class="math inline">\(k\)</span>, <span class="math inline">\(\Delta_i\)</span> reduces to a likelihood-ratio statistic and the cut-off acts as a likelihood-ratio filter on the BFRS draws rather than as a formal model-selection criterion across nested models. This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models. Alternative posterior diagnostics such as the Pareto-<span class="math inline">\(k\)</span> shape statistic of PSIS (<a href="https://doi.org/10.48550/arXiv.1507.02646">Vehtari et al. 2024</a>) can be used to flag cases where the truncated importance-weight distribution has unbounded variance.</p>
 </div>
 <div id="posterior-summaries" class="section level3" number="4.5.3">
 <h3>
@@ -390,10 +390,7 @@ the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We emplo
 \tag{4.13}
 \end{equation}\]</span>
 Because discarded model runs have <span class="math inline">\(\tilde{w}_i=0\)</span>, ESS reflects only the retained
-subset. In dynamic Bayesian models an ESS <span class="math inline">\(\gtrsim\!500\)</span>–<span class="math inline">\(1000\)</span> is generally
-adequate for stable posterior medians and 95% credible intervals
-(<a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a>;
-<a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>).</p>
+subset. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals (<a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a>; see also the MCMC-context discussion of ESS thresholds in <a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a> and <a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>). The earlier MOSAIC guidance of <span class="math inline">\(\widehat{\text{ESS}} \gtrsim 500\)</span>–<span class="math inline">\(1000\)</span> tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-<span class="math inline">\(k\)</span> diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.</p>
 <p>The aggregate <span class="math inline">\(\widehat{\text{ESS}}\)</span> above measures the joint information retained across the full parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. To diagnose whether the posterior on any <em>individual</em> parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter’s draws into 100 equally weighted bins on its prior support and applies Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> within each bin, with the grid scaled adaptively to the parameter’s effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.</p>
 <p>The Akaike weights in Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a> are a special case of a broader <em>Gibbs-posterior</em> weighting scheme (<a href="https://doi.org/10.1111/rssb.12158">Bissiri <em>et al.</em> 2016</a>) of the form</p>
 <p><span class="math display" id="eq:gibbs-weights">\[\begin{equation}

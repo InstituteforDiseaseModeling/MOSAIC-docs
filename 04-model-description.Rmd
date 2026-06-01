@@ -146,7 +146,7 @@ Using the model fitting methods described above, and the cluster-based approach 
 knitr::include_graphics("figures/seasonal_transmission_all.png")
 ```
 
-```{r seasonal-table, echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Estimated coefficients for the truncated Fourier model in Equation \\@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \\@ref(fig:seasonal-all)."}
+```{r seasonal-table, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(readr)
 library(knitr)
@@ -175,6 +175,7 @@ final_table_data_cases <- table_data_cases %>%
 # Display the final data as a kable table with reduced text size, math fonts for parameters, and row shading
 kable(final_table_data_cases,
       col.names = c("Country", "$a_1$", "$a_2$", "$b_1$", "$b_2$"),
+      caption = "Estimated coefficients for the truncated Fourier model in Equation \\@ref(eq:beta1) fit to countries with reported cholera cases. Model fits are shown in Figure \\@ref(fig:seasonal-all).",
       escape = FALSE) %>%
      kable_styling(font_size = 11.75, latex_options = "hold_position", full_width = FALSE) %>%
      add_header_above(c(" ", "Fourier Coefficients" = 4))
@@ -507,7 +508,7 @@ knitr::include_graphics("figures/recovery_rates.png")
 
 Since *V. cholerae* is transmitted through fecal contamination of water and other consumables, the level of exposure to contaminated substrates significantly impacts transmission rates. Interventions involving Water, Sanitation, and Hygiene (WASH) have long been a first line of defense in reducing cholera transmission, and in this context, WASH variables can serve as proxy for the rate of contact with environmental risk factors. In the MOSAIC model, WASH variables are incorporated mechanistically, allowing for intervention scenarios that include changes to WASH. However, it is necessary to distill available WASH variables into a single parameter that represents the WASH-determined contact rate with contaminated substrates for each location $j$, which we define as $\theta_j$.
 
-To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$) in the environment-to-human force of infection ($\Psi_{jt}$). Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
+To parameterize $\theta_j$, we calculated a weighted mean of the 8 WASH variables in [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317) and originally modeled by the [Local Burden of Disease WaSH Collaborators 2020](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext). The 8 WASH variables (listed in Table \@ref(tab:wash-weights)) provide population-weighted measures of the proportion of the population that either: *i*) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or *ii*) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement ($1-\text{value}$) to give the proportion of the population *not* exposed to each risk factor. We used the [`optim`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim) function in R and the [L-BFGS-B](https://en.wikipedia.org/wiki/Limited-memory_BFGS) algorithm to estimate the set of optimal weights (Table \@ref(tab:wash-weights)) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of $r =$ -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \@ref(fig:wash-incidence)). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as ($1-\theta_j$). WASH enters the model twice: as an attenuation on environmental *exposure* in the environment-to-human force of infection $\Psi_{jt}$ (Equation \@ref(eq:foi-environment)), and as an attenuation on environmental *contamination* in the shedding term of the reservoir update $W_{j,t+1}$ (Equation \@ref(eq:system)). These two effects act on opposite sides of the environmental transmission cycle but share the same WASH infrastructure (piped water, sanitation), and their product yields the $(1-\theta_j)^2$ factor in the environmental component of $R_{0,j}$ derived in the *Decomposition of $R_{0,j}$* subsection below. Values of $\theta_j$ for all countries are shown in Figure \@ref(fig:wash-country).
 
 ```{r wash-weights, echo=FALSE}
 library(kableExtra)
@@ -1495,7 +1496,7 @@ tbl <- data.frame(
           "Waning immunity rate of recovered individuals.",                                  # varepsilon
           "Recovery rate of symptomatic infected individuals.",                              # gamma_1
           "Recovery rate of asymptomatic infected individuals.",                             # gamma_2
-          "Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\\mu_{j,0}, \\mu_{j,1}, \\mu_{j,\\text{epi}}$; see \\@ref(eq:mu-jt).",  # mu_jt
+          "Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\\mu_{j,0}, \\mu_{j,1}, \\mu_{j,\\text{epi}}$ (see the *Case fatality rate* subsection).",  # mu_jt
           "Proportion of infections that are symptomatic.",                                  # sigma
           "Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.",  # rho
           "Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.",  # zeta_1
@@ -1618,7 +1619,7 @@ tbl <- data.frame(
           "",        # tau_i
           "",        # pi_{ij}
           "[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)",        # theta_j
-          "Meta-analysis (see \\@ref(eq:kappa))"   # kappa
+          "Meta-analysis (see *Infectious dose* subsection)"   # kappa
      )
 )
 
@@ -1664,7 +1665,7 @@ tbl2 <- data.frame(
           "Survival time at high environmental suitability ($\\psi_{jt}\\!\\to\\!1$). Derived as $\\text{days}_{\\text{short}} + \\text{days}_{\\text{spread}}$.",
           "Algebraic spread between minimum and maximum *V. cholerae* survival time.",
           "Shape parameters of the cumulative Beta transformation $f(\\psi_{jt}) = \\text{pbeta}(\\psi_{jt}\\mid s_1, s_2)$ for the decay rate.",
-          "Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see \\@ref(eq:psi-star).",
+          "Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection).",
           "Per-country shape/gain parameter for the $\\psi \\to \\psi^{\\ast}$ logit calibration.",
           "Per-country scale/offset parameter for the $\\psi \\to \\psi^{\\ast}$ logit calibration.",
           "Per-country EWMA smoothing weight ($z = 1$: no smoothing).",
@@ -1822,7 +1823,7 @@ tbl <- data.frame(
           "Exposed individuals progressing to symptomatic infection.",
           "Effective first doses leaving $I_1$ for $V_1$.",
           "Recovery from symptomatic infection.",
-          "Cholera-attributable mortality among symptomatic individuals (dynamic IFR, see \\@ref(eq:mu-jt)).",
+          "Cholera-attributable mortality among symptomatic individuals (dynamic IFR; see the *Case fatality rate* subsection).",
           "Background death among individuals with symptomatic infection.",
           "",
           "Exposed individuals progressing to asymptomatic infection.",

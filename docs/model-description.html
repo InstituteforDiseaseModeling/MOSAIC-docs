@@ -1211,7 +1211,7 @@ Figure 3.16: Shedding duration (days, x-axis) for symptomatic (red) and asymptom
 <span class="header-section-number">3.4.6</span> WAter, Sanitation, and Hygiene (WASH)<a class="anchor" aria-label="anchor" href="#water-sanitation-and-hygiene-wash"><i class="fas fa-link"></i></a>
 </h3>
 <p>Since <em>V. cholerae</em> is transmitted through fecal contamination of water and other consumables, the level of exposure to contaminated substrates significantly impacts transmission rates. Interventions involving Water, Sanitation, and Hygiene (WASH) have long been a first line of defense in reducing cholera transmission, and in this context, WASH variables can serve as proxy for the rate of contact with environmental risk factors. In the MOSAIC model, WASH variables are incorporated mechanistically, allowing for intervention scenarios that include changes to WASH. However, it is necessary to distill available WASH variables into a single parameter that represents the WASH-determined contact rate with contaminated substrates for each location <span class="math inline">\(j\)</span>, which we define as <span class="math inline">\(\theta_j\)</span>.</p>
-<p>To parameterize <span class="math inline">\(\theta_j\)</span>, we calculated a weighted mean of the 8 WASH variables in <a href="https://doi.org/10.1021/acs.est.3c01317">Sikder et al 2023</a> and originally modeled by the <a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext">Local Burden of Disease WaSH Collaborators 2020</a>. The 8 WASH variables (listed in Table <a href="model-description.html#tab:wash-weights">3.4</a>) provide population-weighted measures of the proportion of the population that either: <em>i</em>) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or <em>ii</em>) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement (<span class="math inline">\(1-\text{value}\)</span>) to give the proportion of the population <em>not</em> exposed to each risk factor. We used the <a href="https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim"><code>optim</code></a> function in R and the <a href="https://en.wikipedia.org/wiki/Limited-memory_BFGS">L-BFGS-B</a> algorithm to estimate the set of optimal weights (Table <a href="model-description.html#tab:wash-weights">3.4</a>) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of <span class="math inline">\(r =\)</span> -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure <a href="model-description.html#fig:wash-incidence">3.17</a>). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as (<span class="math inline">\(1-\theta_j\)</span>) in the environment-to-human force of infection (<span class="math inline">\(\Psi_{jt}\)</span>). Values of <span class="math inline">\(\theta_j\)</span> for all countries are shown in Figure <a href="model-description.html#fig:wash-country">3.18</a>.</p>
+<p>To parameterize <span class="math inline">\(\theta_j\)</span>, we calculated a weighted mean of the 8 WASH variables in <a href="https://doi.org/10.1021/acs.est.3c01317">Sikder et al 2023</a> and originally modeled by the <a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext">Local Burden of Disease WaSH Collaborators 2020</a>. The 8 WASH variables (listed in Table <a href="model-description.html#tab:wash-weights">3.4</a>) provide population-weighted measures of the proportion of the population that either: <em>i</em>) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or <em>ii</em>) are exposed to risk factors (e.g. surface water, open defecation). For risk associated WASH variables, we used the complement (<span class="math inline">\(1-\text{value}\)</span>) to give the proportion of the population <em>not</em> exposed to each risk factor. We used the <a href="https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim"><code>optim</code></a> function in R and the <a href="https://en.wikipedia.org/wiki/Limited-memory_BFGS">L-BFGS-B</a> algorithm to estimate the set of optimal weights (Table <a href="model-description.html#tab:wash-weights">3.4</a>) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of <span class="math inline">\(r =\)</span> -0.33 (-0.51 to -0.09 95% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure <a href="model-description.html#fig:wash-incidence">3.17</a>). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as (<span class="math inline">\(1-\theta_j\)</span>). WASH enters the model twice: as an attenuation on environmental <em>exposure</em> in the environment-to-human force of infection <span class="math inline">\(\Psi_{jt}\)</span> (Equation <a href="model-description.html#eq:foi-environment">(3.3)</a>), and as an attenuation on environmental <em>contamination</em> in the shedding term of the reservoir update <span class="math inline">\(W_{j,t+1}\)</span> (Equation <a href="model-description.html#eq:system">(3.1)</a>). These two effects act on opposite sides of the environmental transmission cycle but share the same WASH infrastructure (piped water, sanitation), and their product yields the <span class="math inline">\((1-\theta_j)^2\)</span> factor in the environmental component of <span class="math inline">\(R_{0,j}\)</span> derived in the <em>Decomposition of <span class="math inline">\(R_{0,j}\)</span></em> subsection below. Values of <span class="math inline">\(\theta_j\)</span> for all countries are shown in Figure <a href="model-description.html#fig:wash-country">3.18</a>.</p>
 <div class="inline-table"><table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 <span id="tab:wash-weights">Table 3.4: </span><span id="tab:wash-weights">Table 3.5: </span>Table of optimized weights used to calculate the single mean WASH index for all countries.
@@ -4126,7 +4126,7 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(\mu_{j,t}\)</span></td>
-<td align="left">Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into <span class="math inline">\(\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}\)</span>; see <a href="model-description.html#eq:mu-jt">(3.28)</a>.</td>
+<td align="left">Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into <span class="math inline">\(\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}\)</span> (see the <em>Case fatality rate</em> subsection).</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
@@ -4267,16 +4267,16 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 <td align="left"><span class="math inline">\(\kappa\)</span></td>
 <td align="left">Number of <em>V. cholerae</em> cells required for 50% per-contact infection probability. In MOSAIC v1.0 expressed in absolute cells (matching the units of <span class="math inline">\(W\)</span>); see <a href="model-description.html#infectious-dose-kappa">Infectious dose (<span class="math inline">\(\kappa\)</span>)</a>.</td>
 <td align="left"><span class="math inline">\(\text{Lognormal}(11.77, 1.82)\)</span></td>
-<td align="left">Meta-analysis (see <a href="model-description.html#eq:kappa">(3.11)</a>)</td>
+<td align="left">Meta-analysis (see <em>Infectious dose</em> subsection)</td>
 </tr>
 </tbody>
 </table></div>
 <div class="inline-table"><table class="table table-sm">
 <colgroup>
 <col width="8%">
-<col width="42%">
-<col width="19%">
-<col width="29%">
+<col width="47%">
+<col width="17%">
+<col width="26%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Parameter</th>
@@ -4342,7 +4342,7 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 </tr>
 <tr class="even">
 <td align="left"><span class="math inline">\(\psi^{\ast}_{jt}\)</span></td>
-<td align="left">Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see <a href="model-description.html#eq:psi-star">(3.9)</a>.</td>
+<td align="left">Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the <em>Calibration of suitability to surveillance</em> subsection).</td>
 <td align="left">Computed (Eq. <a href="model-description.html#eq:psi-star">(3.9)</a>).</td>
 <td align="left">Computed (per-country logit calibration).</td>
 </tr>
@@ -4446,9 +4446,9 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 </h2>
 <div class="inline-table"><table class="table table-sm">
 <colgroup>
-<col width="14%">
-<col width="26%">
-<col width="59%">
+<col width="13%">
+<col width="30%">
+<col width="56%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Term</th>
@@ -4593,7 +4593,7 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 </tr>
 <tr class="even">
 <td align="left"><span class="math inline">\(- \mu_{j,t} I_{1,jt}\)</span></td>
-<td align="left">Cholera-attributable mortality among symptomatic individuals (dynamic IFR, see <a href="model-description.html#eq:mu-jt">(3.28)</a>).</td>
+<td align="left">Cholera-attributable mortality among symptomatic individuals (dynamic IFR; see the <em>Case fatality rate</em> subsection).</td>
 <td align="left"><span class="math inline">\(\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\mu_{j,t}) \big)\)</span></td>
 </tr>
 <tr class="odd">

@@ -207,19 +207,19 @@ For any model, the [Akaike Information Criterion](https://en.wikipedia.org/wiki/
 
 ### Assign truncated importance weights
 
-Since the BFRS method generates a large ensemble of candidate parameter sets $\boldsymbol{\Theta}^{(i)}$, we reduce the influence of poorly fitting models by truncating the importance weights using a $\Delta \text{AIC}$ cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior.
+Since the BFRS method generates a large ensemble of candidate parameter sets $\boldsymbol{\Theta}^{(i)}$, we reduce the influence of poorly fitting models by truncating the importance weights using a $\Delta \text{AIC}$ cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior. We first compute raw (un-normalised) weights:
 \begin{equation}
-\tilde{w}_i \;=\;
+w_i^{\text{raw}} \;=\;
 \begin{cases}
 \exp\!\left[-\tfrac12 \Delta_i\right], & \Delta_i \le 6,\\[6pt]
 0, & \Delta_i > 6,
 \end{cases}
-\qquad \text{and} \qquad
+\qquad \text{and then normalise:} \qquad
 \tilde{w}_i \;=\;
-\dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
+\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j^{\text{raw}}}.
 (\#eq:aic-weights)
 \end{equation}
-The threshold of $\Delta_i \le 6$ is widely used in model selection and corresponds approximately to a likelihood ratio of $p_i = \exp(-\Delta_i/2) \approx 0.05$, which in nested-model comparisons aligns loosely with a frequentist $p$-value of 0.05 (Burnham & Anderson [2002](https://doi.org/10.1007/b97636) and [2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.
+The threshold of $\Delta_i \le 6$ is widely used in model selection and corresponds approximately to a likelihood ratio of $p_i = \exp(-\Delta_i/2) \approx 0.05$, which in nested-model comparisons aligns loosely with a frequentist $p$-value of 0.05 (Burnham & Anderson [2002](https://doi.org/10.1007/b97636) and [2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)). Since every MOSAIC simulation has the same number of estimated parameters $k$, $\Delta_i$ reduces to a likelihood-ratio statistic and the cut-off acts as a likelihood-ratio filter on the BFRS draws rather than as a formal model-selection criterion across nested models. This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models. Alternative posterior diagnostics such as the Pareto-$k$ shape statistic of PSIS ([Vehtari et al. 2024](https://doi.org/10.48550/arXiv.1507.02646)) can be used to flag cases where the truncated importance-weight distribution has unbounded variance.
 
 ### Posterior summaries
 
@@ -259,10 +259,7 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 (\#eq:ess)
 \end{equation}
 Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
-subset.  In dynamic Bayesian models an ESS $\gtrsim\!500$–$1000$ is generally
-adequate for stable posterior medians and 95% credible intervals
-([Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/);
-[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)).
+subset. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals ([Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500); see also the MCMC-context discussion of ESS thresholds in [Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/) and [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)). The earlier MOSAIC guidance of $\widehat{\text{ESS}} \gtrsim 500$–$1000$ tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-$k$ diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.
 
 The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \@ref(eq:ess) within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
 
