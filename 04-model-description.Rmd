@@ -633,7 +633,7 @@ knitr::kable(df,
 We estimated the mean immune decay to be $\bar\varepsilon \approx 3.9 \times 10^{-4}$ day$^{-1}$, equivalent to a mean immune duration of approximately 7 years as shown in Figure \@ref(fig:immune-decay)A. This is slightly longer than previous modeling work estimating the duration of immunity to be approximately 5 years ([King et al. 2008](https://www.nature.com/articles/nature07084)). Uncertainty around $\varepsilon$ in the model is represented by a lognormal prior parameterised on the natural scale by the mean and standard deviation (matching the convention used in `priors_default.json`), as shown in Figure \@ref(fig:immune-decay)B:
 
 $$
-\varepsilon \sim \text{Lognormal}\big(\text{mean} = 3.9 \times 10^{-4},\ \text{sd} = 4.0 \times 10^{-4}\big) \ \ \text{day}^{-1}.
+\varepsilon \sim \text{Lognormal}\big(\text{mean} = 3.9 \times 10^{-4},\ \text{sd} = 2.0 \times 10^{-4}\big) \ \ \text{day}^{-1}.
 $$
 
 
