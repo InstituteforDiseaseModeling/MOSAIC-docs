@@ -955,19 +955,19 @@ $$
 
 The epidemic threshold $\eta_j$ is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country's observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).
 
-A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag from symptom onset is $l_{\text{deaths}}$:
+A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag $l_{\text{deaths}}$ is the time from the **death event** to its appearance in surveillance reports (the symptom-onset-to-death interval is implicit in the SEIR dynamics via $\gamma_1^{-1}$ and is NOT folded into $l_{\text{deaths}}$):
 
 $$
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(6.30,\ 8.52) \quad \text{(mean} \approx 0.43\text{)},\\
-l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
+\rho_{\text{deaths}} \ \sim\ & \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},\\
+l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days, death-event to report)}.
 \end{aligned}
 (\#eq:rho-deaths)
 $$
 
-The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
+The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). MOSAIC's production prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05). The deaths likelihood identifies the product $\mu_{j,0}\,\rho_{\text{deaths}}$ rather than the two factors separately, so a narrow $\rho_{\text{deaths}}$ prior keeps it pinned near 0.42 during sampling, letting the per-country $\mu_{j,0}$ posteriors carry the cross-country CFR signal cleanly. The wider variant Beta(6.30, 8.52) (fit to the 95% prediction interval) is retained as a sensitivity prior only. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
 
-```{r rho-deaths-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior for the cholera death-detection probability $\\rho_{\\text{deaths}}$. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\\tau^2$ = 0.046, $I^2$ = 32%)."}
+```{r rho-deaths-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior for the cholera death-detection probability $\\rho_{\\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\\approx$ 88, sd $\\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\\tau^2$ = 0.046, $I^2$ = 32%)."}
 knitr::include_graphics("figures/rho_deaths_prior.png")
 ```
 
@@ -987,14 +987,24 @@ In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatali
 
 where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
 
-The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, while $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera. In steady state, the daily reported CFR (reported deaths / reported cases on day $t$) equals the per-day true mortality scaled by the relative reporting rates of cases versus deaths, so the per-day baseline mortality rate is recovered as:
+The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014-2025 surveillance window, after accounting for the full observation pipeline that converts true symptomatic infections into reported cases AND reported deaths. Reporting compresses information on three axes: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera, and $\rho_{\text{deaths}}$ controls the fraction of true cholera deaths that are captured by surveillance (laser-cholera v0.13+).
+
+In steady state, taking expectations of the engine equations (`reported_deaths` = $\rho_{\text{deaths}} \cdot \text{disease\_deaths}$, `disease_deaths` $\sim$ Binomial($I_1$, $\mu_{j,t}$), `reported_cases` = $I_1 \cdot \rho / \chi$):
 
 $$
-\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi},
+\text{CFR}^{\text{reported}}_{j} \;=\; \frac{\mathbb{E}[\text{reported\_deaths}]}{\mathbb{E}[\text{reported\_cases}]} \;=\; \frac{I_1 \cdot \mu_{j,t} \cdot \rho_{\text{deaths}}}{I_1 \cdot \rho / \chi} \;=\; \mu_{j,t} \cdot \frac{\rho_{\text{deaths}} \cdot \chi}{\rho}.
+$$
+
+Solving for the un-modulated baseline component:
+
+$$
+\mu_{j,0} \;=\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\rho_{\text{deaths}} \cdot \chi},
 (\#eq:mu-baseline-derivation)
 $$
 
-with units of day$^{-1}$ when $\text{CFR}^{\text{reported}}_{j}$ is interpreted as the daily ratio of reported deaths to reported cases. In practice the derivation uses $\chi^{\text{epi}}$ because the reported-CFR window for most countries is dominated by outbreak periods. Country-specific reported CFRs and Clopper-Pearson 95% confidence intervals are calculated from the surveillance record using the [Binomial exact test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the reported CFR is approximately 2.7% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)$ with mean approximately 0.0083 per day, corresponding to an integrated CFR of roughly 8% over a typical 10-day symptomatic infectious period (i.e. $1 - e^{-0.0083 \times 10}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+with units of day$^{-1}$. The symptomatic fraction $\sigma$ cancels in this identity because both observation pathways start from $I_1$, not from the underlying infections. Country-specific reported CFRs are estimated by a hierarchical GAM (binomial(deaths, cases) $\sim$ s(year) + country random intercepts + country temporal trends) fit to the WHO AFRO annual surveillance data through 2025 with the 2026 partial-year snapshot. The estimated CFR is converted to $\mu_{j,0}$ via the identity above using the prior means of $\rho$, $\rho_{\text{deaths}}$, and the endemic-epidemic-averaged $\chi$, yielding a per-country Gamma(shape=4, rate) prior with CV=50%. For example, in Angola the GAM-estimated reported CFR is approximately 2.3% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 173)$ with mean approximately 0.023 per day, corresponding to an integrated symptomatic-period CFR of roughly 11% over a 5-day symptomatic infectious period (i.e. $1 - e^{-0.023 \times 5}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+
+Pre-laser-cholera-v0.13.0 versions of MOSAIC scored observed reported deaths against simulated raw `disease_deaths` (without the $\rho_{\text{deaths}}$ factor), so per-country $\mu_{j,0}$ priors prior to v0.32.1 implicitly absorbed the missing $\rho_{\text{deaths}}$ factor in their posterior. Posteriors from pre-v0.32.1 calibrations are interpretable as $\mu_{j,0}^{\text{v0.13+}} \cdot \rho_{\text{deaths}}$ under the new schema (a factor of $\approx$0.42 lower than the corrected estimate).
 
 The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
 
@@ -1008,14 +1018,14 @@ $$
 \mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
 $$
 
-Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49) and consumed by MOSAIC-pkg from version 0.30.2.
+Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{round}(\text{disease\_deaths}[t - l_{\text{deaths}}] \cdot \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0.
 
 
 ```{r cfr, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(kableExtra)
 
-cholera_data_recent <- read.csv(file.path(getwd(), "tables/case_fatality_ratio_2014_2024.csv"), stringsAsFactors = FALSE)
+cholera_data_recent <- read.csv(file.path(getwd(), "tables/case_fatality_ratio_2014_2026.csv"), stringsAsFactors = FALSE)
 
 filtered_data <- cholera_data_recent[!is.na(cholera_data_recent$cases_total), ]
 
@@ -1027,19 +1037,19 @@ cfr_table[, c("cases_total", "deaths_total", "cfr", "cfr_lo", "cfr_hi", "shape1"
 
 kableExtra::kbl(cfr_table,
              caption = "CFR Values and Beta Shape Parameters for AFRO Countries",
-             col.names = c("Country", "Cases (2014-2024)", "Deaths (2014-2024)", "CFR", "CFR Lower", "CFR Upper", "Beta Shape1", "Beta Shape2")) %>%
+             col.names = c("Country", "Cases (2014-present)", "Deaths (2014-present)", "CFR", "CFR Lower", "CFR Upper", "Beta Shape1", "Beta Shape2")) %>%
      kable_styling(full_width = FALSE,
                    bootstrap_options = c("hover", "condensed"))
 ```
 
 
-```{r cfr-cases, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='100%', fig.cap='Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.'}
+```{r cfr-cases, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='100%', fig.cap='Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.'}
 knitr::include_graphics("figures/case_fatality_ratio_and_cases_total_by_country.png")
 ```
 
 
 
-```{r cfr-beta, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue.'}
+```{r cfr-beta, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue.'}
 
 knitr::include_graphics("figures/case_fatality_ratio_beta_distributions.png")
 
@@ -1678,7 +1688,7 @@ tbl2 <- data.frame(
           "Positive predictive value of a suspected cholera case during epidemic periods.",
           "Probability that a true cholera death is captured by surveillance.",
           "Reporting lag in days from symptom onset to case reporting.",
-          "Reporting lag in days from symptom onset to death reporting.",
+          "Reporting lag in days from a true cholera death event to its appearance in surveillance reports (symptom-onset-to-death is implicit in $\\gamma_1^{-1}$).",
           "Baseline daily mortality hazard $\\mu_{j,0}$ in destination $j$.",
           "Proportional time-trend factor for $\\mu_{j,t}$ over the simulation period.",
           "Proportional increase in $\\mu_{j,t}$ during epidemic periods.",
@@ -1702,10 +1712,10 @@ tbl2 <- data.frame(
           "$\\text{Truncnorm}$ per country, capped at 0.01.",
           "$\\text{Beta}(5.43, 5.01)$",
           "$\\text{Beta}(4.79, 1.53)$",
-          "$\\text{Beta}(6.30, 8.52)$",
+          "$\\text{Beta}(36.95, 51.02)$",
           "$\\text{Truncnorm}(1, 1.5, 0, 7)$ days",
           "$\\text{Truncnorm}(4, 3, 1, 14)$ days",
-          "$\\text{Gamma}$ per country (e.g., AGO: $\\text{Gamma}(4, 482.6)$).",
+          "$\\text{Gamma}$ per country (e.g., AGO: $\\text{Gamma}(4, 173)$).",
           "$\\mathcal{N}(0, 0.05)$",
           "$\\text{Gamma}(1, 2)$",
           "Calibration control parameter."
@@ -1731,7 +1741,7 @@ tbl2 <- data.frame(
           "SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.",
           "Surveillance reporting practice.",
           "Surveillance reporting practice.",
-          "Derived from reported CFR via $\\mu_{j,0} \\approx \\text{CFR}^{\\text{reported}}_j \\cdot \\rho / \\chi$.",
+          "Derived from reported CFR via $\\mu_{j,0} = \\text{CFR}^{\\text{reported}}_j \\cdot \\rho / (\\rho_{\\text{deaths}} \\cdot \\chi)$ (laser-cholera v0.13+ identity).",
           "Weakly informative.",
           "Reflects typical surge-period IFR increase.",
           "[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)"

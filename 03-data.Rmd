@@ -14,17 +14,17 @@ The MOSAIC model requires a diverse set of data sources, some of which are direc
 
 ## Historical Incidence and Deaths
 
-Data on historical cholera incidence and deaths are crucial for establishing baseline transmission patterns. We compiled the annual total reported cases and deaths for all AFRO region countries from January 1970 to August 2024. These data comes from several sources which include:
+Data on historical cholera incidence and deaths are crucial for establishing baseline transmission patterns. We compiled the annual total reported cases and deaths for all AFRO region countries from January 1970 through the most recent complete calendar year (2025) plus a partial-year snapshot for the current year. These data comes from several sources which include:
 
 
-1. **Our World in Data (1970-2021)**: [Number of Reported Cases of Cholera (1949-2021)](https://ourworldindata.org/grapher/number-reported-cases-of-cholera) and the [Number of Reported Deaths of Cholera from (1949-2021)](https://ourworldindata.org/grapher/number-of-reported-cholera-deaths). The Our World in Data group compiled these data from previously published annual WHO reports. 
+1. **Our World in Data (1970-2021)**: [Number of Reported Cases of Cholera (1949-2021)](https://ourworldindata.org/grapher/number-reported-cases-of-cholera) and the [Number of Reported Deaths of Cholera from (1949-2021)](https://ourworldindata.org/grapher/number-of-reported-cholera-deaths). The Our World in Data group compiled these data from previously published annual WHO reports.
 2. **WHO Annual Report 2022**: These data were manually extracted from the World Health Organization's [Weekly Epidemiological Record](https://www.who.int/publications/journals/weekly-epidemiological-record) No 38, 2023, 98, 431–452.
-3. **Global Cholera and Acute Watery Diarrhea Dashboard (2023-2024)**: Unofficial tallies of reported cases and deaths for 2023 and part of 2024 are available at the [WHO Global Cholera and AWD Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/).
+3. **Global Cholera and Acute Watery Diarrhea Dashboard (2023+)**: Year-filtered CSVs for 2023, 2024, 2025, and rolling snapshots of the current year are available at the [WHO Global Cholera and AWD Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/). Each row's actual year is derived from its `first_epiwk` / `last_epiwk` range, and partial-year coverage is tracked explicitly via `coverage_days` / `year_fraction` columns so partial snapshots can be ingested alongside full-year totals without mislabeling.
 
 
 ## Recent Incidence and Deaths
 
-To capture recent cholera trends, we retrieved reported cases and deaths data from the [WHO Global Cholera and Acute Watery Diarrhea Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/) REST API. These data provide weekly incidence and deaths from January 2023 to August 2024 which provides up-to-date counts at the country level.
+To capture recent cholera trends, we retrieved reported cases and deaths data from the [WHO Global Cholera and Acute Watery Diarrhea Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/) REST API. These data provide weekly incidence and deaths from January 2023 onward, with the current-year rolling snapshot updated on each pipeline run, providing up-to-date counts at the country level.
 
 ## Vaccinations
 
