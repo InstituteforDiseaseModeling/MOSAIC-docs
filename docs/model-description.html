@@ -1751,16 +1751,22 @@ l_{\text{cases}} \sim \text{Truncnorm}(1,\ 1.5,\ 0,\ 7) \ \ \text{(days)}.
 <p>A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is <span class="math inline">\(\rho_{\text{deaths}}\)</span>, and the reporting lag from symptom onset is <span class="math inline">\(l_{\text{deaths}}\)</span>:</p>
 <p><span class="math display" id="eq:rho-deaths">\[
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ &amp; \text{Beta}(3,\ 2) \quad \text{(mean} \approx 0.60\text{)},\\
+\rho_{\text{deaths}} \ \sim\ &amp; \text{Beta}(6.30,\ 8.52) \quad \text{(mean} \approx 0.43\text{)},\\
 l_{\text{deaths}} \ \sim\ &amp; \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
 \end{aligned}
 \tag{3.27}
 \]</span></p>
-<p>The mean death-detection rate of approximately 0.60 reflects the surveillance-capture estimate of <a href="https://doi.org/10.1016/S1473-3099(24)00237-8">Finger et al. 2024</a> (<em>Lancet Infect Dis</em>; note this is the cholera-deaths-surveillance paper, distinct from the <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/">Finger et al. 2024</a> Haiti sero-survey cited above in the symptomatic-proportion subsection). Reported deaths are modelled analogously to reported cases using the dynamic infection-fatality ratio described in the <a href="model-description.html#case-fatality-rate">Case fatality rate</a> subsection that follows.</p>
+<p>The <span class="math inline">\(\rho_{\text{deaths}}\)</span> prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: <a href="https://doi.org/10.3201/eid2313.170529">Routh et al. 2017</a> (Tanzania, 0.48), <a href="https://doi.org/10.4269/ajtmh.2009.09-0400">Shikanga et al. 2009</a> (Kenya, 0.34), and <a href="https://doi.org/10.1371/journal.pntd.0002545">Bwire et al. 2013</a> (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] (<span class="math inline">\(\tau^2 = 0.046\)</span>, <span class="math inline">\(I^2 = 32\%\)</span>); see Figure <a href="model-description.html#fig:rho-deaths-prior">3.29</a>. The conceptual framework separating facility CFR from community deaths comes from <a href="https://doi.org/10.1016/S1473-3099(24)00237-8">Finger et al. 2024</a> (<em>Lancet Infect Dis</em>). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the <a href="model-description.html#case-fatality-rate">Case fatality rate</a> subsection.</p>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:rho-deaths-prior"></span>
+<img src="figures/rho_deaths_prior.png" alt="Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%)." width="100%"><p class="caption">
+Figure 3.29: Prior for the cholera death-detection probability <span class="math inline">\(\rho_{\text{deaths}}\)</span>. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, <span class="math inline">\(\tau^2\)</span> = 0.046, <span class="math inline">\(I^2\)</span> = 32%).
+</p>
+</div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:rho"></span>
 <img src="figures/suspected_cases.png" alt="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings." width="100%"><p class="caption">
-Figure 3.29: Prior distributions for the suspected/reported-case observation model. The care-seeking rate <span class="math inline">\(\rho\)</span> controls how many true symptomatic infections present as suspected cases (<span class="math inline">\(\rho \sim \text{Beta}(6.81, 17.89)\)</span>, mean <span class="math inline">\(\approx 0.28\)</span>). The endemic and epidemic positive predictive values <span class="math inline">\(\chi^{\text{end}}\)</span> and <span class="math inline">\(\chi^{\text{epi}}\)</span> control how many suspected cases are confirmed as true cholera; the endemic PPV (mean <span class="math inline">\(\approx 0.52\)</span>) is substantially lower than the epidemic PPV (mean <span class="math inline">\(\approx 0.76\)</span>) because of higher background diarrhoeal misclassification in non-outbreak settings.
+Figure 3.30: Prior distributions for the suspected/reported-case observation model. The care-seeking rate <span class="math inline">\(\rho\)</span> controls how many true symptomatic infections present as suspected cases (<span class="math inline">\(\rho \sim \text{Beta}(6.81, 17.89)\)</span>, mean <span class="math inline">\(\approx 0.28\)</span>). The endemic and epidemic positive predictive values <span class="math inline">\(\chi^{\text{end}}\)</span> and <span class="math inline">\(\chi^{\text{epi}}\)</span> control how many suspected cases are confirmed as true cholera; the endemic PPV (mean <span class="math inline">\(\approx 0.52\)</span>) is substantially lower than the epidemic PPV (mean <span class="math inline">\(\approx 0.76\)</span>) because of higher background diarrhoeal misclassification in non-outbreak settings.
 </p>
 </div>
 </div>
@@ -2683,13 +2689,13 @@ Zimbabwe
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cfr-cases"></span>
 <img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%"><p class="caption">
-Figure 3.30: Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.
+Figure 3.31: Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.
 </p>
 </div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cfr-beta"></span>
 <img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue." width="95%"><p class="caption">
-Figure 3.31: Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue.
+Figure 3.32: Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue.
 </p>
 </div>
 </div>
@@ -3645,7 +3651,7 @@ location-specific, time-varying estimates of the effective reproductive number.<
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:generation-time"></span>
 <img src="figures/generation_time.png" alt="Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$." width="95%"><p class="caption">
-Figure 3.32: Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number <span class="math inline">\(R_{jt}\)</span>.
+Figure 3.33: Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number <span class="math inline">\(R_{jt}\)</span>.
 </p>
 </div>
 </div>
@@ -4392,8 +4398,8 @@ Figure 3.32: Daily probability mass function of the cholera generation time, mod
 <tr class="even">
 <td align="left"><span class="math inline">\(\rho_{\text{deaths}}\)</span></td>
 <td align="left">Probability that a true cholera death is captured by surveillance.</td>
-<td align="left"><span class="math inline">\(\text{Beta}(3, 2)\)</span></td>
-<td align="left">Finger et al. 2024 surveillance-capture estimate.</td>
+<td align="left"><span class="math inline">\(\text{Beta}(6.30, 8.52)\)</span></td>
+<td align="left">SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.</td>
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(l_{\text{cases}}\)</span></td>
