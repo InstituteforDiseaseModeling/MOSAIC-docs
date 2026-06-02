@@ -151,7 +151,7 @@
 \hfill\break
 
 {\emph{
-Website under development. Last compiled on 2026-05-27 at 06:58 AM PDT.
+Website under development. Last compiled on 2026-06-01 at 05:46 PM PDT.
 }}
 
 \section*{Welcome}\label{welcome}
@@ -300,7 +300,7 @@ The model operates on daily time steps and will be fitted to historical incidenc
 
 }
 
-\caption{A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countires included in the MOSAIC modeling framework are indicated in blue.}\label{fig:map}
+\caption{A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countries included in the MOSAIC modeling framework are indicated in blue.}\label{fig:map}
 \end{figure}
 
 \section{Transmission dynamics}\label{transmission-dynamics}
@@ -386,7 +386,7 @@ The human-to-human force of infection at time \(t+1\) in location \(j\) acts on 
 
 \begin{equation}
 \Lambda_{j,t+1} = \frac{
-\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,jt} + I_{2,jt}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}}.
+\beta_{jt}^{\text{hum}} \, (1-\tau_{j})S_{jt} \, \left[ (1-\tau_{j}) (I_{1,jt} + I_{2,jt}) + \sum_{\forall i \neq j} \pi_{ij}\tau_i(I_{1,it} + I_{2,it}) \right]^{\alpha_1}}{N_{jt}^{\alpha_2}}.
 \label{eq:foi-human}
 \end{equation}
 
@@ -397,7 +397,7 @@ The environmental force of infection \(\Psi_{j,t+1}\) at location \(j\) and time
 \label{eq:foi-environment}
 \end{equation}
 
-Here, \(\beta_{jt}^{\text{hum}}\) and \(\beta_{jt}^{\text{env}}\) are the human-to-human and environment-to-human transmission rates; \(\tau_i\) is the probability of departing origin location \(i\); \(\pi_{ij}\) is the relative probability of travel from origin \(i\) to destination \(j\) (see section on \hyperref[spatial-dynamics]{spatial dynamics}); \(\theta_j\) is the proportion of the population at location \(j\) with at least basic access to Water, Sanitation, and Hygiene (WASH); and \(\kappa\) is the \emph{V. cholerae} concentration associated with a 50\% probability of infection (see \hyperref[infectious-dose-kappa]{Infectious dose (\(\kappa\))}). Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIRWS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats \(V_1\) and \(V_2\) as fully protected for the duration of immunity.
+Here, \(\beta_{jt}^{\text{hum}}\) and \(\beta_{jt}^{\text{env}}\) are the human-to-human and environment-to-human transmission rates; \(\tau_i\) is the probability of departing origin location \(i\); \(\pi_{ij}\) is the relative probability of travel from origin \(i\) to destination \(j\) (see section on \hyperref[spatial-dynamics]{spatial dynamics}); \(\theta_j\) is the proportion of the population at location \(j\) with at least basic access to Water, Sanitation, and Hygiene (WASH); and \(\kappa\) is the \emph{V. cholerae} concentration associated with a 50\% probability of infection (see \hyperref[infectious-dose-kappa]{Infectious dose (\(\kappa\))}). Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIWRS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats \(V_1\) and \(V_2\) as fully protected for the duration of immunity.
 
 Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution \(p(t) = 1-e^{-rt}\) (see \href{https://www.google.com/books/edition/Introduction_to_Probability_Models/1uxBwhAb_zYC?hl=en}{Ross 2007}). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals \(\gamma I_{jt}\):
 
@@ -432,7 +432,7 @@ We estimated the parameters in the Fourier series (\(a_1\), \(b_1\), \(a_2\), \(
 
 }
 
-\caption{Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series fucntions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines.}\label{fig:seasonal-example}
+\caption{Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series functions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines.}\label{fig:seasonal-example}
 \end{figure}
 
 For countries with no reported case data, we inferred seasonal dynamics using the fitted wave function of a neighboring country with available case data. The selected neighbor was chosen from the same cluster of countries (grouped hierarchically into four clusters based on precipitation seasonality using \href{https://en.wikipedia.org/wiki/Ward\%27s_method}{Ward's method}; see Figure \ref{fig:seasonal-cluster}) that had the highest correlation in seasonal precipitation with the country lacking case data. In the rare event that no country with reported case data was found within the same seasonal cluster, we expanded the search to the 10 nearest neighbors and continued expanding by adding the next nearest neighbor until a match was found.
@@ -443,7 +443,7 @@ For countries with no reported case data, we inferred seasonal dynamics using th
 
 }
 
-\caption{A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusteres are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.}\label{fig:seasonal-cluster}
+\caption{A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.}\label{fig:seasonal-cluster}
 \end{figure}
 
 Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure \ref{fig:seasonal-all}, with the corresponding Fourier model coefficients presented in Table \ref{tab:seasonal-table}.
@@ -540,7 +540,7 @@ To capture the impacts of climate-drivers on cholera transmission, we have inclu
 \label{eq:beta2}
 \end{equation}
 
-This formulation effectively scales the base environmental transmission rate \(\beta_{jt}^{\text{env}}\) so that it varies over time according to the climatically driven model of suitability. Note that, unlike the the cosine wave function of \(\beta_{jt}^{\text{hum}}\), this temporal term can increase or decrease over time following multi-annual cycles.
+This formulation effectively scales the base environmental transmission rate \(\beta_{j0}^{\text{env}}\) so that the realised rate \(\beta_{jt}^{\text{env}}\) varies over time according to the climatically driven model of suitability. Note that, unlike the cosine wave function of \(\beta_{jt}^{\text{hum}}\), this temporal term can increase or decrease over time following multi-annual cycles.
 
 \subsection{Suitability-dependent decay rate}\label{suitability-dependent-decay-rate}
 
@@ -582,7 +582,7 @@ The four-argument truncated normals are notated \(\text{Truncnorm}(\mu, \sigma, 
 
 \subsubsection{Environmental data}\label{environmental-data}
 
-The mechanism for environment-to-human transmission (Equation \eqref{eq:beta2}) and rate of decay of \emph{V. cholerae} in the environment (Equation \eqref{eq:delta}) is driven by the parameter \(\psi_{jt}\), which we refer to as environmental suitability. The parameter \(\psi_{jt}\) is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 24 covariates which include 19 historical and forecasted climate variables under the \href{https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present}{MRI-AGCM3-2-S} climate model. Covariates also include 4 large-scale climate drivers such as the Indian Ocean Dipole Mode Index (DMI), and the El Niño Southern Oscillation (ENSO) from 3 different Pacific Ocean regions. We also included a location specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \ref{fig:climate-data-moz} and DMI and ENSO variables in Figure \ref{fig:climate-data-enso}. A list of all covariates and their sources can be seen in Table \ref{tab:climate-data-variables}.
+The mechanism for environment-to-human transmission (Equation \eqref{eq:beta2}) and rate of decay of \emph{V. cholerae} in the environment (Equation \eqref{eq:delta}) is driven by the parameter \(\psi_{jt}\), which we refer to as environmental suitability. The parameter \(\psi_{jt}\) is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 22 covariates: 17 historical and forecasted climate variables drawn from the \href{https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present}{MRI-AGCM3-2-S} climate model, 4 large-scale climate drivers (the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from three Pacific Ocean regions --- Niño3, Niño3.4, and Niño4), and 1 location-specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \ref{fig:climate-data-moz} and DMI and ENSO variables in Figure \ref{fig:climate-data-enso}. A list of all covariates and their sources can be seen in Table \ref{tab:climate-data-variables}.
 
 Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.
 
@@ -601,7 +601,7 @@ Note that while the 19 climate variables offer forecasts up to 2030 and beyond, 
 
 }
 
-\caption{Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacifi). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).}\label{fig:climate-data-enso}
+\caption{Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacific). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM).}\label{fig:climate-data-enso}
 \end{figure}
 
 \begin{table}
@@ -710,7 +710,7 @@ After model training was completed, we predicted the values of environmental sui
 
 }
 
-\caption{The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and tje shaded areas show the binary classification used to characterize environmental suitability. Raw model predicitons are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.}\label{fig:psi-prediction-data}
+\caption{The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and the shaded areas show the binary classification used to characterize environmental suitability. Raw model predictions are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon.}\label{fig:psi-prediction-data}
 \end{figure}
 
 \begin{figure}
@@ -747,9 +747,9 @@ The shape prior is centred on the identity transformation \(a_{\psi^{\ast},j} = 
 
 \subsection{\texorpdfstring{Infectious dose (\(\kappa\))}{Infectious dose (\textbackslash kappa)}}\label{infectious-dose-kappa}
 
-The half-saturation constant \(\kappa\) in Equation \eqref{eq:foi-environment} is the \emph{V. cholerae} concentration at which the per-contact probability of infection is 50\%. Historical cholera transmission models have fixed \(\kappa = 10^6\) cells, a value traceable to the unbuffered water-only volunteer studies of \href{https://pubmed.ncbi.nlm.nih.gov/5286453/}{Hornick et al.~1971} and adopted by convention in subsequent modelling work (e.g.~\href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007}{Hartley et al.~2006}). Modern re-analyses of buffered-exposure volunteer studies --- in which sodium bicarbonate neutralises gastric acid, more representative of typical endemic exposure through food or contaminated drinking water --- consistently support a substantially lower central estimate of approximately \(10^5\) CFU, with considerable between-study heterogeneity.
+The half-saturation constant \(\kappa\) in Equation \eqref{eq:foi-environment} is the \emph{V. cholerae} concentration at which the per-contact probability of infection is 50\%. Historical cholera transmission models have fixed \(\kappa = 10^6\) cells, a value traceable to the unbuffered water-only volunteer studies of \href{https://pubmed.ncbi.nlm.nih.gov/5286453/}{Hornick et al.~1971} and adopted by convention in subsequent modelling work (e.g.~\href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007}{Hartley et al.~2006}). Modern re-analyses of buffered-exposure volunteer studies --- in which sodium bicarbonate neutralises gastric acid, mimicking endemic exposure through food or contaminated water --- support a lower central estimate near \(10^5\) CFU with substantial between-study heterogeneity.
 
-To reflect this evidence base we compiled a meta-analysis of 13 published infectious-dose estimates spanning direct human-volunteer challenge studies (\href{https://pubmed.ncbi.nlm.nih.gov/5286453/}{Hornick et al.~1971}, \href{https://doi.org/10.1093/infdis/129.1.45}{Cash et al.~1974}, Levine et al.~1981, \href{https://doi.org/10.1016/S0140-6736(88)90120-1}{Levine et al.~1988}, Tacket et al.~1999), Beta-Poisson QMRA fits (\href{https://www.wiley.com/en-us/Quantitative+Microbial+Risk+Assessment-p-9780471183976}{Haas, Rose \& Gerba 1999}), expert-review summaries (\href{https://doi.org/10.1128/cmr.8.1.48}{Kaper et al.~1995}, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~2009}), and values adopted by convention in cholera transmission models (\href{https://doi.org/10.1186/1471-2334-1-1}{Codeço 2001}, \href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007}{Hartley et al.~2006}). Each source is weighted by its evidentiary quality and relevance to the endemic, buffered-exposure context: direct volunteer challenge studies receive a weight of 1.0, while expert reviews and QMRA syntheses receive weights between 0 and 0.5. A weighted lognormal is then fit by maximum-likelihood on the log10 scale:
+To reflect this evidence base we compiled a meta-analysis of 13 published infectious-dose estimates spanning four types of source: direct human-volunteer challenge studies, Beta-Poisson QMRA fits, expert-review summaries, and conventional modelling values. The volunteer challenge studies (Hornick et al.~1971, \href{https://doi.org/10.1093/infdis/129.1.45}{Cash et al.~1974}, Levine et al.~1981, \href{https://doi.org/10.1016/S0140-6736(88)90120-1}{Levine et al.~1988}, Tacket et al.~1999) provide the strongest primary evidence; QMRA syntheses (\href{https://www.wiley.com/en-us/Quantitative+Microbial+Risk+Assessment-p-9780471183976}{Haas, Rose \& Gerba 1999}) and expert reviews (\href{https://doi.org/10.1128/cmr.8.1.48}{Kaper et al.~1995}, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~2009}) provide supporting summaries; and conventional modelling values (\href{https://doi.org/10.1186/1471-2334-1-1}{Codeço 2001}, \href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007}{Hartley et al.~2006}) capture the values adopted in the cholera-transmission literature. Each source is weighted by its evidentiary quality and relevance to the endemic, buffered-exposure context: direct volunteer challenge studies receive a weight of 1.0, while expert reviews and QMRA syntheses receive weights between 0 and 0.5. A weighted lognormal is then fit by maximum-likelihood on the log10 scale:
 
 \[
 \kappa \sim \text{Lognormal}(11.77,\ 1.82).
@@ -782,6 +782,8 @@ The rate at which infected individuals shed \emph{Vibrio cholerae} into the envi
 According to the modeling study done by \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/}{Fung et al.~(2014)}, estimates of \emph{V. cholerae} shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~(2009)} report that individuals may shed between \(10^3\) \(\text{cells}~\text{g}^{-1}~\text{stool}\) in asymptomatic cases and up to \(10^{12}\) \(\text{cells}~\text{g}^{-1}~\text{stool}\) in severe symptomatic infections, implying that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.
 
 The shedding-rate parameters \(\zeta_1\) and \(\zeta_2\) enter the environmental reservoir update as cells deposited per infected person per day (see Equation \eqref{eq:system}). Earlier MOSAIC versions parameterised shedding as a concentration (\(\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}\)), but in the current LASER implementation the reservoir \(W\) tracks absolute \emph{V. cholerae} cells and the half-saturation constant \(\kappa\) is expressed in the same absolute units. Under the assumption that watery stool has approximately the density of water, the two specifications differ only by whether the daily stool-volume integral is absorbed into \(\zeta_k\) or left implicit.
+
+The migration to absolute-cell units in v1.0 raised the modal \(\zeta_1\) by roughly six orders of magnitude relative to the v0.1 concentration-scale Uniform prior. Because \(\kappa\) remains parameterised from volunteer dose-response studies that report concentrations, readers should be aware that the \(W\)-vs-\(\kappa\) scale matching is an open methodological question: at very high simulated \(W\), the dose-response \(W/(\kappa + W)\) saturates near unity and the environmental force of infection becomes weakly identifying for \(\kappa\). The calibration mitigates this by retaining the literature-derived prior on \(\kappa\), but joint identifiability of \(\zeta_1, \beta_{j0}^{\text{env}}\), and \(\kappa\) should be inspected in the marginal-posterior diagnostics before strong conclusions are drawn from the environmental component of the force of infection.
 
 To set priors that span the genuine biological range, we performed a literature meta-analysis. For \(\zeta_1\) we assembled per-person-per-day anchors from 14 primary sources reporting \emph{V. cholerae} concentrations in cholera stool (e.g.~\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~2009}, \href{https://www.sciencedirect.com/science/article/pii/S014067361260436X}{Harris et al.~2012}, \href{https://doi.org/10.1128/cmr.8.1.48}{Kaper et al.~1995}, \href{https://www.nature.com/articles/nature00778}{Merrell et al.~2002}) and converted each anchor to a daily rate using time-averaged stool volumes for severe (8 L/day), moderate (4 L/day), and mild (0.5 L/day) infections. A severity-weighted pool --- using a default mix of 20\% severe, 40\% moderate, and 40\% mild, consistent with \href{https://www.sciencedirect.com/science/article/pii/S014067361260436X}{Harris et al.~2012} --- is fit by weighted maximum-likelihood on the log scale. For \(\zeta_2\) the evidence base is thin (essentially \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/}{Nelson et al.~2009} and the \href{https://doi.org/10.1128/cmr.8.1.48}{Kaper et al.~1995} expert review); the prior therefore applies a hard floor of \(\sigma_{\log} \ge 2\) to honestly reflect that only one primary source contributes.
 
@@ -900,7 +902,7 @@ These parameterisations reflect the empirical difference in shedding durations b
 
 Since \emph{V. cholerae} is transmitted through fecal contamination of water and other consumables, the level of exposure to contaminated substrates significantly impacts transmission rates. Interventions involving Water, Sanitation, and Hygiene (WASH) have long been a first line of defense in reducing cholera transmission, and in this context, WASH variables can serve as proxy for the rate of contact with environmental risk factors. In the MOSAIC model, WASH variables are incorporated mechanistically, allowing for intervention scenarios that include changes to WASH. However, it is necessary to distill available WASH variables into a single parameter that represents the WASH-determined contact rate with contaminated substrates for each location \(j\), which we define as \(\theta_j\).
 
-To parameterize \(\theta_j\), we calculated a weighted mean of the 8 WASH variables in \href{https://doi.org/10.1021/acs.est.3c01317}{Sikder et al 2023} and originally modeled by the \href{https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext}{Local Burden of Disease WaSH Collaborators 2020}. The 8 WASH variables (listed in Table \ref{tab:wash-weights}) provide population-weighted measures of the proportion of the population that either: \emph{i}) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or \emph{ii}) are exposed to risk factors (e.g.~surface water, open defecation). For risk associated WASH variables, we used the complement (\(1-\text{value}\)) to give the proportion of the population \emph{not} exposed to each risk factor. We used the \href{https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim}{\texttt{optim}} function in R and the \href{https://en.wikipedia.org/wiki/Limited-memory_BFGS}{L-BFGS-B} algorithm to estimate the set of optimal weights (Table \ref{tab:wash-weights}) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of \(r =\) -0.33 (-0.51 to -0.09 95\% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \ref{fig:wash-incidence}). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as (\(1-\theta_j\)) in the environment-to-human force of infection (\(\Psi_{jt}\)). Values of \(\theta_j\) for all countries are shown in Figure \ref{fig:wash-country}.
+To parameterize \(\theta_j\), we calculated a weighted mean of the 8 WASH variables in \href{https://doi.org/10.1021/acs.est.3c01317}{Sikder et al 2023} and originally modeled by the \href{https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30278-3/fulltext}{Local Burden of Disease WaSH Collaborators 2020}. The 8 WASH variables (listed in Table \ref{tab:wash-weights}) provide population-weighted measures of the proportion of the population that either: \emph{i}) have access to WASH resources (e.g., piped water, septic or sewer sanitation), or \emph{ii}) are exposed to risk factors (e.g.~surface water, open defecation). For risk associated WASH variables, we used the complement (\(1-\text{value}\)) to give the proportion of the population \emph{not} exposed to each risk factor. We used the \href{https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/optim}{\texttt{optim}} function in R and the \href{https://en.wikipedia.org/wiki/Limited-memory_BFGS}{L-BFGS-B} algorithm to estimate the set of optimal weights (Table \ref{tab:wash-weights}) that maximize the correlation between the weighted mean of the 8 WASH variables and reported cholera incidence per 1000 population across 40 SSA countries from 2000 to 2016. The optimal weighted mean had a correlation coefficient of \(r =\) -0.33 (-0.51 to -0.09 95\% CI) which was higher than the basic mean and all correlations provided by the individual WASH variables (see Figure \ref{fig:wash-incidence}). The weighted mean then provides a single variable between 0 and 1 that represents the overall proportion of the population that has access to WASH and/or is not exposed to environmental risk factors. Thus, the WASH-mediated contact rate with sources of environmental transmission is represented as (\(1-\theta_j\)). WASH enters the model twice: as an attenuation on environmental \emph{exposure} in the environment-to-human force of infection \(\Psi_{jt}\) (Equation \eqref{eq:foi-environment}), and as an attenuation on environmental \emph{contamination} in the shedding term of the reservoir update \(W_{j,t+1}\) (Equation \eqref{eq:system}). These two effects act on opposite sides of the environmental transmission cycle but share the same WASH infrastructure (piped water, sanitation), and their product yields the \((1-\theta_j)^2\) factor in the environmental component of \(R_{0,j}\) derived in the \emph{Decomposition of \(R_{0,j}\)} subsection below. Values of \(\theta_j\) for all countries are shown in Figure \ref{fig:wash-country}.
 
 \begin{table}
 \centering
@@ -959,13 +961,25 @@ To estimate the past and current vaccination rates, we sourced data on reported 
 
 \emph{As a result, our current estimates of the OCV vaccination rate likely underestimate total OCV coverage. We are working to expand our data sources to better reflect the full number of OCV doses distributed in SSA and will update the results here as soon as these are available.}
 
-To translate the reported number of OCV doses into the model parameter \(\nu_{jt}\), we take the number of doses shipped and the reported start date of the vaccination campaign, distributing the doses over subsequent days according to a maximum daily vaccination rate. Therefore, the vaccination rate \(\nu_t\) is not an estimated quantity, it is defined by the reported number of OCV doses administered with a assumption about the daily rate of distribution for an OCV campaign:
+To translate the reported number of OCV doses into the model parameter \(\nu_{jt}\), we take the number of doses shipped and the reported start date of the vaccination campaign, distributing the doses over subsequent days according to a maximum daily vaccination rate. Therefore, the vaccination rate \(\nu_t\) is not an estimated quantity, it is defined by the reported number of OCV doses administered with an assumption about the daily rate of distribution for an OCV campaign:
 
 \[
 \nu_{jt} = f\big(\text{reported OCV doses distributed}_{jt} \ | \ \text{daily distribution rate}\big).
 \]
 
 We separate \(\nu_{jt}\) into first doses \(\nu_{1,jt}\) and second doses \(\nu_{2,jt}\) on the basis of the campaign-level vaccine classification reported by GTFCC: Euvichol-S deliveries contribute exclusively to \(\nu_{1,jt}\) (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to \(\nu_{1,jt}\) and \(\nu_{2,jt}\) according to the campaign's reported dose-1 and dose-2 split. Within each day, doses are \emph{delivered deterministically} (rather than via a Poisson draw, as in earlier MOSAIC versions): the reported number of doses for that day is rounded to the nearest integer and processed without stochastic variation. First doses are then allocated proportionally across the configurable source set \(\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}\) (default: all five), so that a fraction \(X_{jt} / N^{\text{src}}_{jt}\) of \(\nu_{1,jt}\) is delivered to each eligible compartment \(X\). Second doses are restricted to existing \(V_1\) recipients and capped at the current \(V_1\) population to prevent over-administration. Two patch-level counters \(\text{doses}^{(1)}_{j,t}\) and \(\text{doses}^{(2)}_{j,t}\) record the daily totals for comparison with reported OCV-campaign data; these are tracking-only and do not feed back into the model dynamics.
+
+A few features of the implementation deserve explicit mention:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Order of operations within a tick.} Second-dose delivery is processed before first-dose delivery so that a recipient who is eligible for a first dose on the same day cannot be advanced to \(V_2\) in a single tick.
+\item
+  \emph{Vaccinating active infectives.} Because the default \(\mathcal{V}^{\text{src}}\) includes \(I_1\) and \(I_2\), a small fraction of doses is delivered to currently-infectious individuals. This is a deliberate simplification that keeps the dose-allocation denominator equal to the eligible population without separately bookkeeping who is shedding; the effect at typical \(I/N\) prevalences is negligible. Restrict \(\mathcal{V}^{\text{src}}\) to \(\{S, E, R\}\) in the LASER config if this simplification is undesired for a particular scenario.
+\item
+  \emph{V protection is one-sided.} The vaccinated compartments \(V_1, V_2\) are excluded from the force-of-infection terms --- i.e.~an individual in \(V\) cannot be reinfected until they wane back to \(S\). There is no ``vaccinated-but-not-protected'' sub-compartment in the v1.0 implementation; the \((1-\phi_k)\) ineffective fraction remains in the source compartment and re-enters the FOI through normal \(S\)-side dynamics.
+\end{itemize}
 
 See Figure \ref{fig:vaccination-example} for an example of OCV distribution using a maximum daily vaccination rate of 100,000. The resulting time series for each country is shown in Figure \ref{fig:vaccination-countries}, with current totals based on the WHO ICG data displayed in Figure \ref{fig:vaccination-maps}.
 
@@ -984,7 +998,7 @@ See Figure \ref{fig:vaccination-example} for an example of OCV distribution usin
 
 }
 
-\caption{The estimated vaccination coverage across all countries with reported vaccination data one the WHO ICG dashboard.}\label{fig:vaccination-countries}
+\caption{The estimated vaccination coverage across all countries with reported vaccination data on the WHO ICG dashboard.}\label{fig:vaccination-countries}
 \end{figure}
 
 \begin{figure}
@@ -1018,7 +1032,9 @@ separately to the mean, lower, and upper effectiveness curves for each dose regi
 \label{eq:effectiveness}
 \]
 
-After applying the constraint, the initial effectiveness is identical at the mode (both schedules reach approximately 0.79 immediately after the last dose), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is \(\log(2) / \omega_1 \approx 984\) days \(\approx 2.7\) years, while the modal two-dose half-life is \(\log(2) / \omega_2 \approx 1939\) days \(\approx 5.3\) years (roughly twice as long). The Gamma posterior for \(\omega_2\) is also more positively skewed (Figure \ref{fig:effectiveness}F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95\% CI bounds at later follow-up.
+After applying the constraint, the initial effectiveness is identical at the mode (both schedules reach approximately 0.79 immediately after the last dose), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is \(\log(2) / \omega_1 \approx 984\) days \(\approx 2.7\) years, while the modal two-dose half-life is \(\log(2) / \omega_2 \approx 1939\) days \(\approx 5.3\) years. The Gamma posterior for \(\omega_2\) is also more positively skewed (Figure \ref{fig:effectiveness}F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95\% CI bounds at later follow-up.
+
+The \(\phi_2 \ge \phi_1\) monotonicity constraint is enforced \emph{during the data fit} --- so the modes of the two Beta priors satisfy it exactly --- but the priors themselves remain independent during BFRS sampling, and individual draws can therefore occasionally produce \(\phi_2 < \phi_1\). In practice both Beta priors are tightly concentrated near 0.79 (Beta(91.84, 25.49) and Beta(206.96, 56.53)), so such violations are rare and the marginal posterior summaries are unaffected.
 
 \begin{figure}
 
@@ -1040,7 +1056,7 @@ Where we make the necessary and simplifying assumption that within 0--90 days af
 
 \begin{table}
 
-\caption{\label{tab:immunity-sources}Sources for the duration of immunity fro natural infection.}
+\caption{\label{tab:immunity-sources}Sources for the duration of immunity from natural infection.}
 \centering
 \begin{tabular}[t]{r|r|r|r|l}
 \hline
@@ -1055,10 +1071,10 @@ Day & Effectiveness & Upper CI & Lower CI & Source\\
 \end{tabular}
 \end{table}
 
-We estimated the mean immune decay to be \(\bar\varepsilon = 3.9 \times 10^{-4}\) (\(1.7 \times 10^{-4}-1.03 \times 10^{-3}\) 95\% CI) which is equivalent to an immune duration of \(7.21\) years (\(2.66-16.1\) years 95\% CI) as shown in Figure \ref{fig:immune-decay}A. This is slightly longer than previous modeling work estimating the duration of immunity to be \textasciitilde5 years (\href{https://www.nature.com/articles/nature07084}{King et al 2008}). Uncertainty around \(\varepsilon\) in the model is then represented by a Log-Normal distribution as shown in Figure \ref{fig:immune-decay}B:
+We estimated the mean immune decay to be \(\bar\varepsilon \approx 3.9 \times 10^{-4}\) day\(^{-1}\), equivalent to a mean immune duration of approximately 7 years as shown in Figure \ref{fig:immune-decay}A. This is slightly longer than previous modeling work estimating the duration of immunity to be approximately 5 years (\href{https://www.nature.com/articles/nature07084}{King et al.~2008}). Uncertainty around \(\varepsilon\) in the model is represented by a lognormal prior parameterised on the natural scale by the mean and standard deviation (matching the convention used in \texttt{priors\_default.json}), as shown in Figure \ref{fig:immune-decay}B:
 
 \[
-\varepsilon \sim \text{Lognormal}(\bar\varepsilon+\frac{\sigma^2}{2}, 0.25)
+\varepsilon \sim \text{Lognormal}\big(\text{mean} = 3.9 \times 10^{-4},\ \text{sd} = 2.0 \times 10^{-4}\big) \ \ \text{day}^{-1}.
 \]
 
 \begin{figure}
@@ -1072,7 +1088,7 @@ We estimated the mean immune decay to be \(\bar\varepsilon = 3.9 \times 10^{-4}\
 
 \section{Spatial dynamics}\label{spatial-dynamics}
 
-The parameters in the model diagram in Figure \ref{fig:diagram} that have a \(jt\) subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection \(\Lambda_{jt}\) which moves contagion among metapopulations according to the connectivity provided by parameters \(\tau_i\) (the probability departure) and \(\pi_{ij}\) (the probability of diffusion to destination \(j\)). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 41 countries included in the MOSAIC framework (Figure \ref{fig:mobility-data}).
+The parameters in the model diagram in Figure \ref{fig:diagram} that have a \(jt\) subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection \(\Lambda_{jt}\) which moves contagion among metapopulations according to the connectivity provided by parameters \(\tau_i\) (the probability departure) and \(\pi_{ij}\) (the probability of diffusion to destination \(j\)). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 40 countries included in the MOSAIC framework (Figure \ref{fig:mobility-data}).
 
 \begin{figure}
 
@@ -1236,7 +1252,7 @@ The coefficient \(\mathcal{C}_{ij}\in[-1,1]\) therefore measures the degree to w
 
 The presentation of infection with \emph{V. cholerae} can be extremely variable. The severity of infection depends many factors such as the amount of the infectious dose, the age of the host, the level of immunity of the host either through vaccination or previous infection, and naivety to the particular strain of \emph{V. cholerae}. Additional circumstantial factors such as nutritional status and overall pathogen burden may also impact infection severity. At the population level, the observed proportion of infections that are symptomatic is also dependent on the endemicity of cholera in the region. Highly endemic areas (e.g.~parts of Bangladesh; \href{https://www.nature.com/articles/s41591-024-02810-4}{Hegde et al 2024}) may have a very low proportion of symptomatic infections due to many previous exposures. Inversely, populations that are largely naive to \emph{V. cholerae} will exhibit a relatively higher proportion of symptomatic infections (e.g.~Haiti; \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/}{Finger et al 2024}).
 
-Accounting for all of these nuances in the first version of this model not possible, but we can past studies do contain some information that can help to set some sensible bounds on our definition for the proportion of infections that are symptomatic (\(\sigma\)). So we have compiled a short list of studies that have done sero-surveys and cohort studies to assess the likelihood of symptomatic infections in different locations and displayed those results in Table (\ref{tab:symptomatic-table}).
+Accounting for all of these nuances in the first version of the model is not possible, but past studies do contain useful information that can help set sensible bounds on the proportion of infections that are symptomatic (\(\sigma\)). We have therefore compiled a short list of sero-surveys and cohort studies that assess the likelihood of symptomatic infection in different locations, summarised in Table \ref{tab:symptomatic-table}.
 
 To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combine mean and confidence intervals of all studies in Table \ref{tab:symptomatic-table} and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion \(\sigma\) is:
 
@@ -1291,7 +1307,13 @@ The clinical presentation of cholera-like illness is similar across diarrhoeal p
 \label{eq:reported-cases}
 \end{equation}
 
-where \(\rho\) enters the numerator as the forward (care-seeking) rate and \(\chi_{jt}^{\text{eff}}\) enters the denominator as the back-correction for the PPV: this is the unique relationship consistent with \(P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text{suspected}) = P(\text{suspected}\mid\text{true})\,P(\text{true})\). The effective PPV \(\chi_{jt}^{\text{eff}}\) switches between an endemic and an epidemic value depending on whether local prevalence is below or above a per-location threshold \(\eta_j\):
+where \(\rho\) enters the numerator as the forward (care-seeking) rate and \(\chi_{jt}^{\text{eff}}\) enters the denominator as the back-correction for the PPV. This is the unique relationship consistent with the joint probability of being both truly cholera-positive and presenting as a suspected case:
+
+\[
+P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text{suspected}) = P(\text{suspected}\mid\text{true})\,P(\text{true}).
+\]
+
+The effective PPV \(\chi_{jt}^{\text{eff}}\) switches between an endemic and an epidemic value depending on whether local prevalence is below or above a per-location threshold \(\eta_j\):
 
 \begin{equation}
 \chi_{jt}^{\text{eff}} =
@@ -1309,7 +1331,7 @@ The prior on the care-seeking rate \(\rho\) is derived from the GEMS multi-count
 \label{eq:rho}
 \]
 
-corresponding to a mean of approximately 0.28 (i.e.~roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of \href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286}{Wiens et al.~2023}, which reports suspected-case PPVs of approximately 0.52 across all settings and 0.78 during outbreaks. Fit to Beta distributions by least-squares:
+corresponding to a mean of approximately 0.28 (i.e.~roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of \href{https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286}{Wiens et al.~2023}, which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
 
 \[
 \begin{aligned}
@@ -1332,13 +1354,22 @@ A parallel observation process applies to cholera-attributable deaths. The proba
 
 \[
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(3,\ 2) \quad \text{(mean} \approx 0.60\text{)},\\
+\rho_{\text{deaths}} \ \sim\ & \text{Beta}(6.30,\ 8.52) \quad \text{(mean} \approx 0.43\text{)},\\
 l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
 \end{aligned}
 \label{eq:rho-deaths}
 \]
 
-The mean death-detection rate of approximately 0.60 reflects the surveillance-capture estimate of \href{https://doi.org/10.1016/S1473-3099(24)00237-8}{Finger et al.~2024} (\emph{Lancet Infect Dis}; note this is the cholera-deaths-surveillance paper, distinct from the \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/}{Finger et al.~2024} Haiti sero-survey cited above in the symptomatic-proportion subsection). Reported deaths are modelled analogously to reported cases using the dynamic infection-fatality ratio described in the \hyperref[case-fatality-rate]{Case fatality rate} subsection that follows.
+The \(\rho_{\text{deaths}}\) prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: \href{https://doi.org/10.3201/eid2313.170529}{Routh et al.~2017} (Tanzania, 0.48), \href{https://doi.org/10.4269/ajtmh.2009.09-0400}{Shikanga et al.~2009} (Kenya, 0.34), and \href{https://doi.org/10.1371/journal.pntd.0002545}{Bwire et al.~2013} (Uganda, 0.50). The pooled mean is 0.42 with a 95\% prediction interval of {[}0.16, 0.73{]} (\(\tau^2 = 0.046\), \(I^2 = 32\%\)); see Figure \ref{fig:rho-deaths-prior}. The conceptual framework separating facility CFR from community deaths comes from \href{https://doi.org/10.1016/S1473-3099(24)00237-8}{Finger et al.~2024} (\emph{Lancet Infect Dis}). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the \hyperref[case-fatality-rate]{Case fatality rate} subsection.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/rho_deaths_prior} 
+
+}
+
+\caption{Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95\% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95\% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32\%).}\label{fig:rho-deaths-prior}
+\end{figure}
 
 \begin{figure}
 
@@ -1360,14 +1391,14 @@ In MOSAIC v1.0 the case fatality rate is replaced by a \emph{dynamic infection-f
 
 where \(t^{\dagger} = t / T_{\text{total}}\) is the normalised simulation time, so \(\mu_{j,1}\) is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator \(\mathbb{1}[\cdot]\) activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold \(\eta_j\) defined in the previous subsection. This dynamic specification replaces the earlier static \(\mu_j\) (a per-infection CFR) used in MOSAIC v0.1.
 
-The per-location baseline \(\mu_{j,0}\) is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: \(\rho\) controls the fraction of true symptomatic infections that are reported as suspected cases, while \(\chi\) controls the fraction of those suspected cases that are confirmed as true cholera. The reported CFR is therefore the true daily mortality scaled by the relative reporting rates of cases versus deaths:
+The per-location baseline \(\mu_{j,0}\) is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: \(\rho\) controls the fraction of true symptomatic infections that are reported as suspected cases, while \(\chi\) controls the fraction of those suspected cases that are confirmed as true cholera. In steady state, the daily reported CFR (reported deaths / reported cases on day \(t\)) equals the per-day true mortality scaled by the relative reporting rates of cases versus deaths, so the per-day baseline mortality rate is recovered as:
 
 \[
-\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi}.
+\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi},
 \label{eq:mu-baseline-derivation}
 \]
 
-Country-specific reported CFRs and Clopper-Pearson 95\% confidence intervals are calculated from the surveillance record using the \href{https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test}{Binomial exact test} in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the prior is \(\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)\) with mean approximately 0.0083 per day, which corresponds to an integrated CFR of roughly 8\% over a typical 10-day symptomatic infectious period. Priors for the other 39 countries are listed in the \hyperref[parameters-table]{Table of model parameters}.
+with units of day\(^{-1}\) when \(\text{CFR}^{\text{reported}}_{j}\) is interpreted as the daily ratio of reported deaths to reported cases. In practice the derivation uses \(\chi^{\text{epi}}\) because the reported-CFR window for most countries is dominated by outbreak periods. Country-specific reported CFRs and Clopper-Pearson 95\% confidence intervals are calculated from the surveillance record using the \href{https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test}{Binomial exact test} in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the reported CFR is approximately 2.7\% and the moment-matched prior is \(\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)\) with mean approximately 0.0083 per day, corresponding to an integrated CFR of roughly 8\% over a typical 10-day symptomatic infectious period (i.e.~\(1 - e^{-0.0083 \times 10}\)). Priors for the other 39 countries are listed in the \hyperref[parameters-table]{Table of model parameters}.
 
 The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
 
@@ -1391,57 +1422,57 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 \hline
 Country & Cases (2014-2024) & Deaths (2014-2024) & CFR & CFR Lower & CFR Upper & Beta Shape1 & Beta Shape2\\
 \hline
-AFRO Region & 1127096 & 21721 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+AFRO Region & 1135678 & 21942 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
-Angola & 3100 & 85 & 0.027 & 0.022 & 0.034 & 0.010 & 1.924\\
+Angola & 3942 & 108 & 0.027 & 0.023 & 0.033 & 0.010 & 1.931\\
 \hline
-Burundi & 5250 & 38 & 0.007 & 0.005 & 0.010 & 0.007 & 1.934\\
+Burundi & 5621 & 40 & 0.007 & 0.005 & 0.010 & 0.007 & 1.918\\
 \hline
 Benin & 3617 & 56 & 0.015 & 0.012 & 0.020 & 0.008 & 1.906\\
 \hline
-Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+Burkina Faso & 7 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
 Cote d'Ivoire & 446 & 18 & 0.040 & 0.024 & 0.063 & 0.013 & 1.863\\
 \hline
 Cameroon & 29897 & 925 & 0.031 & 0.029 & 0.033 & 0.010 & 1.931\\
 \hline
-Democratic Republic of Congo & 306023 & 5809 & 0.019 & 0.019 & 0.019 & 0.008 & 1.909\\
+Democratic Republic of Congo & 310792 & 5992 & 0.019 & 0.019 & 0.020 & 0.008 & 1.910\\
 \hline
-Congo & 359 & 30 & 0.084 & 0.057 & 0.117 & 0.019 & 1.906\\
+Congo & 435 & 36 & 0.083 & 0.059 & 0.113 & 0.019 & 1.905\\
 \hline
 Ethiopia & 46877 & 660 & 0.014 & 0.013 & 0.015 & 0.008 & 1.893\\
 \hline
 Ghana & 29814 & 251 & 0.008 & 0.007 & 0.010 & 0.007 & 1.925\\
 \hline
-Guinea & 1 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+Guinea & 1 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
-Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+Guinea-Bissau & 11 & 2 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
 Kenya & 47343 & 678 & 0.014 & 0.013 & 0.015 & 0.008 & 1.920\\
 \hline
 Liberia & 580 & 0 & 0.000 & 0.000 & 0.006 & 0.006 & 1.938\\
 \hline
-Mali & 12 & 4 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+Mali & 12 & 4 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
-Mozambique & 83417 & 351 & 0.004 & 0.004 & 0.005 & 0.006 & 1.893\\
+Mozambique & 84144 & 351 & 0.004 & 0.004 & 0.005 & 0.006 & 1.894\\
 \hline
-Malawi & 63625 & 1864 & 0.029 & 0.028 & 0.031 & 0.010 & 1.886\\
+Malawi & 63879 & 1859 & 0.029 & 0.028 & 0.030 & 0.010 & 1.879\\
 \hline
-Namibia & 634 & 13 & 0.021 & 0.011 & 0.035 & 0.010 & 1.913\\
+Namibia & 698 & 13 & 0.019 & 0.010 & 0.032 & 0.010 & 1.912\\
 \hline
 Niger & 11639 & 334 & 0.029 & 0.026 & 0.032 & 0.010 & 1.901\\
 \hline
 Nigeria & 241522 & 6521 & 0.027 & 0.026 & 0.028 & 0.009 & 1.894\\
 \hline
-Rwanda & 472 & 0 & 0.000 & 0.000 & 0.008 & 0.006 & 1.928\\
+Rwanda & 478 & 0 & 0.000 & 0.000 & 0.008 & 0.006 & 1.919\\
 \hline
 Sudan & 362 & 11 & 0.030 & 0.015 & 0.054 & 0.012 & 1.855\\
 \hline
 Somalia & 134839 & 1849 & 0.014 & 0.013 & 0.014 & 0.008 & 1.906\\
 \hline
-South Sudan & 34635 & 705 & 0.020 & 0.019 & 0.022 & 0.009 & 1.907\\
+South Sudan & 35871 & 715 & 0.020 & 0.019 & 0.021 & 0.009 & 1.914\\
 \hline
-Eswatini & 2 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.911\\
+Eswatini & 2 & 0 & 0.019 & 0.019 & 0.020 & 0.008 & 1.909\\
 \hline
 Chad & 1359 & 90 & 0.066 & 0.054 & 0.081 & 0.015 & 1.857\\
 \hline
@@ -1453,7 +1484,7 @@ Uganda & 9110 & 176 & 0.019 & 0.017 & 0.022 & 0.009 & 1.904\\
 \hline
 South Africa & 1392 & 47 & 0.034 & 0.025 & 0.045 & 0.012 & 2.008\\
 \hline
-Zambia & 11136 & 269 & 0.024 & 0.021 & 0.027 & 0.009 & 1.891\\
+Zambia & 11373 & 271 & 0.024 & 0.021 & 0.027 & 0.009 & 1.892\\
 \hline
 Zimbabwe & 25380 & 392 & 0.015 & 0.014 & 0.017 & 0.008 & 1.927\\
 \hline
@@ -1484,7 +1515,7 @@ The model includes basic demographic change by using reported birth and death ra
 
 \begin{table}
 \centering
-\caption{\label{tab:demographics}Demographic for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculate from crude birth and death rates from UN World Population Prospects 2024.}
+\caption{\label{tab:demographics}Demographics for AFRO countries in 2023. Data include: total population as of January 1, 2023, daily birth rate, and daily death rate. Values are calculated from crude birth and death rates from UN World Population Prospects 2024.}
 \centering
 \begin{tabular}[t]{l|r|r|r}
 \hline
@@ -1605,15 +1636,15 @@ The mean infectious period combines symptomatic (\(\gamma_1^{-1}\)) and asymptom
 
 \subsection{Worst-case environmental persistence}\label{worst-case-environmental-persistence}
 
-Following the ``upper-bound'' convention for \(R_0\), the pathogen-decay rate is fixed at its \textbf{slowest} plausible value:
+Following the ``upper-bound'' convention for \(R_0\), the pathogen-decay rate is fixed at its \textbf{slowest} plausible value, taken as the modal upper bound of the v1.0 decay prior \(\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}}\):
 
 \[
 \widehat{\delta}_j
-  = \frac{1}{\text{days}_{\max}}
-  = \frac{1}{90}\;\text{day}^{-1},
+  = \frac{1}{\text{days}_{\text{long}}}
+  \approx \frac{1}{196}\;\text{day}^{-1},
 \]
 
-corresponding to a 90-day survival time in water.
+corresponding to a survival time of approximately 196 days in water (16-day mode of \(\text{days}_{\text{short}}\) plus 180-day mode of \(\text{days}_{\text{spread}}\); see Equation \eqref{eq:decay-priors}).
 
 \subsection{\texorpdfstring{Decomposition of \(R_{0,j}\)}{Decomposition of R\_\{0,j\}}}\label{decomposition-of-r_0j}
 
@@ -1650,7 +1681,7 @@ R_{0,j}
 \item
   \textbf{\(R_{0,j}^{\text{hum}}\)} dominates in settings with high baseline contact (\(\beta_{j0}^{\text{hum}}\)) and short infectious periods.\\
 \item
-  \textbf{\(R_{0,j}^{\text{env}}\)} grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j = 1/90\)).\\
+  \textbf{\(R_{0,j}^{\text{env}}\)} grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j \approx 1/196\)).
   Because the WASH factor appears squared, improving basic services reduces both contamination and ingestion, driving \(R_{0,j}^{\text{env}}\) down rapidly.
 \end{itemize}
 
@@ -1787,14 +1818,14 @@ r = \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]}.
 \end{equation}
 The resulting \(\mathrm{Gamma}(s,r)\) kernel gives the \(g(\Delta t)\) function which is tabulated at each daily time-step and employed in the renewal equation for the effective reproductive number \(R_{jt}\) in Equation \eqref{eq:R}.
 
-Because \(s\) and \(r\) depend solely on \(\iota,\,\gamma_{1},\,\gamma_{2}\), and \(\sigma\), they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the the generation time distribution and the model's epidemiological parameters. We also compare our internal derivation of the generation time distribution with those
+Because \(s\) and \(r\) depend solely on \(\iota,\,\gamma_{1},\,\gamma_{2}\), and \(\sigma\), they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the generation time distribution and the model's epidemiological parameters.
 
-We model this quantity with a Gamma distribution whose mean is approximately 5 days:
+In practice we tabulate the renewal kernel as a Gamma distribution with mean equal to the prior-mean generation interval (approximately 5 days under the default \(\iota, \gamma_1, \gamma_2, \sigma\) values) and rate fixed at \(1/10\). With these conventions, \texttt{get\_generation\_time\_distribution()} in MOSAIC-pkg sets the shape parameter as \(\text{mean}/10\):
 \begin{equation}
-g(\cdot) \sim \text{Gamma}(2.5, 0.5).
+g(\cdot) \sim \text{Gamma}(\text{shape} = 0.5,\ \text{rate} = 0.1).
 \label{eq:generation-time}
 \end{equation}
-Here, shape \(= 2.5\), rate \(= 0.5\), and the mean is given by \(\text{shape} / \text{rate} \approx 5\) days (variance \(= \text{shape} / \text{rate}^2 \approx 10\) days). Previous studies have used a mean of 5 days; however, means of 3, 5, 7, or 10 days are also plausible (\href{}{Azman 2012}).
+This yields a kernel with mean \(\text{shape}/\text{rate} \approx 5\) days and variance \(\text{shape}/\text{rate}^2 \approx 50\) days\(^2\), allowing substantial mass at short delays consistent with cholera's rapid transmission. Previous cholera modelling studies have adopted similar mean values around 5 days; means of 3, 7, or 10 days have also been used in the literature (Azman 2012).
 
 \subsection{Generation-time distribution (latent + infectious + environmental delay)}\label{generation-time-distribution-latent-infectious-environmental-delay}
 
@@ -1816,7 +1847,6 @@ where
   \[
   \gamma_{\mathrm{eff}}
     =\Bigl[\tfrac{\sigma}{\gamma_{1}}+\tfrac{1-\sigma}{\gamma_{2}}\Bigr]^{-1};
-  \tag{1}
   \]
 \item
   \(E\sim\mathrm{Exp}(\delta_{jt})\) is an \textbf{environmental delay} that captures the survival of \emph{V.} \emph{cholerae} in water at location \(j\) and day \(t\); the decay rate \(\delta_{jt}\) is given by Eq. \eqref{eq:delta} and varies with the suitability index \(\psi_{jt}\).
@@ -1830,7 +1860,6 @@ Assuming independence of the three exponential clocks, the first two moments are
 \qquad\text{and}\qquad
 \mathbb{V}[\mathcal{G}]
    = \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}} + \frac{1}{\delta_{jt}^{2}}.
-\tag{2}
 \]
 
 Moment--matching to a Gamma distribution \(\text{Gamma}(s_{jt},r_{jt})\) yields
@@ -1839,7 +1868,6 @@ Moment--matching to a Gamma distribution \(\text{Gamma}(s_{jt},r_{jt})\) yields
 s_{jt} \;=\; \frac{\bigl(\mathbb{E}[\mathcal{G}]\bigr)^{2}}{\mathbb{V}[\mathcal{G}]}
 \quad\text{and}\quad
 r_{jt} \;=\; \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]},
-\tag{3}
 \]
 
 so both \textbf{shape} \(s_{jt}\) and \textbf{rate} \(r_{jt}\) evolve in time and space
@@ -1915,7 +1943,7 @@ After the transmission model is fully specified, we tune its numerical parameter
 
 \begin{table}
 
-\caption{\label{tab:mosaic-table}Listof MOSAIC Countries with Cholera News}
+\caption{\label{tab:mosaic-table}List of MOSAIC Countries with Cholera News}
 \centering
 \begin{tabular}[t]{l|l|l|l}
 \hline
@@ -2048,7 +2076,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$\textbackslash{}phi\_2\$ & Vaccine effectiveness of two-dose OCV. &  & \\
 \hline
-\$\textbackslash{}nu\_\{jt\}\$ & Vaccination rate (OCV doses administered) in destination \$j\$ at time \$t\$. &  & \\
+\$\textbackslash{}nu\_\{jt\}\$ & Total OCV vaccination rate in destination \$j\$ at time \$t\$. In MOSAIC v1.0 this is split into separate first-dose (\$\textbackslash{}nu\_\{1,jt\}\$) and second-dose (\$\textbackslash{}nu\_\{2,jt\}\$) rates --- see the supplementary parameter table below for details. &  & \\
 \hline
 \$\textbackslash{}omega\_1\$ & Waning immunity rate of vaccinated individuals with one-dose OCV. &  & \\
 \hline
@@ -2060,7 +2088,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$\textbackslash{}gamma\_2\$ & Recovery rate of asymptomatic infected individuals. &  & \\
 \hline
-\$\textbackslash{}mu\_\{j,t\}\$ & Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into \$\textbackslash{}mu\_\{j,0\}, \textbackslash{}mu\_\{j,1\}, \textbackslash{}mu\_\{j,\textbackslash{}text\{epi\}\}\$; see \textbackslash{}@ref(eq:mu-jt). &  & \\
+\$\textbackslash{}mu\_\{j,t\}\$ & Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into \$\textbackslash{}mu\_\{j,0\}, \textbackslash{}mu\_\{j,1\}, \textbackslash{}mu\_\{j,\textbackslash{}text\{epi\}\}\$ (see the *Case fatality rate* subsection). &  & \\
 \hline
 \$\textbackslash{}sigma\$ & Proportion of infections that are symptomatic. &  & \\
 \hline
@@ -2072,9 +2100,9 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$\textbackslash{}delta\$ & Environmental decay rate of *V. cholerae*. & Determined dynamically in model based on \$\textbackslash{}psi\_\{jt\}\$. & \\
 \hline
-\$\textbackslash{}delta\_\{\textbackslash{}text\{min\}\}\$ & Minimum decay rate when \$\textbackslash{}psi\_\{jt\}=0\$. & \$0.333 \textbackslash{} (3 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
+\$\textbackslash{}delta\_\{\textbackslash{}text\{min\}\}\$ & Minimum decay rate (longest *V. cholerae* survival), reached at \$\textbackslash{}psi\_\{jt\}=1\$; equals \$1/\textbackslash{}text\{days\}\_\{\textbackslash{}text\{long\}\}\$. & \$\textbackslash{}approx 0.0051 \textbackslash{} (196 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
 \hline
-\$\textbackslash{}delta\_\{\textbackslash{}text\{max\}\}\$ & Maximum decay rate when \$\textbackslash{}psi\_\{jt\}=1\$. & \$0.011 \textbackslash{} (90 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
+\$\textbackslash{}delta\_\{\textbackslash{}text\{max\}\}\$ & Maximum decay rate (shortest *V. cholerae* survival), reached at \$\textbackslash{}psi\_\{jt\}=0\$; equals \$1/\textbackslash{}text\{days\}\_\{\textbackslash{}text\{short\}\}\$. & \$\textbackslash{}approx 0.063 \textbackslash{} (16 \textbackslash{} \textbackslash{}text\{days\})\$ & \\
 \hline
 \$\textbackslash{}psi\_\{jt\}\$ & Environmental suitability of *V. cholerae* in destination \$j\$ at time \$t\$. & Estimated by LSTM-RNN model. & \\
 \hline
@@ -2106,7 +2134,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$\textbackslash{}theta\_\{j\}\$ & Proportion with adequate WASH in destination \$j\$. & See Figure \textbackslash{}@ref(fig:wash-country). & [Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)\\
 \hline
-\$\textbackslash{}kappa\$ & Concentration of *V. cholerae* (cells/mL) required for 50\% infection probability. & \$\textbackslash{}text\{Lognormal\}(11.77, 1.82)\$ & Meta-analysis (see \textbackslash{}@ref(eq:kappa))\\
+\$\textbackslash{}kappa\$ & Number of *V. cholerae* cells required for 50\% per-contact infection probability. In MOSAIC v1.0 expressed in absolute cells (matching the units of \$W\$); see [Infectious dose (\$\textbackslash{}kappa\$)](\#infectious-dose-kappa). & \$\textbackslash{}text\{Lognormal\}(11.77, 1.82)\$ & Meta-analysis (see *Infectious dose* subsection)\\
 \hline
 \end{tabular}
 
@@ -2136,7 +2164,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$s\_1, s\_2\$ & Shape parameters of the cumulative Beta transformation \$f(\textbackslash{}psi\_\{jt\}) = \textbackslash{}text\{pbeta\}(\textbackslash{}psi\_\{jt\}\textbackslash{}mid s\_1, s\_2)\$ for the decay rate. & \$\textbackslash{}text\{Truncnorm\}(3, 5, 0.1, 10)\$ each & Bayesian regularisation (v0.26).\\
 \hline
-\$\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\_\{jt\}\$ & Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate; see \textbackslash{}@ref(eq:psi-star). & Computed (Eq. \textbackslash{}@ref(eq:psi-star)). & Computed (per-country logit calibration).\\
+\$\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\_\{jt\}\$ & Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection). & Computed (Eq. \textbackslash{}@ref(eq:psi-star)). & Computed (per-country logit calibration).\\
 \hline
 \$a\_\{\textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\},j\}\$ & Per-country shape/gain parameter for the \$\textbackslash{}psi \textbackslash{}to \textbackslash{}psi\textasciicircum{}\{\textbackslash{}ast\}\$ logit calibration. & \$\textbackslash{}text\{Truncnorm\}(1, 1, 0, \textbackslash{}infty)\$ & Per-country posterior (calibration).\\
 \hline
@@ -2152,7 +2180,7 @@ Parameter & Description & Distribution & Source\\
 \hline
 \$\textbackslash{}chi\textasciicircum{}\{\textbackslash{}text\{epi\}\}\$ & Positive predictive value of a suspected cholera case during epidemic periods. & \$\textbackslash{}text\{Beta\}(4.79, 1.53)\$ & [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)\\
 \hline
-\$\textbackslash{}rho\_\{\textbackslash{}text\{deaths\}\}\$ & Probability that a true cholera death is captured by surveillance. & \$\textbackslash{}text\{Beta\}(3, 2)\$ & Finger et al. 2024 surveillance-capture estimate.\\
+\$\textbackslash{}rho\_\{\textbackslash{}text\{deaths\}\}\$ & Probability that a true cholera death is captured by surveillance. & \$\textbackslash{}text\{Beta\}(6.30, 8.52)\$ & SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.\\
 \hline
 \$l\_\{\textbackslash{}text\{cases\}\}\$ & Reporting lag in days from symptom onset to case reporting. & \$\textbackslash{}text\{Truncnorm\}(1, 1.5, 0, 7)\$ days & Surveillance reporting practice.\\
 \hline
@@ -2231,7 +2259,7 @@ Term & Description & Stochastic.Transition\\
 \hline
 \$- \textbackslash{}gamma\_1 I\_\{1,jt\}\$ & Recovery from symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}gamma\_1) \textbackslash{}big)\$\\
 \hline
-\$- \textbackslash{}mu\_\{j,t\} I\_\{1,jt\}\$ & Cholera-attributable mortality among symptomatic individuals (dynamic IFR, see \textbackslash{}@ref(eq:mu-jt)). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}mu\_\{j,t\}) \textbackslash{}big)\$\\
+\$- \textbackslash{}mu\_\{j,t\} I\_\{1,jt\}\$ & Cholera-attributable mortality among symptomatic individuals (dynamic IFR; see the *Case fatality rate* subsection). & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-\textbackslash{}mu\_\{j,t\}) \textbackslash{}big)\$\\
 \hline
 \$- d\_\{jt\} I\_\{1,jt\}\$ & Background death among individuals with symptomatic infection. & \$\textbackslash{}text\{Binom\}\textbackslash{}big( I\_\{1,jt\},\textbackslash{}; 1 - \textbackslash{}exp(-d\_\{jt\}) \textbackslash{}big)\$\\
 \hline
@@ -2247,9 +2275,9 @@ Term & Description & Stochastic.Transition\\
 \hline
 **\$\textbackslash{}mathbf\{W\}\$ (environment)** &  & \\
 \hline
-\$+ \textbackslash{}zeta\_1 I\_\{1,jt\}\$ & Cells shed into the environment by symptomatic individuals. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_1 I\_\{1,jt\} \textbackslash{}big)\$\\
+\$+ \textbackslash{}zeta\_1 I\_\{1,jt\}\$ & Cells shed into the environment by symptomatic individuals. & \$(1-\textbackslash{}theta\_j)\textbackslash{},\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_1 I\_\{1,jt\} \textbackslash{}big)\$\\
 \hline
-\$+ \textbackslash{}zeta\_2 I\_\{2,jt\}\$ & Cells shed into the environment by asymptomatic individuals. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_2 I\_\{2,jt\} \textbackslash{}big)\$\\
+\$+ \textbackslash{}zeta\_2 I\_\{2,jt\}\$ & Cells shed into the environment by asymptomatic individuals. & \$(1-\textbackslash{}theta\_j)\textbackslash{},\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}zeta\_2 I\_\{2,jt\} \textbackslash{}big)\$\\
 \hline
 \$- \textbackslash{}delta\_\{jt\} W\_\{jt\}\$ & Decay of viable *V. cholerae* in the environment. & \$\textbackslash{}text\{Pois\}\textbackslash{}big( \textbackslash{}delta\_\{jt\} W\_\{jt\} \textbackslash{}big)\$\\
 \hline
@@ -2296,7 +2324,7 @@ Notes
 \(\text{doses}^{(2)}_{j,t}\) & Total second doses delivered on day \(t\) & \(\text{doses}^{(2)}_{j,t} = \nu_{2,jt}\) & Tracking-only patch counter; capped at the current \(V_1\) population. \\
 \end{longtable}
 
-In the simplified SVEIRWS structure introduced in laser-cholera 0.12, only the \emph{effective} fraction of each delivered dose enters \(V_1\) or \(V_2\); ineffective doses are returned (notionally) to the source compartment without changing anyone's compartment membership. Total dose counts on day \(t\) are tracked separately as \(\text{doses}^{(1)}_{j,t}\) and \(\text{doses}^{(2)}_{j,t}\) for comparison with reported OCV-campaign data; these counters are stored as patch-level vectors of length \(T_{\text{total}}\) and are not used in the model dynamics.
+In the simplified SVEIWRS structure introduced in laser-cholera 0.12, only the \emph{effective} fraction of each delivered dose enters \(V_1\) or \(V_2\); ineffective doses are returned (notionally) to the source compartment without changing anyone's compartment membership. Total dose counts on day \(t\) are tracked separately as \(\text{doses}^{(1)}_{j,t}\) and \(\text{doses}^{(2)}_{j,t}\) for comparison with reported OCV-campaign data; these counters are stored as patch-level vectors of length \(T_{\text{total}}\) and are not used in the model dynamics.
 
 \chapter{Model calibration}\label{model-calibration-1}
 
@@ -2509,7 +2537,7 @@ All three representations report \(R^2\) from the stochastic median of their res
 \section{Estimating the Posterior Distribution of Model Parameters}\label{estimating-the-posterior-distribution-of-model-parameters}
 
 To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\) into an legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by \href{https://pubsonline.informs.org/doi/10.1287/opre.1.5.263}{Kahn \& Marshall 1953} and reviewed in a more modern context by \href{https://doi.org/10.1002/wics.56}{Tokdar \& Kass 2010}. Thus, we calculate the IS-weights using the \(\Delta \text{AIC}\) with a practical cut--off of \(\Delta=4\) and retain the IS for a subset of supported models as described in the steps below:
+\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\) into a legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by \href{https://pubsonline.informs.org/doi/10.1287/opre.1.5.263}{Kahn \& Marshall 1953} and reviewed in a more modern context by \href{https://doi.org/10.1002/wics.56}{Tokdar \& Kass 2010}. Thus, we calculate the IS-weights using the \(\Delta \text{AIC}\) with a practical cut--off of \(\Delta \le 6\) and retain the IS for a subset of supported models as described in the steps below:
 
 \subsection{\texorpdfstring{Compute \(\Delta \text{AIC}\) for every draw}{Compute \textbackslash Delta \textbackslash text\{AIC\} for every draw}}\label{compute-delta-textaic-for-every-draw}
 
@@ -2526,19 +2554,19 @@ For any model, the \href{https://en.wikipedia.org/wiki/Akaike_information_criter
 
 \subsection{Assign truncated importance weights}\label{assign-truncated-importance-weights}
 
-Since the BFRS method generates a large ensemble of candidate parameter sets \(\boldsymbol{\Theta}^{(i)}\), we reduce the influence of poorly fitting models by truncating the importance weights using a \(\Delta \text{AIC}\) cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior.
+Since the BFRS method generates a large ensemble of candidate parameter sets \(\boldsymbol{\Theta}^{(i)}\), we reduce the influence of poorly fitting models by truncating the importance weights using a \(\Delta \text{AIC}\) cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior. We first compute raw (un-normalised) weights:
 \begin{equation}
-\tilde{w}_i \;=\;
+w_i^{\text{raw}} \;=\;
 \begin{cases}
 \exp\!\left[-\tfrac12 \Delta_i\right], & \Delta_i \le 6,\\[6pt]
 0, & \Delta_i > 6,
 \end{cases}
-\qquad \text{and} \qquad
+\qquad \text{and then normalise:} \qquad
 \tilde{w}_i \;=\;
-\dfrac{w_i}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j}
+\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j^{\text{raw}}}.
 \label{eq:aic-weights}
 \end{equation}
-The threshold of \(\Delta_i \le 6\) is widely used in model selection and corresponds approximately to a likelihood ratio of \(p_i = \exp(-\Delta_i/2) \approx 0.05\), which in nested-model comparisons aligns loosely with a frequentist \(p\)-value of 0.05 (Burnham \& Anderson \href{https://doi.org/10.1007/b97636}{2002} and \href{https://journals.sagepub.com/doi/abs/10.1177/0049124104268644}{2004}). This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models.
+The threshold of \(\Delta_i \le 6\) is widely used in model selection and corresponds approximately to a likelihood ratio of \(p_i = \exp(-\Delta_i/2) \approx 0.05\), which in nested-model comparisons aligns loosely with a frequentist \(p\)-value of 0.05 (Burnham \& Anderson \href{https://doi.org/10.1007/b97636}{2002} and \href{https://journals.sagepub.com/doi/abs/10.1177/0049124104268644}{2004}). Since every MOSAIC simulation has the same number of estimated parameters \(k\), \(\Delta_i\) reduces to a likelihood-ratio statistic and the cut-off acts as a likelihood-ratio filter on the BFRS draws rather than as a formal model-selection criterion across nested models. This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models. Alternative posterior diagnostics such as the Pareto-\(k\) shape statistic of PSIS (\href{https://doi.org/10.48550/arXiv.1507.02646}{Vehtari et al.~2024}) can be used to flag cases where the truncated importance-weight distribution has unbounded variance.
 
 \subsection{Posterior summaries}\label{posterior-summaries}
 
@@ -2582,10 +2610,7 @@ the role that \(\hat R\) does in MCMC. We employ the specification of the ESS in
 \label{eq:ess}
 \end{equation}
 Because discarded model runs have \(\tilde{w}_i=0\), ESS reflects only the retained
-subset. In dynamic Bayesian models an ESS \(\gtrsim\!500\)--\(1000\) is generally
-adequate for stable posterior medians and 95\% credible intervals
-(\href{https://sites.stat.columbia.edu/gelman/book/}{Gelman \emph{et al.} 2014};
-\href{https://www.jstatsoft.org/article/view/v080i01}{Bürkner 2017}).
+subset. For importance-sampling--style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95\% credible intervals (\href{https://onlinelibrary.wiley.com/doi/10.1111/insr.12500}{Elvira \emph{et al.} 2022}; see also the MCMC-context discussion of ESS thresholds in \href{https://sites.stat.columbia.edu/gelman/book/}{Gelman \emph{et al.} 2014} and \href{https://www.jstatsoft.org/article/view/v080i01}{Bürkner 2017}). The earlier MOSAIC guidance of \(\widehat{\text{ESS}} \gtrsim 500\)--\(1000\) tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-\(k\) diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.
 
 The aggregate \(\widehat{\text{ESS}}\) above measures the joint information retained across the full parameter vector \(\boldsymbol{\Theta}\). To diagnose whether the posterior on any \emph{individual} parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \eqref{eq:ess} within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
 
@@ -2602,7 +2627,7 @@ Note that the location, time, and outcome shape weights \(w_j, w_t, w_{\text{cas
 
 \subsection{\texorpdfstring{Agreement index \emph{A}}{Agreement index A}}\label{agreement-index-a}
 
-We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 4\}\) by the normalized \href{https://en.wikipedia.org/wiki/Entropy_(information_theory)}{Shannon entropy} of their model weights \(\tilde w_i\):
+We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 6\}\) by the normalized \href{https://en.wikipedia.org/wiki/Entropy_(information_theory)}{Shannon entropy} of their model weights \(\tilde w_i\):
 \begin{equation}
 A = 
 \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
@@ -2612,24 +2637,24 @@ H(\mathbf{\tilde{w}})
 -\sum_{i\in\mathcal B}\tilde w_i\,\log\tilde w_i.
 \label{eq:agreement}
 \end{equation}
-Note that by definition \(A \in \{0,1\}\) because \(0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|\). When \(A=1\), all weights are equal (\(\tilde w_i = 1/|\mathcal B|\)) and there is a high degree of consensus in the sense that all models share similar fit. When \(A=0\), a single model dominates (\(\tilde w_i = 1\)) for one model run \(i\) and zero for the rest), which gives poor consensus among the subset of best models \(\mathcal B\).
+Note that by definition \(A \in [0,1]\) because \(0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|\). When \(A=1\), all weights are equal (\(\tilde w_i = 1/|\mathcal B|\)) and there is a high degree of consensus in the sense that all models share similar fit. When \(A=0\), a single model dominates (\(\tilde w_i = 1\)) for one model run \(i\) and zero for the rest), which gives poor consensus among the subset of best models \(\mathcal B\).
 
 \subsection{Coefficient of variation of weights}\label{coefficient-of-variation-of-weights}
 
-Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights:
+Beyond the first-moment metric of model agreement, we use a second-moment check that detects extremely skewed model weights, defined as the sample standard deviation of the truncated weights divided by their mean:
 \begin{equation}
 \mathrm{CV}_\mathbf{\tilde{w}} =
-\frac{\sqrt{\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
+\frac{\sqrt{\tfrac{1}{|\mathcal B|}\sum_{i\in\mathcal B}\left(\tilde{w}_i-\bar w\right)^2}}
 {\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
 \label{eq:cvw}
 \end{equation}
-Large \(\mathrm{CV}_\mathbf{\tilde{w}}\) warns that the variance within the best fitting subset of models may be high even if ESS and \(A\) look satisfactory. A common rule-of-thumb from \href{https://doi.org/10.1080/01621459.1994.10476469}{Kong et al.~1994} is \(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\) for comfortably balanced weights.
+Large \(\mathrm{CV}_\mathbf{\tilde{w}}\) warns that the variance within the best fitting subset of models may be high even if ESS and \(A\) look satisfactory. A common rule-of-thumb from \href{https://doi.org/10.1080/01621459.1994.10476469}{Kong et al.~1994} is \(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\) for comfortably balanced weights. (Note: with \(\tilde w\) normalised to sum to one over \(\mathcal B\), \(\bar w = 1/|\mathcal B|\) by construction.)
 
 \subsection{Convergence guidelines}\label{convergence-guidelines}
 
-A calibration run that meets all three criteria indicates that the retained ensemble is \emph{informative} (high ESS), \emph{internally consistent} (high \(A\)), and \emph{numerically stable} (moderate \(\mathrm{CV}_\mathbf{\tilde{w}}\)), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Out targets for successful model calibration are shown in Table \ref{tab:calibration} with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \ref{fig:likelihood-example}).
+A calibration run that meets all three criteria indicates that the retained ensemble is \emph{informative} (high ESS), \emph{internally consistent} (high \(A\)), and \emph{numerically stable} (moderate \(\mathrm{CV}_\mathbf{\tilde{w}}\)), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Our targets for successful model calibration are shown in Table \ref{tab:calibration} with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure \ref{fig:likelihood-example}).
 
 \begin{table}
 
@@ -2641,7 +2666,7 @@ Metric & Target range & Source\\
 \hline
 \$\textbackslash{}Delta\$AIC cut-off & \$\textbackslash{}le 6 \textbackslash{} \textbackslash{}left(p\textbackslash{}! \textbackslash{}approx \textbackslash{}! 0.05\textbackslash{}right)\$ & [Burnham \& Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)\\
 \hline
-Effective Sample Size \$\textbackslash{}left(\textbackslash{}widehat\{\textbackslash{}text\{ESS\}\}\textbackslash{}right)\$ & \$\textbackslash{}gt 500\$ & [Gelamn et al 2014](https://sites.stat.columbia.edu/gelman/book/)\\
+Effective Sample Size \$\textbackslash{}left(\textbackslash{}widehat\{\textbackslash{}text\{ESS\}\}\textbackslash{}right)\$ & \$\textbackslash{}gt 500\$ & [Gelman et al. 2014](https://sites.stat.columbia.edu/gelman/book/)\\
 \hline
  & \$\textbackslash{}gt 1000\$ & [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)\\
 \hline
@@ -2818,8 +2843,8 @@ Production-scale calibration runs are dispatched to a Dask cluster. The \href{ht
 
 \chapter{News}\label{news}
 
-\section*{November 25, 2024 --- The MOSAIC framework presented at ASMTH 2024}\label{november-25-2024-the-mosaic-framework-presented-at-asmth-2024}
-\addcontentsline{toc}{section}{November 25, 2024 --- The MOSAIC framework presented at ASMTH 2024}
+\section*{November 25, 2024 --- The MOSAIC framework presented at ASTMH 2024}\label{november-25-2024-the-mosaic-framework-presented-at-astmh-2024}
+\addcontentsline{toc}{section}{November 25, 2024 --- The MOSAIC framework presented at ASTMH 2024}
 
 John Giles presented the MOSAIC modeling framework in a talk entitled ``\emph{Cholera modeling capacity at IDM:
 leveraging diverse data streams for scenarios and forecasting}'' at the American Society of Tropical Medicine and Hygiene (ASTMH) on November 14, 2024 as part the symposium entitled ``\emph{Infectious Disease Surveillance and Modeling in LMIC's: From Data Collection to Forecasting}''.
