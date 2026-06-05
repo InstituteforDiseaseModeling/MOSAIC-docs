@@ -374,11 +374,11 @@ To attribute changes in forecast quality to specific model components rather tha
 
 The post-calibration diagnostics described in the previous subsection double as a parameter-identifiability check. We use three measures derived from the marginal posteriors:
 
-1. **Posterior shrinkage** --- the ratio of posterior to prior standard deviation, with values near 1 indicating that the data carry little information about the parameter and values near 0 indicating strong identifiability ([Betancourt 2018](https://betanalpha.github.io/assets/case_studies/identifiability.html));
+1. **Prior-to-posterior KL divergence** --- the [Kullback--Leibler divergence](https://doi.org/10.1214/aoms/1177729694) $D_{\text{KL}}(p_{\text{prior}} \,\|\, p_{\text{post}})$ for each parameter, computed in closed form when the prior and posterior share a known parametric family (Beta, Normal, Gamma, Lognormal) and by numerical integration for Uniform priors. Values near 0 indicate that the posterior is close to the prior and the data carry little information about the parameter; large values indicate that the posterior has moved appreciably away from the prior and the parameter is well identified by the calibration ([Bernardo & Smith 1994](https://doi.org/10.1002/9780470316870), Ch. 5);
 2. **Per-parameter ESS** --- Equation \@ref(eq:ess) evaluated on binned marginal draws as described under *Effective sample size* above, flagging parameters whose effective posterior support has collapsed to a small subset of draws;
 3. **Posterior correlation matrix** --- Spearman rank correlation across the best-fit subset $\mathcal{B}$, hierarchically clustered to surface trade-offs (e.g. between $\beta_{j0}$ and $\rho$, or between $\zeta_1$ and $p_\beta$).
 
-A parameter with a high HSIC score that nonetheless shows minimal shrinkage or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.
+A parameter with a high HSIC score that nonetheless shows a small prior-to-posterior KL or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.
 
 
 ## Model Forecasting

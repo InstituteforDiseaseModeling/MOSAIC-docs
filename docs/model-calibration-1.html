@@ -537,13 +537,13 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <p>The post-calibration diagnostics described in the previous subsection double as a parameter-identifiability check. We use three measures derived from the marginal posteriors:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Posterior shrinkage</strong> — the ratio of posterior to prior standard deviation, with values near 1 indicating that the data carry little information about the parameter and values near 0 indicating strong identifiability (<a href="https://betanalpha.github.io/assets/case_studies/identifiability.html">Betancourt 2018</a>);</li>
+<strong>Prior-to-posterior KL divergence</strong> — the <a href="https://doi.org/10.1214/aoms/1177729694">Kullback–Leibler divergence</a> <span class="math inline">\(D_{\text{KL}}(p_{\text{prior}} \,\|\, p_{\text{post}})\)</span> for each parameter, computed in closed form when the prior and posterior share a known parametric family (Beta, Normal, Gamma, Lognormal) and by numerical integration for Uniform priors. Values near 0 indicate that the posterior is close to the prior and the data carry little information about the parameter; large values indicate that the posterior has moved appreciably away from the prior and the parameter is well identified by the calibration (<a href="https://doi.org/10.1002/9780470316870">Bernardo &amp; Smith 1994</a>, Ch. 5);</li>
 <li>
 <strong>Per-parameter ESS</strong> — Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> evaluated on binned marginal draws as described under <em>Effective sample size</em> above, flagging parameters whose effective posterior support has collapsed to a small subset of draws;</li>
 <li>
 <strong>Posterior correlation matrix</strong> — Spearman rank correlation across the best-fit subset <span class="math inline">\(\mathcal{B}\)</span>, hierarchically clustered to surface trade-offs (e.g. between <span class="math inline">\(\beta_{j0}\)</span> and <span class="math inline">\(\rho\)</span>, or between <span class="math inline">\(\zeta_1\)</span> and <span class="math inline">\(p_\beta\)</span>).</li>
 </ol>
-<p>A parameter with a high HSIC score that nonetheless shows minimal shrinkage or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.</p>
+<p>A parameter with a high HSIC score that nonetheless shows a small prior-to-posterior KL or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.</p>
 </div>
 </div>
 <div id="model-forecasting" class="section level2" number="4.9">
