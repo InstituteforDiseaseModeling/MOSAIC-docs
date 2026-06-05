@@ -1054,14 +1054,14 @@ The effective PPV $\chi_{jt}^{\text{eff}}$ switches between an endemic and an ep
 (\#eq:chi-eff)
 \end{equation}
 
-The prior on the care-seeking rate $\rho$ is derived from the GEMS multi-country case-ascertainment study together with the meta-analysis by Wiens et al. 2025, fit to a Beta distribution by least-squares:
+The prior on the care-seeking rate $\rho$ is derived from a random-effects meta-analytic pool of the two case-definition strata reported by [Wiens et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC12013865/) -- general diarrhea (29.9%, 95% CI [25.3, 35.1] from 122 observations) and severe diarrhea + cholera (58.6%, 95% CI [39.9, 75.2] from 22 observations). Pooling both strata captures the severity spectrum of symptomatic cholera (mild-to-moderate + severe), avoiding the upward bias of the severe-only stratum (dominated by outbreak-response settings) and the downward bias of the general stratum (which includes many self-resolving mild episodes). The 95% confidence interval of the pooled mean is fit to a Beta distribution:
 
 $$
-\rho \sim \text{Beta}(6.81,\ 17.89),
+\rho \sim \text{Beta}(5.38,\ 7.10),
 (\#eq:rho)
 $$
 
-corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
+corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
 
 $$
 \begin{aligned}
@@ -1080,26 +1080,26 @@ $$
 
 The epidemic threshold $\eta_j$ is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country's observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).
 
-A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag from symptom onset is $l_{\text{deaths}}$:
+A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag $l_{\text{deaths}}$ is the time from the **death event** to its appearance in surveillance reports (the symptom-onset-to-death interval is implicit in the SEIR dynamics via $\gamma_1^{-1}$ and is NOT folded into $l_{\text{deaths}}$):
 
 $$
 \begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(6.30,\ 8.52) \quad \text{(mean} \approx 0.43\text{)},\\
-l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days)}.
+\rho_{\text{deaths}} \ \sim\ & \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},\\
+l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days, death-event to report)}.
 \end{aligned}
 (\#eq:rho-deaths)
 $$
 
-The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
+The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). MOSAIC's production prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05). The deaths likelihood identifies the product $\mu_{j,0}\,\rho_{\text{deaths}}$ rather than the two factors separately, so a narrow $\rho_{\text{deaths}}$ prior keeps it pinned near 0.42 during sampling, letting the per-country $\mu_{j,0}$ posteriors carry the cross-country CFR signal cleanly. The wider variant Beta(6.30, 8.52) (fit to the 95% prediction interval) is retained as a sensitivity prior only. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
 
 <div class="figure" style="text-align: center">
-<img src="figures/rho_deaths_prior.png" alt="Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%)." width="100%" />
-<p class="caption">(\#fig:rho-deaths-prior)Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Recommended Beta(6.30, 8.52) (blue, solid) fit by quantile-matching the 5th, 50th, and 95th percentiles of the 95% prediction interval from a random-effects meta-analysis of three SSA direct-capture studies; informative alternative Beta(36.95, 51.02) (plum, dashed) fit to the 95% CI of the pooled mean. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%).</p>
+<img src="figures/rho_deaths_prior.png" alt="Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%)." width="100%" />
+<p class="caption">(\#fig:rho-deaths-prior)Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%).</p>
 </div>
 
 <div class="figure" style="text-align: center">
-<img src="figures/suspected_cases.png" alt="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings." width="100%" />
-<p class="caption">(\#fig:rho)Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(6.81, 17.89)$, mean $\approx 0.28$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings.</p>
+<img src="figures/suspected_cases.png" alt="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(5.38, 7.10)$, mean $\approx 0.42$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings." width="100%" />
+<p class="caption">(\#fig:rho)Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\rho$ controls how many true symptomatic infections present as suspected cases ($\rho \sim \text{Beta}(5.38, 7.10)$, mean $\approx 0.42$). The endemic and epidemic positive predictive values $\chi^{\text{end}}$ and $\chi^{\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\approx 0.52$) is substantially lower than the epidemic PPV (mean $\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings.</p>
 </div>
 
 
@@ -1114,14 +1114,24 @@ In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatali
 
 where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
 
-The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014--2024 surveillance window, after accounting for the observation pipeline that converts true symptomatic infections into reported cases. Reporting compresses information in two ways: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, while $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera. In steady state, the daily reported CFR (reported deaths / reported cases on day $t$) equals the per-day true mortality scaled by the relative reporting rates of cases versus deaths, so the per-day baseline mortality rate is recovered as:
+The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014-2025 surveillance window, after accounting for the full observation pipeline that converts true symptomatic infections into reported cases AND reported deaths. Reporting compresses information on three axes: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera, and $\rho_{\text{deaths}}$ controls the fraction of true cholera deaths that are captured by surveillance (laser-cholera v0.13+).
+
+In steady state, taking expectations of the engine equations (`reported_deaths` = $\rho_{\text{deaths}} \cdot \text{disease\_deaths}$, `disease_deaths` $\sim$ Binomial($I_1$, $\mu_{j,t}$), `reported_cases` = $I_1 \cdot \rho / \chi$):
 
 $$
-\mu_{j,0} \;\approx\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\chi},
+\text{CFR}^{\text{reported}}_{j} \;=\; \frac{\mathbb{E}[\text{reported\_deaths}]}{\mathbb{E}[\text{reported\_cases}]} \;=\; \frac{I_1 \cdot \mu_{j,t} \cdot \rho_{\text{deaths}}}{I_1 \cdot \rho / \chi} \;=\; \mu_{j,t} \cdot \frac{\rho_{\text{deaths}} \cdot \chi}{\rho}.
+$$
+
+Solving for the un-modulated baseline component:
+
+$$
+\mu_{j,0} \;=\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\rho_{\text{deaths}} \cdot \chi},
 (\#eq:mu-baseline-derivation)
 $$
 
-with units of day$^{-1}$ when $\text{CFR}^{\text{reported}}_{j}$ is interpreted as the daily ratio of reported deaths to reported cases. In practice the derivation uses $\chi^{\text{epi}}$ because the reported-CFR window for most countries is dominated by outbreak periods. Country-specific reported CFRs and Clopper-Pearson 95% confidence intervals are calculated from the surveillance record using the [Binomial exact test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/binom.test) in R, and the resulting quantiles are fit to a Gamma prior per country by least squares. For example, in Angola the reported CFR is approximately 2.7% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 482.6)$ with mean approximately 0.0083 per day, corresponding to an integrated CFR of roughly 8% over a typical 10-day symptomatic infectious period (i.e. $1 - e^{-0.0083 \times 10}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+with units of day$^{-1}$. The symptomatic fraction $\sigma$ cancels in this identity because both observation pathways start from $I_1$, not from the underlying infections. Country-specific reported CFRs are estimated by a hierarchical GAM (binomial(deaths, cases) $\sim$ s(year) + country random intercepts + country temporal trends) fit to the WHO AFRO annual surveillance data through 2025 with the 2026 partial-year snapshot. The estimated CFR is converted to $\mu_{j,0}$ via the identity above using the prior means of $\rho$, $\rho_{\text{deaths}}$, and the endemic-epidemic-averaged $\chi$, yielding a per-country Gamma(shape=4, rate) prior with CV=50%. For example, in Angola the GAM-estimated reported CFR is approximately 2.3% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 173)$ with mean approximately 0.023 per day, corresponding to an integrated symptomatic-period CFR of roughly 11% over a 5-day symptomatic infectious period (i.e. $1 - e^{-0.023 \times 5}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+
+Pre-laser-cholera-v0.13.0 versions of MOSAIC scored observed reported deaths against simulated raw `disease_deaths` (without the $\rho_{\text{deaths}}$ factor), so per-country $\mu_{j,0}$ priors prior to v0.32.1 implicitly absorbed the missing $\rho_{\text{deaths}}$ factor in their posterior. Posteriors from pre-v0.32.1 calibrations are interpretable as $\mu_{j,0}^{\text{v0.13+}} \cdot \rho_{\text{deaths}}$ under the new schema (a factor of $\approx$0.42 lower than the corrected estimate).
 
 The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
 
@@ -1135,7 +1145,7 @@ $$
 \mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
 $$
 
-Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49) and consumed by MOSAIC-pkg from version 0.30.2.
+Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{round}(\text{disease\_deaths}[t - l_{\text{deaths}}] \cdot \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0.
 
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -1143,8 +1153,8 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
  <thead>
   <tr>
    <th style="text-align:left;"> Country </th>
-   <th style="text-align:right;"> Cases (2014-2024) </th>
-   <th style="text-align:right;"> Deaths (2014-2024) </th>
+   <th style="text-align:right;"> Cases (2014-present) </th>
+   <th style="text-align:right;"> Deaths (2014-present) </th>
    <th style="text-align:right;"> CFR </th>
    <th style="text-align:right;"> CFR Lower </th>
    <th style="text-align:right;"> CFR Upper </th>
@@ -1155,33 +1165,33 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 <tbody>
   <tr>
    <td style="text-align:left;"> AFRO Region </td>
-   <td style="text-align:right;"> 1135678 </td>
-   <td style="text-align:right;"> 21942 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 1444871 </td>
+   <td style="text-align:right;"> 28215 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 3942 </td>
-   <td style="text-align:right;"> 108 </td>
-   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 43127 </td>
+   <td style="text-align:right;"> 1049 </td>
+   <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.023 </td>
-   <td style="text-align:right;"> 0.033 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.931 </td>
+   <td style="text-align:right;"> 0.026 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.907 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 5621 </td>
-   <td style="text-align:right;"> 40 </td>
+   <td style="text-align:right;"> 10292 </td>
+   <td style="text-align:right;"> 59 </td>
+   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.005 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.918 </td>
+   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 1.911 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Benin </td>
@@ -1197,11 +1207,11 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:left;"> Burkina Faso </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cote d'Ivoire </td>
@@ -1214,84 +1224,104 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 1.863 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Côte D’ivoire </td>
+   <td style="text-align:right;"> 503 </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 0.040 </td>
+   <td style="text-align:right;"> 0.024 </td>
+   <td style="text-align:right;"> 0.061 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 1.854 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 29897 </td>
-   <td style="text-align:right;"> 925 </td>
+   <td style="text-align:right;"> 29981 </td>
+   <td style="text-align:right;"> 926 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.931 </td>
+   <td style="text-align:right;"> 1.929 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 310792 </td>
-   <td style="text-align:right;"> 5992 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 419069 </td>
+   <td style="text-align:right;"> 8672 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.916 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Congo </td>
+   <td style="text-align:right;"> 1431 </td>
+   <td style="text-align:right;"> 111 </td>
+   <td style="text-align:right;"> 0.078 </td>
+   <td style="text-align:right;"> 0.064 </td>
+   <td style="text-align:right;"> 0.093 </td>
+   <td style="text-align:right;"> 0.016 </td>
+   <td style="text-align:right;"> 1.901 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Comoros </td>
+   <td style="text-align:right;"> 11171 </td>
+   <td style="text-align:right;"> 153 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 0.016 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.896 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Ethiopia </td>
+   <td style="text-align:right;"> 82589 </td>
+   <td style="text-align:right;"> 1016 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 0.012 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 1.922 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Ghana </td>
+   <td style="text-align:right;"> 36994 </td>
+   <td style="text-align:right;"> 302 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 1.921 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Guinea </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Congo </td>
-   <td style="text-align:right;"> 435 </td>
-   <td style="text-align:right;"> 36 </td>
-   <td style="text-align:right;"> 0.083 </td>
-   <td style="text-align:right;"> 0.059 </td>
-   <td style="text-align:right;"> 0.113 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 1.905 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:right;"> 46877 </td>
-   <td style="text-align:right;"> 660 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.013 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.893 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:right;"> 29814 </td>
-   <td style="text-align:right;"> 251 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 1.925 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Guinea </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> Guinea-Bissau </td>
    <td style="text-align:right;"> 11 </td>
    <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:right;"> 47343 </td>
-   <td style="text-align:right;"> 678 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 48656 </td>
+   <td style="text-align:right;"> 709 </td>
    <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.920 </td>
+   <td style="text-align:right;"> 1.915 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Liberia </td>
@@ -1307,71 +1337,71 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:left;"> Mali </td>
    <td style="text-align:right;"> 12 </td>
    <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 84144 </td>
-   <td style="text-align:right;"> 351 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 99439 </td>
+   <td style="text-align:right;"> 457 </td>
+   <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.894 </td>
+   <td style="text-align:right;"> 1.904 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 63879 </td>
-   <td style="text-align:right;"> 1859 </td>
+   <td style="text-align:right;"> 65556 </td>
+   <td style="text-align:right;"> 1886 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.030 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.879 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:right;"> 698 </td>
-   <td style="text-align:right;"> 13 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 791 </td>
+   <td style="text-align:right;"> 14 </td>
+   <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 0.030 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.912 </td>
+   <td style="text-align:right;"> 1.882 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Niger </td>
-   <td style="text-align:right;"> 11639 </td>
-   <td style="text-align:right;"> 334 </td>
-   <td style="text-align:right;"> 0.029 </td>
-   <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 12705 </td>
+   <td style="text-align:right;"> 357 </td>
+   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.025 </td>
+   <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.901 </td>
+   <td style="text-align:right;"> 1.897 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 241522 </td>
-   <td style="text-align:right;"> 6521 </td>
+   <td style="text-align:right;"> 292418 </td>
+   <td style="text-align:right;"> 7831 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.894 </td>
+   <td style="text-align:right;"> 1.891 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:right;"> 478 </td>
+   <td style="text-align:right;"> 823 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.919 </td>
+   <td style="text-align:right;"> 1.920 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Sudan </td>
@@ -1395,93 +1425,93 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 35871 </td>
-   <td style="text-align:right;"> 715 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.914 </td>
+   <td style="text-align:right;"> 134119 </td>
+   <td style="text-align:right;"> 2346 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 1.926 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Eswatini </td>
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 0 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.909 </td>
+   <td style="text-align:right;"> 1.910 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Chad </td>
-   <td style="text-align:right;"> 1359 </td>
-   <td style="text-align:right;"> 90 </td>
-   <td style="text-align:right;"> 0.066 </td>
-   <td style="text-align:right;"> 0.054 </td>
-   <td style="text-align:right;"> 0.081 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 1.857 </td>
+   <td style="text-align:right;"> 4338 </td>
+   <td style="text-align:right;"> 257 </td>
+   <td style="text-align:right;"> 0.059 </td>
+   <td style="text-align:right;"> 0.052 </td>
+   <td style="text-align:right;"> 0.067 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 1.862 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Togo </td>
-   <td style="text-align:right;"> 405 </td>
-   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 851 </td>
+   <td style="text-align:right;"> 40 </td>
    <td style="text-align:right;"> 0.047 </td>
-   <td style="text-align:right;"> 0.028 </td>
-   <td style="text-align:right;"> 0.072 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 1.866 </td>
+   <td style="text-align:right;"> 0.034 </td>
+   <td style="text-align:right;"> 0.063 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 1.868 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:right;"> 33830 </td>
-   <td style="text-align:right;"> 524 </td>
-   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 50383 </td>
+   <td style="text-align:right;"> 729 </td>
    <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.913 </td>
+   <td style="text-align:right;"> 1.915 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:right;"> 9110 </td>
-   <td style="text-align:right;"> 176 </td>
+   <td style="text-align:right;"> 9461 </td>
+   <td style="text-align:right;"> 181 </td>
    <td style="text-align:right;"> 0.019 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.904 </td>
+   <td style="text-align:right;"> 1.901 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> South Africa </td>
-   <td style="text-align:right;"> 1392 </td>
+   <td style="text-align:right;"> 1403 </td>
    <td style="text-align:right;"> 47 </td>
-   <td style="text-align:right;"> 0.034 </td>
+   <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.025 </td>
-   <td style="text-align:right;"> 0.045 </td>
+   <td style="text-align:right;"> 0.044 </td>
    <td style="text-align:right;"> 0.012 </td>
    <td style="text-align:right;"> 2.008 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 11373 </td>
-   <td style="text-align:right;"> 271 </td>
-   <td style="text-align:right;"> 0.024 </td>
-   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 32784 </td>
+   <td style="text-align:right;"> 929 </td>
+   <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.892 </td>
+   <td style="text-align:right;"> 0.030 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 1.897 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:right;"> 25380 </td>
-   <td style="text-align:right;"> 392 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 46191 </td>
+   <td style="text-align:right;"> 814 </td>
+   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.016 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.927 </td>
+   <td style="text-align:right;"> 1.914 </td>
   </tr>
 </tbody>
 </table>
@@ -1490,15 +1520,15 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%" />
-<p class="caption">(\#fig:cfr-cases)Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 to 2024. Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black, all countries with less than 3/0.2 = 150 total reported cases are assigned the mean CFR for AFRO.</p>
+<img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%" />
+<p class="caption">(\#fig:cfr-cases)Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.</p>
 </div>
 
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue." width="95%" />
-<p class="caption">(\#fig:cfr-beta)Beta distributions of the overall Case Fatality Rate (CFR) from 2014 to 2024. Examples show the overall CFR for the AFRO region (2%) in black, Congo with the highest CFR (7%) in red, and South Sudan with the lowest CFR (0.1%) in blue.</p>
+<img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue." width="95%" />
+<p class="caption">(\#fig:cfr-beta)Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue.</p>
 </div>
 
 
@@ -2243,32 +2273,32 @@ Table: (\#tab:mosaic-table)List of MOSAIC Countries with Cholera News
 
 Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC v1.0.
 
-|Parameter                     |Description                                                                                                                                                                        |Distribution                                                      |Source                                                                                              |
-|:-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
-|$\nu_{1,jt}$                  |First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.                                                                                               |Derived from GTFCC OCV campaign data.                             |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                              |
-|$\nu_{2,jt}$                  |Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.                                                                              |Derived from GTFCC OCV campaign data.                             |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                              |
-|$\mathcal{V}^{\text{src}}$    |Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$).                                                                                       |Default: $\{S, E, I_1, I_2, R\}$.                                 |laser-cholera issue #42.                                                                            |
-|$N^{\text{src}}_{jt}$         |Total population eligible for first-dose vaccination on day $t$: $\sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$.                                                                   |Computed.                                                         |Computed from compartment populations.                                                              |
-|$\zeta_{\text{ratio}}$        |Symptomatic-to-asymptomatic shedding ratio $\zeta_1/\zeta_2$.                                                                                                                      |$\text{Lognormal}(4.31, 4.39)$                                    |Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)                    |
-|$\text{days}_{\text{short}}$  |Survival time of *V. cholerae* at low environmental suitability ($\psi_{jt}\!\to\!0$).                                                                                             |$\text{Truncnorm}(16, 7, 0.01, 60)$                               |Literature anchor; staged calibration.                                                              |
-|$\text{days}_{\text{long}}$   |Survival time at high environmental suitability ($\psi_{jt}\!\to\!1$). Derived as $\text{days}_{\text{short}} + \text{days}_{\text{spread}}$.                                      |Derived.                                                          |Algebraic.                                                                                          |
-|$\text{days}_{\text{spread}}$ |Algebraic spread between minimum and maximum *V. cholerae* survival time.                                                                                                          |$\text{Truncnorm}(180, 95, 1, 365)$                               |Literature anchor; staged calibration.                                                              |
-|$s_1, s_2$                    |Shape parameters of the cumulative Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$ for the decay rate.                                                   |$\text{Truncnorm}(3, 5, 0.1, 10)$ each                            |Bayesian regularisation (v0.26).                                                                    |
-|$\psi^{\ast}_{jt}$            |Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection). |Computed (Eq. \@ref(eq:psi-star)).                                |Computed (per-country logit calibration).                                                           |
-|$a_{\psi^{\ast},j}$           |Per-country shape/gain parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                                 |$\text{Truncnorm}(1, 1, 0, \infty)$                               |Per-country posterior (calibration).                                                                |
-|$b_{\psi^{\ast},j}$           |Per-country scale/offset parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                               |$\mathcal{N}(0, 2.5)$                                             |Per-country posterior (calibration).                                                                |
-|$z_{\psi^{\ast},j}$           |Per-country EWMA smoothing weight ($z = 1$: no smoothing).                                                                                                                         |$\text{Beta}(2, 1)$                                               |Per-country posterior; Beta(2,1) tightening from v0.28.5.                                           |
-|$k_{\psi^{\ast},j}$           |Per-country time offset in days for the $\psi \to \psi^{\ast}$ calibration.                                                                                                        |$\text{Truncnorm}(0, 25, -90, 90)$                                |Per-country posterior (calibration).                                                                |
-|$\eta_j$                      |Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).                                                                                               |$\text{Truncnorm}$ per country, capped at 0.01.                   |Per-country historical median epidemic prevalence.                                                  |
-|$\chi^{\text{end}}$           |Positive predictive value of a suspected cholera case during endemic periods.                                                                                                      |$\text{Beta}(5.43, 5.01)$                                         |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286) |
-|$\chi^{\text{epi}}$           |Positive predictive value of a suspected cholera case during epidemic periods.                                                                                                     |$\text{Beta}(4.79, 1.53)$                                         |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286) |
-|$\rho_{\text{deaths}}$        |Probability that a true cholera death is captured by surveillance.                                                                                                                 |$\text{Beta}(6.30, 8.52)$                                         |SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.                            |
-|$l_{\text{cases}}$            |Reporting lag in days from symptom onset to case reporting.                                                                                                                        |$\text{Truncnorm}(1, 1.5, 0, 7)$ days                             |Surveillance reporting practice.                                                                    |
-|$l_{\text{deaths}}$           |Reporting lag in days from symptom onset to death reporting.                                                                                                                       |$\text{Truncnorm}(4, 3, 1, 14)$ days                              |Surveillance reporting practice.                                                                    |
-|$\mu_{j,0}$                   |Baseline daily mortality hazard $\mu_{j,0}$ in destination $j$.                                                                                                                    |$\text{Gamma}$ per country (e.g., AGO: $\text{Gamma}(4, 482.6)$). |Derived from reported CFR via $\mu_{j,0} \approx \text{CFR}^{\text{reported}}_j \cdot \rho / \chi$. |
-|$\mu_{j,1}$                   |Proportional time-trend factor for $\mu_{j,t}$ over the simulation period.                                                                                                         |$\mathcal{N}(0, 0.05)$                                            |Weakly informative.                                                                                 |
-|$\mu_{j,\text{epi}}$          |Proportional increase in $\mu_{j,t}$ during epidemic periods.                                                                                                                      |$\text{Gamma}(1, 2)$                                              |Reflects typical surge-period IFR increase.                                                         |
-|$w_{\text{gibbs}}$            |Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter).                                                                                   |Calibration control parameter.                                    |[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)                                           |
+|Parameter                     |Description                                                                                                                                                                        |Distribution                                                    |Source                                                                                                                                                     |
+|:-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|
+|$\nu_{1,jt}$                  |First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.                                                                                               |Derived from GTFCC OCV campaign data.                           |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                                                                                     |
+|$\nu_{2,jt}$                  |Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.                                                                              |Derived from GTFCC OCV campaign data.                           |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                                                                                     |
+|$\mathcal{V}^{\text{src}}$    |Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$).                                                                                       |Default: $\{S, E, I_1, I_2, R\}$.                               |laser-cholera issue #42.                                                                                                                                   |
+|$N^{\text{src}}_{jt}$         |Total population eligible for first-dose vaccination on day $t$: $\sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$.                                                                   |Computed.                                                       |Computed from compartment populations.                                                                                                                     |
+|$\zeta_{\text{ratio}}$        |Symptomatic-to-asymptomatic shedding ratio $\zeta_1/\zeta_2$.                                                                                                                      |$\text{Lognormal}(4.31, 4.39)$                                  |Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)                                                                           |
+|$\text{days}_{\text{short}}$  |Survival time of *V. cholerae* at low environmental suitability ($\psi_{jt}\!\to\!0$).                                                                                             |$\text{Truncnorm}(16, 7, 0.01, 60)$                             |Literature anchor; staged calibration.                                                                                                                     |
+|$\text{days}_{\text{long}}$   |Survival time at high environmental suitability ($\psi_{jt}\!\to\!1$). Derived as $\text{days}_{\text{short}} + \text{days}_{\text{spread}}$.                                      |Derived.                                                        |Algebraic.                                                                                                                                                 |
+|$\text{days}_{\text{spread}}$ |Algebraic spread between minimum and maximum *V. cholerae* survival time.                                                                                                          |$\text{Truncnorm}(180, 95, 1, 365)$                             |Literature anchor; staged calibration.                                                                                                                     |
+|$s_1, s_2$                    |Shape parameters of the cumulative Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$ for the decay rate.                                                   |$\text{Truncnorm}(3, 5, 0.1, 10)$ each                          |Bayesian regularisation (v0.26).                                                                                                                           |
+|$\psi^{\ast}_{jt}$            |Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection). |Computed (Eq. \@ref(eq:psi-star)).                              |Computed (per-country logit calibration).                                                                                                                  |
+|$a_{\psi^{\ast},j}$           |Per-country shape/gain parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                                 |$\text{Truncnorm}(1, 1, 0, \infty)$                             |Per-country posterior (calibration).                                                                                                                       |
+|$b_{\psi^{\ast},j}$           |Per-country scale/offset parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                               |$\mathcal{N}(0, 2.5)$                                           |Per-country posterior (calibration).                                                                                                                       |
+|$z_{\psi^{\ast},j}$           |Per-country EWMA smoothing weight ($z = 1$: no smoothing).                                                                                                                         |$\text{Beta}(2, 1)$                                             |Per-country posterior; Beta(2,1) tightening from v0.28.5.                                                                                                  |
+|$k_{\psi^{\ast},j}$           |Per-country time offset in days for the $\psi \to \psi^{\ast}$ calibration.                                                                                                        |$\text{Truncnorm}(0, 25, -90, 90)$                              |Per-country posterior (calibration).                                                                                                                       |
+|$\eta_j$                      |Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).                                                                                               |$\text{Truncnorm}$ per country, capped at 0.01.                 |Per-country historical median epidemic prevalence.                                                                                                         |
+|$\chi^{\text{end}}$           |Positive predictive value of a suspected cholera case during endemic periods.                                                                                                      |$\text{Beta}(5.43, 5.01)$                                       |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)                                                        |
+|$\chi^{\text{epi}}$           |Positive predictive value of a suspected cholera case during epidemic periods.                                                                                                     |$\text{Beta}(4.79, 1.53)$                                       |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)                                                        |
+|$\rho_{\text{deaths}}$        |Probability that a true cholera death is captured by surveillance.                                                                                                                 |$\text{Beta}(36.95, 51.02)$                                     |SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.                                                                                   |
+|$l_{\text{cases}}$            |Reporting lag in days from symptom onset to case reporting.                                                                                                                        |$\text{Truncnorm}(1, 1.5, 0, 7)$ days                           |Surveillance reporting practice.                                                                                                                           |
+|$l_{\text{deaths}}$           |Reporting lag in days from a true cholera death event to its appearance in surveillance reports (symptom-onset-to-death is implicit in $\gamma_1^{-1}$).                           |$\text{Truncnorm}(4, 3, 1, 14)$ days                            |Surveillance reporting practice.                                                                                                                           |
+|$\mu_{j,0}$                   |Baseline daily mortality hazard $\mu_{j,0}$ in destination $j$.                                                                                                                    |$\text{Gamma}$ per country (e.g., AGO: $\text{Gamma}(4, 173)$). |Derived from reported CFR via $\mu_{j,0} = \text{CFR}^{\text{reported}}_j \cdot \rho / (\rho_{\text{deaths}} \cdot \chi)$ (laser-cholera v0.13+ identity). |
+|$\mu_{j,1}$                   |Proportional time-trend factor for $\mu_{j,t}$ over the simulation period.                                                                                                         |$\mathcal{N}(0, 0.05)$                                          |Weakly informative.                                                                                                                                        |
+|$\mu_{j,\text{epi}}$          |Proportional increase in $\mu_{j,t}$ during epidemic periods.                                                                                                                      |$\text{Gamma}(1, 2)$                                            |Reflects typical surge-period IFR increase.                                                                                                                |
+|$w_{\text{gibbs}}$            |Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter).                                                                                   |Calibration control parameter.                                  |[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)                                                                                                  |
 
 
 

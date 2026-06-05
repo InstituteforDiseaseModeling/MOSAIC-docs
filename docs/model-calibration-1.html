@@ -497,15 +497,64 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <p>Three diagnostic plot families are produced automatically. <code>plot_model_distributions()</code> produces a marginal prior-versus-posterior panel for every fitted parameter, with six parameters (<code>kappa</code>, <code>zeta_1</code>, <code>zeta_2</code>, <code>zeta_ratio</code>, <code>prop_E_initial</code>, <code>prop_I_initial</code>) drawn on a log10 x-axis to handle their multi-decade prior support; the change-of-variables <span class="math inline">\(f_Y(\log_{10} x) = f_X(x) \, x \, \ln 10\)</span> is applied to the density values so that the visible peaks correspond to the modes of the original-scale density. <code>plot_psi_star_diagnostic()</code> produces a per-location overlay of the raw LSTM suitability <span class="math inline">\(\psi_{jt}\)</span> and the calibrated <span class="math inline">\(\psi^{\ast}_{jt}\)</span> from Equation <a href="model-description.html#eq:psi-star">(3.9)</a>, with the mean reduction in suitability reported in the subtitle. <code>plot_model_likelihood()</code> plots the log-likelihood as a function of accumulated parameter draws, displaying the diminishing-returns curve referenced in Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>.</p>
 <p>The marginal prior/posterior plots are particularly useful for spotting calibration pathologies. A near-delta posterior on the boundary of a uniform or truncated-normal prior typically indicates an under-informative shape that should be re-specified; a near-uniform posterior typically indicates the data carry little information about that parameter. Both warrant a check against the importance-sampling weights before any forecast is released.</p>
 </div>
-<div id="model-forecasting" class="section level2" number="4.8">
+<div id="sensitivity-analysis" class="section level2" number="4.8">
 <h2>
-<span class="header-section-number">4.8</span> Model Forecasting<a class="anchor" aria-label="anchor" href="#model-forecasting"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.8</span> Sensitivity analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"><i class="fas fa-link"></i></a>
+</h2>
+<p>The BFRS calibration produces a weighted ensemble of <span class="math inline">\(n_{\text{sim}}\)</span> parameter vectors <span class="math inline">\(\{\boldsymbol{\Theta}^{(i)}, \tilde{w}_i\}\)</span> from which we quantify how each parameter contributes to model fit. We use three complementary methods:</p>
+<ol style="list-style-type: decimal">
+<li>a global, post-hoc importance ranking of all sampled parameters against the log-likelihood;</li>
+<li>targeted ablation experiments that re-fit the model with individual components (covariates, compartments, or likelihood terms) switched off; and</li>
+<li>identifiability diagnostics derived from the marginal posteriors themselves.</li>
+</ol>
+<p>These methods are complementary rather than redundant: the first ranks parameters cheaply once a calibration has run, the second establishes the causal contribution of a structural component at the cost of one additional calibration per variant, and the third detects parameters that are weakly constrained by the data regardless of their nominal importance score.</p>
+<div id="global-sensitivity-via-r²-hsic" class="section level3" number="4.8.1">
+<h3>
+<span class="header-section-number">4.8.1</span> Global sensitivity via R²-HSIC<a class="anchor" aria-label="anchor" href="#global-sensitivity-via-r%C2%B2-hsic"><i class="fas fa-link"></i></a>
+</h3>
+<p>For each fitted parameter <span class="math inline">\(\theta_p\)</span> in the calibration ensemble, we compute the <a href="https://link.springer.com/chapter/10.1007/11564089_7">Hilbert–Schmidt Independence Criterion</a> (HSIC) between the draws of <span class="math inline">\(\theta_p\)</span> and the per-simulation log-likelihood <span class="math inline">\(\log \mathcal{L}_i = \log \mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span>, using Gaussian RBF kernels with median-heuristic bandwidths. Importance-weighted resampling by <span class="math inline">\(\tilde{w}_i\)</span> is applied to the ensemble first so that the HSIC operates on the effective BFRS posterior rather than the prior. The normalised statistic,</p>
+<p><span class="math display" id="eq:hsic">\[\begin{equation}
+\widehat{R^2}_{\text{HSIC}}(\theta_p,\ \log\mathcal{L})
+=
+\frac{\widehat{\text{HSIC}}(\theta_p,\ \log\mathcal{L})^{2}}
+     {\widehat{\text{HSIC}}(\theta_p,\ \theta_p)\,
+      \widehat{\text{HSIC}}(\log\mathcal{L},\ \log\mathcal{L})},
+\tag{4.17}
+\end{equation}\]</span></p>
+<p>is a parameter-importance score in <span class="math inline">\([0,\,1]\)</span> that captures non-linear and non-monotonic dependence without assuming a particular sampling design or input independence (<a href="https://doi.org/10.1080/00949655.2014.945932">Da Veiga 2015</a>; <a href="https://link.springer.com/article/10.1007/s00477-014-1004-2">De Lozzo &amp; Marrel 2016</a>). Statistical significance is assessed via the asymptotic Gamma approximation, with permutation testing available as a fallback.</p>
+<p>HSIC was adopted in place of <a href="https://doi.org/10.1016/j.jtbi.2008.04.011">partial rank correlation coefficients</a> (PRCC) because PRCC requires Latin-hypercube inputs, monotonic input-output relationships, and approximately independent parameters — none of which hold under BFRS with correlated posterior draws and the multi-modal log-likelihood surfaces typical of metapopulation cholera models.</p>
+</div>
+<div id="component-ablation" class="section level3" number="4.8.2">
+<h3>
+<span class="header-section-number">4.8.2</span> Component ablation<a class="anchor" aria-label="anchor" href="#component-ablation"><i class="fas fa-link"></i></a>
+</h3>
+<p>To attribute changes in forecast quality to specific model components rather than to individual scalar parameters, we re-run the full BFRS calibration with one component held fixed at a null value — for example <span class="math inline">\(\psi_{jt}\)</span> replaced by its mean, the WASH attenuation <span class="math inline">\((1 - \theta_j)\)</span> replaced by 1, or one of the spatial-coupling terms in <span class="math inline">\(\Lambda_{jt}\)</span> set to zero — and compare fit metrics across variants. Each variant produces its own posterior and diagnostic suite, so the comparison is causal in the sense that any change in fit is attributable to the structural difference rather than to a re-weighting of the same draws. The cost is one additional calibration per ablated component.</p>
+</div>
+<div id="identifiability-diagnostics" class="section level3" number="4.8.3">
+<h3>
+<span class="header-section-number">4.8.3</span> Identifiability diagnostics<a class="anchor" aria-label="anchor" href="#identifiability-diagnostics"><i class="fas fa-link"></i></a>
+</h3>
+<p>The post-calibration diagnostics described in the previous subsection double as a parameter-identifiability check. We use three measures derived from the marginal posteriors:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Posterior shrinkage</strong> — the ratio of posterior to prior standard deviation, with values near 1 indicating that the data carry little information about the parameter and values near 0 indicating strong identifiability (<a href="https://betanalpha.github.io/assets/case_studies/identifiability.html">Betancourt 2018</a>);</li>
+<li>
+<strong>Per-parameter ESS</strong> — Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> evaluated on binned marginal draws as described under <em>Effective sample size</em> above, flagging parameters whose effective posterior support has collapsed to a small subset of draws;</li>
+<li>
+<strong>Posterior correlation matrix</strong> — Spearman rank correlation across the best-fit subset <span class="math inline">\(\mathcal{B}\)</span>, hierarchically clustered to surface trade-offs (e.g. between <span class="math inline">\(\beta_{j0}\)</span> and <span class="math inline">\(\rho\)</span>, or between <span class="math inline">\(\zeta_1\)</span> and <span class="math inline">\(p_\beta\)</span>).</li>
+</ol>
+<p>A parameter with a high HSIC score that nonetheless shows minimal shrinkage or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.</p>
+</div>
+</div>
+<div id="model-forecasting" class="section level2" number="4.9">
+<h2>
+<span class="header-section-number">4.9</span> Model Forecasting<a class="anchor" aria-label="anchor" href="#model-forecasting"><i class="fas fa-link"></i></a>
 </h2>
 <p>This section is in development.</p>
 </div>
-<div id="scenarios-and-counter-factuals" class="section level2" number="4.9">
+<div id="scenarios-and-counter-factuals" class="section level2" number="4.10">
 <h2>
-<span class="header-section-number">4.9</span> Scenarios and Counter Factuals<a class="anchor" aria-label="anchor" href="#scenarios-and-counter-factuals"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.10</span> Scenarios and Counter Factuals<a class="anchor" aria-label="anchor" href="#scenarios-and-counter-factuals"><i class="fas fa-link"></i></a>
 </h2>
 <p>This section is in development.</p>
 
@@ -551,8 +600,15 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 </ul>
 </li>
 <li><a class="nav-link" href="#calibration-outputs-and-diagnostics"><span class="header-section-number">4.7</span> Calibration outputs and diagnostics</a></li>
-<li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.8</span> Model Forecasting</a></li>
-<li><a class="nav-link" href="#scenarios-and-counter-factuals"><span class="header-section-number">4.9</span> Scenarios and Counter Factuals</a></li>
+<li>
+<a class="nav-link" href="#sensitivity-analysis"><span class="header-section-number">4.8</span> Sensitivity analysis</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#global-sensitivity-via-r%C2%B2-hsic"><span class="header-section-number">4.8.1</span> Global sensitivity via R²-HSIC</a></li>
+<li><a class="nav-link" href="#component-ablation"><span class="header-section-number">4.8.2</span> Component ablation</a></li>
+<li><a class="nav-link" href="#identifiability-diagnostics"><span class="header-section-number">4.8.3</span> Identifiability diagnostics</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#model-forecasting"><span class="header-section-number">4.9</span> Model Forecasting</a></li>
+<li><a class="nav-link" href="#scenarios-and-counter-factuals"><span class="header-section-number">4.10</span> Scenarios and Counter Factuals</a></li>
 </ul>
 
       <div class="book-extra">

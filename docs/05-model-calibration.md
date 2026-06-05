@@ -336,6 +336,51 @@ Three diagnostic plot families are produced automatically. `plot_model_distribut
 The marginal prior/posterior plots are particularly useful for spotting calibration pathologies. A near-delta posterior on the boundary of a uniform or truncated-normal prior typically indicates an under-informative shape that should be re-specified; a near-uniform posterior typically indicates the data carry little information about that parameter. Both warrant a check against the importance-sampling weights before any forecast is released.
 
 
+## Sensitivity analysis
+
+The BFRS calibration produces a weighted ensemble of $n_{\text{sim}}$ parameter vectors $\{\boldsymbol{\Theta}^{(i)}, \tilde{w}_i\}$ from which we quantify how each parameter contributes to model fit. We use three complementary methods:
+
+1. a global, post-hoc importance ranking of all sampled parameters against the log-likelihood;
+2. targeted ablation experiments that re-fit the model with individual components (covariates, compartments, or likelihood terms) switched off; and
+3. identifiability diagnostics derived from the marginal posteriors themselves.
+
+These methods are complementary rather than redundant: the first ranks parameters cheaply once a calibration has run, the second establishes the causal contribution of a structural component at the cost of one additional calibration per variant, and the third detects parameters that are weakly constrained by the data regardless of their nominal importance score.
+
+
+### Global sensitivity via R²-HSIC
+
+For each fitted parameter $\theta_p$ in the calibration ensemble, we compute the [Hilbert--Schmidt Independence Criterion](https://link.springer.com/chapter/10.1007/11564089_7) (HSIC) between the draws of $\theta_p$ and the per-simulation log-likelihood $\log \mathcal{L}_i = \log \mathcal{L}(\boldsymbol{\Theta}^{(i)})$, using Gaussian RBF kernels with median-heuristic bandwidths. Importance-weighted resampling by $\tilde{w}_i$ is applied to the ensemble first so that the HSIC operates on the effective BFRS posterior rather than the prior. The normalised statistic,
+
+\begin{equation}
+\widehat{R^2}_{\text{HSIC}}(\theta_p,\ \log\mathcal{L})
+=
+\frac{\widehat{\text{HSIC}}(\theta_p,\ \log\mathcal{L})^{2}}
+     {\widehat{\text{HSIC}}(\theta_p,\ \theta_p)\,
+      \widehat{\text{HSIC}}(\log\mathcal{L},\ \log\mathcal{L})},
+(\#eq:hsic)
+\end{equation}
+
+is a parameter-importance score in $[0,\,1]$ that captures non-linear and non-monotonic dependence without assuming a particular sampling design or input independence ([Da Veiga 2015](https://doi.org/10.1080/00949655.2014.945932); [De Lozzo & Marrel 2016](https://link.springer.com/article/10.1007/s00477-014-1004-2)). Statistical significance is assessed via the asymptotic Gamma approximation, with permutation testing available as a fallback.
+
+HSIC was adopted in place of [partial rank correlation coefficients](https://doi.org/10.1016/j.jtbi.2008.04.011) (PRCC) because PRCC requires Latin-hypercube inputs, monotonic input-output relationships, and approximately independent parameters --- none of which hold under BFRS with correlated posterior draws and the multi-modal log-likelihood surfaces typical of metapopulation cholera models.
+
+
+### Component ablation
+
+To attribute changes in forecast quality to specific model components rather than to individual scalar parameters, we re-run the full BFRS calibration with one component held fixed at a null value --- for example $\psi_{jt}$ replaced by its mean, the WASH attenuation $(1 - \theta_j)$ replaced by 1, or one of the spatial-coupling terms in $\Lambda_{jt}$ set to zero --- and compare fit metrics across variants. Each variant produces its own posterior and diagnostic suite, so the comparison is causal in the sense that any change in fit is attributable to the structural difference rather than to a re-weighting of the same draws. The cost is one additional calibration per ablated component.
+
+
+### Identifiability diagnostics
+
+The post-calibration diagnostics described in the previous subsection double as a parameter-identifiability check. We use three measures derived from the marginal posteriors:
+
+1. **Posterior shrinkage** --- the ratio of posterior to prior standard deviation, with values near 1 indicating that the data carry little information about the parameter and values near 0 indicating strong identifiability ([Betancourt 2018](https://betanalpha.github.io/assets/case_studies/identifiability.html));
+2. **Per-parameter ESS** --- Equation \@ref(eq:ess) evaluated on binned marginal draws as described under *Effective sample size* above, flagging parameters whose effective posterior support has collapsed to a small subset of draws;
+3. **Posterior correlation matrix** --- Spearman rank correlation across the best-fit subset $\mathcal{B}$, hierarchically clustered to surface trade-offs (e.g. between $\beta_{j0}$ and $\rho$, or between $\zeta_1$ and $p_\beta$).
+
+A parameter with a high HSIC score that nonetheless shows minimal shrinkage or a near-degenerate per-parameter ESS is interpreted not as truly important but as influential along a degenerate direction in the posterior, and is flagged for prior re-specification.
+
+
 ## Model Forecasting
 
 This section is in development.
