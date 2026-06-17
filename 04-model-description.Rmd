@@ -905,18 +905,20 @@ knitr::include_graphics("figures/proportion_symptomatic.png")
 
 ### Suspected cases, reported cases, and deaths
 
-The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence $I_{1,jt}$ in the model. We resolve this with a two-stage observation model. In the *care-seeking* stage, a true symptomatic infection is presented to the surveillance system as a suspected case with probability $\rho$. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
+The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence in the model -- the daily inflow $\sigma\,\iota\,E_{jt}$ of newly symptomatic infections (the inflow term in the $I_1$ dynamics). We resolve this with a two-stage observation model. In the *care-seeking* stage, each incident symptomatic infection is independently presented to the surveillance system as a suspected case with probability $\rho$, a Binomial thinning of the daily incidence. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
 
 \begin{equation}
-\text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\rho \cdot I_{1,\,j,t - l_{\text{cases}}}}{\chi_{jt}^{\text{eff}}} \,\right],
+\text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\text{Binom}\!\left(\sigma\,\iota\,E_{j,\,t - l_{\text{cases}}},\ \rho\right)}{\chi_{jt}^{\text{eff}}} \,\right],
 (\#eq:reported-cases)
 \end{equation}
 
-where $\rho$ enters the numerator as the forward (care-seeking) rate and $\chi_{jt}^{\text{eff}}$ enters the denominator as the back-correction for the PPV. This is the unique relationship consistent with the joint probability of being both truly cholera-positive and presenting as a suspected case:
+where $\rho$ is the per-infection probability of the Binomial care-seeking stage applied to the incident symptomatic infections $\sigma\,\iota\,E_{j,\,t - l_{\text{cases}}}$, and $\chi_{jt}^{\text{eff}}$ enters the denominator as a deterministic back-correction for the PPV. Note that $\rho$ is the only true probability here; $1/\chi_{jt}^{\text{eff}}$ is a multiplicative gross-up (true cholera plus false positives among suspected cases) and so stays outside the Binomial. This is the unique relationship consistent with the joint probability of being both truly cholera-positive and presenting as a suspected case:
 
 $$
 P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text{suspected}) = P(\text{suspected}\mid\text{true})\,P(\text{true}).
 $$
+
+This incidence-based reporting was introduced in [laser-cholera issue #67](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/67) (shipped in laser-cholera v0.14.0, consumed by MOSAIC-pkg from version 0.41.0); earlier versions applied $\rho$ to the symptomatic prevalence $I_{1,jt}$, which multiply-counted each individual across the days they remained symptomatic and inflated reported cases by approximately the mean symptomatic infectious period $\gamma_1^{-1}$.
 
 The effective PPV $\chi_{jt}^{\text{eff}}$ switches between an endemic and an epidemic value depending on whether local prevalence is below or above a per-location threshold $\eta_j$:
 
@@ -929,14 +931,14 @@ The effective PPV $\chi_{jt}^{\text{eff}}$ switches between an endemic and an ep
 (\#eq:chi-eff)
 \end{equation}
 
-The prior on the care-seeking rate $\rho$ is derived from the GEMS multi-country case-ascertainment study together with the meta-analysis by Wiens et al. 2025, fit to a Beta distribution by least-squares:
+The prior on the care-seeking rate $\rho$ is derived from a random-effects meta-analytic pool of the two case-definition strata reported by [Wiens et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC12013865/) -- general diarrhea (29.9%, 95% CI [25.3, 35.1] from 122 observations) and severe diarrhea + cholera (58.6%, 95% CI [39.9, 75.2] from 22 observations). Pooling both strata captures the severity spectrum of symptomatic cholera (mild-to-moderate + severe), avoiding the upward bias of the severe-only stratum (dominated by outbreak-response settings) and the downward bias of the general stratum (which includes many self-resolving mild episodes). The 95% confidence interval of the pooled mean is fit to a Beta distribution:
 
 $$
-\rho \sim \text{Beta}(6.81,\ 17.89),
+\rho \sim \text{Beta}(5.38,\ 7.10),
 (\#eq:rho)
 $$
 
-corresponding to a mean of approximately 0.28 (i.e. roughly one in four true symptomatic infections enters the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
+corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
 
 $$
 \begin{aligned}
@@ -971,7 +973,7 @@ The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects me
 knitr::include_graphics("figures/rho_deaths_prior.png")
 ```
 
-```{r rho, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\\rho$ controls how many true symptomatic infections present as suspected cases ($\\rho \\sim \\text{Beta}(6.81, 17.89)$, mean $\\approx 0.28$). The endemic and epidemic positive predictive values $\\chi^{\\text{end}}$ and $\\chi^{\\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\\approx 0.52$) is substantially lower than the epidemic PPV (mean $\\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings."}
+```{r rho, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="Prior distributions for the suspected/reported-case observation model. The care-seeking rate $\\rho$ controls how many true symptomatic infections present as suspected cases ($\\rho \\sim \\text{Beta}(5.38, 7.10)$, mean $\\approx 0.42$). The endemic and epidemic positive predictive values $\\chi^{\\text{end}}$ and $\\chi^{\\text{epi}}$ control how many suspected cases are confirmed as true cholera; the endemic PPV (mean $\\approx 0.52$) is substantially lower than the epidemic PPV (mean $\\approx 0.76$) because of higher background diarrhoeal misclassification in non-outbreak settings."}
 knitr::include_graphics("figures/suspected_cases.png")
 ```
 
@@ -1018,7 +1020,7 @@ $$
 \mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
 $$
 
-Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{round}(\text{disease\_deaths}[t - l_{\text{deaths}}] \cdot \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0.
+Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{Binom}(\text{disease\_deaths}[t - l_{\text{deaths}}],\ \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0; laser-cholera v0.14.0 then replaced the deterministic rounding with the Binomial draw shown above (MOSAIC-pkg from version 0.41.0). Because $\text{disease\_deaths}$ is already an incident count, this changes only the stochasticity, not the expected scale.
 
 
 ```{r cfr, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1391,7 +1393,7 @@ and the resulting per-country values are fit to a Beta prior. Across the 40 MOSA
 
 ### Exposed and infected initial conditions ($E, I_1, I_2$)
 
-The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported case count in the weeks leading up to 1 January 2023, scaled by the observation pipeline (Equation \@ref(eq:reported-cases)) to back out the true infectious population. The $E$ and $I$ priors are placed on the log scale with relatively wide support to reflect the substantial uncertainty in the immediate pre-start state. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ using the symptomatic proportion $\sigma$.
+The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported case count in the weeks leading up to 1 January 2023 by inverting the observation pipeline (Equation \@ref(eq:reported-cases)) to recover the incident symptomatic infections, which are then mapped to the initial infectious pool using the mean symptomatic infectious period $\gamma_1^{-1}$. The $E$ and $I$ priors are placed on the log scale with relatively wide support to reflect the substantial uncertainty in the immediate pre-start state. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ using the symptomatic proportion $\sigma$.
 
 After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country's $t = 0$ population.
 
