@@ -1529,8 +1529,8 @@ tbl <- data.frame(
           "Second Fourier cosine coefficient for seasonality.",                              # a_2
           "Second Fourier sine coefficient for seasonality.",                                # b_2
           "Period of the seasonal cycle (set to days).",                                      # p
-          "Exponent on infectious individuals in the force of infection numerator.",  # alpha_1
-          "Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence.",  # alpha_2
+          "Exponent on infectious individuals in the force of infection numerator. Dual-mode: a single global scalar (broadcast to all metapopulations) or a per-location vector applied elementwise per patch (calibrated per-location by default, with a shared informative prior).",  # alpha_1
+          "Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. A single global scalar.",  # alpha_2
           "Probability an individual departs from origin $i$.",                              # tau_i
           "Probability of travel from origin $i$ to destination $j$ given departure.",         # pi_{ij}
           "Proportion with adequate WASH in destination $j$.",                               # theta_j
