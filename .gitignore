@@ -18,3 +18,8 @@
 
 # but keep the source preamble
 !/preamble.tex
+
+# Transient R plotting scratch (default device dumps + per-run posterior test dirs)
+Rplots.pdf
+figures/test_posteriors/
+figures/test_posteriors_sampled/
