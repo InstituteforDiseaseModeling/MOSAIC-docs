@@ -488,7 +488,7 @@ $$
 \quad (\text{median duration} \approx 2 \ \text{days, 95\% CI} \approx 1\text{--}5 \ \text{days}).
 $$
 
-The two priors encode the empirical pattern that symptomatic infections shed for substantially longer than asymptomatic infections, even though the latter outnumber the former: the cumulative *per-infection* environmental load is approximately $\zeta_1/\gamma_1$ for symptomatic and $\zeta_2/\gamma_2$ for asymptomatic, so the differences in $\zeta$ and $\gamma$ work in the same direction and reinforce the dominance of severe cases in the environmental signal. The combined effective removal rate $\gamma_{\mathrm{eff}}$ used in the basic reproductive number (Equation \@ref(eq:gamma-eff)) is the symptomatic-proportion-weighted harmonic mean of $\gamma_1$ and $\gamma_2$ and therefore inherits the same skew toward the symptomatic duration.
+The two priors encode the empirical pattern that symptomatic infections shed for substantially longer than asymptomatic infections, even though the latter outnumber the former: the cumulative *per-infection* environmental load is approximately $\zeta_1/\gamma_1$ for symptomatic and $\zeta_2/\gamma_2$ for asymptomatic, so the differences in $\zeta$ and $\gamma$ work in the same direction and reinforce the dominance of severe cases in the environmental signal. The combined effective removal rate $\gamma_{\mathrm{eff}}$ used in the basic reproductive number (Equation \@ref(eq:gamma-eff)) is the reciprocal of the symptomatic-proportion-weighted arithmetic mean of the *durations* $1/\gamma_1$ and $1/\gamma_2$ (not a harmonic mean of the rates $\gamma_1,\gamma_2$) and therefore inherits the same skew toward the symptomatic duration.
 
 For deterministic simulations or sensitivity analyses that prefer point estimates rather than draws from the lognormal priors, the medians serve as defaults:
 
@@ -1092,6 +1092,8 @@ kableExtra::kbl(
 
 To evaluate the *intrinsic* transmission potential of *Vibrio cholerae* in each country \(j\), we compute a location‐specific basic reproductive number.  Vaccination, susceptible depletion, and cross-border travel are set to zero; only baseline contact rates and local WASH coverage remain.
 
+> **What the pipeline computes.** This basic reproductive number \(R_{0,j}\) and the mechanistic effective reproductive number \(R_{jt}^{\mathrm{mech}}\) that follows are presented here as **reference theory**. The MOSAIC calibration pipeline (`run_MOSAIC()`) computes and reports only the **Cori** effective reproductive number \(R_{jt}^{\mathrm{cori}}\) (see the Cori section below). \(R_{0,j}\) and \(R_{jt}^{\mathrm{mech}}\) are documented for completeness and are not produced as model outputs.
+
 ### Effective removal rate
 
 The mean infectious period combines symptomatic (\(\gamma_1^{-1}\)) and asymptomatic (\(\gamma_2^{-1}\)) durations, weighted by the symptomatic proportion \(\sigma\):
@@ -1114,6 +1116,8 @@ Following the "upper-bound" convention for \(R_0\), the pathogen-decay rate is f
 
 corresponding to a survival time of approximately 196 days in water (16-day mode of $\text{days}_{\text{short}}$ plus 180-day mode of $\text{days}_{\text{spread}}$; see Equation \@ref(eq:decay-priors)).
 
+Because \(R_{0,j}^{\text{env}}\propto 1/\widehat{\delta}_j\), fixing \(\widehat{\delta}_j\) at its **slowest** plausible value (longest persistence) **maximizes** the environmental contribution. \(R_{0,j}^{\text{env}}(\widehat{\delta}_j)\) is therefore a deliberate **sensitivity ceiling**, not the realized environmental reproduction number: the decay rate that actually governs dynamics is the time-varying, suitability-driven \(\delta_{jt}\) of Eq. \@ref(eq:delta), which is typically faster (\(\delta_{jt}\ge\widehat{\delta}_j\)) and shortens reservoir persistence below the 196-day worst case. \(R_{0,j}^{\text{env}}(\widehat{\delta}_j)\) should be presented as an upper envelope on intrinsic environmental potential, not as an operative rate.
+
 ### Decomposition of \(R_{0,j}\)
 
 *Human-to-human contribution*
@@ -1135,6 +1139,8 @@ R_{0,j}^{\text{env}}
           +\zeta_2\frac{1-\sigma}{\gamma_2}\right].
 \]
 
+The \(1/\kappa\) factor here is the *linearization* of the saturating dose-response \(W/(\kappa+W)\) (Eq. \@ref(eq:foi-environment)) evaluated at the **disease-free equilibrium**, where the reservoir is empty (\(W\!\to\!0\)) and \(\partial\,[W/(\kappa+W)]/\partial W = 1/\kappa\). Consequently \(R_{0,j}^{\text{env}}\) measures the *invasion potential* of *V. cholerae* into a pathogen-free reservoir — the secondary infections a single introduction would seed before the reservoir has accumulated. It is **not** the operative environmental transmission during an established outbreak: once \(W\) is large the dose-response saturates near unity (\(W/(\kappa+W)\!\to\!1\)), the marginal effect of additional shedding collapses, and the effective environmental transmission is far below the \(1/\kappa\)-scaled invasion value. \(R_{0,j}^{\text{env}}\) should therefore be read as an introduction-phase quantity, not as the realised environmental reproduction number mid-epidemic.
+
 *Total basic reproductive number*
 
 \[
@@ -1142,20 +1148,35 @@ R_{0,j}
   = R_{0,j}^{\text{hum}} + R_{0,j}^{\text{env}}.
 \]
 
+This additive decomposition is **exact**, not an approximation: because both transmission routes — the human force of infection \(\Lambda\) and the environmental force of infection \(\Psi\) — deposit newly infected individuals into the *single* Exposed compartment \(E\), the next-generation transmission matrix \(F\) is rank one. The spectral radius of a rank-one matrix equals its trace, so \(R_{0,j}\) is simply the sum of the two route-specific contributions, with no square-root or dominant-eigenvalue coupling between them. This exactness is contingent on the current compartment topology (a single infection-entry compartment); if the infection-entry structure changes — e.g. separate exposed compartments per route — the next-generation matrix is no longer rank one and the decomposition must be re-derived as a dominant eigenvalue.
+
+This \(R_{0,j}\) also drops the small \(E\)-exit and \(I\)-exit flows from background mortality \(d_j\) and (for the infectious classes) disease mortality \(\mu_{jt}\): the removal terms use \(\iota\) and \(\gamma_{1},\gamma_{2}\) alone. This is exact at the disease-free equilibrium under the stated \(R_0\) convention (vaccination \(\nu=0\), no susceptible depletion), where these competing-risk exits are negligible relative to latent progression and recovery; including them would scale each route by factors of order \(\iota/(\iota+d_j)\) and \(\gamma_k/(\gamma_k+d_j+\mu_{jt})\), both \(\approx 1\) for cholera timescales.
+
 ### Interpretation
 
 * **\(R_{0,j}^{\text{hum}}\)** dominates in settings with high baseline contact (\(\beta_{j0}^{\text{hum}}\)) and short infectious periods.  
 * **\(R_{0,j}^{\text{env}}\)** grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j \approx 1/196\)).
   Because the WASH factor appears squared, improving basic services reduces both contamination and ingestion, driving \(R_{0,j}^{\text{env}}\) down rapidly.
 
-These patch-specific numbers provide an upper ceiling for every effective reproductive number reported later in the analysis.
+\(R_{0,j}\) is a strictly **within-patch** quantity: the stated convention zeroes cross-border travel, so each \(R_{0,j}\) describes invasion in patch \(j\) treated in isolation. The per-patch \(R_{0,j}\) values therefore **cannot be summed or averaged into a single metapopulation \(R_0\)** — that operation has no epidemiological meaning here. A true network-level \(R_0\) would be the spectral radius of the *full* multi-patch next-generation matrix, in which patches are coupled through the mobility terms \(\tau_i\pi_{ij}\) (Eq. \@ref(eq:foi-human)) and through any shared environmental exposure; that coupled eigenvalue is not computed in this spec. The \(R_{0,j}\) reported here are patch-isolated reference scales, and metapopulation-level invasion should be assessed from the coupled system directly rather than aggregated from them.
+
+These patch-specific numbers serve as a reference scale for the effective reproductive numbers reported later. They provide an upper ceiling only **conditionally** — when the susceptible fraction satisfies \(f_{jt}\le 1\) and the time-varying rates stay at or below baseline (\(\beta_{jt}\le\beta_{j0}\), \(\delta_{jt}\ge\widehat{\delta}_j\)); seasonal/suitability forcing can push \(\beta_{jt}>\beta_{j0}\) (and \(\delta_{jt}<\widehat{\delta}_j\)) at peak season, in which case the mechanistic \(R_{jt}^{\mathrm{mech}}\) can exceed \(R_{0,j}\) (see the mechanistic-number section below).
 
 
 
 
-### Intrinsic effective reproductive number \(R_{jt}^{\mathrm{intr}}\)
+## The mechanistic effective reproductive number \(R_{jt}^{\mathrm{mech}}\)
 
-The **intrinsic** reproductive number measures the secondary cases produced *within* location \(j\) when only resident–resident transmission pathways are active.
+The model spec defines **two distinct effective-reproductive-number estimands** that answer different questions and will **not** be numerically equal in general (of these, only the Cori estimator is computed by the calibration pipeline — see the note in the basic reproductive number section above):
+
+* **\(R_{jt}^{\mathrm{mech}}\)** (this section) — the *mechanistic* (next-generation-matrix–scaled) number. It is the basic reproductive number \(R_{0,j}\) re-evaluated with the current susceptible fraction \(f_{jt}=(1-\tau_j)S_{jt}/N_{jt}\), the time-varying transmission rates \(\beta_{jt}^{\text{hum}},\beta_{jt}^{\text{env}}\), and the time-varying environmental decay \(\delta_{jt}\). It is a *forward* quantity derived from the model's parameters and current state, and answers: *given the model mechanism and the present state, how many secondary infections does a typical case produce?*
+* **\(R_{jt}^{\mathrm{cori}}\)** (next section) — the *Cori* instantaneous estimator (Cori et al. 2013), computed from the realised incidence time series and a generation-time kernel. It is a *backward/observational* quantity and answers: *given the incidence trajectory and an assumed generation interval, what reproductive number is consistent with the observed growth?*
+
+The two are different estimands, not two estimators of the same number. The mechanistic form documented below comes in an **intrinsic** variant (resident–resident transmission only) and an **extrinsic** variant (adding cross-border importation); it is provided as **reference theory** and is not produced by `run_MOSAIC()`, which reports the Cori estimator of the next section.
+
+### Intrinsic mechanistic number \(R_{jt}^{\mathrm{mech,intr}}\)
+
+The **intrinsic** mechanistic number measures the secondary cases produced *within* location \(j\) when only resident–resident transmission pathways are active.
 
 *Susceptible fraction*
 \[
@@ -1179,9 +1200,9 @@ f_{jt}
               \bigl(\text{days}_{\text{long}}-\text{days}_{\text{short}}\bigr)} .
 \]
 
-*Analytic expression*  
+*Analytic expression*
 \[
-R_{jt}^{\mathrm{intr}}
+R_{jt}^{\mathrm{mech,intr}}
   = f_{jt}\Bigl[
         \beta_{jt}^{\text{hum}}
         \Bigl(\frac{\sigma}{\gamma_1}
@@ -1193,27 +1214,27 @@ R_{jt}^{\mathrm{intr}}
     \Bigr].
 \]
 
-When \(R_{jt}^{\mathrm{intr}}<1\) local transmission would fade out in the absence of new importations.
+When \(R_{jt}^{\mathrm{mech,intr}}<1\) local transmission would fade out in the absence of new importations.
 
 ---
 
-### Extrinsic effective reproductive number \(R_{jt}^{\mathrm{extr}}\)
+### Extrinsic mechanistic number \(R_{jt}^{\mathrm{mech,extr}}\)
 
-The **extrinsic** number augments the human‐to‐human term with infections sparked by visiting infectious travellers.
+The **extrinsic** mechanistic number augments the human‐to‐human term with infections sparked by visiting infectious travellers. To avoid a symbol collision with the infection-incidence series \(I^{\ast}_{jt}\) of the Cori section (Eq. \@ref(eq:I-star)), we denote the relative imported prevalence by \(\Phi_{jt}\).
 
-*Relative imported prevalence*  
+*Relative imported prevalence*
 \[
-I^{\ast}_{jt}
+\Phi_{jt}
   = \frac{\sum_{i\neq j}\tau_i\pi_{ij}\bigl(I_{1,it}+I_{2,it}\bigr)}
          {(1-\tau_j)\bigl(I_{1,jt}+I_{2,jt}\bigr)} .
 \]
 
-*Analytic expression*  
+*Analytic expression*
 \[
-R_{jt}^{\mathrm{extr}}
+R_{jt}^{\mathrm{mech,extr}}
   = f_{jt}\Bigl[
         \beta_{jt}^{\text{hum}}
-        \bigl(1+I^{\ast}_{jt}\bigr)
+        \bigl(1+\Phi_{jt}\bigr)
         \Bigl(\frac{\sigma}{\gamma_1}
               +\frac{1-\sigma}{\gamma_2}\Bigr)
       + \frac{\beta_{jt}^{\text{env}}\,(1-\theta_j)^{2}}
@@ -1225,8 +1246,9 @@ R_{jt}^{\mathrm{extr}}
 
 *Key points*
 
-* \(R_{jt}^{\mathrm{extr}} \ge R_{jt}^{\mathrm{intr}}\); equality holds when imported prevalence is negligible \((I^{\ast}_{jt}\approx0)\).
-* Both measures are bounded above by the local basic value \(R_{0,j}\); cross-border seeding accelerates observed growth but cannot raise per-case offspring beyond the worst-case ceiling set by local parameters.
+* \(R_{jt}^{\mathrm{mech,extr}} \ge R_{jt}^{\mathrm{mech,intr}}\); equality holds when imported prevalence is negligible \((\Phi_{jt}\approx0)\).
+* **The linear \((1+\Phi_{jt})\) add-in is an \(\alpha_1=1\) approximation.** In the human force of infection (Eq. \@ref(eq:foi-human)) the resident and imported infectious pressures are summed *inside* a bracket raised to the exponent \(\alpha_1\), i.e. \([(1-\tau_j)(I_{1,jt}+I_{2,jt}) + \sum_{i\neq j}\pi_{ij}\tau_i(I_{1,it}+I_{2,it})]^{\alpha_1}\). Factoring out the resident term gives a multiplier of \((1+\Phi_{jt})^{\alpha_1}\), not \((1+\Phi_{jt})\). With \(\alpha_1\) pinned at \(0.27\) the concave exponent substantially damps the import contribution, so the linear form here **overstates** it. The exact mechanistic multiplier is \((1+\Phi_{jt})^{\alpha_1}\); the linear expression above is retained only as the \(\alpha_1=1\) limiting case. For spatial settings where importation matters, the Cori estimator \(R_{jt}^{\mathrm{cori}}\) (next section) — which reads transmission directly from realised incidence and is agnostic to the \(\alpha_1\) mixing — is the recommended diagnostic.
+* When \(f_{jt}\le 1\) **and** \(\beta_{jt}^{\text{hum}}\le\beta_{j0}^{\text{hum}}\), \(\beta_{jt}^{\text{env}}\le\beta_{j0}^{\text{env}}\), the mechanistic numbers are bounded above by the local basic value \(R_{0,j}\). This bound is **conditional**: seasonal/suitability forcing can drive \(\beta_{jt}>\beta_{j0}\) at peak season (and \(\delta_{jt}<\widehat{\delta}_j\) raises the environmental term), so \(R_{jt}^{\mathrm{mech}}\) can *exceed* \(R_{0,j}\) during favourable periods. There is no unconditional ceiling at \(R_{0,j}\).
 
 
 
@@ -1235,25 +1257,24 @@ R_{jt}^{\mathrm{extr}}
 
 
 
-## The effective reproductive number
+## The Cori effective reproductive number \(R_{jt}^{\mathrm{cori}}\)
 
-The effective reproductive number $R_t$ quantifies epidemic growth by capturing the average number of secondary infections generated by a primary case at time $t$. We estimate $R_t$ and account for our two infectious classes *symptomatic $I_{1}$* and *asymptomatic $I_{2}$* by 
-letting $\zeta_{1}$ and $\zeta_{2}$ denote the per-capita shedding rates of *V. cholerae* for symptomatic and asymptomatic cases, respectively (see Section \@ref(sec:shedding)). To combine the two classes into a single measure of infectious individuals, we weight asymptomatic cases by the ratio of shedding rates:
+The **Cori** instantaneous effective reproductive number \(R_{jt}^{\mathrm{cori}}\) is the second of MOSAIC's two reproductive-number estimands (contrast the mechanistic \(R_{jt}^{\mathrm{mech}}\) above). It is computed from the realised incidence time series rather than from the model parameters, and will **not** in general equal \(R_{jt}^{\mathrm{mech}}\). It quantifies epidemic growth by capturing the average number of secondary infections generated by one infection at time $t$. The input series $I_{jt}^{\ast}$ is the **infection incidence**: the number of *new* infections per timestep at location $j$, i.e. the realised $S\!\to\!E$ flow. In MOSAIC engine terms this is the `incidence` channel recorded at the $S\!\to\!E$ transition (`incidence_human` + `incidence_env`). New symptomatic and asymptomatic infections are counted with **equal weight**:
 \begin{equation}
-I_{jt}^{\ast} \;=\; I_{1,jt} \;+\; \mathcal{z}\, I_{2,jt}
-\qquad \text{and} \qquad
-\mathcal{z} \;=\; \frac{\zeta_{2}}{\zeta_{1}}.
+I_{jt}^{\ast} \;=\; \big(\text{new } S\!\to\!E \text{ infections at } j,t\big)
+\;=\; \texttt{incidence\_human}_{jt} + \texttt{incidence\_env}_{jt}.
 (\#eq:I-star)
 \end{equation}
-When $\zeta_{1} = \zeta_{2}$, $\mathcal{z} = 1$ and symptomatic and asymptomatic infections contribute equally to transmission.
+The two infection types enter with equal weight because, in the human-to-human force of infection (Eq. \@ref(eq:foi-human)), symptomatic ($I_1$) and asymptomatic ($I_2$) infectious individuals contribute to transmission with the same per-capita weight. The shedding rates $\zeta_{1},\zeta_{2}$ (Section \@ref(sec:shedding)) are *environmental-pathway* shedding parameters and do **not** represent relative human-transmission infectiousness, so no shedding-based weight $\zeta_{2}/\zeta_{1}$ is applied here. Heterogeneity in infectiousness over the course of infection is instead carried by the generation-interval kernel $g(\Delta t)$ (Eq. \@ref(eq:R)), which is moment-matched to $\iota,\gamma_1,\gamma_2,\sigma$ — not by a weight on the incidence input.
+
+Critically, $I_{jt}^{\ast}$ is a **flow** (new infections), not a compartment **stock** ($I_1,I_2$ occupancy). A stock is already a $\gamma$-convolution of past infection incidence, so feeding compartment occupancy into the renewal equation would double-apply the infectious-period structure (once through the kernel $g$, once through the compartment's own residence-time smoothing) and bias $R_{jt}^{\mathrm{cori}}$ toward $1$. The $I_1/I_2$ stocks must therefore **not** be used as the renewal input.
 
 Following the method of [Cori et al. 2013](https://academic.oup.com/aje/article/178/9/1505/89262), the location-specific instantaneous effective reproductive number is
 \begin{equation}
-R_{jt} = \frac{I_{jt}^{\ast}}{\displaystyle\sum_{\Delta t = 1}^{t} g\left(\Delta t\right)\, I_{j,t-\Delta t}^{\ast}}
+R_{jt}^{\mathrm{cori}} = \frac{I_{jt}^{\ast}}{\displaystyle\sum_{\Delta t = 1}^{t} g\left(\Delta t\right)\, I_{j,t-\Delta t}^{\ast}}
 (\#eq:R)
 \end{equation}
-Here, $g(\Delta t)$ is the generation-time probability mass function at lag $\Delta t$.  
-The denominator aggregates the recent infectiousness contributed by past symptomatic and asymptomatic cases—each weighted by $\mathcal{z}$ and by the generation-time distribution—so dividing the current combined incidence $I_{jt}^{\ast}$ by this weighted sum yields the time-varying effective reproductive number $R_{jt}$.
+The **same** infection-incidence series $I_{j}^{\ast}$ appears in the numerator (current incidence) and in the lagged denominator sum (past incidence). Here $g(\Delta t)$ is the **generation-interval** (infection-to-infection) probability mass function at lag $\Delta t$ — consistent with using infection incidence rather than case onset or compartment occupancy — and must be **normalized** so that $\sum_{\Delta t} g(\Delta t) = 1$ after truncation at the available history. The denominator aggregates the recent transmission pressure contributed by past infections, weighted by the generation interval; dividing the current infection incidence $I_{jt}^{\ast}$ by this sum yields the time-varying Cori **infection** effective reproductive number $R_{jt}^{\mathrm{cori}}$ (secondary infections per infection) per [Cori et al. 2013](https://academic.oup.com/aje/article/178/9/1505/89262).
 
 
 
@@ -1267,19 +1288,28 @@ The generation time distribution is the time between when an individual becomes 
 \mathcal{G} = \left(\, \text{latent} + \text{time to first transmission} + \text{decay in environment}\, \right)
 (\#eq:gen-time-range)
 \end{equation}
-We combine the latent period $\iota$ and the two infectious periods (symptomatic $I_1$ and asymptomatic $I_2$) with removal rates $\gamma_1$ and $\gamma_2$. Because only a proportion $\sigma$ of new infections become symptomatic, the mean infectious period of a randomly chosen case is the weighted harmonic mean of the two class-specific durations.
+We combine the latent period $\iota$ and the two infectious periods (symptomatic $I_1$ and asymptomatic $I_2$) with removal rates $\gamma_1$ and $\gamma_2$. Because only a proportion $\sigma$ of new infections become symptomatic, the mean infectious period of a randomly chosen case is the $\sigma$-weighted **arithmetic** mean of the two class-specific *durations* $1/\gamma_1$ and $1/\gamma_2$; the effective removal rate $\gamma_{\mathrm{eff}}$ is the reciprocal of that mean duration (it is *not* a harmonic mean of the rates $\gamma_1, \gamma_2$).
 \begin{equation}
 \gamma_{\mathrm{eff}}
   = \left[\,\tfrac{\sigma}{\gamma_{1}} + \tfrac{1-\sigma}{\gamma_{2}}\right]^{-1}
 (\#eq:gamma-eff)
 \end{equation}
-Under these assumptions the we approximate $\mathcal{G}$ with a Gamma distribution and derive its first two moments as
+Under these assumptions we approximate $\mathcal{G}$ with a Gamma distribution and derive its first two moments as
 \begin{equation}
 \mathbb{E}[\mathcal{G}] \;=\; \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}}
 \qquad \text{and} \qquad
-\mathbb{V}[\mathcal{G}] \;=\; \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}}.
+\mathbb{V}[\mathcal{G}] \;=\; \frac{1}{\iota^{2}} + \mathbb{V}_{\mathrm{inf}},
 (\#eq:generation-time-moments)
 \end{equation}
+where the infectious-period variance is **not** $1/\gamma_{\mathrm{eff}}^{2}$. The infectious period is a $\sigma$-mixture of two exponential durations, and a mixture of exponentials is over-dispersed relative to a single exponential with the same mean, so
+\begin{equation}
+\mathbb{V}_{\mathrm{inf}}
+  \;=\; \frac{\sigma}{\gamma_{1}^{2}}
+      + \frac{1-\sigma}{\gamma_{2}^{2}}
+      + \sigma\,(1-\sigma)\!\left(\frac{1}{\gamma_{1}} - \frac{1}{\gamma_{2}}\right)^{2}.
+(\#eq:infectious-period-variance)
+\end{equation}
+The first two terms are the within-class exponential variances weighted by $\sigma$; the third (always non-negative) is the between-class component of the law of total variance, which $1/\gamma_{\mathrm{eff}}^{2}$ omits.
 Where the shape ($s$) and rate ($r$) parameters that match these moments are
 \begin{equation}
 s = \frac{\mathbb{E}[\mathcal{G}]^{2}}{\mathbb{V}[\mathcal{G}]}
@@ -1287,16 +1317,14 @@ s = \frac{\mathbb{E}[\mathcal{G}]^{2}}{\mathbb{V}[\mathcal{G}]}
 r = \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]}.
 (\#eq:gamma-shape-rate)
 \end{equation}
-The resulting $\mathrm{Gamma}(s,r)$ kernel gives the $g(\Delta t)$ function which is tabulated at each daily time-step and employed in the renewal equation for the effective reproductive number $R_{jt}$ in Equation \@ref(eq:R). 
+The resulting $\mathrm{Gamma}(s,r)$ kernel gives the $g(\Delta t)$ function which is tabulated at each daily time-step and employed in the renewal equation for $R_{jt}^{\mathrm{cori}}$ in Equation \@ref(eq:R). This **moment-matched** $\mathrm{Gamma}(s,r)$ — with *both* shape and rate determined by $\iota,\,\gamma_{1},\,\gamma_{2},\,\sigma$ (and, in the three-clock extension below, $\delta_{jt}$) — is the **canonical** generation-time kernel for $R_{jt}^{\mathrm{cori}}$. Because $s$ and $r$ depend solely on these timing parameters, they update across each sample of the model parameter space, keeping the generation-time distribution coherent with the model's epidemiological parameters.
 
-Because $s$ and $r$ depend solely on $\iota,\,\gamma_{1},\,\gamma_{2}$, and $\sigma$, they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the generation time distribution and the model's epidemiological parameters.
-
-In practice we tabulate the renewal kernel as a Gamma distribution with mean equal to the prior-mean generation interval (approximately 5 days under the default $\iota, \gamma_1, \gamma_2, \sigma$ values) and rate fixed at $1/10$. With these conventions, `get_generation_time_distribution()` in MOSAIC-pkg sets the shape parameter as $\text{mean}/10$:
-\begin{equation}
-g(\cdot) \sim \text{Gamma}(\text{shape} = 0.5,\ \text{rate} = 0.1).
-(\#eq:generation-time)
-\end{equation}
-This yields a kernel with mean $\text{shape}/\text{rate} \approx 5$ days and variance $\text{shape}/\text{rate}^2 \approx 50$ days$^2$, allowing substantial mass at short delays consistent with cholera's rapid transmission. Previous cholera modelling studies have adopted similar mean values around 5 days; means of 3, 7, or 10 days have also been used in the literature (Azman 2012).
+> **Legacy/default kernel.** Earlier code paths tabulate a *fixed* $\mathrm{Gamma}(\text{shape}=0.5,\ \text{rate}=0.1)$ kernel (mean $\approx 5$ days, variance $\approx 50$ days$^2$), set by `get_generation_time_distribution()` in MOSAIC-pkg as $\text{shape}=\text{mean}/10$ with the rate pinned at $1/10$:
+> \begin{equation}
+> g(\cdot) \sim \text{Gamma}(\text{shape} = 0.5,\ \text{rate} = 0.1).
+> (\#eq:generation-time)
+> \end{equation}
+> This fixed kernel is a **legacy default** only: it does *not* satisfy the moment matching above (its shape and rate are not derived from $\iota,\gamma_1,\gamma_2,\sigma$) and does not update with the sampled parameters. Previous cholera modelling studies have adopted similar mean values around 5 days; means of 3, 7, or 10 days have also been used in the literature (Azman 2012). For $R_{jt}^{\mathrm{cori}}$ the moment-matched $\mathrm{Gamma}(s,r)$ should be used in preference to this fixed kernel.
 
 
 ### Generation-time distribution (latent + infectious + environmental delay)
@@ -1318,15 +1346,17 @@ where
   \]
 * \(E\sim\mathrm{Exp}(\delta_{jt})\) is an **environmental delay** that captures the survival of *V.* *cholerae* in water at location \(j\) and day \(t\); the decay rate \(\delta_{jt}\) is given by Eq. \@ref(eq:delta) and varies with the suitability index \(\psi_{jt}\).
 
-Assuming independence of the three exponential clocks, the first two moments are
+Assuming independence of the three clocks, the first two moments are
 
 \[
 \mathbb{E}[\mathcal{G}]
    = \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}} + \frac{1}{\delta_{jt}}
 \qquad\text{and}\qquad
 \mathbb{V}[\mathcal{G}]
-   = \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}} + \frac{1}{\delta_{jt}^{2}}.
+   = \frac{1}{\iota^{2}} + \mathbb{V}_{\mathrm{inf}} + \frac{1}{\delta_{jt}^{2}},
 \]
+
+where $\mathbb{V}_{\mathrm{inf}}$ is the over-dispersed infectious-period variance of Eq. \@ref(eq:infectious-period-variance) — again **not** $1/\gamma_{\mathrm{eff}}^{2}$, because the infectious period $T$ is a $\sigma$-mixture of two exponentials. Only the latent ($1/\iota^{2}$) and environmental-delay ($1/\delta_{jt}^{2}$) clocks contribute single-exponential variances.
 
 Moment–matching to a Gamma distribution \(\text{Gamma}(s_{jt},r_{jt})\) yields
 
@@ -1339,7 +1369,7 @@ r_{jt} \;=\; \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]},
 so both **shape** \(s_{jt}\) and **rate** \(r_{jt}\) evolve in time and space
 through \(\delta_{jt}\).  
 When suitability is **high** \((\psi_{jt}\!\to\!1 \;\Rightarrow\; \delta_{jt}\!\to\!\delta_{\min})\) the extra
-delay lengthens the mean generation interval and can inflate \(R_{jt}\);
+delay lengthens the mean generation interval and can inflate \(R_{jt}^{\mathrm{cori}}\);
 when suitability is **low** the term \(1/\delta_{jt}\) shrinks towards zero and the kernel converges to the purely human-to-human specification.
 
 > **Interpretation.**  
@@ -1359,7 +1389,7 @@ location-specific, time-varying estimates of the effective reproductive number.
 
 
 
-```{r generation-time, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$.'}
+```{r generation-time, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying Cori reproductive number $R_{jt}^{\mathrm{cori}}$.'}
 knitr::include_graphics("figures/generation_time.png")
 ```
 
