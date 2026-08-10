@@ -54,5 +54,5 @@ This work was developed at the Institute for Disease Modeling in support of fund
 </center>
 
 <center><span style="color:#808080; font-size:13px;">
-&copy; 2024 Bill & Melinda Gates Foundation. All rights reserved.
+&copy; 2024&ndash;2026, Gates Foundation. All rights reserved. [Privacy and Cookies Notice](https://www.gatesfoundation.org/Privacy-and-Cookies-Notice) | [Terms of Use](https://www.gatesfoundation.org/Terms-of-Use)
 </span></center>
