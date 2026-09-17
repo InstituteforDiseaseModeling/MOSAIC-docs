@@ -178,7 +178,7 @@ For each of the $n_{\text{sim}} \times n_{\text{iter}}$ internal iterations, com
 
 After all $n_{\text{sim}}$ parameter vectors have been scored, the calibration pipeline produces three complementary representations of the posterior:
 
-- *Posterior parameter distributions* --- the truncated importance weights $\tilde w_i$ (Equation \@ref(eq:aic-weights)) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation \@ref(eq:weighted-posterior)). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.
+- *Posterior parameter distributions* --- the saturated subset weights $\tilde w_i$ (Equation \@ref(eq:aic-weights)) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation \@ref(eq:weighted-posterior)). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.
 
 - *Ensemble forecast* --- for each of $n_{\text{iter}}^{\text{ens}}$ stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.
 
@@ -190,7 +190,7 @@ All three representations report $R^2$ from the stochastic median of their respe
 ## Estimating the Posterior Distribution of Model Parameters
 
 To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into a legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights using the $\Delta \text{AIC}$ with a practical cut–off of $\Delta \le 6$ and retain the IS for a subset of supported models as described in the steps below:
+$\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}$ into a legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by [Kahn & Marshall 1953](https://pubsonline.informs.org/doi/10.1287/opre.1.5.263) and reviewed in a more modern context by [Tokdar & Kass 2010](https://doi.org/10.1002/wics.56). Thus, we calculate the IS-weights from the $\Delta \text{AIC}$ of each draw and retain a subset of supported models, as described in the steps below. Note that MOSAIC does **not** apply the textbook $\Delta \le 6$ cut-off; the reason, and the scheme actually used, are given in the "Assign best-subset weights" section below.
 
 ### Compute $\Delta \text{AIC}$ for every draw
 
@@ -205,21 +205,44 @@ For any model, the [Akaike Information Criterion](https://en.wikipedia.org/wiki/
 (\#eq:aic-delta)
 \end{equation}
 
-### Assign truncated importance weights
+### Assign best-subset weights
 
-Since the BFRS method generates a large ensemble of candidate parameter sets $\boldsymbol{\Theta}^{(i)}$, we reduce the influence of poorly fitting models by truncating the importance weights using a $\Delta \text{AIC}$ cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior. We first compute raw (un-normalised) weights:
+Since the BFRS method generates a large ensemble of candidate parameter sets $\boldsymbol{\Theta}^{(i)}$, we reduce the influence of poorly fitting models before forming the posterior. MOSAIC does this in **two stages**: a rank-based selection of the best subset, followed by a *saturating* Gibbs weighting within it.
+
+**Stage 1 --- rank-based subset selection.** The retained best subset $\mathcal{B}$ is the top $q$ draws by log-likelihood, where $q$ is chosen by a tiered search (`get_default_subset_tiers()`) subject to $|\mathcal{B}| \ge \text{ESS}_{\text{best}}$ and the agreement/CV targets below. It is a **rank** criterion, not a threshold on $\Delta_i$.
+
+**Stage 2 --- saturating weights within the subset.** For $i \in \mathcal{B}$ we compute
+
 \begin{equation}
-w_i^{\text{raw}} \;=\;
-\begin{cases}
-\exp\!\left[-\tfrac12 \Delta_i\right], & \Delta_i \le 6,\\[6pt]
-0, & \Delta_i > 6,
-\end{cases}
+w_i^{\text{raw}} \;=\; \exp\!\left[-\tfrac12 \min(\Delta_i,\, \Delta^{\ast})\right],
+\qquad \Delta^{\ast} = 4,
 \qquad \text{and then normalise:} \qquad
 \tilde{w}_i \;=\;
-\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j^{\text{raw}}}.
+\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j\in\mathcal{B}} w_j^{\text{raw}}}.
 (\#eq:aic-weights)
 \end{equation}
-The threshold of $\Delta_i \le 6$ is widely used in model selection and corresponds approximately to a likelihood ratio of $p_i = \exp(-\Delta_i/2) \approx 0.05$, which in nested-model comparisons aligns loosely with a frequentist $p$-value of 0.05 (Burnham & Anderson [2002](https://doi.org/10.1007/b97636) and [2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)). Since every MOSAIC simulation has the same number of estimated parameters $k$, $\Delta_i$ reduces to a likelihood-ratio statistic and the cut-off acts as a likelihood-ratio filter on the BFRS draws rather than as a formal model-selection criterion across nested models. This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models. Alternative posterior diagnostics such as the Pareto-$k$ shape statistic of PSIS ([Vehtari et al. 2024](https://doi.org/10.48550/arXiv.1507.02646)) can be used to flag cases where the truncated importance-weight distribution has unbounded variance.
+
+Note the $\min(\cdot)$: $\Delta_i$ is **saturated** at $\Delta^{\ast}=4$, not cut off. Every draw beyond $\Delta^{\ast}$ receives the same non-zero weight $e^{-2}$, so all weights lie in $[e^{-2}, 1]$ and the ratio between the best and worst retained draw can never exceed $e^{2} \approx 7.39$.
+
+#### Why not the textbook $\Delta \le 6$ cut-off? {-}
+
+Earlier versions of this document specified a hard cut-off, $w_i^{\text{raw}} = 0$ for $\Delta_i > 6$, on the standard model-selection argument (Burnham & Anderson [2002](https://doi.org/10.1007/b97636), [2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)) that $\Delta_i \le 6$ corresponds to a likelihood ratio of roughly $0.05$. **That rule is not applicable at MOSAIC's data scale, and is not what the pipeline implements.**
+
+The $\Delta \le 6$ heuristic is calibrated for comparing a handful of *fitted* models, each evaluated at its own maximum-likelihood estimate, where $\Delta$ is naturally of order unity. MOSAIC instead scores *unfitted prior draws* against a time-series likelihood summed over $O(10^5)$ observations (40 locations $\times$ $\sim$1,400 days $\times$ 2 outcome channels). Log-likelihood differences between prior draws are then of order $10^5$–$10^6$, and essentially no draw other than the single best falls within 6 AIC units.
+
+This is not hypothetical. In a reference 100,000-draw calibration over all 40 locations, the median $\Delta_i$ was $9.6 \times 10^5$ and the maximum $1.4 \times 10^7$; **exactly one draw** satisfied $\Delta_i \le 6$. Applying the documented cut-off would therefore place the entire posterior on a single parameter vector, yielding degenerate credible intervals. Saturating at $\Delta^{\ast}$ is what keeps the posterior non-degenerate.
+
+#### What the saturation does and does not buy {-}
+
+The saturation should be understood as **deliberate regularisation, not as importance sampling.** Two consequences follow directly and are reported rather than hidden:
+
+1. *Within the subset, the likelihood is used mainly to rank, not to weight.* Because weights are confined to $[e^{-2},1]$, the subset posterior is close to uniform over $\mathcal{B}$. In the reference run above, the single best draw carried $6.1\%$ of the mass while the remaining 114 draws each carried $0.82\%$ against $0.87\%$ for exact uniformity. The resulting estimator is closer in spirit to approximate Bayesian computation with a rank-based acceptance threshold than to importance sampling.
+
+2. *The convergence metrics below are inflated by construction.* $\widehat{\text{ESS}}$, $A$ and $\mathrm{CV}_{\tilde w}$ are all computed on these saturated weights. Since $\widehat{\text{ESS}}$ is maximised by uniform weights, saturation *raises* it: for weights bounded in $[e^{-2},1]$, $\widehat{\text{ESS}} \gtrsim 0.42\,|\mathcal{B}|$ (Kish) or $0.62\,|\mathcal{B}|$ (perplexity) **regardless of how poorly the draws fit**. These metrics therefore measure the weighting scheme at least as much as they measure the fit, and they cannot be read as evidence that the importance sampler has explored the posterior.
+
+Because of point 2, MOSAIC additionally reports **exact, untruncated importance-sampling diagnostics** (`calc_is_diagnostics()`), written to `summary.json` as `ess_is_all`, `ess_is_best`, `khat_all` and `khat_all_status`. These apply Equation \@ref(eq:ess) to the raw likelihood ratios $r_i \propto \mathcal{L}(\boldsymbol{\Theta}^{(i)})$ with no truncation, and add the Pareto-$\hat k$ shape statistic of PSIS ([Vehtari et al. 2024](https://doi.org/10.48550/arXiv.1507.02646)); $\hat k \ge 0.7$ indicates IS estimates with unbounded variance. In the reference run these gave $\widehat{\text{ESS}}_{\text{IS}} = 1.00$ against a reported $\text{ESS}_B$ of $107.5$ --- a gap of more than two orders of magnitude. **The two numbers are not in conflict; they measure different things, and both are reported so that the difference is visible.** Any claim about posterior coverage should be read against the exact diagnostics, not against $\text{ESS}_B$ alone.
+
+A `tempered` alternative to Stage 2 is available (`control$targets$best_subset_weighting = "tempered"`), which selects the inverse temperature adaptively so that the worst retained draw sits at a specified weight floor rather than saturating at a fixed $\Delta^{\ast}$. It preserves more of the likelihood ordering within $\mathcal{B}$. The default remains `"saturated"`.
 
 ### Posterior summaries
 
@@ -250,7 +273,7 @@ measures the variability of the retained models and detects extremely skewed mod
 
 ### Effective sample size (ESS)
 Since the BFRS draws are independent of $P(\boldsymbol{\Theta})$, ESS plays
-the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500) using the $\Delta \text{AIC}$-truncated model weights $\tilde w_i$ from Equation \@ref(eq:aic-weights):
+the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500). Applied to the *saturated* subset weights $\tilde w_i$ of Equation \@ref(eq:aic-weights) this yields the reported $\text{ESS}_B$; applied to the raw untruncated ratios it yields the exact $\widehat{\text{ESS}}_{\text{IS}}$ described above. Both use:
 \begin{equation}
 \widehat{\text{ESS}} =
 \left[
@@ -258,8 +281,8 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 \right]^{-1}.
 (\#eq:ess)
 \end{equation}
-Because discarded model runs have $\tilde{w}_i=0$, ESS reflects only the retained
-subset. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals ([Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500); see also the MCMC-context discussion of ESS thresholds in [Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/) and [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)). The earlier MOSAIC guidance of $\widehat{\text{ESS}} \gtrsim 500$–$1000$ tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-$k$ diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.
+Because draws outside $\mathcal{B}$ have $\tilde{w}_i=0$, $\text{ESS}_B$ reflects only the retained
+subset, and --- as noted above --- is bounded below by roughly $0.42|\mathcal{B}|$ by the saturation alone. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals ([Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500); see also the MCMC-context discussion of ESS thresholds in [Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/) and [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)). The earlier MOSAIC guidance of $\widehat{\text{ESS}} \gtrsim 500$–$1000$ tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-$k$ diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.
 
 The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \@ref(eq:ess) within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
 
@@ -270,13 +293,13 @@ The Akaike weights in Equation \@ref(eq:aic-weights) are a special case of a bro
 (\#eq:gibbs-weights)
 \end{equation}
 
-where $x_i$ is a generic loss (lower is better) and $w_{\text{gibbs}} \ge 0$ is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting $x_i = \Delta_i$ and $w_{\text{gibbs}} = 1/2$ recovers Equation \@ref(eq:aic-weights) exactly; setting $x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ and $w_{\text{gibbs}} = 1$ recovers normalised likelihood weights. The Gibbs formulation is used internally to allow the calibration pipeline to fall back to a softer weight scheme when a $\Delta\text{AIC}$ cut-off would otherwise truncate too many draws.
+where $x_i$ is a generic loss (lower is better) and $w_{\text{gibbs}} \ge 0$ is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting $x_i = \min(\Delta_i, \Delta^{\ast})$ and $w_{\text{gibbs}} = 1/2$ recovers Equation \@ref(eq:aic-weights); note that it is the *saturated* loss, not $\Delta_i$ itself, that appears --- with $x_i = \Delta_i$ the Gibbs form gives untruncated Akaike weights, which at MOSAIC's data scale collapse onto a single draw. Setting $x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ and $w_{\text{gibbs}} = 1$ recovers normalised likelihood weights. The Gibbs formulation is what allows the pipeline to offer the softer `tempered` scheme described above, in which $w_{\text{gibbs}}$ is set adaptively from the observed $\Delta$ range instead of being fixed at $1/2$.
 
 Note that the location, time, and outcome shape weights $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ that enter the log-likelihood in Equation \@ref(eq:total-log-likelihood-2) are normalised to make their contributions comparable across components: each shape weight is rescaled by $N_{\text{obs}} / N_{\text{component}}$, where $N_{\text{obs}}$ is the count of non-NA surveillance observations and $N_{\text{component}}$ is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.
 
 
 ### Agreement index *A*
-We quantify consensus among the retained subset of best models \(\mathcal B = \{\,i : \Delta_i \le 6\}\) by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
+We quantify consensus among the retained subset of best models \(\mathcal B\) --- defined by rank, as in Stage 1 above --- by the normalized [Shannon entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) of their model weights $\tilde w_i$:
 \begin{equation}
 A = 
 \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
@@ -309,27 +332,30 @@ A calibration run that meets all three criteria indicates that the retained ense
 library(knitr)
 
 metric_tbl <- data.frame(
-     Metric            = c("$\\Delta$AIC cut-off",
-                           "Effective Sample Size $\\left(\\widehat{\\text{ESS}}\\right)$",
-                           "",
-                           "Agreement Index $\\left(A\\right)$",
-                           "Weight Coefficient of Variation $\\left(\\mathrm{CV}_{\\tilde{\\mathbf w}} \\right)$"),
+     Metric            = c("$\\Delta$AIC saturation $\\left(\\Delta^{\\ast}\\right)$",
+                           "Subset ESS $\\left(\\text{ESS}_B\\right)$ --- *gated*",
+                           "Agreement Index $\\left(A\\right)$ --- *gated*",
+                           "Weight Coefficient of Variation $\\left(\\mathrm{CV}_{\\tilde{\\mathbf w}} \\right)$ --- *gated*",
+                           "Exact IS ESS $\\left(\\widehat{\\text{ESS}}_{\\text{IS}}\\right)$ --- *reported*",
+                           "Pareto $\\hat k$ --- *reported*"),
      
-     `Target range`     = c("$\\le 6 \\ \\left(p\\! \\approx \\! 0.05\\right)$",
-                            "$\\gt 500$",
-                            "$\\gt 1000$",
-                            "$\\gt 0.7 \\ \\text{or} \\ 0.8$",
-                            "$\\lt 1 \\ \\text{or} \\ 2$"),
+     `Target range`     = c("$=4$; **saturating, not a $\\Delta\\le6$ cut-off**",
+                            "$\\ge 100$, but $\\gtrsim 0.42\\lvert\\mathcal B\\rvert$ by construction",
+                            "$\\gt 0.70$",
+                            "$\\lt 1$",
+                            "no gate; $\\lt 2$ indicates a collapsed sampler",
+                            "$\\lt 0.7$ for reliable IS; no gate"),
      
      #`Action if missed` = c("Increase $n_{\\text{sim}}$, relax $\Delta \text{AIC}$ cut-off, reduce ESS threshold to 500",
      #                      "Increase $n_{\\text{sim}}$, relax $\Delta \text{AIC}$ cut-off, more informative priors, reduce $A$ threshold to 0.7",
      #                      "Increase $n_{\\text{sim}}$, reduce number of fitted parameters, increase $\\mathrm{CV}_w$ to 3, severe skew suggests instability"),
      
-     Source             = c("[Burnham & Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644)",
-                            "[Gelman et al. 2014](https://sites.stat.columbia.edu/gelman/book/)",
-                            "[Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)",
+     Source             = c("MOSAIC implementation; see text for why [Burnham & Anderson 2004](https://journals.sagepub.com/doi/abs/10.1177/0049124104268644) $\\Delta\\le6$ does not apply here",
                             "[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)",
-                            "[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)")
+                            "[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)",
+                            "[Kong et al 1994](https://doi.org/10.1080/01621459.1994.10476469)",
+                            "[Elvira et al 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500)",
+                            "[Vehtari et al 2024](https://doi.org/10.48550/arXiv.1507.02646)")
 )
 
 kable(metric_tbl,
@@ -338,7 +364,13 @@ kable(metric_tbl,
                     'Target range', 
                     #'Action if target missed', 
                     'Source'),
-      caption  = "Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.")
+      caption  = paste("Convergence diagnostics with recommended thresholds.",
+                       "The first four rows are computed on the SATURATED subset weights of",
+                       "Equation 5.4 and form the convergence gate; because saturation bounds",
+                       "all weights into a narrow band, they are high by construction and",
+                       "cannot on their own establish that the importance sampler explored the",
+                       "posterior. The last two rows are the exact untruncated",
+                       "importance-sampling diagnostics, reported alongside but never gated."))
 
 ```
 
