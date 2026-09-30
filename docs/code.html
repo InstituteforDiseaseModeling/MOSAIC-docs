@@ -6,14 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>7 Code | MOSAIC: a spatial model of endemic cholera</title>
 <meta name="author" content="John R Giles">
-<meta name="description" content="The MOSAIC framework is open source. The implementation is split across two repositories: an R package that handles data assembly, parameter sampling, and Bayesian calibration, and a Python...">
+<meta name="description" content="The MOSAIC framework is open source. The implementation lives in an R package that handles data assembly, parameter sampling, simulation, and Bayesian calibration. The transmission engine is...">
 <meta name="generator" content="bookdown 0.46 with bs4_book()">
 <meta property="og:title" content="7 Code | MOSAIC: a spatial model of endemic cholera">
 <meta property="og:type" content="book">
-<meta property="og:description" content="The MOSAIC framework is open source. The implementation is split across two repositories: an R package that handles data assembly, parameter sampling, and Bayesian calibration, and a Python...">
+<meta property="og:description" content="The MOSAIC framework is open source. The implementation lives in an R package that handles data assembly, parameter sampling, simulation, and Bayesian calibration. The transmission engine is...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="7 Code | MOSAIC: a spatial model of endemic cholera">
-<meta name="twitter:description" content="The MOSAIC framework is open source. The implementation is split across two repositories: an R package that handles data assembly, parameter sampling, and Bayesian calibration, and a Python...">
+<meta name="twitter:description" content="The MOSAIC framework is open source. The implementation lives in an R package that handles data assembly, parameter sampling, simulation, and Bayesian calibration. The transmission engine is...">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.10.0/transition.js"></script><script src="libs/bs3compat-0.10.0/tabs.js"></script><script src="libs/bs3compat-0.10.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
@@ -88,16 +88,16 @@
 <h1>
 <span class="header-section-number">7</span> Code<a class="anchor" aria-label="anchor" href="#code"><i class="fas fa-link"></i></a>
 </h1>
-<p>The MOSAIC framework is open source. The implementation is split across two repositories: an R package that handles data assembly, parameter sampling, and Bayesian calibration, and a Python package that runs the metapopulation simulation engine.</p>
+<p>The MOSAIC framework is open source. The implementation lives in an R package that handles data assembly, parameter sampling, simulation, and Bayesian calibration. The transmission engine is written in R; Python is used only by the environmental-suitability model (Keras/TensorFlow, called through <code>reticulate</code>).</p>
 <div id="source-repositories" class="section level2" number="7.1">
 <h2>
 <span class="header-section-number">7.1</span> Source repositories<a class="anchor" aria-label="anchor" href="#source-repositories"><i class="fas fa-link"></i></a>
 </h2>
 <ul>
 <li>
-<strong><a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg">MOSAIC-pkg</a></strong> — the R package that prepares data, samples from priors, runs ensembles, computes importance-sampling weights, and produces every figure and table on this site. Function reference and vignettes are published at <a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/">institutefordiseasemodeling.github.io/MOSAIC-pkg</a>.</li>
+<strong><a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg">MOSAIC-pkg</a></strong> — the R package that prepares data, samples from priors, runs the metapopulation transmission engine (<code><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/reference/run_simulation.html">run_simulation()</a></code>), computes importance-sampling weights, and produces every figure and table on this site. Function reference and vignettes are published at <a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/">institutefordiseasemodeling.github.io/MOSAIC-pkg</a>.</li>
 <li>
-<strong><a href="https://github.com/InstituteforDiseaseModeling/laser-cholera">laser-cholera</a></strong> — the Python metapopulation transmission engine, built on the <a href="https://github.com/InstituteforDiseaseModeling/laser">LASER</a> platform. MOSAIC-pkg calls it through <code>reticulate</code>.</li>
+<strong><a href="https://github.com/InstituteforDiseaseModeling/laser-cholera">laser-cholera</a></strong> — the Python metapopulation engine, built on the <a href="https://github.com/InstituteforDiseaseModeling/laser">LASER</a> platform, from which the R engine was ported. MOSAIC-pkg no longer calls it (from MOSAIC-pkg v0.69.0); it remains the historical reference implementation.</li>
 <li>
 <strong><a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-data">MOSAIC-data</a></strong> — processed inputs used by MOSAIC-pkg. Raw inputs are local-only.</li>
 <li>
@@ -113,7 +113,8 @@
 <code class="sourceCode R"><span><span class="co"># Install MOSAIC-pkg from GitHub</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"InstituteforDiseaseModeling/MOSAIC-pkg"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Install the laser-cholera Python wheel into the R-managed environment</span></span>
+<span><span class="co"># Optional: the Python (Keras/TensorFlow) environment used only by the</span></span>
+<span><span class="co"># environmental-suitability model. Simulation and calibration do not need it.</span></span>
 <span><span class="fu">MOSAIC</span><span class="fu">::</span><span class="fu"><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/reference/install_dependencies.html">install_dependencies</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Verify</span></span>
@@ -123,24 +124,24 @@
 <h2>
 <span class="header-section-number">7.3</span> Running the model<a class="anchor" aria-label="anchor" href="#running-the-model"><i class="fas fa-link"></i></a>
 </h2>
-<p>The two driver vignettes cover the typical workflows end-to-end:</p>
+<p>The driver vignettes cover the typical workflows end-to-end:</p>
 <ul>
 <li>
-<strong><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Running-MOSAIC.html">Running MOSAIC</a></strong> — the calibration pipeline: prior sampling, Dask-parallel forward simulation, importance-sampling weights, and best / medioid / ensemble forecasts.</li>
+<strong><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Running-simulations.html">Running simulations</a></strong> — a single stochastic simulation of the metapopulation engine for a chosen configuration.</li>
 <li>
-<strong><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Running-LASER.html">Running LASER</a></strong> — a single deterministic or stochastic simulation of the metapopulation engine for a chosen configuration.</li>
+<strong><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Running-MOSAIC.html">Running MOSAIC</a></strong> — the calibration pipeline: prior sampling, parallel forward simulation, importance-sampling weights, and the medoid and ensemble forecasts.</li>
 </ul>
-<p>A minimal LASER call from R looks like this:</p>
+<p>A minimal simulation call from R looks like this:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lc</span> <span class="op">&lt;-</span> <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html">import</a></span><span class="op">(</span><span class="st">"laser.cholera"</span><span class="op">)</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="va">lc</span><span class="op">$</span><span class="va">metapop</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="fu">run_model</span><span class="op">(</span>paramfile <span class="op">=</span> <span class="va">params</span>, seed <span class="op">=</span> <span class="va">seed</span><span class="op">)</span></span></code></pre></div>
-<p>Note that the Python namespace is <code>laser.cholera</code> (since laser-cholera 0.11, when the package was migrated to a namespace package and the build system switched to <code>uv</code>). Older code using <code>laser_cholera</code> will need to be updated.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/">MOSAIC</a></span><span class="op">)</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/reference/run_simulation.html">run_simulation</a></span><span class="op">(</span>config <span class="op">=</span> <span class="fu">MOSAIC</span><span class="fu">::</span><span class="va"><a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/reference/config_default.html">config_default</a></span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">reported_cases</span> <span class="op">&lt;-</span> <span class="va">model</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">reported_cases</span></span></code></pre></div>
 </div>
 <div id="deployment-at-scale" class="section level2" number="7.4">
 <h2>
 <span class="header-section-number">7.4</span> Deployment at scale<a class="anchor" aria-label="anchor" href="#deployment-at-scale"><i class="fas fa-link"></i></a>
 </h2>
-<p>Production-scale calibration runs are dispatched to a Dask cluster. The <a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Deployment.html">Deployment vignette</a> covers Azure-style parallel execution, including the threading-environment setup required to avoid fork-related deadlocks between Numba (in laser-cholera) and the Dask worker pool.</p>
+<p>Calibration runs are parallelised across the cores of one machine with a local PSOCK cluster of R worker processes; the BLAS and OpenMP thread-count environment variables are pinned to 1 in each worker so that the workers do not oversubscribe the cores. The <a href="https://institutefordiseasemodeling.github.io/MOSAIC-pkg/articles/Deployment.html">Deployment vignette</a> covers setting up a large virtual machine for production runs.</p>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DKRGVPD7GE"></script><script>

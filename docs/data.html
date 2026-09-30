@@ -108,6 +108,8 @@
 <span class="header-section-number">2.2</span> Recent Incidence and Deaths<a class="anchor" aria-label="anchor" href="#recent-incidence-and-deaths"><i class="fas fa-link"></i></a>
 </h2>
 <p>To capture recent cholera trends, we retrieved reported cases and deaths data from the <a href="https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/">WHO Global Cholera and Acute Watery Diarrhea Dashboard</a> REST API. These data provide weekly incidence and deaths from January 2023 onward, with the current-year rolling snapshot updated on each pipeline run, providing up-to-date counts at the country level.</p>
+<p>Note that WHO’s epidemiological weeks are not ISO-8601 weeks. WHO numbers weeks on the MMWR (US CDC) calendar – Sunday-start weeks, week 1 being the week that contains 4 January – and stamps each week with the following Monday. This coincides with ISO-8601 weeks except in years whose 4 January falls on a Sunday: WHO has a genuine week 53 of 2025, starting Monday 29 December 2025 (ISO 2025 has only 52 weeks), and WHO week 1 of 2026 starts on 5 January 2026. We therefore date every weekly row from WHO’s own calendar (Monday to Sunday), keep a real week 53 as its own week rather than merging it into a neighbour, and key all downstream processing on the week’s start date rather than on the (year, week) label. A missing case or death count stays missing; no row is dropped because one of its two fields is missing.</p>
+<p>We also use the country-level weekly series of the Johns Hopkins public cholera surveillance dataset (compiled by the Johns Hopkins Bloomberg School of Public Health and retrieved with the <a href="https://github.com/InstituteforDiseaseModeling/jhu_cholera_data">jhu_cholera_data</a> scraper) as back-history before the WHO dashboard era. Cases are the suspected count when present, otherwise the confirmed count. A missing death count is kept as missing (<code>NA</code>), not recorded as zero: about three quarters of the country-level rows in the archive carry no death count, and treating them as observed zeros would bias the deaths likelihood and any case fatality estimate. Rows with neither a case nor a death count are dropped.</p>
 </div>
 <div id="vaccinations" class="section level2" number="2.3">
 <h2>
@@ -116,7 +118,7 @@
 <p>Accurate data on oral cholera vaccine (OCV) campaigns and vaccination history are vital for understanding the impact of vaccination efforts. These data come from:</p>
 <ul>
 <li>
-<strong>WHO Cholera Vaccine Dashboard</strong>: This resource (<a href="https://www.who.int/groups/icg/cholera">link</a>) provides detailed information on OCV distribution and vaccination campaigns from 2016 to 2024.</li>
+<strong>WHO Cholera Vaccine Dashboard</strong>: This resource (<a href="https://www.who.int/groups/icg/cholera">link</a>) provides detailed information on OCV distribution and vaccination campaigns from 2016 onward. Each extraction of the International Coordinating Group (ICG) request table is saved as a new dated snapshot (<code>who_vaccination_data_snapshot_&lt;date&gt;.csv</code>), written only when its content differs from the newest existing snapshot; earlier snapshots are never modified, and each new file is logged in the directory’s provenance ledger (see <em>Provenance of raw data snapshots</em> below).</li>
 <li>
 <strong>GTFCC OCV Dashboard</strong>: Managed by Médecins Sans Frontières, this dashboard (<a href="https://apps.epicentre-msf.org/public/app/gtfcc">link</a>) tracks OCV deployments globally, offering granular insights into vaccination efforts from 2013 to 2024.</li>
 </ul>
@@ -142,7 +144,7 @@
 <li>
 <strong><a href="https://github.com/InstituteforDiseaseModeling/open-meteo-pipeline">open-meteo-pipeline</a></strong>: a production pipeline that pulls daily-resolution variables from the <a href="https://open-meteo.com/en/docs/historical-weather-api">OpenMeteo Historical Weather Data API</a> and the <a href="https://open-meteo.com/en/docs/climate-api">OpenMeteo Climate Change API</a> for 30 uniformly distributed points within each MOSAIC country, splices ERA5 reanalysis with <a href="https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present">MRI-AGCM3-2-S</a> projections, spatially averages to the country level, and writes daily and weekly parquet files. MOSAIC reads these via <code>process_open_meteo_data()</code>. Variables include 2 m air temperature, dew point, relative humidity, 10 m wind, mean sea level pressure, cloud cover, shortwave radiation, precipitation, soil moisture at 0–7 cm (loaded as <code>soil_moisture_0_to_10cm_mean</code> for backward compatibility with the LSTM training data), and FAO evapotranspiration.</li>
 <li>
-<strong><a href="https://github.com/InstituteforDiseaseModeling/enso-data">enso-data</a></strong>: a compiled time-series of the Indian Ocean Dipole Mode Index (DMI) and the Niño3, Niño3.4, and Niño4 indices of the El Niño Southern Oscillation (ENSO), updated from the National Oceanic and Atmospheric Administration (<a href="https://psl.noaa.gov/enso/">NOAA</a>) and the Australian Bureau of Meteorology (<a href="http://www.bom.gov.au/climate/ocean/outlooks/">BOM</a>). MOSAIC reads these via <code>process_enso_data()</code>. The ENSO and DMI indices provide leading signals for environmental suitability over a 5-month forecast horizon.</li>
+<strong><a href="https://github.com/InstituteforDiseaseModeling/enso-data">enso-data</a></strong>: a compiled time-series of the Indian Ocean Dipole Mode Index (DMI) and the Niño3, Niño3.4, and Niño4 indices of the El Niño Southern Oscillation (ENSO), combining historical observations from the National Oceanic and Atmospheric Administration (<a href="https://psl.noaa.gov/enso/">NOAA</a>) with operational forecasts from NOAA’s North American Multi-Model Ensemble (<a href="https://www.cpc.ncep.noaa.gov/products/NMME/">NMME</a>, the default forecast source; the Australian Bureau of Meteorology <a href="http://www.bom.gov.au/climate/ocean/outlooks/">BOM</a> feed remains available as a legacy alternative). MOSAIC reads these via <code>process_enso_data()</code>. The ENSO and DMI indices provide leading signals for environmental suitability over a ~9-month forecast horizon (NMME ENSMEAN).</li>
 </ul>
 <p>Together these two pipelines supply the 24 covariates used by the LSTM model for environmental suitability <span class="math inline">\(\psi_{jt}\)</span> (see the <a href="https://www.mosaicmod.org/model-description.html#modeling-environmental-suitability">Model Description</a> page).</p>
 <div id="storms-and-floods" class="section level3" number="2.5.1">
@@ -154,6 +156,18 @@
 <li>
 <strong>EM-DAT International Disaster Database</strong>: Maintained by the Centre for Research on the Epidemiology of Disasters (CRED) at UCLouvain, this database (<a href="https://www.emdat.be/">link</a>) provides comprehensive records of disasters from 2000 to the present, including those affecting African countries.</li>
 </ul>
+</div>
+<div id="drought" class="section level3" number="2.5.2">
+<h3>
+<span class="header-section-number">2.5.2</span> Drought<a class="anchor" aria-label="anchor" href="#drought"><i class="fas fa-link"></i></a>
+</h3>
+<p>EM-DAT drought records are too long-lasting to serve as a weekly signal, so we derive a weekly drought label from each country’s approximate standardised precipitation-evapotranspiration index: a country-week is drought-active when the 12-week rolling mean of the index is at or below <span class="math inline">\(-0.8\)</span>. A binomial GAM (<code>impute_drought_probability()</code>) maps ENSO (Niño3.4) and Indian Ocean Dipole indices at lags of 8, 16 and 24 weeks, together with <em>antecedent</em> temperature and precipitation anomalies and accumulated precipitation, onto this label and predicts a drought probability for every country-week, historical and forecast. To avoid leakage, the concurrent index that defines the label is never a predictor, and every local-climate predictor is lagged by the 12-week label window so that it describes conditions strictly before that window. The GAM is fitted only on rows up to the observed-climate horizon – the earlier of the last observed ENSO/IOD value and each country’s last ERA5 reanalysis date – so forecast-period climate never enters the fit; rows after the horizon are predicted, not fitted.</p>
+</div>
+<div id="displacement" class="section level3" number="2.5.3">
+<h3>
+<span class="header-section-number">2.5.3</span> Displacement<a class="anchor" aria-label="anchor" href="#displacement"><i class="fas fa-link"></i></a>
+</h3>
+<p>Internal displacement events are taken from the Internal Displacement Monitoring Centre’s Internal Displacement Updates (<a href="https://www.internal-displacement.org/">IDMC</a>), downloaded as dated snapshots of the per-country mirrors on the <a href="https://data.humdata.org/">Humanitarian Data Exchange</a> (38 of the 40 MOSAIC countries have a dataset) and expanded into weekly country panels of conflict- and disaster-driven displacement. Only records with the role <em>Recommended figure</em> are used: IDMC publishes each displacement once as a recommended figure, and the additional triangulation rows describe the same displacement, so summing both would double-count it (IDMC’s own totals use recommended figures only).</p>
 </div>
 </div>
 <div id="wash-water-sanitation-and-hygiene" class="section level2" number="2.6">
@@ -176,6 +190,13 @@
 <strong>UN World Population Prospects 2024</strong>: This database (<a href="https://population.un.org/wpp/Download/">link</a>) provides probabilistic projections of key demographic metrics, essential for estimating population-level impacts of cholera.</li>
 </ul>
 </div>
+<div id="provenance-of-raw-data-snapshots" class="section level2" number="2.8">
+<h2>
+<span class="header-section-number">2.8</span> Provenance of raw data snapshots<a class="anchor" aria-label="anchor" href="#provenance-of-raw-data-snapshots"><i class="fas fa-link"></i></a>
+</h2>
+<p>Raw inputs that MOSAIC downloads automatically (EM-DAT, IDMC, World Bank, UN World Population Prospects, the mobility origin-destination sources, the travel-time friction raster, the WHO annual cholera record and the WHO ICG vaccination table) are written to the raw data directory as dated snapshots that are never overwritten. Each download goes to a temporary file, is validated, and is then moved into place, so an interrupted fetch cannot become the newest and therefore canonical file (the IDMC and mobility readers also skip an incomplete newer snapshot). Every new snapshot appends a row to a provenance ledger (<code>PROVENANCE.md</code>) in its source directory, recording when, from where and by which function it was obtained. All other raw files are hand-curated and read-only.</p>
+
+</div>
 </div>
   <div class="chapter-nav">
 <div class="prev"><a href="rationale.html"><span class="header-section-number">1</span> Rationale</a></div>
@@ -189,10 +210,15 @@
 <li><a class="nav-link" href="#vaccinations"><span class="header-section-number">2.3</span> Vaccinations</a></li>
 <li><a class="nav-link" href="#human-mobility-data"><span class="header-section-number">2.4</span> Human Mobility Data</a></li>
 <li>
-<a class="nav-link" href="#climate-data"><span class="header-section-number">2.5</span> Climate Data</a><ul class="nav navbar-nav"><li><a class="nav-link" href="#storms-and-floods"><span class="header-section-number">2.5.1</span> Storms and Floods</a></li></ul>
+<a class="nav-link" href="#climate-data"><span class="header-section-number">2.5</span> Climate Data</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#storms-and-floods"><span class="header-section-number">2.5.1</span> Storms and Floods</a></li>
+<li><a class="nav-link" href="#drought"><span class="header-section-number">2.5.2</span> Drought</a></li>
+<li><a class="nav-link" href="#displacement"><span class="header-section-number">2.5.3</span> Displacement</a></li>
+</ul>
 </li>
 <li><a class="nav-link" href="#wash-water-sanitation-and-hygiene"><span class="header-section-number">2.6</span> WASH (Water, Sanitation, and Hygiene)</a></li>
 <li><a class="nav-link" href="#demographics"><span class="header-section-number">2.7</span> Demographics</a></li>
+<li><a class="nav-link" href="#provenance-of-raw-data-snapshots"><span class="header-section-number">2.8</span> Provenance of raw data snapshots</a></li>
 </ul>
 
       <div class="book-extra">

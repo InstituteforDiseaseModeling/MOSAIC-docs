@@ -33,12 +33,12 @@ nocite: '@*'
 \
 
 <center><span style="color:#FF6347; font-size:13px;">*
-Website under development. Last compiled on 2026-06-05 at  12:18 PM PDT.
+Website under development. Last compiled on 2026-09-30 at  10:24 AM PDT.
 *</span></center>
 
 ## Welcome {-}
 
-Welcome to the **Metapopulation Outbreak Simulation with Agent-based Implementation for Cholera (MOSAIC)**. The MOSAIC framework simulates the transmission dynamics of cholera in Sub-Saharan Africa (SSA) and provides tools to understand the impact of interventions, such as vaccination, as well as large-scale drivers like climate change. MOSAIC is built using the Light-agent Spatial Model for ERadication (LASER) platform, and this site serves as documentation for the model's methods and associated analyses. Please note that MOSAIC is currently under development, so content may change regularly. We are sharing it here to increase visibility and welcome feedback on any aspect of the model.
+Welcome to the **Metapopulation Outbreak Simulation with Agent-based Implementation for Cholera (MOSAIC)**. The MOSAIC framework simulates the transmission dynamics of cholera in Sub-Saharan Africa (SSA) and provides tools to understand the impact of interventions, such as vaccination, as well as large-scale drivers like climate change. MOSAIC's transmission engine was first built on the Light-agent Spatial Model for ERadication (LASER) platform, in the [laser-cholera](https://github.com/InstituteforDiseaseModeling/laser-cholera) package, and now runs as a pure-R port of that engine inside the MOSAIC R package; this site serves as documentation for the model's methods and associated analyses. Please note that MOSAIC is currently under development, so content may change regularly. We are sharing it here to increase visibility and welcome feedback on any aspect of the model.
 
 ## Contact {-}
 

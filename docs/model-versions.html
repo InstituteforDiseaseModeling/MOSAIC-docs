@@ -108,7 +108,7 @@
 <tr class="even">
 <td align="left">v1.0</td>
 <td align="left">
-<strong>Current:</strong> First production implementation. The transmission engine runs in the Python <a href="https://github.com/InstituteforDiseaseModeling/laser-cholera">laser-cholera</a> metapopulation model, driven by the R <a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg">MOSAIC</a> package for data assembly, parameter sampling, and Bayesian calibration via Dask. Priors for all biological parameters are now literature-derived (shedding, ID<sub>50</sub>, decay, CFR), and the calibration pipeline produces best, medioid, and ensemble forecasts with importance-sampling weights, effective sample size, and agreement-index diagnostics.</td>
+<strong>Current:</strong> First production implementation. The transmission engine was developed in the Python <a href="https://github.com/InstituteforDiseaseModeling/laser-cholera">laser-cholera</a> metapopulation model and has since been ported to pure R (<code>run_simulation()</code>) inside the R <a href="https://github.com/InstituteforDiseaseModeling/MOSAIC-pkg">MOSAIC</a> package, which also handles data assembly, parameter sampling, and Bayesian calibration on a local parallel cluster. Priors for all biological parameters are now literature-derived (shedding, ID<sub>50</sub>, decay, CFR), and the calibration pipeline produces medoid and ensemble forecasts with importance-sampling weights, effective sample size, and agreement-index diagnostics.</td>
 </tr>
 <tr class="odd">
 <td align="left">v2.0</td>

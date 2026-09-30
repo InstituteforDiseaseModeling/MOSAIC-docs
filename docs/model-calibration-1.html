@@ -123,14 +123,14 @@ P(\text{data}\mid\boldsymbol{\Theta})\;
 P(\text{data}\mid\boldsymbol{\Theta}),
 \tag{4.4}
 \end{equation}\]</span>
-therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood <span class="math inline">\(P(\text{data}\mid\boldsymbol{\Theta})\)</span>, and we can now construct the likelihood function using the relevant probability density functions <span class="math inline">\(f(y\mid\mu)\)</span> as described below.</p>
+therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood <span class="math inline">\(P(\text{data}\mid\boldsymbol{\Theta})\)</span>, and we can now construct the likelihood function using the relevant probability density functions <span class="math inline">\(f(y\mid\hat{y})\)</span> as described below.</p>
 </div>
 <div id="total-log-likelihood-for-cases-and-deaths" class="section level2" number="4.2">
 <h2>
 <span class="header-section-number">4.2</span> Total Log-likelihood for Cases and Deaths<a class="anchor" aria-label="anchor" href="#total-log-likelihood-for-cases-and-deaths"><i class="fas fa-link"></i></a>
 </h2>
 <p>Because the model posterior is proportional to <span class="math inline">\(P(\text{data}\mid\boldsymbol{\Theta})\)</span>, we constructed the likelihood function with
-the appropriate distribution for each of the observed data types using common notation for a probability density function <span class="math inline">\(f(y\mid\mu)\)</span>. The MOSAIC framework is a spatial model, so we also included the <span class="math inline">\(J\)</span> spatial locations and <span class="math inline">\(T\)</span> time points in the full
+the appropriate distribution for each of the observed data types using common notation for a probability density function <span class="math inline">\(f(y\mid\hat{y})\)</span>. The MOSAIC framework is a spatial model, so we also included the <span class="math inline">\(J\)</span> spatial locations and <span class="math inline">\(T\)</span> time points in the full
 likelihood, which gives the product over both indices:</p>
 <p><span class="math display" id="eq:total-log-likelihood-1">\[\begin{equation}
 P\left(\text{data}\mid\boldsymbol{\Theta}\right)
@@ -140,13 +140,13 @@ P\left(\text{data}\mid\boldsymbol{\Theta}\right)
 f\!\left(
 y_{jt}\;
 \bigl|\;
-\mu_{jt}\!\left(\boldsymbol{\Theta}\right)
+\hat{y}_{jt}\!\left(\boldsymbol{\Theta}\right)
 \right),
 \tag{4.5}
 \end{equation}\]</span></p>
 <p>where <span class="math inline">\(y_{jt}\)</span> is the observed count (cases, deaths, etc.) for location <span class="math inline">\(j\)</span> at
-time <span class="math inline">\(t\)</span>, and <span class="math inline">\(\mu_{jt}(\boldsymbol{\Theta})\)</span> is the corresponding model-generated
-mean. Substituting <span class="math inline">\(f(\cdot)\)</span> with the appropriate probability distribution
+time <span class="math inline">\(t\)</span>, and <span class="math inline">\(\hat{y}_{jt}(\boldsymbol{\Theta})\)</span> is the corresponding model-generated
+mean (written <span class="math inline">\(C_{j,t}^{\text{est}}\)</span> for cases below). Substituting <span class="math inline">\(f(\cdot)\)</span> with the appropriate probability distribution
 (Poisson, Negative Binomial, etc.) yields the explicit likelihood function used in
 calibration.</p>
 <p>The total log-likelihood combines contributions from observed cases and deaths across locations and time points. This combined likelihood function quantifies the probability of the observed epidemiological data given the model parameters <span class="math inline">\(\boldsymbol{\Theta}\)</span>.
@@ -154,11 +154,11 @@ calibration.</p>
 \log \mathcal{L}(\boldsymbol{\Theta}) =
 \sum_{j=1}^{J} w_{j} \left[
 w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\right)
-+ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\left(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\right)
++ w_{\text{deaths}}\,\log \mathcal{L}^{\text{deaths}}_{j}(\boldsymbol{\Theta})
 \right]
 \tag{4.6}
 \end{equation}\]</span></p>
-<p>Note that each log-likelihood term is weighted three times — by a location weight <span class="math inline">\(w_j\)</span>, a time-step weight <span class="math inline">\(w_t\)</span>, and an outcome-specific weight <span class="math inline">\(w_{\text{cases}}\)</span> or <span class="math inline">\(w_{\text{deaths}}\)</span> — so that contributions reflect data reliability and public-health priorities across space, time, and outcome. The choice between Poisson and Negative Binomial for the density <span class="math inline">\(P(\cdot)\)</span> is driven by the local mean-variance relationship (VMR), ensuring that the assumed error structure mirrors the dispersion actually observed in the surveillance data. The next subsection details the parameterisation of each probability distribution and how the corresponding likelihood is computed.</p>
+<p>Note that each log-likelihood term is weighted three times — by a location weight <span class="math inline">\(w_j\)</span>, a time-step weight <span class="math inline">\(w_t\)</span> (which, for deaths, weights the days of each reporting week inside <span class="math inline">\(\log \mathcal{L}^{\text{deaths}}_{j}\)</span>), and an outcome-specific weight <span class="math inline">\(w_{\text{cases}}\)</span> or <span class="math inline">\(w_{\text{deaths}}\)</span> — so that contributions reflect data reliability and public-health priorities across space, time, and outcome. The cases term is a sum of per-day Negative Binomial log-densities. The deaths term <span class="math inline">\(\log \mathcal{L}^{\text{deaths}}_{j}\)</span> is not a per-day density: it is the marginal likelihood of the weekly observed deaths with the reported case fatality ratio integrated out for each simulated path, as defined in the <a href="https://www.mosaicmod.org/model-description.html#case-fatality-rate">Case fatality rate</a> section of the model description (a weekly quasi-Poisson score with a per-location dispersion and a small background, and a Laplace approximation over a location offset and one deviation per calendar year). The next subsection details the cases density and how its dispersion is estimated.</p>
 <div class="inline-table"><table class="table table-sm">
 <colgroup>
 <col width="38%">
@@ -183,44 +183,33 @@ w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{
 </td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(D_{j,t}^{\text{obs}}\)</span></td>
-<td>Observed deaths at location <span class="math inline">\(j\)</span> and time <span class="math inline">\(t\)</span>
-</td>
-</tr>
-<tr class="odd">
 <td><span class="math inline">\(C_{j,t}^{\text{est}}(\boldsymbol{\Theta})\)</span></td>
 <td>Model-estimated mean cases at location <span class="math inline">\(j\)</span>, time <span class="math inline">\(t\)</span>
 </td>
 </tr>
-<tr class="even">
-<td><span class="math inline">\(D_{j,t}^{\text{est}}(\boldsymbol{\Theta})\)</span></td>
-<td>Model-estimated mean deaths at location <span class="math inline">\(j\)</span>, time <span class="math inline">\(t\)</span>
-</td>
-</tr>
 <tr class="odd">
+<td><span class="math inline">\(\log \mathcal{L}^{\text{deaths}}_{j}(\boldsymbol{\Theta})\)</span></td>
+<td>Integrated deaths log-likelihood at location <span class="math inline">\(j\)</span> (reported CFR integrated out; see the model description)</td>
+</tr>
+<tr class="even">
 <td><span class="math inline">\(w_j\)</span></td>
 <td>Location-specific weights (reflecting population or data confidence)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><span class="math inline">\(w_t\)</span></td>
 <td>Time-specific weights (typically uniform, <span class="math inline">\(w_t=1\)</span>)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><span class="math inline">\(w_{\text{cases}}\)</span></td>
 <td>Relative weight for cases</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><span class="math inline">\(w_{\text{deaths}}\)</span></td>
 <td>Relative weight for deaths</td>
 </tr>
-<tr class="odd">
-<td><span class="math inline">\(k_{\text{cases}, j}\)</span></td>
-<td>Dispersion parameter for cases at location <span class="math inline">\(j\)</span>
-</td>
-</tr>
 <tr class="even">
-<td><span class="math inline">\(k_{\text{deaths}, j}\)</span></td>
-<td>Dispersion parameter for deaths at location <span class="math inline">\(j\)</span>
+<td><span class="math inline">\(k_{\text{cases}, j}\)</span></td>
+<td>Negative Binomial dispersion for cases at location <span class="math inline">\(j\)</span>
 </td>
 </tr>
 </tbody>
@@ -230,45 +219,30 @@ w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{
 <h2>
 <span class="header-section-number">4.3</span> Distributional Assumptions for Likelihood Components<a class="anchor" aria-label="anchor" href="#distributional-assumptions-for-likelihood-components"><i class="fas fa-link"></i></a>
 </h2>
-<p>For each location <span class="math inline">\(j\)</span> and time step <span class="math inline">\(t\)</span> the density <span class="math inline">\(f\!\left(y_{jt}\mid\mu_{jt}\left(\boldsymbol{\Theta}\right)\right)\)</span> in Equation
-<a href="model-calibration-1.html#eq:total-log-likelihood-1">(4.5)</a> is chosen to match the observed mean–variance relationship at that location, which is
-calculated as <span class="math inline">\(\mathrm{VMR}_j = \mathrm{Var}(y_{j\cdot}) / \mathrm{Mean}(y_{j\cdot})\)</span> from the raw surveillance counts.
-If <span class="math inline">\(\mathrm{VMR}_j &lt; 1.5\)</span> the data are close to <em>equi-dispersion</em> and we adopt a <em>Poisson</em> distributed error model. Otherwise,
-the count data are considered to be <em>over-dispersed</em> and we use a <em>Negative Binomial</em> error model with a location-specific dispersion
-parameter <span class="math inline">\(k_j\)</span>.</p>
-<div id="negative-binomial-density-vmr-ge-1.5" class="section level3" number="4.3.1">
+<p>For each location <span class="math inline">\(j\)</span> and time step <span class="math inline">\(t\)</span> the cases density <span class="math inline">\(f\!\left(y_{jt}\mid\hat{y}_{jt}\left(\boldsymbol{\Theta}\right)\right)\)</span> in Equation
+<a href="model-calibration-1.html#eq:total-log-likelihood-1">(4.5)</a> is a <em>Negative Binomial</em> with a location-specific dispersion parameter <span class="math inline">\(k_j\)</span>, which reduces to the <em>Poisson</em> density when <span class="math inline">\(k_j = \infty\)</span>.</p>
+<div id="negative-binomial-density" class="section level3" number="4.3.1">
 <h3>
-<span class="header-section-number">4.3.1</span> Negative Binomial density (VMR <span class="math inline">\(\ge 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#negative-binomial-density-vmr-ge-1.5"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.3.1</span> Negative Binomial density<a class="anchor" aria-label="anchor" href="#negative-binomial-density"><i class="fas fa-link"></i></a>
 </h3>
 <p><span class="math display" id="eq:negbin">\[\begin{equation}
-\log P_{\text{NB}}\!\left(y_{jt}\mid\mu_{jt},k_j\right)
+\log P_{\text{NB}}\!\left(y_{jt}\mid\hat{y}_{jt},k_j\right)
 \,=\,
 \log\Gamma(y_{jt}+k_j)-\log\Gamma(k_j)-\log\Gamma(y_{jt}+1)
-+k_j\log\!\left[\tfrac{k_j}{k_j+\mu_{jt}}\right]
-+y_{jt}\log\!\left[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\right]
++k_j\log\!\left[\tfrac{k_j}{k_j+\hat{y}_{jt}}\right]
++y_{jt}\log\!\left[\tfrac{\hat{y}_{jt}}{k_j+\hat{y}_{jt}}\right]
 \tag{4.7}
 \end{equation}\]</span>
-The dispersion is estimated per location via the method-of-moments:
-<span class="math display" id="eq:dispersion">\[\begin{equation}
-k_j \;=\;\frac{\mu_j^2}{\mathrm{Var}(y_{j\cdot})-\mu_j},
+so that <span class="math inline">\(\mathrm{Var}(y_{jt})=\hat{y}_{jt}+\hat{y}_{jt}^2/k_j\)</span>. Every cell is scored through this density with the predicted mean floored at <span class="math inline">\(\max\!\left(10^{-4},\ 0.02\,\bar{y}_{j}\right)\)</span>, where <span class="math inline">\(\bar{y}_{j}\)</span> is the location’s mean observed count (<code>control$likelihood$eps_rel_cases</code>), so a day with observed cases and a zero prediction costs a bounded, data-scaled amount.</p>
+<p>The dispersion <span class="math inline">\(k_j\)</span> is a property of the observation process, so it is estimated once per calibration from the observed cases alone (<code>est_nb_dispersion()</code>), not from the model-observation mismatch. For each location we aggregate the daily series to its native weekly reporting cadence (the reporting-week boundary is detected per location), model the weekly mean with a spline trend plus seasonal harmonics following the Farrington/Noufaily convention used by the <a href="https://cran.r-project.org/package=surveillance"><code>surveillance</code></a> package, and estimate <span class="math inline">\(k_j\)</span> by conditional maximum likelihood (<code><a href="https://rdrr.io/pkg/MASS/man/glm.nb.html">MASS::glm.nb</a></code>), honouring the per-observation confidence weights. The per-location estimates are then shrunk toward a cross-location mean-dispersion trend in the style of <a href="https://doi.org/10.1186/s13059-014-0550-8">Love, Huber &amp; Anders 2014</a>, with each location’s own estimate weighted by its precision (the trend is fitted only when at least five locations carry estimates; otherwise the estimates are used as they are). Because the daily series are weekly totals spread evenly over the days of the week, the quadratic term <span class="math inline">\(\hat{y}_{jt}^2/k_j\)</span> of the variance is the same on the weekly and the daily scale, so the weekly <span class="math inline">\(k_j\)</span> applies directly to the daily cells. All-zero and otherwise uninformative series, and dispersion estimates that run to the Poisson boundary, resolve to <span class="math inline">\(k_j = \infty\)</span>, i.e. the Poisson density
+<span class="math display" id="eq:poisson">\[\begin{equation}
+\log P_{\text{Pois}}\!\left(y_{jt}\mid\hat{y}_{jt}\right)
+\,=\;
+y_{jt}\log\hat{y}_{jt}-\hat{y}_{jt}-\log(y_{jt}!).
 \tag{4.8}
 \end{equation}\]</span>
-so that <span class="math inline">\(\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j\)</span>. As <span class="math inline">\(k_j\rightarrow\infty\)</span> the density in
-<a href="model-calibration-1.html#eq:negbin">(4.7)</a> collapses smoothly to the Poisson form.</p>
-</div>
-<div id="poisson-density-vmr-1.5" class="section level3" number="4.3.2">
-<h3>
-<span class="header-section-number">4.3.2</span> Poisson density (VMR <span class="math inline">\(&lt; 1.5\)</span>)<a class="anchor" aria-label="anchor" href="#poisson-density-vmr-1.5"><i class="fas fa-link"></i></a>
-</h3>
-<p><span class="math display" id="eq:poisson">\[\begin{equation}
-\log P_{\text{Pois}}\!\left(y_{jt}\mid\mu_{jt}\right)
-\,=\;
-y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
-\tag{4.9}
-\end{equation}\]</span></p>
-<p>The automatic Poisson/Negative-Binomial switch ensures that the
-error structure embedded in the likelihood replicates the empirical
-dispersion seen in the surveillance data, while the weighting scheme
+The estimates are written to <code>2_calibration/diagnostics/nb_dispersion.csv</code>. They replace an earlier method-of-moments estimate across the whole series, which measured the variance of the epidemic signal rather than the observation dispersion and was held up by a floor (<span class="math inline">\(k \ge 3\)</span>) at almost every location; that floor is retired. A dispersion can still be set explicitly with <code>control$likelihood$nb_k_cases</code>, which replaces the estimate.</p>
+<p>The weighting scheme
 <span class="math inline">\(w_j,\,w_t,\,w_{\text{cases}},\,w_{\text{deaths}}\)</span> (introduced in
 Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>) controls the relative influence
 of each location, time step, and outcome on the overall fit.</p>
@@ -279,9 +253,9 @@ of each location, time step, and outcome on the overall fit.</p>
 <span class="header-section-number">4.4</span> Algorithm for Parameter Estimation<a class="anchor" aria-label="anchor" href="#algorithm-for-parameter-estimation"><i class="fas fa-link"></i></a>
 </h2>
 <p>The MOSAIC calibration relies on a <em>brute-force random sampling</em> (BFRS) workflow with importance-sampling for estimating posterior parameter distributions. The BFRS approach is deliberately simple, fully parallelisable, and maps directly onto the informative priors which have been painstakingly estimated a priori (see the <a href="https://www.mosaicmod.org/model-description.html">Model Description</a> page).</p>
-<p>Unlike <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is small because the LASER modelling engine, whose fast, metapopulation implementation can evaluate each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> parameter draw in milliseconds.</p>
-<p>Relative to <a href="https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any">Latin-hypercube</a> or <a href="https://en.wikipedia.org/wiki/Sobol_sequence">Sobol sequence</a> sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with LASER’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.</p>
-<p>In practice, the BFRS workflow is executed in two phases. A <em>broad exploration phase</em> draws <span class="math inline">\(n_{\text{sim}}^{(1)}\)</span> parameter vectors directly from the prior to identify the high-likelihood region of the parameter space. A <em>fine-tuning phase</em> then refines the posterior by drawing <span class="math inline">\(n_{\text{sim}}^{(2)}\)</span> additional vectors from an updated proposal distribution centred on the retained subset of the exploration phase, repeating until the convergence diagnostics in the <a href="model-calibration-1.html#model-convergence">Model convergence</a> section are satisfied or a maximum number of fine-tuning batches is reached. Across both phases, the LASER simulations are dispatched to a Dask <code>LocalCluster</code> (or an Azure-style cluster for production runs), with several thousand parameter vectors evaluated in parallel. To prevent fork-related deadlocks between the Numba JIT inside laser-cholera and the Dask worker pool, the thread-count environment variables (<code>TBB_NUM_THREADS</code>, <code>NUMBA_NUM_THREADS</code>, <code>OMP_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code>) are pinned to 1 in each worker before the LASER engine is imported.</p>
+<p>Unlike <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov-Chain Monte Carlo</a> (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is acceptable because the metapopulation engine (<code>run_simulation()</code>, implemented in R) evaluates each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> parameter draw in roughly a second for the full 40-location model, and draws are embarrassingly parallel.</p>
+<p>Relative to <a href="https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any">Latin-hypercube</a> or <a href="https://en.wikipedia.org/wiki/Sobol_sequence">Sobol sequence</a> sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with the engine’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.</p>
+<p>In practice, the BFRS workflow is executed in two phases, and every draw in both phases comes from the prior <span class="math inline">\(P(\boldsymbol{\Theta})\)</span>; the phases differ only in how many draws are run, not in where they are drawn. An <em>adaptive phase</em> runs fixed-size batches (default 500 draws; at least 5 and at most 8 batches) and after each batch recomputes the per-parameter marginal ESS described in the <a href="model-calibration-1.html#model-convergence">Model convergence</a> section, tracking the value reached by 95% of the parameters. It ends when a regression of that ESS on <span class="math inline">\(\sqrt{n_{\text{sim}}}\)</span> fits with <span class="math inline">\(R^2 \ge 0.90\)</span> (over at least five batches) or the batch limit is reached. A <em>predictive phase</em> then uses that regression to predict how many further draws are needed to reach the target ESS, runs them in batches (never smaller than the adaptive batch size and at most 10,000 draws each, for at most 10 batches), and re-evaluates the ESS after each until the target is met or the total budget (default 100,000 draws) is spent. <em>Known limitation of this stopping rule:</em> the per-parameter marginal ESS that drives both phases is not bounded by the effective sample size of the importance weights themselves, so it does not detect weight collapse. When the weights have collapsed onto a single draw (exact importance-sampling ESS of 1, the regime routinely observed at MOSAIC’s data scale) the default kernel-density estimate still returns a marginal ESS that grows with the number of draws (roughly <span class="math inline">\(n_{\text{sim}}/5\)</span> under a uniform prior and <span class="math inline">\(n_{\text{sim}}/25\)</span> under a lognormal one), which can clear the default target and stop sampling; see <a href="model-calibration-1.html#effective-sample-size-ess">Effective sample size</a> below. The stopping rule should therefore be read alongside the exact importance-sampling diagnostics reported in <code>summary.json</code>. A calibration can instead be run with a fixed number of draws (<code>control$calibration$n_simulations</code>); such a run never evaluates the ESS criterion and reports the status <code>completed_fixed</code> (or <code>completed_fixed_partial</code> if the posterior-ensemble metrics could not be computed) with <code>converged = FALSE</code> and <code>convergence_evaluated = FALSE</code>, rather than <code>completed_unconverged</code>. Batches are dispatched to a local PSOCK cluster of R worker processes (the <code>parallel</code> package); the BLAS and OpenMP thread-count environment variables are pinned to 1 in each worker so that parallel workers do not oversubscribe the cores.</p>
 <p>The steps below summarise how this BFRS workflow is turned into a practical calibration routine—moving from prior draws, through model simulation and likelihood evaluation, to the identification of the best-fitting parameter set.</p>
 <ol style="list-style-type: decimal">
 <li><em>Generate reproducible parameter sample</em></li>
@@ -294,24 +268,24 @@ of each location, time step, and outcome on the overall fit.</p>
 <ol start="3" style="list-style-type: decimal">
 <li><em>Evaluate the fit for every draw</em></li>
 </ol>
-<p>For each of the <span class="math inline">\(n_{\text{sim}} \times n_{\text{iter}}\)</span> internal iterations, compute the total <em>negative</em> log-likelihood <span class="math inline">\(-\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> via Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>.</p>
+<p>For each of the <span class="math inline">\(n_{\text{sim}} \times n_{\text{iter}}\)</span> internal iterations, compute the total log-likelihood via Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a>, and combine the <span class="math inline">\(n_{\text{iter}}\)</span> values of each draw into <span class="math inline">\(\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> by their log-mean-exp, i.e. the log of the likelihood averaged over the stochastic iterations.</p>
 <ol start="4" style="list-style-type: decimal">
 <li><em>Posterior summaries and representative-model selection</em></li>
 </ol>
-<p>After all <span class="math inline">\(n_{\text{sim}}\)</span> parameter vectors have been scored, the calibration pipeline produces three complementary representations of the posterior:</p>
+<p>After all <span class="math inline">\(n_{\text{sim}}\)</span> parameter vectors have been scored, the calibration pipeline produces three complementary summaries: the posterior parameter distributions and two predictive representations.</p>
 <ul>
-<li><p><em>Posterior parameter distributions</em> — the truncated importance weights <span class="math inline">\(\tilde w_i\)</span> (Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation <a href="model-calibration-1.html#eq:weighted-posterior">(4.12)</a>). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.</p></li>
+<li><p><em>Posterior parameter distributions</em> — the saturated subset weights <span class="math inline">\(\tilde w_i\)</span> (Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a>) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation <a href="model-calibration-1.html#eq:weighted-posterior">(4.11)</a>). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.</p></li>
 <li><p><em>Ensemble forecast</em> — for each of <span class="math inline">\(n_{\text{iter}}^{\text{ens}}\)</span> stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.</p></li>
-<li><p><em>Best and medioid representative models</em> — two deterministic summaries of the ensemble are also produced for scenario analysis. The <em>best model</em> is the parameter vector with the highest log-likelihood, <span class="math inline">\(\hat{\boldsymbol{\Theta}}^{\text{best}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]\)</span>. The <em>medioid model</em> is the parameter vector closest (in weighted Mahalanobis distance) to the importance-sampling-weighted posterior centroid, providing a statistical representative that is less affected by stochastic excursions of the maximum-likelihood point than <span class="math inline">\(\hat{\boldsymbol{\Theta}}^{\text{best}}\)</span>. Both representatives are simulated for <span class="math inline">\(n_{\text{iter}}^{\text{best}}\)</span> stochastic realisations (default 100), so their reported coverage is directly comparable to the ensemble.</p></li>
+<li><p><em>Medoid representative model</em> — a single parameter vector is also selected for scenario analysis. The <em>medoid model</em> is the ensemble member whose predicted cases trajectory (the median over its stochastic runs) is closest, in mean absolute error of <span class="math inline">\(\log(1 + \text{cases})\)</span>, to the ensemble’s central cases trajectory, so that the representative tracks the reported curve. The distance is pooled over every location and every scored time step (the burn-in and the engine’s artifact-masked steps are excluded), so in a multi-location calibration every location counts and a single location is not allowed to stand for the whole network; for a single-location run it reduces to that location’s log-scale error. The distance uses cases only. Its configuration, with the reported case fatality ratio shifted to the medoid’s own posterior, is saved as <code>config_medoid.json</code> and simulated for <span class="math inline">\(n_{\text{iter}}^{\text{best}}\)</span> stochastic realisations (default 100), so its reported coverage is directly comparable to the ensemble. A best-likelihood configuration is not produced; the highest-likelihood draw is only flagged in the sample table.</p></li>
 </ul>
-<p>All three representations report <span class="math inline">\(R^2\)</span> from the stochastic median of their respective trajectories rather than from a separate deterministic LASER call, so they are directly comparable across the prediction set. The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of <span class="math inline">\(A_{\text{best}} = 0.70\)</span> and a maximum weight coefficient of variation of <span class="math inline">\(\mathrm{CV}_{\tilde w,\text{best}} = 1.0\)</span>, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.</p>
+<p>Both predictive representations, the ensemble and the medoid, report <span class="math inline">\(R^2\)</span> and the bias ratio from the central line of their respective stochastic trajectories rather than from a separate deterministic simulation, so they are directly comparable across the prediction set. The central line is the weighted mean by default (<code>control$predictions$central_method</code>; it was the weighted median before MOSAIC-pkg v0.98.0, and <code>"median"</code> restores that). In the ensemble, each member’s deaths are redrawn from the posterior of the reported case fatality ratio given that member’s path, and forecast years carry the ensemble’s shared latest-year CFR shift (see the <a href="https://www.mosaicmod.org/model-description.html#case-fatality-rate">Case fatality rate</a> section). The retained subset of draws used for the ensemble is selected after sampling has finished, by a grid search over subset sizes that seeks a subset meeting the targets <span class="math inline">\(\text{ESS}_{\text{best}} = 100\)</span>, <span class="math inline">\(A_{\text{best}} = 0.70\)</span> and <span class="math inline">\(\mathrm{CV}_{\tilde w,\text{best}} = 1.0\)</span>, relaxing the targets through a sequence of tiers (<code>get_default_subset_tiers()</code>) until one is met (see Stage 1 below). Each candidate subset is scored with the same weights the posterior uses (<code>control$targets$best_subset_weighting</code>; the saturated weights of Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a> by default), so the size the search certifies is the size at which the posterior’s own weights meet the tier. No further simulations are run for this step.</p>
 </div>
 <div id="estimating-the-posterior-distribution-of-model-parameters" class="section level2" number="4.5">
 <h2>
 <span class="header-section-number">4.5</span> Estimating the Posterior Distribution of Model Parameters<a class="anchor" aria-label="anchor" href="#estimating-the-posterior-distribution-of-model-parameters"><i class="fas fa-link"></i></a>
 </h2>
 <p>To transform the BFRS ensemble of samples from the parameter space and corresponding likelihood values
-<span class="math inline">\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> into a legitimate Bayesian posterior, we used Importance Sampling (IS). The IS method is a well‑known technique to estimate posterior distributions originally described by <a href="https://pubsonline.informs.org/doi/10.1287/opre.1.5.263">Kahn &amp; Marshall 1953</a> and reviewed in a more modern context by <a href="https://doi.org/10.1002/wics.56">Tokdar &amp; Kass 2010</a>. Thus, we calculate the IS-weights using the <span class="math inline">\(\Delta \text{AIC}\)</span> with a practical cut–off of <span class="math inline">\(\Delta \le 6\)</span> and retain the IS for a subset of supported models as described in the steps below:</p>
+<span class="math inline">\(\bigl\{\boldsymbol{\Theta}^{(i)},\,\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> into an approximate posterior, we used Importance Sampling (IS) — with the important caveat, quantified below, that at MOSAIC’s data scale the IS weights collapse onto a single draw, so the implemented scheme departs from exact IS by design. The IS method is a well‑known technique to estimate posterior distributions originally described by <a href="https://pubsonline.informs.org/doi/10.1287/opre.1.5.263">Kahn &amp; Marshall 1953</a> and reviewed in a more modern context by <a href="https://doi.org/10.1002/wics.56">Tokdar &amp; Kass 2010</a>. Thus, we calculate the IS-weights from the <span class="math inline">\(\Delta \text{AIC}\)</span> of each draw and retain a subset of supported models, as described in the steps below. Note that MOSAIC does <strong>not</strong> apply the textbook <span class="math inline">\(\Delta \le 6\)</span> cut-off; the reason, and the scheme actually used, are given in the “Assign best-subset weights” section below.</p>
 <div id="compute-delta-textaic-for-every-draw" class="section level3" number="4.5.1">
 <h3>
 <span class="header-section-number">4.5.1</span> Compute <span class="math inline">\(\Delta \text{AIC}\)</span> for every draw<a class="anchor" aria-label="anchor" href="#compute-delta-textaic-for-every-draw"><i class="fas fa-link"></i></a>
@@ -324,37 +298,54 @@ of each location, time step, and outcome on the overall fit.</p>
 \;=\;
 -\,2\!\left[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)}) -
 \log\mathcal{L}_{\max}\right]
-\tag{4.10}
+\tag{4.9}
 \end{equation}\]</span></p>
 </div>
-<div id="assign-truncated-importance-weights" class="section level3" number="4.5.2">
+<div id="assign-best-subset-weights" class="section level3" number="4.5.2">
 <h3>
-<span class="header-section-number">4.5.2</span> Assign truncated importance weights<a class="anchor" aria-label="anchor" href="#assign-truncated-importance-weights"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.5.2</span> Assign best-subset weights<a class="anchor" aria-label="anchor" href="#assign-best-subset-weights"><i class="fas fa-link"></i></a>
 </h3>
-<p>Since the BFRS method generates a large ensemble of candidate parameter sets <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we reduce the influence of poorly fitting models by truncating the importance weights using a <span class="math inline">\(\Delta \text{AIC}\)</span> cut-off. This ensures that only models with substantially better fit to the data contribute to the posterior. We first compute raw (un-normalised) weights:
-<span class="math display" id="eq:aic-weights">\[\begin{equation}
-w_i^{\text{raw}} \;=\;
-\begin{cases}
-\exp\!\left[-\tfrac12 \Delta_i\right], &amp; \Delta_i \le 6,\\[6pt]
-0, &amp; \Delta_i &gt; 6,
-\end{cases}
+<p>Since the BFRS method generates a large ensemble of candidate parameter sets <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span>, we reduce the influence of poorly fitting models before forming the posterior. MOSAIC does this in <strong>two stages</strong>: a rank-based selection of the best subset, followed by a <em>saturating</em> Gibbs weighting within it.</p>
+<p><strong>Stage 1 — rank-based subset selection.</strong> The retained best subset <span class="math inline">\(\mathcal{B}\)</span> is the top <span class="math inline">\(q\)</span> draws by log-likelihood, where <span class="math inline">\(q\)</span> is chosen by a tiered search (<code>get_default_subset_tiers()</code>) subject to <span class="math inline">\(|\mathcal{B}| \ge \text{ESS}_{\text{best}}\)</span> and the agreement/CV targets below, each candidate <span class="math inline">\(q\)</span> being scored on the Stage 2 weights of its own subset (saturated by default; the scheme set by <code>control$targets$best_subset_weighting</code> is used for the tier search, the subset optimizer and the posterior alike). It is a <strong>rank</strong> criterion, not a threshold on <span class="math inline">\(\Delta_i\)</span>. Because the saturated weights are nearly flat, in practice the ESS target alone sets <span class="math inline">\(q\)</span> and the agreement and CV targets rarely bind.</p>
+<p><strong>Stage 2 — saturating weights within the subset.</strong> For <span class="math inline">\(i \in \mathcal{B}\)</span> we compute</p>
+<p><span class="math display" id="eq:aic-weights">\[\begin{equation}
+w_i^{\text{raw}} \;=\; \exp\!\left[-\tfrac12 \min(\Delta_i,\, \Delta^{\ast})\right],
+\qquad \Delta^{\ast} = 4,
 \qquad \text{and then normalise:} \qquad
 \tilde{w}_i \;=\;
-\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j=1}^{n_{\text{sim}}} w_j^{\text{raw}}}.
-\tag{4.11}
-\end{equation}\]</span>
-The threshold of <span class="math inline">\(\Delta_i \le 6\)</span> is widely used in model selection and corresponds approximately to a likelihood ratio of <span class="math inline">\(p_i = \exp(-\Delta_i/2) \approx 0.05\)</span>, which in nested-model comparisons aligns loosely with a frequentist <span class="math inline">\(p\)</span>-value of 0.05 (Burnham &amp; Anderson <a href="https://doi.org/10.1007/b97636">2002</a> and <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">2004</a>). Since every MOSAIC simulation has the same number of estimated parameters <span class="math inline">\(k\)</span>, <span class="math inline">\(\Delta_i\)</span> reduces to a likelihood-ratio statistic and the cut-off acts as a likelihood-ratio filter on the BFRS draws rather than as a formal model-selection criterion across nested models. This cut-off removes models with essentially no empirical support, while preserving relative likelihood ratios among the retained models. Alternative posterior diagnostics such as the Pareto-<span class="math inline">\(k\)</span> shape statistic of PSIS (<a href="https://doi.org/10.48550/arXiv.1507.02646">Vehtari et al. 2024</a>) can be used to flag cases where the truncated importance-weight distribution has unbounded variance.</p>
+\dfrac{w_i^{\text{raw}}}{\displaystyle\sum_{j\in\mathcal{B}} w_j^{\text{raw}}}.
+\tag{4.10}
+\end{equation}\]</span></p>
+<p>Note the <span class="math inline">\(\min(\cdot)\)</span>: <span class="math inline">\(\Delta_i\)</span> is <strong>saturated</strong> at <span class="math inline">\(\Delta^{\ast}=4\)</span>, not cut off. Every draw beyond <span class="math inline">\(\Delta^{\ast}\)</span> receives the same non-zero weight <span class="math inline">\(e^{-2}\)</span>, so all weights lie in <span class="math inline">\([e^{-2}, 1]\)</span> and the ratio between the best and worst retained draw can never exceed <span class="math inline">\(e^{2} \approx 7.39\)</span>.</p>
+<div id="why-not-the-textbook-delta-le-6-cut-off" class="section level4 unnumbered">
+<h4>Why not the textbook <span class="math inline">\(\Delta \le 6\)</span> cut-off?<a class="anchor" aria-label="anchor" href="#why-not-the-textbook-delta-le-6-cut-off"><i class="fas fa-link"></i></a>
+</h4>
+<p>Earlier versions of this document specified a hard cut-off, <span class="math inline">\(w_i^{\text{raw}} = 0\)</span> for <span class="math inline">\(\Delta_i &gt; 6\)</span>, on the standard model-selection argument (Burnham &amp; Anderson <a href="https://doi.org/10.1007/b97636">2002</a>, <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">2004</a>) that <span class="math inline">\(\Delta_i \le 6\)</span> corresponds to a likelihood ratio of roughly <span class="math inline">\(0.05\)</span>. <strong>That rule is not applicable at MOSAIC’s data scale, and is not what the pipeline implements.</strong></p>
+<p>The <span class="math inline">\(\Delta \le 6\)</span> heuristic is calibrated for comparing a handful of <em>fitted</em> models, each evaluated at its own maximum-likelihood estimate, where <span class="math inline">\(\Delta\)</span> is naturally of order unity. MOSAIC instead scores <em>unfitted prior draws</em> against a time-series likelihood summed over <span class="math inline">\(O(10^5)\)</span> observations (40 locations <span class="math inline">\(\times\)</span> $$1,400 days <span class="math inline">\(\times\)</span> 2 outcome channels). Log-likelihood differences between prior draws are then of order <span class="math inline">\(10^5\)</span>–<span class="math inline">\(10^6\)</span>, and essentially no draw other than the single best falls within 6 AIC units.</p>
+<p>This is not hypothetical. In a reference 100,000-draw calibration over all 40 locations, the median <span class="math inline">\(\Delta_i\)</span> was <span class="math inline">\(9.6 \times 10^5\)</span> and the maximum <span class="math inline">\(1.4 \times 10^7\)</span>; <strong>exactly one draw</strong> satisfied <span class="math inline">\(\Delta_i \le 6\)</span>. Applying the documented cut-off would therefore place the entire posterior on a single parameter vector, yielding degenerate credible intervals. Saturating at <span class="math inline">\(\Delta^{\ast}\)</span> is what keeps the posterior non-degenerate.</p>
+</div>
+<div id="what-the-saturation-does-and-does-not-buy" class="section level4 unnumbered">
+<h4>What the saturation does and does not buy<a class="anchor" aria-label="anchor" href="#what-the-saturation-does-and-does-not-buy"><i class="fas fa-link"></i></a>
+</h4>
+<p>The saturation should be understood as <strong>deliberate regularisation, not as importance sampling.</strong> Two consequences follow directly and are reported rather than hidden:</p>
+<ol style="list-style-type: decimal">
+<li><p><em>Within the subset, the likelihood is used mainly to rank, not to weight.</em> Because weights are confined to <span class="math inline">\([e^{-2},1]\)</span>, the subset posterior is close to uniform over <span class="math inline">\(\mathcal{B}\)</span>. In the reference run above, the single best draw carried <span class="math inline">\(6.1\%\)</span> of the mass while the remaining 114 draws each carried <span class="math inline">\(0.82\%\)</span> against <span class="math inline">\(0.87\%\)</span> for exact uniformity. The resulting estimator is closer in spirit to approximate Bayesian computation with a rank-based acceptance threshold than to importance sampling.</p></li>
+<li><p><em>The convergence metrics below are inflated by construction.</em> <span class="math inline">\(\widehat{\text{ESS}}\)</span>, <span class="math inline">\(A\)</span> and <span class="math inline">\(\mathrm{CV}_{\tilde w}\)</span> are all computed on these saturated weights. Since <span class="math inline">\(\widehat{\text{ESS}}\)</span> is maximised by uniform weights, saturation <em>raises</em> it: for weights bounded in <span class="math inline">\([e^{-2},1]\)</span>, <span class="math inline">\(\widehat{\text{ESS}} \gtrsim 0.42\,|\mathcal{B}|\)</span> (Kish) or <span class="math inline">\(0.62\,|\mathcal{B}|\)</span> (perplexity) <strong>regardless of how poorly the draws fit</strong>. These metrics therefore measure the weighting scheme at least as much as they measure the fit, and they cannot be read as evidence that the importance sampler has explored the posterior.</p></li>
+</ol>
+<p>Because of point 2, MOSAIC additionally reports <strong>exact, untruncated importance-sampling diagnostics</strong> (<code>calc_is_diagnostics()</code>), written to <code>summary.json</code> as <code>ess_is_all</code>, <code>ess_is_best</code>, <code>khat_all</code> and <code>khat_all_status</code>. These apply Equation <a href="model-calibration-1.html#eq:ess">(4.12)</a> to the raw likelihood ratios <span class="math inline">\(r_i \propto \mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> with no truncation, and add the Pareto-<span class="math inline">\(\hat k\)</span> shape statistic of PSIS (<a href="https://doi.org/10.48550/arXiv.1507.02646">Vehtari et al. 2024</a>); <span class="math inline">\(\hat k \ge 0.7\)</span> indicates IS estimates with unbounded variance. In the reference run these gave <span class="math inline">\(\widehat{\text{ESS}}_{\text{IS}} = 1.00\)</span> against a reported <span class="math inline">\(\text{ESS}_B\)</span> of <span class="math inline">\(107.5\)</span> — a gap of more than two orders of magnitude. <strong>The two numbers are not in conflict; they measure different things, and both are reported so that the difference is visible.</strong> Any claim about posterior coverage should be read against the exact diagnostics, not against <span class="math inline">\(\text{ESS}_B\)</span> alone.</p>
+<p>A <code>tempered</code> alternative to Stage 2 is available (<code>control$targets$best_subset_weighting = "tempered"</code>), which selects the inverse temperature adaptively so that the worst retained draw sits at a specified weight floor rather than saturating at a fixed <span class="math inline">\(\Delta^{\ast}\)</span>. It does preserve the likelihood ordering within <span class="math inline">\(\mathcal{B}\)</span> faithfully (rank correlation between weight and log-likelihood 1.00, against 0.16 for the saturated scheme). <strong>But it is SHARPER than the default, not softer</strong>, and should not be enabled expecting a gentler weighting: <span class="math inline">\(w_{\text{gibbs}}\)</span> is derived from <span class="math inline">\(\max(\Delta)\)</span> <em>within the set it is applied to</em>, and inside <span class="math inline">\(\mathcal{B}\)</span> that maximum is ~<span class="math inline">\(4\times10^{3}\)</span> rather than the ~<span class="math inline">\(2.9\times10^{6}\)</span> seen across all draws, making the inverse temperature roughly 680 times larger. Measured on a 25,000-draw Ethiopia run it moves <span class="math inline">\(\widehat{\text{ESS}}\)</span> from 107.5 to <strong>1.25</strong>, with 96% of the posterior mass on a single draw. Because its inverse temperature is rescaled to each candidate subset’s own <span class="math inline">\(\Delta\)</span> range, its ESS grows only roughly in proportion to the subset size (about <span class="math inline">\(0.06\,|\mathcal{B}|\)</span> when <span class="math inline">\(\Delta\)</span> rises linearly with rank), so the tier search meets its targets, if at all, at a much larger subset than under the saturated scheme. When selected, the tempered weights are used for the posterior summaries and the ensemble, not only for the convergence gate. The default remains <code>"saturated"</code>.</p>
+</div>
 </div>
 <div id="posterior-summaries" class="section level3" number="4.5.3">
 <h3>
 <span class="header-section-number">4.5.3</span> Posterior summaries<a class="anchor" aria-label="anchor" href="#posterior-summaries"><i class="fas fa-link"></i></a>
 </h3>
-<p>Because the vector of truncated <span class="math inline">\(\Delta \text{AIC}\)</span> weights <span class="math inline">\(\mathbf{\tilde{w}}\)</span> are proportional to the posterior density <span class="math inline">\(P(\boldsymbol{\Theta}\mid\text{data})\)</span>, we estimate the true Bayesian posterior distributions of each fitted model parameter as a weighted empirical statistic. Take for example the scalar <span class="math inline">\(\sigma\)</span>, which gives the proportion of infections that are symptomatic. It is an element of each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> sample of the parameter space, so <span class="math inline">\(\bigl\{\sigma^{(i)}\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> gives all <span class="math inline">\(\sigma\)</span> values for which a likelihood has been calculated. Therefore, we derive the posterior mean and 95% credible intervals for <span class="math inline">\(\sigma\)</span> as:
+<p>The saturated weights <span class="math inline">\(\mathbf{\tilde{w}}\)</span> of Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a> are <strong>not</strong> proportional to the posterior density <span class="math inline">\(P(\boldsymbol{\Theta}\mid\text{data})\)</span>, and the summaries below should not be read as exact Bayesian posteriors. Within <span class="math inline">\(\mathcal{B}\)</span> the true density ratio between the best and worst retained draw spans many orders of magnitude — measured at <span class="math inline">\(\exp(-52{,}263)\)</span> on a reference 100,000-draw run — while the saturation caps the weight ratio at <span class="math inline">\(e^{2}\approx 7.39\)</span>. What follows is therefore a weighted empirical summary over the retained subset, closer to an approximate-Bayesian-computation posterior with a rank-based acceptance rule than to importance-sampling from the exact posterior (see “Assign best-subset weights” above, and the exact IS diagnostics reported in <code>summary.json</code>). With that reading in place, we summarise each fitted parameter as a weighted empirical statistic. Take for example the scalar <span class="math inline">\(\sigma\)</span>, which gives the proportion of infections that are symptomatic. It is an element of each <span class="math inline">\(\boldsymbol{\Theta}^{(i)}\)</span> sample of the parameter space, so <span class="math inline">\(\bigl\{\sigma^{(i)}\bigr\}_{i=1}^{n_{\text{sim}}}\)</span> gives all <span class="math inline">\(\sigma\)</span> values for which a likelihood has been calculated. Therefore, we derive the posterior mean and 95% credible intervals for <span class="math inline">\(\sigma\)</span> as:
 <span class="math display" id="eq:weighted-posterior">\[\begin{equation}
 \mathbb{E}[\sigma] \;=\; \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i\,\sigma^{(i)}
 \qquad \text{and} \qquad
 95\% \, \text{CI} \;=\; \left[\,Q^{(\tilde{w})}_{0.025},\; Q^{(\tilde{w})}_{0.975}\right].
-\tag{4.12}
+\tag{4.11}
 \end{equation}\]</span>
 Where <span class="math inline">\(Q^{(\tilde{w})}_{p}\)</span> denotes the <span class="math inline">\(\tilde{w}\)</span>-weighted <span class="math inline">\(p\)</span>-th quantile of the retained ensemble, ensuring that the resulting intervals are
 fully consistent with the Bayesian posterior implied by the importance-sampling weights.</p>
@@ -381,30 +372,33 @@ measures the variability of the retained models and detects extremely skewed mod
 <span class="header-section-number">4.6.1</span> Effective sample size (ESS)<a class="anchor" aria-label="anchor" href="#effective-sample-size-ess"><i class="fas fa-link"></i></a>
 </h3>
 <p>Since the BFRS draws are independent of <span class="math inline">\(P(\boldsymbol{\Theta})\)</span>, ESS plays
-the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We employ the specification of the ESS in <a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a> using the <span class="math inline">\(\Delta \text{AIC}\)</span>-truncated model weights <span class="math inline">\(\tilde w_i\)</span> from Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a>:
+the role that <span class="math inline">\(\hat R\)</span> does in MCMC. We employ the specification of the ESS in <a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a>. Applied to the <em>saturated</em> subset weights <span class="math inline">\(\tilde w_i\)</span> of Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a> this yields the reported <span class="math inline">\(\text{ESS}_B\)</span>; applied to the raw untruncated ratios it yields the exact <span class="math inline">\(\widehat{\text{ESS}}_{\text{IS}}\)</span> described above. Both use:
 <span class="math display" id="eq:ess">\[\begin{equation}
 \widehat{\text{ESS}} =
 \left[
 \sum_{i=1}^{n_{\text{sim}}} \tilde{w}_i^{\,2}
 \right]^{-1}.
-\tag{4.13}
+\tag{4.12}
 \end{equation}\]</span>
-Because discarded model runs have <span class="math inline">\(\tilde{w}_i=0\)</span>, ESS reflects only the retained
-subset. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals (<a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a>; see also the MCMC-context discussion of ESS thresholds in <a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a> and <a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>). The earlier MOSAIC guidance of <span class="math inline">\(\widehat{\text{ESS}} \gtrsim 500\)</span>–<span class="math inline">\(1000\)</span> tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-<span class="math inline">\(k\)</span> diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.</p>
-<p>The aggregate <span class="math inline">\(\widehat{\text{ESS}}\)</span> above measures the joint information retained across the full parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. To diagnose whether the posterior on any <em>individual</em> parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter’s draws into 100 equally weighted bins on its prior support and applies Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> within each bin, with the grid scaled adaptively to the parameter’s effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.</p>
-<p>The Akaike weights in Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a> are a special case of a broader <em>Gibbs-posterior</em> weighting scheme (<a href="https://doi.org/10.1111/rssb.12158">Bissiri <em>et al.</em> 2016</a>) of the form</p>
+Equation <a href="model-calibration-1.html#eq:ess">(4.12)</a> is the Kish form (<code>control$targets$ESS_method = "kish"</code>). The default, <code>"perplexity"</code>, is the exponential of the weight entropy, <span class="math inline">\(\exp\!\big(-\sum_i \tilde{w}_i \log \tilde{w}_i\big)\)</span>, which is never smaller than the Kish value; <span class="math inline">\(\text{ESS}_B\)</span>, <span class="math inline">\(\widehat{\text{ESS}}_{\text{IS}}\)</span> and the marginal ESS below all use the configured form.
+Because draws outside <span class="math inline">\(\mathcal{B}\)</span> have <span class="math inline">\(\tilde{w}_i=0\)</span>, <span class="math inline">\(\text{ESS}_B\)</span> reflects only the retained
+subset, and — as noted above — is bounded below by roughly <span class="math inline">\(0.42|\mathcal{B}|\)</span> by the saturation alone. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals (<a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira <em>et al.</em> 2022</a>; see also the MCMC-context discussion of ESS thresholds in <a href="https://sites.stat.columbia.edu/gelman/book/">Gelman <em>et al.</em> 2014</a> and <a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a>). The earlier MOSAIC guidance of <span class="math inline">\(\widehat{\text{ESS}} \gtrsim 500\)</span>–<span class="math inline">\(1000\)</span> tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-<span class="math inline">\(k\)</span> diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.</p>
+<p>The aggregate <span class="math inline">\(\widehat{\text{ESS}}\)</span> above measures the joint information retained across the full parameter vector <span class="math inline">\(\boldsymbol{\Theta}\)</span>. To diagnose whether the posterior on any <em>individual</em> parameter is well-supported, we also compute a per-parameter marginal ESS. The default (<code>control$targets$ESS_marginal_method = "kde"</code>) estimates each parameter’s weighted marginal posterior by a kernel density on a grid over the range of its draws (100 grid points at the default target <span class="math inline">\(\text{ESS}_{\text{param}} = 100\)</span>, more for higher targets), divides it by a uniform density on that range, applies Equation <a href="model-calibration-1.html#eq:ess">(4.12)</a> to the normalised ratios and rescales the result from grid points to draws. A <code>"binned"</code> alternative sums the weights in 100 bins, applies Equation <a href="model-calibration-1.html#eq:ess">(4.12)</a> to the bin totals and rescales by the number of occupied bins. Both start from the raw importance weights <span class="math inline">\(\exp(\log\mathcal{L}_i - \log\mathcal{L}_{\max})\)</span> over all draws, and both replace the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws. This marginal ESS is the quantity that drives the adaptive and predictive phases described above.</p>
+<p><strong>Known limitation.</strong> Neither form of the marginal ESS is bounded by the ESS of the importance weights. The kernel bandwidth is chosen from the <em>unweighted</em> draws, so it does not shrink as the weights concentrate, and both forms are rescaled by the number of draws. A weight vector that has collapsed onto a single draw (exact <span class="math inline">\(\widehat{\text{ESS}}_{\text{IS}} = 1\)</span>) therefore still yields a marginal ESS that grows with <span class="math inline">\(n_{\text{sim}}\)</span> (for the default <code>"kde"</code>, roughly <span class="math inline">\(n_{\text{sim}}/5\)</span> under a uniform prior and <span class="math inline">\(n_{\text{sim}}/25\)</span> under a lognormal prior; for <code>"binned"</code>, about <span class="math inline">\(n_{\text{sim}}\)</span> divided by the number of occupied bins), and for a non-uniform prior the uniform reference density mixes the prior’s shape into the result. Because this quantity is the stopping rule, a collapsed sampler can clear the default target (<span class="math inline">\(\text{ESS}_{\text{param}} = 100\)</span> for 95% of parameters) and end the adaptive phase. The defect is documented and its correction deferred; until it is fixed, the marginal ESS and the stop it triggers should be read against the exact importance-sampling diagnostics (<span class="math inline">\(\widehat{\text{ESS}}_{\text{IS}}\)</span> and Pareto <span class="math inline">\(\hat k\)</span>), which do detect the collapse.</p>
+<p>The weights in Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a> are related to the broader <em>Gibbs-posterior</em> family (<a href="https://doi.org/10.1111/rssb.12158">Bissiri <em>et al.</em> 2016</a>), though — as noted above and for the reason given after Equation <a href="model-calibration-1.html#eq:gibbs-weights">(4.13)</a> — the implemented saturated form does <strong>not</strong> satisfy the coherence requirement from which Bissiri <em>et al.</em> derive that family, so it is not a Gibbs posterior. The general form is</p>
 <p><span class="math display" id="eq:gibbs-weights">\[\begin{equation}
 \tilde{w}_i \;=\; \frac{\exp\!\big(-w_{\text{gibbs}}\, x_i\big)}{\sum_{j=1}^{n_{\text{sim}}} \exp\!\big(-w_{\text{gibbs}}\, x_j\big)},
-\tag{4.14}
+\tag{4.13}
 \end{equation}\]</span></p>
-<p>where <span class="math inline">\(x_i\)</span> is a generic loss (lower is better) and <span class="math inline">\(w_{\text{gibbs}} \ge 0\)</span> is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting <span class="math inline">\(x_i = \Delta_i\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1/2\)</span> recovers Equation <a href="model-calibration-1.html#eq:aic-weights">(4.11)</a> exactly; setting <span class="math inline">\(x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1\)</span> recovers normalised likelihood weights. The Gibbs formulation is used internally to allow the calibration pipeline to fall back to a softer weight scheme when a <span class="math inline">\(\Delta\text{AIC}\)</span> cut-off would otherwise truncate too many draws.</p>
-<p>Note that the location, time, and outcome shape weights <span class="math inline">\(w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}\)</span> that enter the log-likelihood in Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a> are normalised to make their contributions comparable across components: each shape weight is rescaled by <span class="math inline">\(N_{\text{obs}} / N_{\text{component}}\)</span>, where <span class="math inline">\(N_{\text{obs}}\)</span> is the count of non-NA surveillance observations and <span class="math inline">\(N_{\text{component}}\)</span> is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.</p>
+<p>where <span class="math inline">\(x_i\)</span> is a generic loss (lower is better) and <span class="math inline">\(w_{\text{gibbs}} \ge 0\)</span> is the inverse-temperature parameter that controls how sharply weight concentrates on the best draws. Setting <span class="math inline">\(x_i = \min(\Delta_i, \Delta^{\ast})\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1/2\)</span> recovers Equation <a href="model-calibration-1.html#eq:aic-weights">(4.10)</a>; note that it is the <em>saturated</em> loss, not <span class="math inline">\(\Delta_i\)</span> itself, that appears — with <span class="math inline">\(x_i = \Delta_i\)</span> the Gibbs form gives untruncated Akaike weights, which at MOSAIC’s data scale collapse onto a single draw. Setting <span class="math inline">\(x_i = -\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\)</span> and <span class="math inline">\(w_{\text{gibbs}} = 1\)</span> recovers normalised likelihood weights. The Gibbs formulation is what allows the pipeline to offer the <code>tempered</code> scheme described above, in which <span class="math inline">\(w_{\text{gibbs}}\)</span> is set adaptively from the observed <span class="math inline">\(\Delta\)</span> range instead of being fixed at <span class="math inline">\(1/2\)</span>.</p>
+<p>Two caveats on the saturated default, both material. First, it is <strong>not sample-coherent</strong>: because <span class="math inline">\(\min(\Delta_i, \Delta^{\ast})\)</span> places the sample maximum inside a non-linear function, the additive shift no longer cancels, and the <em>relative</em> weight of two fixed draws depends on which other draws are in the sample. Concretely, two draws with <span class="math inline">\(\log\mathcal{L} = -100\)</span> and <span class="math inline">\(-102\)</span> have weight ratio <span class="math inline">\(e^{2}=7.39\)</span>; adding a third, better draw at <span class="math inline">\(-90\)</span> — changing neither of the first two — moves that ratio to exactly <span class="math inline">\(1.00\)</span>. Bissiri <em>et al.</em> derive the Gibbs form <em>from</em> a coherence requirement, which this violates. Second, the saturation level <span class="math inline">\(\Delta^{\ast}=4\)</span> is <strong>fixed</strong>, whereas the classical truncated-importance-sampling result of <a href="https://doi.org/10.1198/106186008X320456">Ionides 2008</a> requires a truncation level that GROWS with the sample size (at <span class="math inline">\(\sqrt{S}\,\bar r\)</span>) for consistency. A fixed level does not deliver it, so the estimator does not converge as <span class="math inline">\(n\)</span> grows.</p>
+<p>Note that the optional shape terms of the likelihood (peak timing, peak magnitude, cumulative progression and the weighted interval score, all off by default) are each multiplied by <span class="math inline">\(N_{\text{obs}} / N_{\text{component}}\)</span>, where <span class="math inline">\(N_{\text{obs}}\)</span> is the number of time steps with at least one observation at the location and <span class="math inline">\(N_{\text{component}}\)</span> is the number of evaluations that shape term makes (peaks, quantiles or cumulative evaluation points). This puts the peak terms, whose helpers return sums over peaks, on the scale of the core terms. It does <strong>not</strong> make the weighted interval score and the cumulative term comparable with them: their helpers already average over their quantiles and evaluation points, so with the defaults (five WIS quantile levels and four cumulative fractions) a given weight on those two terms carries <span class="math inline">\(1/5\)</span> and <span class="math inline">\(1/4\)</span> of <span class="math inline">\(N_{\text{obs}}\)</span> times the per-cell value, and changing the number of quantiles or evaluation points changes their influence. When the reported CFR is integrated out of the deaths likelihood, the deaths peak-magnitude, cumulative and WIS terms are dropped. The location, time and outcome weights <span class="math inline">\(w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}\)</span> of Equation <a href="model-calibration-1.html#eq:total-log-likelihood-2">(4.6)</a> are not rescaled.</p>
 </div>
 <div id="agreement-index-a" class="section level3" number="4.6.2">
 <h3>
 <span class="header-section-number">4.6.2</span> Agreement index <em>A</em><a class="anchor" aria-label="anchor" href="#agreement-index-a"><i class="fas fa-link"></i></a>
 </h3>
-<p>We quantify consensus among the retained subset of best models <span class="math inline">\(\mathcal B = \{\,i : \Delta_i \le 6\}\)</span> by the normalized <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Shannon entropy</a> of their model weights <span class="math inline">\(\tilde w_i\)</span>:
+<p>We quantify consensus among the retained subset of best models <span class="math inline">\(\mathcal B\)</span> — defined by rank, as in Stage 1 above — by the normalized <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Shannon entropy</a> of their model weights <span class="math inline">\(\tilde w_i\)</span>:
 <span class="math display" id="eq:agreement">\[\begin{equation}
 A =
 \frac{H(\mathbf{\tilde{w}})}{\log|\mathcal B|}
@@ -412,7 +406,7 @@ A =
 H(\mathbf{\tilde{w}})
 =
 -\sum_{i\in\mathcal B}\tilde w_i\,\log\tilde w_i.
-\tag{4.15}
+\tag{4.14}
 \end{equation}\]</span>
 Note that by definition <span class="math inline">\(A \in [0,1]\)</span> because <span class="math inline">\(0 \;\le\; H(\mathbf{\tilde{w}})\;\le\;\log|\mathcal B|\)</span>. When <span class="math inline">\(A=1\)</span>, all weights are equal (<span class="math inline">\(\tilde w_i = 1/|\mathcal B|\)</span>) and there is a high degree of consensus in the sense that all models share similar fit. When <span class="math inline">\(A=0\)</span>, a single model dominates (<span class="math inline">\(\tilde w_i = 1\)</span>) for one model run <span class="math inline">\(i\)</span> and zero for the rest), which gives poor consensus among the subset of best models <span class="math inline">\(\mathcal B\)</span>.</p>
 </div>
@@ -427,7 +421,7 @@ Note that by definition <span class="math inline">\(A \in [0,1]\)</span> because
 {\bar w}
 \qquad \text{and} \qquad
 \bar w=\tfrac1{|\mathcal B|}.
-\tag{4.16}
+\tag{4.15}
 \end{equation}\]</span>
 Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns that the variance within the best fitting subset of models may be high even if ESS and <span class="math inline">\(A\)</span> look satisfactory. A common rule-of-thumb from <a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al. 1994</a> is <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\!\lesssim\!2\)</span> for comfortably balanced weights. (Note: with <span class="math inline">\(\tilde w\)</span> normalised to sum to one over <span class="math inline">\(\mathcal B\)</span>, <span class="math inline">\(\bar w = 1/|\mathcal B|\)</span> by construction.)</p>
 </div>
@@ -438,11 +432,11 @@ Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns 
 <p>A calibration run that meets all three criteria indicates that the retained ensemble is <em>informative</em> (high ESS), <em>internally consistent</em> (high <span class="math inline">\(A\)</span>), and <em>numerically stable</em> (moderate <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span>), providing confidence in the posterior summaries and subsequent MOSAIC forecasts. We also perform Posterior Predictive Checks (PPC) on calibration runs to assess model fit and to refine the definition of model priors. Our targets for successful model calibration are shown in Table <a href="model-calibration-1.html#tab:calibration">4.1</a> with an example log-likelihood curve for a calibration test showing the diminishing returns in model fit with the number of simulations (Figure <a href="model-calibration-1.html#fig:likelihood-example">4.1</a>).</p>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:calibration">Table 4.1: </span>Details on convergence diagnostics with recommended thresholds and troubleshooting guidelines.</caption>
+<span id="tab:calibration">Table 4.1: </span>Convergence diagnostics with recommended thresholds. The first four rows are computed on the SATURATED subset weights of Equation 5.4 and form the convergence gate; because saturation bounds all weights into a narrow band, they are high by construction and cannot on their own establish that the importance sampler explored the posterior. The next two rows are the exact untruncated importance-sampling diagnostics, reported alongside but never gated; the best-subset percentile is also reported but not gated.</caption>
 <colgroup>
-<col width="54%">
-<col width="29%">
-<col width="16%">
+<col width="35%">
+<col width="26%">
+<col width="37%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Metric</th>
@@ -452,32 +446,50 @@ Large <span class="math inline">\(\mathrm{CV}_\mathbf{\tilde{w}}\)</span> warns 
 <tbody>
 <tr class="odd">
 <td align="left">
-<span class="math inline">\(\Delta\)</span>AIC cut-off</td>
-<td align="left"><span class="math inline">\(\le 6 \ \left(p\! \approx \! 0.05\right)\)</span></td>
-<td align="right"><a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">Burnham &amp; Anderson 2004</a></td>
+<span class="math inline">\(\Delta\)</span>AIC saturation <span class="math inline">\(\left(\Delta^{\ast}\right)\)</span>
+</td>
+<td align="left">
+<span class="math inline">\(=4\)</span>; <strong>saturating, not a <span class="math inline">\(\Delta\le6\)</span> cut-off</strong>
+</td>
+<td align="right">MOSAIC implementation; see text for why <a href="https://journals.sagepub.com/doi/abs/10.1177/0049124104268644">Burnham &amp; Anderson 2004</a> <span class="math inline">\(\Delta\le6\)</span> does not apply here</td>
 </tr>
 <tr class="even">
-<td align="left">Effective Sample Size <span class="math inline">\(\left(\widehat{\text{ESS}}\right)\)</span>
+<td align="left">Subset ESS <span class="math inline">\(\left(\text{ESS}_B\right)\)</span> — <em>gated</em>
 </td>
-<td align="left"><span class="math inline">\(\gt 500\)</span></td>
-<td align="right"><a href="https://sites.stat.columbia.edu/gelman/book/">Gelman et al. 2014</a></td>
-</tr>
-<tr class="odd">
-<td align="left"></td>
-<td align="left"><span class="math inline">\(\gt 1000\)</span></td>
-<td align="right"><a href="https://www.jstatsoft.org/article/view/v080i01">Bürkner 2017</a></td>
-</tr>
-<tr class="even">
-<td align="left">Agreement Index <span class="math inline">\(\left(A\right)\)</span>
-</td>
-<td align="left"><span class="math inline">\(\gt 0.7 \ \text{or} \ 0.8\)</span></td>
+<td align="left">
+<span class="math inline">\(\ge 100\)</span>, but <span class="math inline">\(\gtrsim 0.42\lvert\mathcal B\rvert\)</span> by construction</td>
 <td align="right"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
 </tr>
 <tr class="odd">
-<td align="left">Weight Coefficient of Variation <span class="math inline">\(\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)\)</span>
+<td align="left">Agreement Index <span class="math inline">\(\left(A\right)\)</span> — <em>gated</em>
 </td>
-<td align="left"><span class="math inline">\(\lt 1 \ \text{or} \ 2\)</span></td>
+<td align="left"><span class="math inline">\(\gt 0.70\)</span></td>
+<td align="right"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
+</tr>
+<tr class="even">
+<td align="left">Weight Coefficient of Variation <span class="math inline">\(\left(\mathrm{CV}_{\tilde{\mathbf w}} \right)\)</span> — <em>gated</em>
+</td>
+<td align="left"><span class="math inline">\(\lt 1\)</span></td>
 <td align="right"><a href="https://doi.org/10.1080/01621459.1994.10476469">Kong et al 1994</a></td>
+</tr>
+<tr class="odd">
+<td align="left">Exact IS ESS <span class="math inline">\(\left(\widehat{\text{ESS}}_{\text{IS}}\right)\)</span> — <em>reported</em>
+</td>
+<td align="left">no gate; <span class="math inline">\(\lt 2\)</span> indicates a collapsed sampler</td>
+<td align="right"><a href="https://onlinelibrary.wiley.com/doi/10.1111/insr.12500">Elvira et al 2022</a></td>
+</tr>
+<tr class="even">
+<td align="left">Pareto <span class="math inline">\(\hat k\)</span> — <em>reported</em>
+</td>
+<td align="left">
+<span class="math inline">\(\lt 0.7\)</span> for reliable IS; no gate</td>
+<td align="right"><a href="https://doi.org/10.48550/arXiv.1507.02646">Vehtari et al 2024</a></td>
+</tr>
+<tr class="odd">
+<td align="left">Best-subset share of all draws (percentile) — <em>reported</em>
+</td>
+<td align="left">no gate (duplicates the subset-size bound)</td>
+<td align="right">MOSAIC implementation</td>
 </tr>
 </tbody>
 </table></div>
@@ -519,7 +531,7 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 \frac{\widehat{\text{HSIC}}(\theta_p,\ \log\mathcal{L})^{2}}
      {\widehat{\text{HSIC}}(\theta_p,\ \theta_p)\,
       \widehat{\text{HSIC}}(\log\mathcal{L},\ \log\mathcal{L})},
-\tag{4.17}
+\tag{4.16}
 \end{equation}\]</span></p>
 <p>is a parameter-importance score in <span class="math inline">\([0,\,1]\)</span> that captures non-linear and non-monotonic dependence without assuming a particular sampling design or input independence (<a href="https://doi.org/10.1080/00949655.2014.945932">Da Veiga 2015</a>; <a href="https://link.springer.com/article/10.1007/s00477-014-1004-2">De Lozzo &amp; Marrel 2016</a>). Statistical significance is assessed via the asymptotic Gamma approximation, with permutation testing available as a fallback.</p>
 <p>HSIC was adopted in place of <a href="https://doi.org/10.1016/j.jtbi.2008.04.011">partial rank correlation coefficients</a> (PRCC) because PRCC requires Latin-hypercube inputs, monotonic input-output relationships, and approximately independent parameters — none of which hold under BFRS with correlated posterior draws and the multi-modal log-likelihood surfaces typical of metapopulation cholera models.</p>
@@ -537,9 +549,9 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <p>The post-calibration diagnostics described in the previous subsection double as a parameter-identifiability check. We use three measures derived from the marginal posteriors:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Prior-to-posterior KL divergence</strong> — the <a href="https://doi.org/10.1214/aoms/1177729694">Kullback–Leibler divergence</a> <span class="math inline">\(D_{\text{KL}}(p_{\text{prior}} \,\|\, p_{\text{post}})\)</span> for each parameter, computed in closed form when the prior and posterior share a known parametric family (Beta, Normal, Gamma, Lognormal) and by numerical integration for Uniform priors. Values near 0 indicate that the posterior is close to the prior and the data carry little information about the parameter; large values indicate that the posterior has moved appreciably away from the prior and the parameter is well identified by the calibration (<a href="https://doi.org/10.1002/9780470316870">Bernardo &amp; Smith 1994</a>, Ch. 5);</li>
+<strong>Prior-to-posterior KL divergence</strong> — the information gain <span class="math inline">\(D_{\text{KL}}(p_{\text{post}} \,\|\, p_{\text{prior}})\)</span> (<a href="https://doi.org/10.1214/aoms/1177729694">Kullback–Leibler divergence</a>) for each parameter. There is no closed form: the posterior density is a weighted kernel density estimate of the best-subset draws (bandwidth from the weighted Silverman rule with the Kish effective sample size of the weights), the prior density is a kernel density estimate of all draws, and the integral is evaluated numerically on a grid over the posterior’s support, with no cap on the value. Strictly positive parameters are evaluated on the log scale when that reduces the skewness of the prior draws (KL is invariant to monotone reparameterisation). The KL is reported as missing (<code>NA</code>) when the posterior weights have a Kish effective sample size below 2, where the kernel bandwidth is undefined. Values near 0 indicate that the posterior is close to the prior and the data carry little information about the parameter; large values indicate that the posterior has moved appreciably away from the prior and the parameter is well identified by the calibration (<a href="https://doi.org/10.1002/9780470316870">Bernardo &amp; Smith 1994</a>, Ch. 5);</li>
 <li>
-<strong>Per-parameter ESS</strong> — Equation <a href="model-calibration-1.html#eq:ess">(4.13)</a> evaluated on binned marginal draws as described under <em>Effective sample size</em> above, flagging parameters whose effective posterior support has collapsed to a small subset of draws;</li>
+<strong>Per-parameter ESS</strong> — the marginal ESS described under <em>Effective sample size</em> above (kernel-density form by default, binned form optional), subject to the known limitation stated there, flagging parameters whose effective posterior support has collapsed to a small subset of draws;</li>
 <li>
 <strong>Posterior correlation matrix</strong> — Spearman rank correlation across the best-fit subset <span class="math inline">\(\mathcal{B}\)</span>, hierarchically clustered to surface trade-offs (e.g. between <span class="math inline">\(\beta_{j0}\)</span> and <span class="math inline">\(\rho\)</span>, or between <span class="math inline">\(\zeta_1\)</span> and <span class="math inline">\(p_\beta\)</span>).</li>
 </ol>
@@ -578,16 +590,13 @@ Figure 4.1: Example log-Likelihood curve for a sample of 2000 model simulations.
 <li><a class="nav-link" href="#bayesian-likelihood-approach"><span class="header-section-number">4.1</span> Bayesian Likelihood Approach</a></li>
 <li><a class="nav-link" href="#total-log-likelihood-for-cases-and-deaths"><span class="header-section-number">4.2</span> Total Log-likelihood for Cases and Deaths</a></li>
 <li>
-<a class="nav-link" href="#distributional-assumptions-for-likelihood-components"><span class="header-section-number">4.3</span> Distributional Assumptions for Likelihood Components</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#negative-binomial-density-vmr-ge-1.5"><span class="header-section-number">4.3.1</span> Negative Binomial density (VMR \(\ge 1.5\))</a></li>
-<li><a class="nav-link" href="#poisson-density-vmr-1.5"><span class="header-section-number">4.3.2</span> Poisson density (VMR \(&lt; 1.5\))</a></li>
-</ul>
+<a class="nav-link" href="#distributional-assumptions-for-likelihood-components"><span class="header-section-number">4.3</span> Distributional Assumptions for Likelihood Components</a><ul class="nav navbar-nav"><li><a class="nav-link" href="#negative-binomial-density"><span class="header-section-number">4.3.1</span> Negative Binomial density</a></li></ul>
 </li>
 <li><a class="nav-link" href="#algorithm-for-parameter-estimation"><span class="header-section-number">4.4</span> Algorithm for Parameter Estimation</a></li>
 <li>
 <a class="nav-link" href="#estimating-the-posterior-distribution-of-model-parameters"><span class="header-section-number">4.5</span> Estimating the Posterior Distribution of Model Parameters</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#compute-delta-textaic-for-every-draw"><span class="header-section-number">4.5.1</span> Compute \(\Delta \text{AIC}\) for every draw</a></li>
-<li><a class="nav-link" href="#assign-truncated-importance-weights"><span class="header-section-number">4.5.2</span> Assign truncated importance weights</a></li>
+<li><a class="nav-link" href="#assign-best-subset-weights"><span class="header-section-number">4.5.2</span> Assign best-subset weights</a></li>
 <li><a class="nav-link" href="#posterior-summaries"><span class="header-section-number">4.5.3</span> Posterior summaries</a></li>
 </ul>
 </li>

@@ -57,10 +57,9 @@ E_{jt}
 - d_{jt}\,E_{jt}\\[3mm]
 I_{1,j,t+1} = \ &
 I_{1,jt}
-+ \sigma\,\iota\,E_{jt}
++ \big(1 - p^{\text{fatal}}_{jt}\big)\,\sigma\,\iota\,E_{jt}
 - \frac{\phi_1\,\nu_{1,jt}\,I_{1,jt}}{N^{\text{src}}_{jt}}
 - \gamma_1\,I_{1,jt}
-- \mu_{j,t}\,I_{1,jt}
 - d_{jt}\,I_{1,jt}\\[3mm]
 I_{2,j,t+1} = \ &
 I_{2,jt}
@@ -95,14 +94,14 @@ The human-to-human force of infection at time $t+1$ in location $j$ acts on the 
 (\#eq:foi-human)
 \end{equation}
 
-The environmental force of infection $\Psi_{j,t+1}$ at location $j$ and time $t+1$ also acts on the local susceptibles, dose-responding to the reservoir concentration $W_{jt}$ through the half-saturation constant $\kappa$:
+The environmental force of infection $\Psi_{j,t+1}$ at location $j$ and time $t+1$ also acts on the local susceptibles, dose-responding to the per-capita environmental load $W_{jt}/N_{jt}$ through the half-saturation constant $\kappa$:
 
 \begin{equation}
-\Psi_{j,t+1} = \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)W_{jt}}{\kappa + W_{jt}}.
+\Psi_{j,t+1} = \frac{\beta_{jt}^{\text{env}}\, (1-\tau_{j})S_{jt}\,(1-\theta_j)\,W_{jt}/N_{jt}}{\kappa + W_{jt}/N_{jt}}.
 (\#eq:foi-environment)
 \end{equation}
 
-Here, $\beta_{jt}^{\text{hum}}$ and $\beta_{jt}^{\text{env}}$ are the human-to-human and environment-to-human transmission rates; $\tau_i$ is the probability of departing origin location $i$; $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]); $\theta_j$ is the proportion of the population at location $j$ with at least basic access to Water, Sanitation, and Hygiene (WASH); and $\kappa$ is the *V. cholerae* concentration associated with a 50% probability of infection (see [Infectious dose ($\kappa$)](#infectious-dose-kappa)). Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIWRS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats $V_1$ and $V_2$ as fully protected for the duration of immunity.
+Here, $\beta_{jt}^{\text{hum}}$ and $\beta_{jt}^{\text{env}}$ are the human-to-human and environment-to-human transmission rates; $\tau_i$ is the probability of departing origin location $i$; $\pi_{ij}$ is the relative probability of travel from origin $i$ to destination $j$ (see section on [spatial dynamics][Spatial dynamics]); $\theta_j$ is the proportion of the population at location $j$ with at least basic access to Water, Sanitation, and Hygiene (WASH); and $\kappa$ is the half-saturation constant of the environmental dose-response, the per-capita load $W_{jt}/N_{jt}$ (*V. cholerae* cells in the reservoir per resident) at which the environmental hazard reaches half its maximum (see [Infectious dose ($\kappa$)](#infectious-dose-kappa)). Dividing the reservoir by the population (MOSAIC-pkg v0.89.0 onward) keeps the dose-response density dependent: without it a single symptomatic shedder saturates $W_{jt}/(\kappa + W_{jt})$ near unity at the literature shedding rates, and $\kappa$, $\zeta_1$ and $\beta_{j0}^{\text{env}}$ cannot be identified. At the default $\kappa = 10^6$ the environmental hazard half-saturates at roughly 0.3% symptomatic prevalence, so it is approximately linear at low prevalence and saturates during large outbreaks. (The engine's `replay` mode, which exists only to verify the R engine against laser-cholera draw for draw, keeps that engine's raw-$W_{jt}$ form.) Vaccinated individuals are excluded from both force-of-infection terms in the current SVEIWRS implementation; this is a deliberate simplification that absorbs vaccine effectiveness into the dose-delivery step and treats $V_1$ and $V_2$ as fully protected for the duration of immunity.
 
 Note that all model processes are stochastic. Transition rates are converted to probabilities with the commonly used method based on the exponential waiting time distribution $p(t) = 1-e^{-rt}$ (see [Ross 2007](https://www.google.com/books/edition/Introduction_to_Probability_Models/1uxBwhAb_zYC?hl=en)). Integer quantities are thus moved between model compartments at each time step according to a binomial process similar to the recovery of infected individuals $\gamma I_{jt}$:
 
@@ -114,9 +113,16 @@ For a detailed list of all stochastic transitions in the model, see the [Table o
 
 ## Latency
 
-An important feature of the SVEIWRS model is the inclusion of an exposed compartment $\left(E\right)$ , which captures the latent period between exposure and the onset of infectiousness. In our model, individuals who become infected first enter the $E$ compartment, where they remain for a period governed by the incubation period $\iota$, before progressing to the infectious compartments $I_1$ (severe symptomatic infection) or $I_2$ (mild and/or asymptomatic infection).
+An important feature of the SVEIWRS model is the inclusion of an exposed compartment $\left(E\right)$ , which captures the latent period between exposure and the onset of infectiousness. In our model, individuals who become infected first enter the $E$ compartment, where they remain for a period governed by the incubation rate $\iota$ (the reciprocal of the mean incubation period), before progressing to the infectious compartments $I_1$ (severe symptomatic infection) or $I_2$ (mild and/or asymptomatic infection).
 
-A systematic review by [Azman et al (2013)](http://www.sciencedirect.com/science/article/pii/S0163445312003477) estimated the median incubation period for cholera to be approximately $1.4 \ \text{days} \ (1.3–1.6 \ 95\% \text{CI})$. This relatively short latency is one of the key characteristic governing cholera dynamics and is critical for accurately capturing the rapid spatial spread observed during outbreaks.
+A systematic review by [Azman et al (2013)](http://www.sciencedirect.com/science/article/pii/S0163445312003477) estimated the median incubation period for cholera to be approximately $1.4 \ \text{days} \ (1.3–1.6 \ 95\% \text{CI})$. This relatively short latency is one of the key characteristic governing cholera dynamics and is critical for accurately capturing the rapid spatial spread observed during outbreaks. We place a lognormal prior on the daily rate $\iota$, centred on the Azman et al. median and widened well beyond its confidence interval to cover between-setting variation:
+
+$$
+\iota \sim \text{Lognormal}(-0.337,\ 0.4) \ \ \text{day}^{-1}
+\quad (\text{median} \approx 0.71 \ \text{day}^{-1}\text{, i.e. an incubation period of} \approx 1.4 \ \text{days; 95\% CI} \approx 0.64\text{--}3.1 \ \text{days}).
+$$
+
+Each day an exposed individual progresses to infection with probability $1 - e^{-\iota}$.
 
 
 ## Seasonality
@@ -127,7 +133,9 @@ Cholera transmission is seasonal and is typically associated with the rainy seas
 (\#eq:beta1)
 \end{equation}
 
-Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 365, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over each day of the year.
+Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at location $j$ over all time steps. Seasonal dynamics are determined by the parameters $a_1$, $b_1$ and $a_2$, $b_2$ which gives the amplitude of the first and second waves respectively. The periodic cycle $p$ is 365, so the function controls the temporal variation in $\beta_{jt}^{\text{hum}}$ over each day of the year. Note that $t$ in Equation \@ref(eq:beta1) is the *calendar day of the year* ($t = 1$ on 1 January), not the simulation day: the coefficients are fitted against calendar day of year (below), and the engine evaluates the envelope on each simulated day at that day's calendar day of the year, offsetting the simulation clock by the day of the year of the start date (code-name `season_t0`). The coefficients therefore keep their seasonal meaning whatever date a simulation starts on.
+
+Because the seasonal term multiplies $\beta_{j0}^{\text{hum}}$, the envelope $1 + f(t)$, where $f(t)$ is the sum of the four harmonic terms in Equation \@ref(eq:beta1), must stay positive; multiplicative seasonal forcing requires an amplitude below one ([Keeling & Rohani 2008](https://press.princeton.edu/books/hardcover/9780691116174/modeling-infectious-diseases-in-humans-and-animals), section 5.2). A Fourier fit to normalised case counts is not constrained this way and can dip below $-1$, which would switch human-to-human transmission off for weeks at a time. When a case-fitted envelope has $\min_t\,[1 + f(t)] < 0.1$, we multiply all four coefficients (and their standard errors) by the single factor $0.9 / \left[-\min_t f(t)\right]$, which lowers the amplitude so that the minimum of the envelope is exactly $0.1$ while keeping the phase and the relative shape of the season. The floor of $0.1$ (code-name `envelope_floor`) is a numerical positivity margin that leaves room for prior draws around the fitted means, not an estimated seasonal trough; the factor applied to each country is recorded as `envelope_scale` in the coefficient table.
 
 We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
 
@@ -169,206 +177,220 @@ Using the model fitting methods described above, and the cluster-based approach 
 <tbody>
   <tr>
    <td style="text-align:left;"> Angola </td>
-   <td style="text-align:left;"> -0.06 (-0.23 to 0.1) </td>
-   <td style="text-align:left;"> -0.46 (-0.63 to -0.29) </td>
-   <td style="text-align:left;"> 0.63 (0.46 to 0.8) </td>
-   <td style="text-align:left;"> -0.44 (-0.61 to -0.28) </td>
+   <td style="text-align:left;"> -0.26 (-0.46 to -0.06) </td>
+   <td style="text-align:left;"> -0.31 (-0.51 to -0.1) </td>
+   <td style="text-align:left;"> 1.24 (1.04 to 1.44) </td>
+   <td style="text-align:left;"> -0.26 (-0.46 to -0.06) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Benin </td>
-   <td style="text-align:left;"> 0.17 (-0.01 to 0.35) </td>
-   <td style="text-align:left;"> -0.58 (-0.76 to -0.4) </td>
-   <td style="text-align:left;"> -1.29 (-1.47 to -1.11) </td>
-   <td style="text-align:left;"> -0.36 (-0.54 to -0.18) </td>
+   <td style="text-align:left;"> 0.16 (-0.02 to 0.34) </td>
+   <td style="text-align:left;"> -0.59 (-0.77 to -0.41) </td>
+   <td style="text-align:left;"> -1.3 (-1.48 to -1.12) </td>
+   <td style="text-align:left;"> -0.36 (-0.54 to -0.19) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burkina Faso </td>
-   <td style="text-align:left;"> -1.67 (-2.1 to -1.23) </td>
-   <td style="text-align:left;"> 0.91 (0.46 to 1.35) </td>
-   <td style="text-align:left;"> -0.77 (-1.21 to -0.33) </td>
-   <td style="text-align:left;"> 0.86 (0.42 to 1.3) </td>
+   <td style="text-align:left;"> -1.68 (-2.12 to -1.25) </td>
+   <td style="text-align:left;"> 0.91 (0.47 to 1.35) </td>
+   <td style="text-align:left;"> -0.78 (-1.22 to -0.33) </td>
+   <td style="text-align:left;"> 0.87 (0.43 to 1.31) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:left;"> 0.21 (0.09 to 0.32) </td>
-   <td style="text-align:left;"> -0.32 (-0.44 to -0.2) </td>
-   <td style="text-align:left;"> -0.75 (-0.86 to -0.63) </td>
-   <td style="text-align:left;"> -0.16 (-0.28 to -0.05) </td>
+   <td style="text-align:left;"> -0.39 (-0.48 to -0.3) </td>
+   <td style="text-align:left;"> -0.34 (-0.43 to -0.25) </td>
+   <td style="text-align:left;"> -0.35 (-0.44 to -0.26) </td>
+   <td style="text-align:left;"> 0.1 (0.01 to 0.19) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:left;"> -0.47 (-0.58 to -0.37) </td>
-   <td style="text-align:left;"> -0.37 (-0.48 to -0.26) </td>
-   <td style="text-align:left;"> 0.03 (-0.08 to 0.14) </td>
-   <td style="text-align:left;"> 0.13 (0.03 to 0.24) </td>
+   <td style="text-align:left;"> -0.53 (-0.62 to -0.43) </td>
+   <td style="text-align:left;"> -0.34 (-0.44 to -0.25) </td>
+   <td style="text-align:left;"> 0.07 (-0.03 to 0.16) </td>
+   <td style="text-align:left;"> 0.01 (-0.09 to 0.11) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Central African Republic </td>
-   <td style="text-align:left;"> -1.62 (-2.02 to -1.22) </td>
-   <td style="text-align:left;"> 0.62 (0.21 to 1.03) </td>
-   <td style="text-align:left;"> -1.16 (-1.57 to -0.75) </td>
-   <td style="text-align:left;"> 1.7 (1.29 to 2.1) </td>
+   <td style="text-align:left;"> -1.64 (-2.04 to -1.23) </td>
+   <td style="text-align:left;"> 0.62 (0.22 to 1.03) </td>
+   <td style="text-align:left;"> -1.17 (-1.58 to -0.76) </td>
+   <td style="text-align:left;"> 1.71 (1.31 to 2.11) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Chad </td>
-   <td style="text-align:left;"> -0.18 (-0.45 to 0.09) </td>
-   <td style="text-align:left;"> -1.35 (-1.62 to -1.08) </td>
-   <td style="text-align:left;"> -1.83 (-2.1 to -1.56) </td>
-   <td style="text-align:left;"> 0.21 (-0.06 to 0.47) </td>
+   <td style="text-align:left;"> -0.69 (-0.95 to -0.44) </td>
+   <td style="text-align:left;"> -0.78 (-1.04 to -0.52) </td>
+   <td style="text-align:left;"> -1.64 (-1.91 to -1.38) </td>
+   <td style="text-align:left;"> 0.95 (0.7 to 1.21) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Congo </td>
-   <td style="text-align:left;"> -0.8 (-1.03 to -0.57) </td>
-   <td style="text-align:left;"> 0.06 (-0.17 to 0.3) </td>
-   <td style="text-align:left;"> -0.63 (-0.86 to -0.4) </td>
-   <td style="text-align:left;"> 1.31 (1.08 to 1.54) </td>
+   <td style="text-align:left;"> -1.31 (-1.59 to -1.03) </td>
+   <td style="text-align:left;"> 0.44 (0.15 to 0.73) </td>
+   <td style="text-align:left;"> -0.98 (-1.27 to -0.69) </td>
+   <td style="text-align:left;"> 1.34 (1.06 to 1.62) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Côte d’Ivoire </td>
-   <td style="text-align:left;"> 1.12 (0.79 to 1.44) </td>
-   <td style="text-align:left;"> 0.7 (0.38 to 1.03) </td>
-   <td style="text-align:left;"> 0.55 (0.22 to 0.87) </td>
-   <td style="text-align:left;"> 0.73 (0.41 to 1.05) </td>
+   <td style="text-align:left;"> -0.85 (-1.31 to -0.39) </td>
+   <td style="text-align:left;"> 1.08 (0.62 to 1.55) </td>
+   <td style="text-align:left;"> -0.24 (-0.71 to 0.23) </td>
+   <td style="text-align:left;"> 0.83 (0.37 to 1.3) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> DRC </td>
-   <td style="text-align:left;"> 0.1 (0.06 to 0.14) </td>
-   <td style="text-align:left;"> -0.07 (-0.11 to -0.03) </td>
-   <td style="text-align:left;"> -0.12 (-0.16 to -0.08) </td>
-   <td style="text-align:left;"> 0.05 (0.01 to 0.09) </td>
+   <td style="text-align:left;"> 0.03 (-0.01 to 0.07) </td>
+   <td style="text-align:left;"> -0.09 (-0.13 to -0.04) </td>
+   <td style="text-align:left;"> -0.11 (-0.15 to -0.06) </td>
+   <td style="text-align:left;"> 0.04 (0 to 0.09) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Eswatini </td>
+   <td style="text-align:left;"> -2.02 (-3.74 to -0.3) </td>
+   <td style="text-align:left;"> -2.6 (-4.56 to -0.64) </td>
+   <td style="text-align:left;"> -0.63 (-3.05 to 1.79) </td>
+   <td style="text-align:left;"> 2.05 (1.01 to 3.09) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ethiopia </td>
-   <td style="text-align:left;"> -0.45 (-0.53 to -0.38) </td>
-   <td style="text-align:left;"> -0.3 (-0.37 to -0.22) </td>
-   <td style="text-align:left;"> 0.12 (0.04 to 0.19) </td>
-   <td style="text-align:left;"> 0.2 (0.13 to 0.28) </td>
+   <td style="text-align:left;"> -0.39 (-0.47 to -0.32) </td>
+   <td style="text-align:left;"> -0.3 (-0.38 to -0.23) </td>
+   <td style="text-align:left;"> 0.1 (0.02 to 0.17) </td>
+   <td style="text-align:left;"> 0.22 (0.14 to 0.29) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Ghana </td>
-   <td style="text-align:left;"> -0.43 (-0.69 to -0.18) </td>
-   <td style="text-align:left;"> -0.89 (-1.14 to -0.64) </td>
-   <td style="text-align:left;"> -1.64 (-1.89 to -1.39) </td>
-   <td style="text-align:left;"> 0.59 (0.34 to 0.84) </td>
+   <td style="text-align:left;"> -0.04 (-0.26 to 0.17) </td>
+   <td style="text-align:left;"> -0.6 (-0.82 to -0.39) </td>
+   <td style="text-align:left;"> -1.37 (-1.58 to -1.16) </td>
+   <td style="text-align:left;"> 0.37 (0.16 to 0.58) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Guinea </td>
-   <td style="text-align:left;"> -1.1 (-1.41 to -0.78) </td>
+   <td style="text-align:left;"> -1.1 (-1.41 to -0.79) </td>
    <td style="text-align:left;"> -0.22 (-0.53 to 0.09) </td>
-   <td style="text-align:left;"> -1.22 (-1.53 to -0.91) </td>
-   <td style="text-align:left;"> 1.43 (1.13 to 1.74) </td>
+   <td style="text-align:left;"> -1.23 (-1.54 to -0.92) </td>
+   <td style="text-align:left;"> 1.45 (1.14 to 1.75) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:left;"> 0.15 (0.04 to 0.26) </td>
-   <td style="text-align:left;"> -0.02 (-0.13 to 0.1) </td>
-   <td style="text-align:left;"> 0.62 (0.51 to 0.73) </td>
-   <td style="text-align:left;"> -0.31 (-0.42 to -0.2) </td>
+   <td style="text-align:left;"> 0.1 (-0.02 to 0.22) </td>
+   <td style="text-align:left;"> 0.02 (-0.1 to 0.14) </td>
+   <td style="text-align:left;"> 0.61 (0.49 to 0.73) </td>
+   <td style="text-align:left;"> -0.21 (-0.33 to -0.1) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Liberia </td>
-   <td style="text-align:left;"> 0.07 (-0.03 to 0.16) </td>
-   <td style="text-align:left;"> -0.38 (-0.48 to -0.29) </td>
+   <td style="text-align:left;"> 0.06 (-0.04 to 0.15) </td>
+   <td style="text-align:left;"> -0.39 (-0.49 to -0.3) </td>
    <td style="text-align:left;"> 0.3 (0.21 to 0.4) </td>
    <td style="text-align:left;"> -0.16 (-0.26 to -0.07) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:left;"> 1.28 (1.02 to 1.54) </td>
-   <td style="text-align:left;"> 0.42 (0.16 to 0.68) </td>
-   <td style="text-align:left;"> 0.99 (0.73 to 1.25) </td>
-   <td style="text-align:left;"> 1.11 (0.85 to 1.37) </td>
+   <td style="text-align:left;"> 1.33 (1.07 to 1.59) </td>
+   <td style="text-align:left;"> 0.43 (0.16 to 0.69) </td>
+   <td style="text-align:left;"> 1.05 (0.78 to 1.32) </td>
+   <td style="text-align:left;"> 1.16 (0.9 to 1.43) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:left;"> 0.46 (0.31 to 0.61) </td>
-   <td style="text-align:left;"> -0.65 (-0.8 to -0.5) </td>
-   <td style="text-align:left;"> 1.15 (1 to 1.3) </td>
-   <td style="text-align:left;"> 0.15 (0 to 0.29) </td>
+   <td style="text-align:left;"> 0.37 (0.21 to 0.54) </td>
+   <td style="text-align:left;"> -0.78 (-0.95 to -0.61) </td>
+   <td style="text-align:left;"> 1.18 (1.01 to 1.34) </td>
+   <td style="text-align:left;"> 0.09 (-0.08 to 0.26) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Namibia </td>
-   <td style="text-align:left;"> 1.59 (1.42 to 1.76) </td>
-   <td style="text-align:left;"> 0.82 (0.65 to 0.99) </td>
-   <td style="text-align:left;"> 0.55 (0.38 to 0.72) </td>
-   <td style="text-align:left;"> 0.42 (0.25 to 0.59) </td>
+   <td style="text-align:left;"> 2.32 (1.41 to 3.22) </td>
+   <td style="text-align:left;"> 2.35 (1.18 to 3.53) </td>
+   <td style="text-align:left;"> 5.98 (4.41 to 7.55) </td>
+   <td style="text-align:left;"> 4.45 (3.19 to 5.71) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Niger </td>
-   <td style="text-align:left;"> -0.84 (-1.04 to -0.65) </td>
-   <td style="text-align:left;"> -0.51 (-0.71 to -0.32) </td>
-   <td style="text-align:left;"> -1.22 (-1.41 to -1.02) </td>
-   <td style="text-align:left;"> 0.87 (0.67 to 1.06) </td>
+   <td style="text-align:left;"> -0.76 (-0.94 to -0.59) </td>
+   <td style="text-align:left;"> -0.61 (-0.78 to -0.44) </td>
+   <td style="text-align:left;"> -1.27 (-1.45 to -1.1) </td>
+   <td style="text-align:left;"> 0.83 (0.66 to 1.01) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
    <td style="text-align:left;"> -0.77 (-0.87 to -0.67) </td>
-   <td style="text-align:left;"> -0.21 (-0.31 to -0.12) </td>
-   <td style="text-align:left;"> -0.67 (-0.77 to -0.57) </td>
-   <td style="text-align:left;"> 0.42 (0.32 to 0.52) </td>
+   <td style="text-align:left;"> -0.21 (-0.31 to -0.11) </td>
+   <td style="text-align:left;"> -0.66 (-0.76 to -0.56) </td>
+   <td style="text-align:left;"> 0.41 (0.31 to 0.51) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:left;"> -0.37 (-0.64 to -0.09) </td>
-   <td style="text-align:left;"> -1.06 (-1.34 to -0.78) </td>
-   <td style="text-align:left;"> 1.32 (1.04 to 1.59) </td>
-   <td style="text-align:left;"> -0.54 (-0.81 to -0.27) </td>
+   <td style="text-align:left;"> 0.37 (-0.01 to 0.75) </td>
+   <td style="text-align:left;"> -0.53 (-1.02 to -0.03) </td>
+   <td style="text-align:left;"> 1.35 (0.68 to 2.01) </td>
+   <td style="text-align:left;"> 0.46 (-0.07 to 0.99) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Sierra Leone </td>
-   <td style="text-align:left;"> -0.9 (-1.15 to -0.66) </td>
-   <td style="text-align:left;"> -0.25 (-0.5 to -0.01) </td>
-   <td style="text-align:left;"> -1.14 (-1.38 to -0.9) </td>
-   <td style="text-align:left;"> 1.34 (1.1 to 1.58) </td>
+   <td style="text-align:left;"> -0.91 (-1.16 to -0.67) </td>
+   <td style="text-align:left;"> -0.26 (-0.5 to -0.01) </td>
+   <td style="text-align:left;"> -1.15 (-1.4 to -0.91) </td>
+   <td style="text-align:left;"> 1.35 (1.11 to 1.6) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Somalia </td>
-   <td style="text-align:left;"> -0.37 (-0.46 to -0.28) </td>
+   <td style="text-align:left;"> -0.34 (-0.44 to -0.25) </td>
    <td style="text-align:left;"> -0.27 (-0.37 to -0.18) </td>
-   <td style="text-align:left;"> 0.86 (0.77 to 0.96) </td>
+   <td style="text-align:left;"> 0.8 (0.71 to 0.9) </td>
    <td style="text-align:left;"> -0.24 (-0.33 to -0.15) </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> South Africa </td>
+   <td style="text-align:left;"> -0.99 (-2.01 to 0.03) </td>
+   <td style="text-align:left;"> -0.88 (-1.9 to 0.14) </td>
+   <td style="text-align:left;"> -1.61 (-2.63 to -0.6) </td>
+   <td style="text-align:left;"> 1.69 (0.68 to 2.71) </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:left;"> 0.01 (-0.12 to 0.14) </td>
-   <td style="text-align:left;"> 0.29 (0.16 to 0.42) </td>
-   <td style="text-align:left;"> 0.6 (0.47 to 0.73) </td>
-   <td style="text-align:left;"> -0.06 (-0.19 to 0.07) </td>
+   <td style="text-align:left;"> 0.06 (-0.07 to 0.2) </td>
+   <td style="text-align:left;"> 0.39 (0.25 to 0.52) </td>
+   <td style="text-align:left;"> 0.66 (0.52 to 0.79) </td>
+   <td style="text-align:left;"> -0.06 (-0.2 to 0.08) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Tanzania </td>
-   <td style="text-align:left;"> 0.55 (0.48 to 0.63) </td>
-   <td style="text-align:left;"> -0.11 (-0.18 to -0.03) </td>
-   <td style="text-align:left;"> -0.38 (-0.45 to -0.3) </td>
-   <td style="text-align:left;"> -0.07 (-0.14 to 0.01) </td>
+   <td style="text-align:left;"> 0.62 (0.54 to 0.69) </td>
+   <td style="text-align:left;"> -0.09 (-0.17 to -0.02) </td>
+   <td style="text-align:left;"> -0.44 (-0.52 to -0.37) </td>
+   <td style="text-align:left;"> -0.11 (-0.18 to -0.04) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Togo </td>
-   <td style="text-align:left;"> 0.81 (0.5 to 1.11) </td>
-   <td style="text-align:left;"> -0.71 (-1.02 to -0.41) </td>
-   <td style="text-align:left;"> -1.43 (-1.74 to -1.13) </td>
-   <td style="text-align:left;"> -0.89 (-1.19 to -0.59) </td>
+   <td style="text-align:left;"> 1.22 (0.99 to 1.46) </td>
+   <td style="text-align:left;"> 0.13 (-0.11 to 0.37) </td>
+   <td style="text-align:left;"> -0.72 (-0.96 to -0.48) </td>
+   <td style="text-align:left;"> -0.45 (-0.69 to -0.22) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Uganda </td>
-   <td style="text-align:left;"> 0.37 (0.11 to 0.63) </td>
-   <td style="text-align:left;"> -0.36 (-0.61 to -0.1) </td>
-   <td style="text-align:left;"> 0.91 (0.65 to 1.16) </td>
-   <td style="text-align:left;"> 0.72 (0.47 to 0.98) </td>
+   <td style="text-align:left;"> 0.22 (-0.02 to 0.46) </td>
+   <td style="text-align:left;"> -0.31 (-0.55 to -0.06) </td>
+   <td style="text-align:left;"> 0.92 (0.68 to 1.17) </td>
+   <td style="text-align:left;"> 0.79 (0.55 to 1.03) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:left;"> 1.36 (1.12 to 1.6) </td>
-   <td style="text-align:left;"> 0.65 (0.41 to 0.89) </td>
-   <td style="text-align:left;"> 0.65 (0.41 to 0.89) </td>
-   <td style="text-align:left;"> 0.7 (0.46 to 0.94) </td>
+   <td style="text-align:left;"> 1.41 (1.16 to 1.66) </td>
+   <td style="text-align:left;"> 0.7 (0.45 to 0.95) </td>
+   <td style="text-align:left;"> 0.71 (0.46 to 0.96) </td>
+   <td style="text-align:left;"> 0.73 (0.48 to 0.97) </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Zimbabwe </td>
-   <td style="text-align:left;"> 0.66 (0.51 to 0.81) </td>
-   <td style="text-align:left;"> -0.12 (-0.28 to 0.03) </td>
-   <td style="text-align:left;"> -0.04 (-0.19 to 0.12) </td>
-   <td style="text-align:left;"> 0.09 (-0.06 to 0.24) </td>
+   <td style="text-align:left;"> 0.71 (0.55 to 0.86) </td>
+   <td style="text-align:left;"> -0.13 (-0.29 to 0.02) </td>
+   <td style="text-align:left;"> -0.07 (-0.23 to 0.08) </td>
+   <td style="text-align:left;"> 0.08 (-0.07 to 0.24) </td>
   </tr>
 </tbody>
 </table>
@@ -510,6 +532,8 @@ To fit the LSTM model to data, we modified the learning rate by applying an expo
 
 After model training was completed, we predicted the values of environmental suitability $\psi_{jt}$ across all time steps for each location. Predictions start in January 1970 and go up to 5 months past the present date (currently February 2025). Given the amount of noise in the model predictions, we added a simple LOESS spline with logit transformation to smooth model predictions over time and give a more stable value of $\psi_{jt}$ when incorporating it into other model features (e.g. Equations \@ref(eq:beta2) and \@ref(eq:delta)). The resulting model predictions are shown for an example country such as Mozambique in Figure \@ref(fig:psi-prediction-data) which compares model predictions to the original case counts and the binary classification. Predicitons for all model locations are shown in a simplified view in Figure \@ref(fig:psi-prediction-countries).
 
+*Note that the architecture described above is the original v0.1 suitability model. The current default in MOSAIC-pkg (`est_suitability()`, architecture `lstm_v2_hierarchical_film`) is a hierarchical LSTM with region- and country-level modulation, trained with expanding-window rolling-origin cross-validation; it is fitted with several random seeds, and the seed-level predictions are pooled by their median on the logit scale (not averaged). When suitability is estimated retrospectively (a fitting cutoff earlier than the end of the surveillance record, e.g. for forecast cross-validation), the default pre-computed response is scaled by anchors computed over the whole data panel unless the panel was compiled with a matching anchor cutoff, so out-of-sample skill measured from such a fit is optimistic; the frozen `lstm_v1_legacy` path is never leak-free for a retrospective cutoff. The production refresh, which fits up to the end of surveillance, is not affected.*
+
 *Also, please note that this initial version of the model is fitted to a rather small amount of data. Model hyper parameters were specifically chosen to reduce overfitting. Therefore, we recommend to not over-interpret the time series predictions of the model at this early stage since they are likely to change and improve as more historical incidence data is included in future versions.*
 
 <div class="figure" style="text-align: center">
@@ -536,32 +560,32 @@ where $\sigma(\cdot)$ is the logistic function and $\text{logit}(\cdot)$ its inv
 $$
 \begin{aligned}
 a_{\psi^{\ast},j} \ \sim\ & \text{Truncnorm}(1,\ 1,\ 0,\ \infty),\\
-b_{\psi^{\ast},j} \ \sim\ & \mathcal{N}(0,\ 2.5),\\
+b_{\psi^{\ast},j} \ \sim\ & \mathcal{N}(1,\ 2.5),\\
 z_{\psi^{\ast},j} \ \sim\ & \text{Beta}(2,\ 1),\\
 k_{\psi^{\ast},j} \ \sim\ & \text{Truncnorm}(0,\ 25,\ -90,\ 90).
 \end{aligned}
 (\#eq:psi-star-priors)
 $$
 
-The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior allows the baseline odds to shift by approximately a factor of $e^{2.5} \approx 12$ on either side of unity; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
+The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior is centred at $+1$ (baseline odds multiplied by $e \approx 2.7$), which matches the low level of the per-capita suitability response adopted in `priors_default` v15.11 and moves the environmental decay rate of Equation \@ref(eq:delta), which reads $\psi^{\ast}_{jt}$ on its absolute level, off the $\text{days}_{\text{short}}$ floor, while its standard deviation of 2.5 allows the odds to shift by a further factor of approximately $e^{2.5} \approx 12$ in either direction; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
 
 
 ### Infectious dose ($\kappa$) {#infectious-dose-kappa}
 
-The half-saturation constant $\kappa$ in Equation \@ref(eq:foi-environment) is the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Historical cholera transmission models have fixed $\kappa = 10^6$ cells, a value traceable to the unbuffered water-only volunteer studies of [Hornick et al. 1971](https://pubmed.ncbi.nlm.nih.gov/5286453/) and adopted by convention in subsequent modelling work (e.g. [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Modern re-analyses of buffered-exposure volunteer studies — in which sodium bicarbonate neutralises gastric acid, mimicking endemic exposure through food or contaminated water — support a lower central estimate near $10^5$ CFU with substantial between-study heterogeneity.
+The half-saturation constant $\kappa$ in Equation \@ref(eq:foi-environment) is the dose at which the environmental hazard reaches half its maximum. In the engine the dose is the per-capita load $W_{jt}/N_{jt}$ (cells in the reservoir per resident, MOSAIC-pkg v0.89.0 onward), not a water concentration, so the volunteer infectious-dose (ID$_{50}$) studies below anchor the *scale* of $\kappa$ rather than defining it directly; the residual conversion between cells per resident and cells per mL of ingested water is absorbed into the shedding rates $\zeta_1, \zeta_2$ (see [Shedding of *V. cholerae*](#sec:shedding)). Historical cholera transmission models have fixed $\kappa = 10^6$ cells, a value traceable to the unbuffered water-only volunteer studies of [Hornick et al. 1971](https://pubmed.ncbi.nlm.nih.gov/5286453/) and adopted by convention in subsequent modelling work (e.g. [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)). Modern re-analyses of buffered-exposure volunteer studies — in which sodium bicarbonate neutralises gastric acid, mimicking endemic exposure through food or contaminated water — support a lower central estimate near $10^5$ CFU with substantial between-study heterogeneity.
 
-To reflect this evidence base we compiled a meta-analysis of 13 published infectious-dose estimates spanning four types of source: direct human-volunteer challenge studies, Beta-Poisson QMRA fits, expert-review summaries, and conventional modelling values. The volunteer challenge studies (Hornick et al. 1971, [Cash et al. 1974](https://doi.org/10.1093/infdis/129.1.45), Levine et al. 1981, [Levine et al. 1988](https://doi.org/10.1016/S0140-6736(88)90120-1), Tacket et al. 1999) provide the strongest primary evidence; QMRA syntheses ([Haas, Rose & Gerba 1999](https://www.wiley.com/en-us/Quantitative+Microbial+Risk+Assessment-p-9780471183976)) and expert reviews ([Kaper et al. 1995](https://doi.org/10.1128/cmr.8.1.48), [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)) provide supporting summaries; and conventional modelling values ([Codeço 2001](https://doi.org/10.1186/1471-2334-1-1), [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)) capture the values adopted in the cholera-transmission literature. Each source is weighted by its evidentiary quality and relevance to the endemic, buffered-exposure context: direct volunteer challenge studies receive a weight of 1.0, while expert reviews and QMRA syntheses receive weights between 0 and 0.5. A weighted lognormal is then fit by maximum-likelihood on the log10 scale:
+To reflect this evidence base we compiled a meta-analysis of 13 published infectious-dose estimates spanning four types of source: direct human-volunteer challenge studies, Beta-Poisson QMRA fits, expert-review summaries, and conventional modelling values. The volunteer challenge studies (Hornick et al. 1971, [Cash et al. 1974](https://doi.org/10.1093/infdis/129.1.45), Levine et al. 1981, [Levine et al. 1988](https://doi.org/10.1016/S0140-6736(88)90120-1), Tacket et al. 1999) provide the strongest primary evidence; QMRA syntheses ([Haas, Rose & Gerba 1999](https://www.wiley.com/en-us/Quantitative+Microbial+Risk+Assessment-p-9780471183976)) and expert reviews ([Kaper et al. 1995](https://doi.org/10.1128/cmr.8.1.48), [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)) provide supporting summaries; and conventional modelling values ([Codeço 2001](https://doi.org/10.1186/1471-2334-1-1), [Hartley et al. 2006](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0030007)) capture the values adopted in the cholera-transmission literature. Each source is weighted by its evidentiary quality and relevance to the endemic, buffered-exposure context: direct volunteer challenge studies receive a weight of 1.0, while expert reviews and QMRA syntheses receive weights between 0 and 0.5 (the modelling-convention values and the unbuffered water-only arm of Hornick et al. 1971 receive zero weight, so eight of the 13 estimates contribute to the fit). A weighted lognormal is then fit by maximum-likelihood on the log10 scale:
 
 $$
 \kappa \sim \text{Lognormal}(11.77,\ 1.82).
 (\#eq:kappa)
 $$
 
-The resulting prior has a median of approximately $1.3 \times 10^5$ CFU and a 95% credible interval of approximately $3.6 \times 10^3$ to $4.6 \times 10^6$ CFU (Figure \@ref(fig:kappa-prior)). This is consistent with the lower modern-era central estimate while preserving the order-of-magnitude uncertainty that the volunteer-study literature genuinely reflects.
+The resulting prior has a median of approximately $1.3 \times 10^5$ CFU and a 95% credible interval of approximately $3.6 \times 10^3$ to $4.6 \times 10^6$ CFU (Figure \@ref(fig:kappa-prior)). This is consistent with the lower modern-era central estimate while preserving the order-of-magnitude uncertainty that the volunteer-study literature genuinely reflects. Note that $\kappa$ is **pinned at $10^6$ rather than sampled** by default in calibration (`sample_kappa = FALSE`, the value in the default configuration) since the per-capita dose-response was introduced in MOSAIC-pkg v0.89.0; at that value the environmental hazard half-saturates at roughly 0.3% symptomatic prevalence. The prior of Equation \@ref(eq:kappa) is retained as the literature record and for sensitivity runs that sample $\kappa$.
 
 <div class="figure" style="text-align: center">
-<img src="figures/kappa_prior.png" alt="Prior distribution for the environmental half-saturation constant $\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight." width="100%" />
-<p class="caption">(\#fig:kappa-prior)Prior distribution for the environmental half-saturation constant $\kappa$, the *V. cholerae* concentration at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight.</p>
+<img src="figures/kappa_prior.png" alt="Prior distribution for the environmental half-saturation constant $\kappa$, anchored on the *V. cholerae* dose at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight." width="100%" />
+<p class="caption">(\#fig:kappa-prior)Prior distribution for the environmental half-saturation constant $\kappa$, anchored on the *V. cholerae* dose at which the per-contact probability of infection is 50%. Points and bars show the 13 literature anchors and their reported bounds; the lognormal fit (solid line) is weighted by evidentiary quality, with direct human-volunteer challenge studies receiving the highest weight.</p>
 </div>
 
 
@@ -574,24 +598,24 @@ The rate at which infected individuals shed *Vibrio cholerae* into the environme
 
 According to the modeling study done by  [Fung et al. (2014)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/), estimates of *V. cholerae* shedding across the population can range from 0.01 to 10 cells per mL per person per day. However, this estimate does not fully capture the range of possible shedding that can occur depending on the type of infection. In contrast, [Nelson et al. (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) report that individuals may shed between $10^3$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in asymptomatic cases and up to $10^{12}$ $\text{cells}~\text{g}^{-1}~\text{stool}$ in severe symptomatic infections, implying that symptomatic individuals may shed several orders of magnitude more bacteria into the environment per day than asymptomatic individuals.
 
-The shedding-rate parameters $\zeta_1$ and $\zeta_2$ enter the environmental reservoir update as cells deposited per infected person per day (see Equation \@ref(eq:system)). Earlier MOSAIC versions parameterised shedding as a concentration ($\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$), but in the current LASER implementation the reservoir $W$ tracks absolute *V. cholerae* cells and the half-saturation constant $\kappa$ is expressed in the same absolute units. Under the assumption that watery stool has approximately the density of water, the two specifications differ only by whether the daily stool-volume integral is absorbed into $\zeta_k$ or left implicit.
+The shedding-rate parameters $\zeta_1$ and $\zeta_2$ enter the environmental reservoir update as cells deposited per infected person per day (see Equation \@ref(eq:system)). Earlier MOSAIC versions parameterised shedding as a concentration ($\text{cells}~\text{mL}^{-1}~\text{person}^{-1}~\text{day}^{-1}$), but in the current engine the reservoir $W$ tracks absolute *V. cholerae* cells and the dose-response is applied to the per-capita load $W/N$, so $\kappa$ is expressed in cells per resident. Under the assumption that watery stool has approximately the density of water, the two specifications differ only by whether the daily stool-volume integral is absorbed into $\zeta_k$ or left implicit.
 
-The migration to absolute-cell units in v1.0 raised the modal $\zeta_1$ by roughly six orders of magnitude relative to the v0.1 concentration-scale Uniform prior. Because $\kappa$ remains parameterised from volunteer dose-response studies that report concentrations, readers should be aware that the $W$-vs-$\kappa$ scale matching is an open methodological question: at very high simulated $W$, the dose-response $W/(\kappa + W)$ saturates near unity and the environmental force of infection becomes weakly identifying for $\kappa$. The calibration mitigates this by retaining the literature-derived prior on $\kappa$, but joint identifiability of $\zeta_1, \beta_{j0}^{\text{env}}$, and $\kappa$ should be inspected in the marginal-posterior diagnostics before strong conclusions are drawn from the environmental component of the force of infection.
+The migration to absolute-cell units in v1.0 raised the modal $\zeta_1$ by roughly six orders of magnitude relative to the v0.1 concentration-scale Uniform prior. With absolute $W$ in the dose-response, the literature shedding rates saturated $W/(\kappa + W)$ near unity from a single symptomatic shedder over the whole joint prior of $\kappa$ and $\zeta_1$, so neither parameter (nor $\beta_{j0}^{\text{env}}$) could be identified. The per-capita dose $W/N$ of Equation \@ref(eq:foi-environment) restores density dependence, but it does not make $W/N$ a water concentration: cells per resident and cells per mL differ by a conversion that stays absorbed into $\zeta_k$, which is why $\kappa$ is pinned by default. Joint identifiability of $\zeta_1$, $\beta_{j0}^{\text{env}}$ and $\kappa$ should still be inspected in the marginal-posterior diagnostics before strong conclusions are drawn from the environmental component of the force of infection.
 
 To set priors that span the genuine biological range, we performed a literature meta-analysis. For $\zeta_1$ we assembled per-person-per-day anchors from 14 primary sources reporting *V. cholerae* concentrations in cholera stool (e.g. [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/), [Harris et al. 2012](https://www.sciencedirect.com/science/article/pii/S014067361260436X), [Kaper et al. 1995](https://doi.org/10.1128/cmr.8.1.48), [Merrell et al. 2002](https://www.nature.com/articles/nature00778)) and converted each anchor to a daily rate using time-averaged stool volumes for severe (8 L/day), moderate (4 L/day), and mild (0.5 L/day) infections. A severity-weighted pool --- using a default mix of 20% severe, 40% moderate, and 40% mild, consistent with [Harris et al. 2012](https://www.sciencedirect.com/science/article/pii/S014067361260436X) --- is fit by weighted maximum-likelihood on the log scale. For $\zeta_2$ the evidence base is thin (essentially [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) and the [Kaper et al. 1995](https://doi.org/10.1128/cmr.8.1.48) expert review); the prior therefore applies a hard floor of $\sigma_{\log} \ge 2$ to honestly reflect that only one primary source contributes.
 
-Rather than treating $\zeta_1$ and $\zeta_2$ as independent draws --- which can produce samples with $\zeta_1 < \zeta_2$ contrary to biology --- we sample $\zeta_1$ together with a shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$ and derive $\zeta_2$ algebraically. The ratio prior combines two complementary literature channels via precision-weighting on the log scale: a *direct channel* using published symptomatic-to-asymptomatic ratios such as the household transmission odds ratio of [Smith et al. 2026](https://doi.org/10.64898/2026.01.09.26343785) (approximately 1.6), the paired stool concentrations of [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) (approximately $10^5$), and modelling anchors from [Chao et al. 2011](https://doi.org/10.1073/pnas.1102149108) and [Finger et al. 2018](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002509); and a *derived channel* obtained as the closed-form ratio of the independent $\zeta_1$ and $\zeta_2$ lognormals. The resulting priors are:
+Rather than treating $\zeta_1$ and $\zeta_2$ as independent draws --- which can produce samples with $\zeta_1 < \zeta_2$ contrary to biology --- we sample $\zeta_1$ together with a shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$ and derive $\zeta_2$ algebraically. The ratio prior is the *direct channel*: a lognormal fitted to published symptomatic-to-asymptomatic ratios such as the household transmission odds ratio of [Smith et al. 2026](https://doi.org/10.64898/2026.01.09.26343785) (approximately 1.6), the paired stool concentrations of [Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/) (approximately $10^5$), and modelling anchors from [Chao et al. 2011](https://doi.org/10.1073/pnas.1102149108) and [Finger et al. 2018](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002509). A *derived channel* (the closed-form ratio of the independent $\zeta_1$ and $\zeta_2$ lognormals) and its precision-weighted combination with the direct channel are computed for comparison but not used, because the combined median (approximately $2 \times 10^5$) overstates the ratio relative to the household-transmission and modelling evidence. The untruncated direct channel places about 16% of its mass below 1, inherited from the Smith et al. interval, which is a transmission odds ratio rather than a per-day shedding ratio; since symptomatic stool carries several orders of magnitude more vibrios than asymptomatic carriage ([Nelson et al. 2009](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/), [Kaper et al. 1995](https://doi.org/10.1128/cmr.8.1.48)), the prior is truncated below at 1 so that $\zeta_2 \le \zeta_1$ for every draw (MOSAIC-pkg v0.100.0). The resulting priors are:
 
 $$
 \begin{aligned}
 \zeta_1 \ \sim \ &\text{Lognormal}(25.65,\ 2.46) \quad \text{(symptomatic shedding)},\\
-\zeta_{\text{ratio}} \ \sim \ &\text{Lognormal}(4.31,\ 4.39) \quad \text{(symptomatic-to-asymptomatic ratio)},\\
+\zeta_{\text{ratio}} \ \sim \ &\text{Lognormal}(4.31,\ 4.39)\ \text{truncated to}\ [1, \infty) \quad \text{(symptomatic-to-asymptomatic ratio)},\\
 \zeta_2 \ = \ & \zeta_1 \,/\, \zeta_{\text{ratio}} \quad \text{(asymptomatic shedding, derived)}.
 \end{aligned}
 (\#eq:shedding)
 $$
 
-The medians of these priors correspond to approximately $1.4 \times 10^{11}$ *V. cholerae* cells per symptomatic person per day, a ratio of approximately 75 between symptomatic and asymptomatic shedding, and therefore approximately $1.9 \times 10^9$ cells per asymptomatic person per day (Figures \@ref(fig:zeta1-prior) and \@ref(fig:zeta-ratio-prior)). These central values are several orders of magnitude larger than the older Frame-B Uniform priors used in MOSAIC v0.1, but they are biologically anchored to the volumetric scale of *V. cholerae* shedding observed in clinical studies. The 95% credible intervals span the full range of values reported across the studies in the table below.
+The medians of these priors correspond to approximately $1.4 \times 10^{11}$ *V. cholerae* cells per symptomatic person per day and a ratio of approximately 185 between symptomatic and asymptomatic shedding (95% interval approximately 1.4 to $5.7 \times 10^5$; the Lognormal parameters are those of the untruncated distribution, whose median is approximately 75), giving a derived median of approximately $6.6 \times 10^8$ cells per asymptomatic person per day (Figures \@ref(fig:zeta1-prior) and \@ref(fig:zeta-ratio-prior)). These central values are several orders of magnitude larger than the older Frame-B Uniform priors used in MOSAIC v0.1, but they are biologically anchored to the volumetric scale of *V. cholerae* shedding observed in clinical studies. The 95% credible intervals span the full range of values reported across the studies in the table below.
 
 <div class="figure" style="text-align: center">
 <img src="figures/zeta_1_prior.png" alt="Prior distribution for the symptomatic shedding rate $\zeta_1$ (cells per symptomatic person per day, log scale). The lognormal fit is weighted by severity class and anchored to per-person-per-day rates derived from *V. cholerae* stool concentrations and time-averaged stool volumes from 14 literature sources. Points and bars show the literature anchors and their reported bounds." width="100%" />
@@ -599,8 +623,8 @@ The medians of these priors correspond to approximately $1.4 \times 10^{11}$ *V.
 </div>
 
 <div class="figure" style="text-align: center">
-<img src="figures/zeta_ratio_prior.png" alt="Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals)." width="100%" />
-<p class="caption">(\#fig:zeta-ratio-prior)Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The combined channel is a precision-weighted Bayesian combination of a direct literature channel (from household-transmission and paired-stool studies) and a derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals).</p>
+<img src="figures/zeta_ratio_prior.png" alt="Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The prior used in calibration is the direct literature channel (from household-transmission, paired-stool and modelling studies), truncated below at 1. The derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals) and the precision-weighted combined channel are shown for comparison only." width="100%" />
+<p class="caption">(\#fig:zeta-ratio-prior)Prior distribution for the symptomatic-to-asymptomatic shedding ratio $\zeta_{\text{ratio}} = \zeta_1 / \zeta_2$. The prior used in calibration is the direct literature channel (from household-transmission, paired-stool and modelling studies), truncated below at 1. The derived channel (the closed-form ratio of the $\zeta_1$ and $\zeta_2$ marginal lognormals) and the precision-weighted combined channel are shown for comparison only.</p>
 </div>
 
 The table below summarizes key published estimates and assumptions regarding *V. cholerae* and related bacterial shedding rates:
@@ -641,7 +665,7 @@ $$
 \quad (\text{median duration} \approx 2 \ \text{days, 95\% CI} \approx 1\text{--}5 \ \text{days}).
 $$
 
-The two priors encode the empirical pattern that symptomatic infections shed for substantially longer than asymptomatic infections, even though the latter outnumber the former: the cumulative *per-infection* environmental load is approximately $\zeta_1/\gamma_1$ for symptomatic and $\zeta_2/\gamma_2$ for asymptomatic, so the differences in $\zeta$ and $\gamma$ work in the same direction and reinforce the dominance of severe cases in the environmental signal. The combined effective removal rate $\gamma_{\mathrm{eff}}$ used in the basic reproductive number (Equation \@ref(eq:gamma-eff)) is the symptomatic-proportion-weighted harmonic mean of $\gamma_1$ and $\gamma_2$ and therefore inherits the same skew toward the symptomatic duration.
+The two priors encode the empirical pattern that symptomatic infections shed for substantially longer than asymptomatic infections, even though the latter outnumber the former: the cumulative *per-infection* environmental load is approximately $\zeta_1/\gamma_1$ for symptomatic and $\zeta_2/\gamma_2$ for asymptomatic, so the differences in $\zeta$ and $\gamma$ work in the same direction and reinforce the dominance of severe cases in the environmental signal. The combined effective removal rate $\gamma_{\mathrm{eff}}$ used in the basic reproductive number (Equation \@ref(eq:gamma-eff)) is the reciprocal of the symptomatic-proportion-weighted arithmetic mean of the *durations* $1/\gamma_1$ and $1/\gamma_2$ (not a harmonic mean of the rates $\gamma_1,\gamma_2$) and therefore inherits the same skew toward the symptomatic duration.
 
 For deterministic simulations or sensitivity analyses that prefer point estimates rather than draws from the lognormal priors, the medians serve as defaults:
 
@@ -739,7 +763,7 @@ $$
 \nu_{jt} = f\big(\text{reported OCV doses distributed}_{jt} \ | \ \text{daily distribution rate}\big).
 $$
 
-We separate $\nu_{jt}$ into first doses $\nu_{1,jt}$ and second doses $\nu_{2,jt}$ on the basis of the campaign-level vaccine classification reported by GTFCC: Euvichol-S deliveries contribute exclusively to $\nu_{1,jt}$ (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to $\nu_{1,jt}$ and $\nu_{2,jt}$ according to the campaign's reported dose-1 and dose-2 split. Within each day, doses are *delivered deterministically* (rather than via a Poisson draw, as in earlier MOSAIC versions): the reported number of doses for that day is rounded to the nearest integer and processed without stochastic variation. First doses are then allocated proportionally across the configurable source set $\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}$ (default: all five), so that a fraction $X_{jt} / N^{\text{src}}_{jt}$ of $\nu_{1,jt}$ is delivered to each eligible compartment $X$. Second doses are restricted to existing $V_1$ recipients and capped at the current $V_1$ population to prevent over-administration. Two patch-level counters $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ record the daily totals for comparison with reported OCV-campaign data; these are tracking-only and do not feed back into the model dynamics.
+The dose series carries shipped doses only, with no round or regimen information, so in the default configuration **all doses are routed to first doses**: $\nu_{1,jt} = \nu_{jt}$ and $\nu_{2,jt} = 0$, and $V_2$ is not entered after the simulation start. For simulation windows from 2023 onward this is close to right, because the ICG suspended the two-dose regimen for outbreak response in October 2022 during the global OCV shortage ([WHO, 19 October 2022](https://www.who.int/news/item/19-10-2022-shortage-of-cholera-vaccines-leads-to-temporary-suspension-of-two-dose-strategy--as-cases-rise-worldwide)), so reactive campaigns have been single-dose since. For earlier windows this is a known limitation: a two-dose campaign is counted as two rounds of first doses, which roughly doubles the number of distinct people immunised, and shipped-but-unused doses are counted as delivered. Splitting $\nu_{jt}$ into $\nu_{1,jt}$ and $\nu_{2,jt}$ requires round-level data in the processed vaccination inputs; pre-start campaigns do enter the two-dose compartment through the initial conditions, which pair rounds from the GTFCC campaign log (see [Vaccinated initial conditions](#initial-conditions)). Within each day, doses are *delivered deterministically* (rather than via a Poisson draw, as in earlier MOSAIC versions): the reported number of doses for that day is rounded to the nearest integer and processed without stochastic variation. First doses are then allocated proportionally across the configurable source set $\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}$ (default: all five), so that a fraction $X_{jt} / N^{\text{src}}_{jt}$ of $\nu_{1,jt}$ is delivered to each eligible compartment $X$. Second doses are restricted to existing $V_1$ recipients and capped at the current $V_1$ population to prevent over-administration. Two patch-level counters $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ record the daily totals for comparison with reported OCV-campaign data; these are tracking-only and do not feed back into the model dynamics.
 
 A few features of the implementation deserve explicit mention:
 
@@ -835,15 +859,15 @@ $$
 
 ## Spatial dynamics
 
-The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
+The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters belong to the departure-diffusion model below, but they are informed by different data. We fit the diffusion kernel $\pi_{ij}$ to a fused origin-destination matrix for all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)). The fused matrix is the sum of two daily person-flow matrices: average daily air passenger volume, and an overland matrix built by ensemble-averaging four bilateral sources -- migrant stock, estimated migration flows, social connectedness, and land contiguity -- and then raking each origin's row total to its overland departure estimate. We take the departure probability $\tau_i$ from those overland cross-border travel estimates rather than from the air-only fit, because air traffic captures only a minority of cross-border movement in the region.
 
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_flight_data.png" alt="The average number of air passengers per day in 2017 among all countries." width="100%" />
-<p class="caption">(\#fig:mobility-data)The average number of air passengers per day in 2017 among all countries.</p>
+<img src="figures/mobility_flight_data_config.png" alt="The average number of travelers per day among all countries in the fused origin-destination matrix, which combines air passenger volume with overland movement." width="100%" />
+<p class="caption">(\#fig:mobility-data)The average number of travelers per day among all countries in the fused origin-destination matrix, which combines air passenger volume with overland movement.</p>
 </div>
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_network.png" alt="A network map showing the average number of air passengers per day in 2017." width="100%" />
-<p class="caption">(\#fig:mobility-network)A network map showing the average number of air passengers per day in 2017.</p>
+<img src="figures/mobility_network_config.png" alt="A network map showing the average number of travelers per day in the fused origin-destination matrix." width="100%" />
+<p class="caption">(\#fig:mobility-network)A network map showing the average number of travelers per day in the fused origin-destination matrix.</p>
 </div>
 
 
@@ -873,17 +897,11 @@ Where, $\theta$ is a proportionality constant representing the overall number of
 
 
 ### Estimating the departure process
-The probability of travel outside the origin is estimated for each location $i$ to give the location-specific departure probability $\tau_i$.
+The daily probability of travel outside the origin, $\tau_i$, is given a per-country prior built from overland cross-border travel evidence (`est_overland_tau_prior()`) rather than fitted to air traffic. The evidence is a set of weekly outbound departure probabilities assembled from border-throughput counts, IOM Displacement Tracking Matrix flow monitoring and national overland travel statistics, which span roughly $10^{-3}$ to $5 \times 10^{-3}$ per week. Each weekly value is divided by 7 to give a daily probability and scaled by the share of the country's outbound migrant stock whose destination lies inside the 40 MOSAIC locations, so that travel to countries outside the model is not re-routed onto in-set neighbours by the row normalisation of $\pi_{ij}$. The prior is
 $$
-\tau_i \sim \text{Beta}(1+s, 1+r)
+\tau_i \sim \text{Lognormal}\!\left(\log \tau^{0}_i,\ \text{sd}_{\tau}\right),
 $$
-Binomial probabilities for each origin $\tau_i$ are drawn from a Beta distributed prior with shape ($s$) and rate ($r$) parameters.
-$$
-\begin{aligned}
-s &\sim \text{Gamma}(0.01, 0.01)\\
-r &\sim \text{Gamma}(0.01, 0.01)
-\end{aligned}
-$$  
+where $\tau^{0}_i$ is the resulting daily value (the prior median, and the value in the default configuration) and $\text{sd}_{\tau}$ gives a 95% interval spanning a factor of 10 ($\text{sd}_{\tau} = 0.587$) for the 26 countries with direct evidence and a factor of 30 ($\text{sd}_{\tau} = 0.868$) for the 14 countries without it, whose median is the median of the evidenced values. The wide band reflects that every underlying count is a floor (recorded crossings only). An earlier version fitted $\tau_i$ to air passenger volumes with a hierarchical Beta-Binomial model; air traffic captures only a small fraction of cross-border movement in the region, and that fit gave departure probabilities an order of magnitude lower.
 
 
 
@@ -894,31 +912,31 @@ We use a normalized formulation of the power law gravity model to defined the di
 
 \begin{equation}
 \pi_{ij} = \frac{
-N_j^\omega d_{ij}^{-\gamma}
+N_j^{\omega^{\text{mob}}} d_{ij}^{-\gamma^{\text{mob}}}
 }{
-\sum\limits_{\forall j \ne i} N_j^\omega d_{ij}^{-\gamma}
+\sum\limits_{\forall j \ne i} N_j^{\omega^{\text{mob}}} d_{ij}^{-\gamma^{\text{mob}}}
 }
 (\#eq:gravity)
 \end{equation}
 
-Where, $\omega$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. Prior distributions of diffusion model parameters are defined as:
+Where, $\omega^{\text{mob}}$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma^{\text{mob}}}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. (The superscript distinguishes these gravity-model exponents, code-names `mobility_omega` and `mobility_gamma`, from the vaccine waning rates $\omega_1, \omega_2$ and the recovery rates $\gamma_1, \gamma_2$.) We fit $\omega^{\text{mob}}$ and $\gamma^{\text{mob}}$ to the fused origin-destination matrix described above, which gives $\hat\omega^{\text{mob}} = 0.627$ and $\hat\gamma^{\text{mob}} = 1.900$ (the values in the default configuration). In calibration both are sampled from Gamma priors with rate 2 whose modes equal the fitted values:
 $$
 \begin{aligned}
-\omega &\sim \text{Gamma}(1, 1)\\
-\gamma &\sim \text{Gamma}(1, 1)
+\omega^{\text{mob}} &\sim \text{Gamma}(2.25, 2)\\
+\gamma^{\text{mob}} &\sim \text{Gamma}(4.80, 2)
 \end{aligned} 
 $$
 
-The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG](https://www.oag.com/flight-data-sets) using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
+We fit $\pi_{ij}$ to the fused origin-destination matrix described above, which adds air traffic data from [OAG](https://www.oag.com/flight-data-sets) to the raked overland matrix, using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). The departure probability $\tau_i$ is taken from the overland cross-border travel estimates described above. Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_travel_prob_tau.png" alt="The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day." width="100%" />
-<p class="caption">(\#fig:mobility-departure)The estimated weekly probability of travel outside of each origin location $\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.</p>
+<img src="figures/mobility_travel_prob_tau_config.png" alt="The estimated daily probability of travel outside of each origin location $\tau_i$ and 95% prior intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day." width="100%" />
+<p class="caption">(\#fig:mobility-departure)The estimated daily probability of travel outside of each origin location $\tau_i$ and 95% prior intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day.</p>
 </div>
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/mobility_diffusion_pi.png" alt="The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred." width="100%" />
+<img src="figures/mobility_diffusion_pi_config.png" alt="The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred." width="100%" />
 <p class="caption">(\#fig:mobility-diffusion)The diffusion process $\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred.</p>
 </div>
 
@@ -1009,12 +1027,12 @@ Table: (\#tab:symptomatic-table)Summary of Studies on Cholera Immunity
 |-----:|------:|-------:|:---------------|:----------------------|:------------------------------------------------|
 | 0.570|     NA|      NA|NA              |[Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)|Review                                           |
 |    NA|  1.000|   0.250|NA              |[Lueng & Matrajt (2021)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0009383)|Review                                           |
-|    NA|  0.600|   0.200|Endemic regions |[Harris et al (2012)](https://www.sciencedirect.com/science/article/pii/S014067361260436X)|Review                                           |
+|    NA|  0.200|   0.600|Endemic regions |[Harris et al (2012)](https://www.sciencedirect.com/science/article/pii/S014067361260436X)|Review                                           |
 | 0.238|  0.250|   0.227|Haiti           |[Finger et al (2024)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/)|Sero-survey and clinical data                    |
 | 0.213|  0.231|   0.194|Haiti           |[Jackson et al (2013)](https://www.ajtmh.org/view/journals/tpmd/89/4/article-p654.xml)|Cross-sectional sero-survey                      |
 | 0.204|     NA|      NA|Pakistan        |[Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17)|Sero-survey during epidemic; El Tor Ogawa strain |
 | 0.371|     NA|      NA|Pakistan        |[Bart et al (1970)](https://doi.org/10.1093/infdis/121.Supplement.S17)|Sero-survey during epidemic; Inaba strain        |
-| 0.184|  0.256|   0.112|Bangladesh      |[Harris et al (2008)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221)|Household cohort; mean of all age groups         |
+| 0.629|  0.558|   0.695|Bangladesh      |[Harris et al (2008)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221)|Household cohort; culture-confirmed infections   |
 | 0.001|  0.000|   0.001|Bangladesh      |[Hegde et al (2024)](https://www.nature.com/articles/s41591-024-02810-4)|Sero-survey and clinical data                    |
 
 
@@ -1030,18 +1048,20 @@ The prior distribution for $\sigma$ is plotted in Figure \@ref(fig:symptomatic-f
 
 ### Suspected cases, reported cases, and deaths
 
-The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence $I_{1,jt}$ in the model. We resolve this with a two-stage observation model. In the *care-seeking* stage, a true symptomatic infection is presented to the surveillance system as a suspected case with probability $\rho$. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
+The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence in the model -- the daily inflow $\sigma\,\iota\,E_{jt}$ of newly symptomatic infections (all symptomatic onsets, including the fatal onsets that never enter $I_1$; see the [Case fatality rate](#case-fatality-rate) subsection). We resolve this with a two-stage observation model. In the *care-seeking* stage, each incident symptomatic infection is independently presented to the surveillance system as a suspected case with probability $\rho$, a Binomial thinning of the daily incidence. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
 
 \begin{equation}
-\text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\rho \cdot I_{1,\,j,t - l_{\text{cases}}}}{\chi_{jt}^{\text{eff}}} \,\right],
+\text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\text{Binom}\!\left(\sigma\,\iota\,E_{j,\,t - l_{\text{cases}}},\ \rho\right)}{\chi_{jt}^{\text{eff}}} \,\right],
 (\#eq:reported-cases)
 \end{equation}
 
-where $\rho$ enters the numerator as the forward (care-seeking) rate and $\chi_{jt}^{\text{eff}}$ enters the denominator as the back-correction for the PPV. This is the unique relationship consistent with the joint probability of being both truly cholera-positive and presenting as a suspected case:
+where $\rho$ is the per-infection probability of the Binomial care-seeking stage applied to the incident symptomatic infections $\sigma\,\iota\,E_{j,\,t - l_{\text{cases}}}$, and $\chi_{jt}^{\text{eff}}$ enters the denominator as a deterministic back-correction for the PPV. Note that $\rho$ is the only true probability here; $1/\chi_{jt}^{\text{eff}}$ is a multiplicative gross-up (true cholera plus false positives among suspected cases) and so stays outside the Binomial. This is the unique relationship consistent with the joint probability of being both truly cholera-positive and presenting as a suspected case:
 
 $$
 P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text{suspected}) = P(\text{suspected}\mid\text{true})\,P(\text{true}).
 $$
+
+This incidence-based reporting was introduced in [laser-cholera issue #67](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/67) (shipped in laser-cholera v0.14.0, consumed by MOSAIC-pkg from version 0.41.0); earlier versions applied $\rho$ to the symptomatic prevalence $I_{1,jt}$, which multiply-counted each individual across the days they remained symptomatic and inflated reported cases by approximately the mean symptomatic infectious period $\gamma_1^{-1}$.
 
 The effective PPV $\chi_{jt}^{\text{eff}}$ switches between an endemic and an epidemic value depending on whether local prevalence is below or above a per-location threshold $\eta_j$:
 
@@ -1080,21 +1100,28 @@ $$
 
 The epidemic threshold $\eta_j$ is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country's observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).
 
-A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag $l_{\text{deaths}}$ is the time from the **death event** to its appearance in surveillance reports (the symptom-onset-to-death interval is implicit in the SEIR dynamics via $\gamma_1^{-1}$ and is NOT folded into $l_{\text{deaths}}$):
+A parallel observation process applies to cholera-attributable deaths. In the current engine (MOSAIC-pkg v0.96.0 onward) the outcome of a symptomatic infection is decided **at symptom onset**: each new symptomatic onset is fatal with probability $p^{\text{fatal}}_{jt}$ (Eq. \@ref(eq:p-fatal) in the [Case fatality rate](#case-fatality-rate) subsection), and fatal onsets never enter $I_1$. Each true cholera death is then captured by surveillance with probability $\rho_{\text{deaths}}$ and reported on the *case* lag $l_{\text{cases}}$, so a death is reported on the same day as its case, as the surveillance data record it. With the same indexing as Eq. \@ref(eq:reported-cases):
+
+\begin{equation}
+\begin{aligned}
+\text{true deaths}_{jt} \ &\sim\ \text{Binom}\!\left(\sigma\,\iota\,E_{jt},\ p^{\text{fatal}}_{jt}\right),\\[3pt]
+\text{reported deaths}_{j,t+1} \ &\sim\ \text{Binom}\!\left(\text{true deaths}_{j,\,t - l_{\text{cases}}},\ \rho_{\text{deaths}}\right),
+\end{aligned}
+(\#eq:reported-deaths)
+\end{equation}
+
+where the first line thins the same symptomatic onsets $\sigma\,\iota\,E_{jt}$ that feed the reported cases. The separate death-event-to-report lag $l_{\text{deaths}}$ of earlier versions is retired, because deaths no longer occur some days after onset. The death-detection probability has a literature prior,
 
 $$
-\begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},\\
-l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days, death-event to report)}.
-\end{aligned}
+\rho_{\text{deaths}} \ \sim\ \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},
 (\#eq:rho-deaths)
 $$
 
-The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). MOSAIC's production prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05). The deaths likelihood identifies the product $\mu_{j,0}\,\rho_{\text{deaths}}$ rather than the two factors separately, so a narrow $\rho_{\text{deaths}}$ prior keeps it pinned near 0.42 during sampling, letting the per-country $\mu_{j,0}$ posteriors carry the cross-country CFR signal cleanly. The wider variant Beta(6.30, 8.52) (fit to the 95% prediction interval) is retained as a sensitivity prior only. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
+fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). The prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05); the wider variant Beta(6.30, 8.52), fit to the 95% prediction interval, documents between-study heterogeneity. Note that $\rho_{\text{deaths}}$ is **pinned at 0.42 rather than sampled** in calibration. It cancels exactly from the expected number of reported deaths: the per-onset fatality probability of Eq. \@ref(eq:p-fatal) divides by $\rho_{\text{deaths}}$ and the reporting draw of Eq. \@ref(eq:reported-deaths) multiplies by it, so $\mathbb{E}[\text{reported deaths}] = \mu_{jt}\,(\rho/\chi^{\text{epi}})\,\sigma\,\iota\,E_{jt}$ whatever value is drawn. The cancellation holds in distribution, not only in expectation: a Binomial thinning of a Binomial draw is itself Binomial, so given the onsets the reported deaths are $\text{Binom}\big(\sigma\,\iota\,E_{jt},\ \mu_{jt}\,\rho/\chi^{\text{epi}}\big)$. The prior therefore fixes the *interpretation* of the true-death stage -- what fraction of true cholera deaths the surveillance product is taken to represent, and hence the scale of the modelled true deaths -- rather than being informed by the deaths data. It is not entirely inert: it sets how many fatal onsets are withheld from $I_1$ (a transmission effect of at most a few percent, see the $R_0$ remark below) and where the bound $p^{\text{fatal}}_{jt} < 1$ falls. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*).
 
 <div class="figure" style="text-align: center">
-<img src="figures/rho_deaths_prior.png" alt="Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%)." width="100%" />
-<p class="caption">(\#fig:rho-deaths-prior)Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%).</p>
+<img src="figures/rho_deaths_prior.png" alt="Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05); its mean, 0.42, is the value $\rho_{\text{deaths}}$ is pinned at. Wider variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval, shown to document between-study heterogeneity. Neither is sampled in calibration, because $\rho_{\text{deaths}}$ cancels from the expected reported deaths: the per-onset fatality probability divides by it and the reporting draw multiplies by it. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%)." width="100%" />
+<p class="caption">(\#fig:rho-deaths-prior)Prior for the cholera death-detection probability $\rho_{\text{deaths}}$. (A) Informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\approx$ 88, sd $\approx$ 0.05); its mean, 0.42, is the value $\rho_{\text{deaths}}$ is pinned at. Wider variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval, shown to document between-study heterogeneity. Neither is sampled in calibration, because $\rho_{\text{deaths}}$ cancels from the expected reported deaths: the per-onset fatality probability divides by it and the reporting draw multiplies by it. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\tau^2$ = 0.046, $I^2$ = 32%).</p>
 </div>
 
 <div class="figure" style="text-align: center">
@@ -1105,48 +1132,79 @@ The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects me
 
 ### Case fatality rate {#case-fatality-rate}
 
-In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatality ratio* (IFR) implemented as a per-day mortality hazard among symptomatic infections. The hazard $\mu_{j,t}$ is the rate at which a symptomatic individual in location $j$ dies from cholera on day $t$, and the corresponding per-day death-transition probability is $1 - e^{-\mu_{j,t}}$ (see the [Table of stochastic transitions](#transitions-table)). It is factored into three multiplicative components: a per-location baseline $\mu_{j,0}$, a linear time-trend factor $\mu_{j,1}$ that captures slow drift in case-management quality over the simulation period, and an epidemic-period factor $\mu_{j,\text{epi}}$ that captures higher mortality during outbreak surges (e.g. when treatment infrastructure is overwhelmed):
+We parameterise cholera mortality directly by the time-varying **reported case fatality ratio** $\mu_{jt}$: the expected number of reported deaths per reported suspected case in location $j$ on day $t$, which is the quantity that surveillance measures. It replaces the per-day mortality hazard on the symptomatic stock, with its baseline, time-trend and epidemic-escalation factors ($\mu_{j,0}$, $\mu_{j,1}$, $\mu_{j,\text{epi}}$) and the target CFR from which the baseline was derived, used by MOSAIC-pkg versions before 0.96.0; those parameters are retired. The engine converts $\mu_{jt}$ on each day into the probability that a symptomatic onset is fatal:
 
 \begin{equation}
-\mu_{j,t} \;=\; \mu_{j,0} \,\big(1 + \mu_{j,1}\, t^{\dagger}\big)\,\Big(1 + \mu_{j,\text{epi}} \cdot \mathbb{1}\!\big[\,I_{1,\,j,t - l_{\text{cases}}} \big/ N_{j,\,t - l_{\text{cases}}} > \eta_j\,\big]\Big),
+p^{\text{fatal}}_{jt} \;=\; \mu_{jt}\,\frac{\rho}{\rho_{\text{deaths}}\,\chi^{\text{epi}}}.
+(\#eq:p-fatal)
+\end{equation}
+
+Where, $\rho$ is the care-seeking probability, $\chi^{\text{epi}}$ the epidemic-period PPV and $\rho_{\text{deaths}}$ the death-detection probability defined in the previous subsection. A configuration for which $p^{\text{fatal}}_{jt} \ge 1$ at any location and day is refused rather than clamped. Because reported cases (Eq. \@ref(eq:reported-cases)) and reported deaths (Eq. \@ref(eq:reported-deaths)) are drawn from the same onsets $\sigma\,\iota\,E_{jt}$, taking expectations gives
+
+$$
+\frac{\mathbb{E}[\text{reported deaths}]}{\mathbb{E}[\text{reported cases}]} \;=\; \frac{\rho_{\text{deaths}}\,p^{\text{fatal}}_{jt}}{\rho\,/\,\chi^{\text{eff}}_{jt}} \;=\; \mu_{jt}\,\frac{\chi^{\text{eff}}_{jt}}{\chi^{\text{epi}}},
+$$
+
+up to the rounding in Eq. \@ref(eq:reported-cases). Thus, in the epidemic regime ($\chi^{\text{eff}}_{jt} = \chi^{\text{epi}}$) the modelled reported CFR equals $\mu_{jt}$ exactly, and in the endemic regime it is $\mu_{jt}\,\chi^{\text{end}}/\chi^{\text{epi}}$ (approximately $0.69\,\mu_{jt}$ at the prior means). Neither $\sigma$, $\gamma_1$ nor $\rho_{\text{deaths}}$ enters this ratio, so no derivation through the recovery dwell or the symptomatic stock is needed. At the default configuration $p^{\text{fatal}}_{jt}$ has a median of 2.8% of symptomatic onsets (range 0.2--10%). Fatal onsets leave the population at onset and never enter $I_1$, so they neither shed into $W$ nor contribute to the force of infection. (The engine's `replay` mode, which exists only to verify the R engine draw for draw against laser-cholera 0.16.1, retains that engine's daily-hazard form; the production `rng` mode is the form described here.)
+
+**Prior for $\mu_{jt}$.** The prior centre of $\mu_{jt}$ comes from a hierarchical binomial GAM (`est_CFR_hierarchical()`) fit by fREML with `mgcv::bam()` to every country-year of the WHO annual cholera record from 1970 onward, for every country in the file (not only the 40 MOSAIC locations, so that the additional countries inform the global curve). For country $j$ in calendar year $\text{yr}$, with $D_{j,\text{yr}}$ reported deaths among $C_{j,\text{yr}}$ reported cases,
+
+\begin{equation}
+D_{j,\text{yr}} \sim \text{Binom}\!\left(C_{j,\text{yr}},\ p_{j,\text{yr}}\right), \qquad
+\text{logit}\,p_{j,\text{yr}} \;=\; f(\text{yr}) + u_j + g_j(\text{yr}) + e_{j,\text{yr}},
+(\#eq:cfr-gam)
+\end{equation}
+
+where $f$ is a global smooth trend, $u_j \sim \mathcal{N}(0,\ \text{sd}_{\text{country}}^2)$ is a country random intercept, $g_j$ is a country-specific penalised trend (a factor smooth, shrunk toward the global curve), and $e_{j,\text{yr}} \sim \mathcal{N}(0,\ \text{sd}_{\text{year}}^2)$ is a country-year random effect that absorbs the large year-to-year scatter of annual CFR. A calendar year still in progress when its WHO dashboard snapshot was taken is excluded, because its deaths lag its cases. The point estimate for a country-year excludes $e_{j,\text{yr}}$, so it is the mean of that year's reported CFR on the logit scale (the median, not the mean, on the probability scale), and each estimate carries the standard error $\text{se}_{j,\text{yr}}$ of $f + u_j + g_j$. Years after the data are carried forward: the global trend is held flat after the last year in the data, and each country's trend after that country's own last WHO-annual year. In the current fit $\text{sd}_{\text{year}} \approx 0.70$ on the logit scale; $\text{sd}_{\text{country}}$ is weakly identified (the factor smooth carries its own per-country intercept) but no MOSAIC location depends on it, since all 40 appear in the WHO annual data.
+
+The annual centres are expanded to the daily \[location $\times$ day\] matrix $\mu^{0}_{jt}$ that the engine reads as `config$mu_jt` by `make_mu_jt()`: the logit-scale centres are interpolated linearly between 1 July anchors of consecutive years and held flat before the 1 July anchor of the first estimated year and after that of the last (the estimated years include three carried-forward years past the last WHO-annual year). A simulation run from a configuration draws its deaths at $\mu_{jt} = \mu^{0}_{jt}$.
+
+**Integrating $\mu_{jt}$ out of the deaths likelihood.** In calibration $\mu_{jt}$ is not sampled. Given one simulated path, the expected reported deaths on each day are $\mu_{jt}$ times a known exposure, $(\rho/\chi^{\text{epi}})\,\sigma\,\iota\,E_{jt}$ evaluated at the path's simulated symptomatic onsets on the onset day, so the level of the reported CFR can be solved for per path (`calc_log_likelihood_deaths_integrated()`). The reported CFR is modelled as the prior centre shifted on the logit scale by a location offset and one level per calendar year:
+
+\begin{equation}
+\text{logit}\,\mu_{jt} \;=\; \text{logit}\,\mu^{0}_{jt} \;+\; \xi_j \;+\; \sum_{\text{yr}} B_{\text{yr}}(t)\, e_{j,\text{yr}},
 (\#eq:mu-jt)
 \end{equation}
 
-where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
-
-The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014-2025 surveillance window, after accounting for the full observation pipeline that converts true symptomatic infections into reported cases AND reported deaths. Reporting compresses information on three axes: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera, and $\rho_{\text{deaths}}$ controls the fraction of true cholera deaths that are captured by surveillance (laser-cholera v0.13+).
-
-In steady state, taking expectations of the engine equations (`reported_deaths` = $\rho_{\text{deaths}} \cdot \text{disease\_deaths}$, `disease_deaths` $\sim$ Binomial($I_1$, $\mu_{j,t}$), `reported_cases` = $I_1 \cdot \rho / \chi$):
-
 $$
-\text{CFR}^{\text{reported}}_{j} \;=\; \frac{\mathbb{E}[\text{reported\_deaths}]}{\mathbb{E}[\text{reported\_cases}]} \;=\; \frac{I_1 \cdot \mu_{j,t} \cdot \rho_{\text{deaths}}}{I_1 \cdot \rho / \chi} \;=\; \mu_{j,t} \cdot \frac{\rho_{\text{deaths}} \cdot \chi}{\rho}.
-$$
-
-Solving for the un-modulated baseline component:
-
-$$
-\mu_{j,0} \;=\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\rho}{\rho_{\text{deaths}} \cdot \chi},
-(\#eq:mu-baseline-derivation)
+\xi_j \sim \mathcal{N}\!\left(0,\ \text{sd}_{\text{product}}^2 + \overline{\text{se}^2_{j}}\right), \qquad
+e_{j,\text{yr}} \sim
+\begin{cases}
+\mathcal{N}\!\left(0,\ \text{sd}_{\text{year}}^2\right), & \text{yr} \le \text{yr}^{\ast}_j,\\[3pt]
+\mathcal{N}\!\left(\bar{e}_j,\ \text{sd}_{\text{year}}^2\right), & \text{yr} > \text{yr}^{\ast}_j.
+\end{cases}
 $$
 
-with units of day$^{-1}$. The symptomatic fraction $\sigma$ cancels in this identity because both observation pathways start from $I_1$, not from the underlying infections. Country-specific reported CFRs are estimated by a hierarchical GAM (binomial(deaths, cases) $\sim$ s(year) + country random intercepts + country temporal trends) fit to the WHO AFRO annual surveillance data through 2025 with the 2026 partial-year snapshot. The estimated CFR is converted to $\mu_{j,0}$ via the identity above using the prior means of $\rho$, $\rho_{\text{deaths}}$, and the endemic-epidemic-averaged $\chi$, yielding a per-country Gamma(shape=4, rate) prior with CV=50%. For example, in Angola the GAM-estimated reported CFR is approximately 2.3% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 173)$ with mean approximately 0.023 per day, corresponding to an integrated symptomatic-period CFR of roughly 11% over a 5-day symptomatic infectious period (i.e. $1 - e^{-0.023 \times 5}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+Where, $\xi_j$ is the location offset, whose prior variance adds $\text{sd}_{\text{product}} = 0.3$ (the residual error of the GAM centre against the observed reported CFR in the calibration window) to $\overline{\text{se}^2_{j}}$, the mean squared GAM standard error $\text{se}_{j,\text{yr}}^2$ over the calendar years of the scored window that carry deaths observations; $e_{j,\text{yr}}$ is the deviation for calendar year $\text{yr}$ -- the country-year effect of Eq. \@ref(eq:cfr-gam), now estimated from the weekly surveillance given the simulated path -- with the GAM's country-year SD $\text{sd}_{\text{year}}$; and $B_{\text{yr}}(t)$ equals 1 inside calendar year $\text{yr}$ and blends linearly into the next year over the 60 days centred on each 1 January (weight 0.5 on each year on 1 January), so the reported CFR has no step at a year boundary. Each deviation is a *level* for its year: a year observed only in part is fitted to the months observed and applied unchanged to the rest of that year. $\text{yr}^{\ast}_j$ is the latest year observed past its New Year blend (the year of the last scored day minus 30 days), and every later year is a *forecast year* whose deviation is centred on the forecast shift $\bar{e}_j$ described below (zero during calibration).
 
-Pre-laser-cholera-v0.13.0 versions of MOSAIC scored observed reported deaths against simulated raw `disease_deaths` (without the $\rho_{\text{deaths}}$ factor), so per-country $\mu_{j,0}$ priors prior to v0.32.1 implicitly absorbed the missing $\rho_{\text{deaths}}$ factor in their posterior. Posteriors from pre-v0.32.1 calibrations are interpretable as $\mu_{j,0}^{\text{v0.13+}} \cdot \rho_{\text{deaths}}$ under the new schema (a factor of $\approx$0.42 lower than the corrected estimate).
-
-The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
+Deaths are scored at the weekly reporting cadence with a quasi-Poisson likelihood. For location $j$ and reporting week $w$ (the week boundary is detected per location; a week cut by the edge of the scored window is scored on its own days), let $D_{jw}$ be the observed deaths and
 
 $$
-\mu_{j,1} \sim \mathcal{N}(0,\ 0.05).
+m_{jw} \;=\; \sum_{t \in w} \mu_{jt}\,\frac{\rho}{\chi^{\text{epi}}}\,\sigma\,\iota\,E_{jt} \;+\; m^{\text{bg}}_j
 $$
 
-The epidemic factor is a non-negative Gamma prior with a mean of 0.5, reflecting the approximately 50% increase in cholera CFR typically observed during outbreak surges:
+the expected reported deaths, with the CFR and onsets both taken at the onset day of the deaths reported in week $w$. The deaths log-likelihood of location $j$ given $(\xi_j, e_{j,\cdot})$ is
+
+\begin{equation}
+\ell_j \;=\; \frac{1}{\varphi_j}\sum_{w} \bar{w}_{jw}\left[D_{jw}\log m_{jw} - m_{jw} - \log D_{jw}!\right].
+(\#eq:deaths-quasipoisson)
+\end{equation}
+
+Where, $\bar{w}_{jw}$ is the mean scoring weight of the week's days (the per-observation confidence weights are rescaled so that they redistribute, but do not change, the location's total weight); $m^{\text{bg}}_j = \max\!\left(10^{-4},\ 0.02\,\bar{D}_j\right)$ is a small additive background, 2% of the location's mean scored weekly deaths (the cases channel's relative floor, `control$likelihood$eps_rel_cases`), so that a week with observed deaths but no simulated onsets costs a bounded amount; and $\varphi_j \ge 1$ is a per-location dispersion, the quasi-Poisson dispersion of observed weekly deaths about a year-specific multiple of observed weekly cases (a log-link fit with the cases as offset and one effect per year), floored at 1 and set to 1 when a location has fewer than 10 deaths or fewer weeks than its number of years plus three. The Poisson score for the CFR level is total-preserving up to the prior shrinkage, the background and the logit link's $(1-\mu_{jt})$ factor, so given a path the fitted reported CFR approximately reproduces the observed deaths totals; a negative-binomial score would weight low-count weeks far above the peak weeks and bias the level. For each location the offsets are fitted by Newton's method, and the deaths contribution to the calibration log-likelihood is the Laplace approximation to the marginal likelihood at the mode $(\hat\xi_j, \hat{e}_{j,\cdot})$, which has $K_j$ components (the offset and one deviation per calendar year of the simulation window),
 
 $$
-\mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
+\log \mathcal{L}^{\text{deaths}}_j \;\approx\; \ell_j(\hat\xi_j, \hat{e}_{j,\cdot}) + \log P(\hat\xi_j, \hat{e}_{j,\cdot}) + \tfrac{K_j}{2}\log 2\pi - \tfrac{1}{2}\log\det\!\left(-\mathbf{H}_j\right),
 $$
 
-Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{round}(\text{disease\_deaths}[t - l_{\text{deaths}}] \cdot \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0.
+where $\mathbf{H}_j$ is the Hessian of the log posterior at the mode. This term replaces the per-day negative-binomial deaths term used before MOSAIC-pkg v0.96.0 and enters the total log-likelihood of the calibration chapter weighted by $w_{\text{deaths}}$ and $w_j$; when the reported CFR is integrated out, the level-dependent deaths shape terms (peak magnitude, cumulative progression and WIS) are dropped, because they would score engine deaths drawn at the prior $\mu^{0}_{jt}$.
 
+**Posterior deaths and forecasts.** Because fatal onsets are the only route by which deaths feed back on transmission, the deaths of each posterior ensemble member can be redrawn after its simulation. For each stochastic run of each member and each location we fit $(\xi_j, e_{j,\cdot})$ to the observed deaths given that member's onsets, draw them from the Laplace posterior, rebuild the daily $\mu_{jt}$ with the same year basis, and draw true and reported deaths with Eqs. \@ref(eq:p-fatal) and \@ref(eq:reported-deaths). A draw that would need $p^{\text{fatal}}_{jt} \ge 1$ is redrawn (up to 20 times, then the mode is used); a location whose posterior mode itself is infeasible -- a path with far too few onsets for the observed deaths -- keeps the engine's deaths at the prior $\mu^{0}_{jt}$ and is counted and reported, rather than the member being dropped. The redraw ignores the small transmission effect of the difference between the prior and posterior $p^{\text{fatal}}_{jt}$. The resulting reported CFR by location and year (the weighted median and 95% interval, over members and their stochastic runs, of each run's mean daily $\mu_{jt}$ in that year, beside the prior's mean daily $\mu^{0}_{jt}$) is written to `cfr_posterior.csv`; it is conditional on each member's modelled cases, so a year whose cases a member over-predicts receives a lower CFR. The medoid configuration's $\mu_{jt}$ is shifted per calendar year on the logit scale, with the same blend, so that each year's mean daily reported CFR matches the posterior median from the medoid's own stochastic ensemble (the run-level `cfr_posterior.csv` is used only if that ensemble fails).
+
+Forecast years carry the ensemble's latest calibrated CFR rather than reverting to the prior level. After calibration, one stochastic run of each posterior member gives its posterior-mode deviation for $\text{yr}^{\ast}_j$, and the forecast shift $\bar{e}_j$ is the weighted mean of these over members. Averaging keeps the CFR change the members share while discarding each member's own case error in $\text{yr}^{\ast}_j$, which its deviation also absorbs. The same $\bar{e}_j$ centres every forecast year's deviation in the ensemble, the medoid, `cfr_posterior.csv` and any post hoc re-run from the saved deaths integration.
+
+A configuration carrying any of the retired mortality fields `mu_j_baseline`, `mu_j_epidemic_factor`, `CFR_target` or `mu_j` is converted when it has a `CFR_target`, which becomes a constant $\mu_{jt}$ (with a warning, and ignoring any `mu_jt` matrix the legacy configuration carries), and is otherwise refused. The retired `delta_reporting_deaths` and `mu_j_slope` fields do not mark a configuration as legacy; they are accepted and ignored.
+
+The table and figures below summarise the observed WHO AFRO reported CFR from 2014 onward. They are descriptive: the per-country Beta shapes are not used as model priors.
 
 <table class="table table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>(\#tab:cfr)CFR Values and Beta Shape Parameters for AFRO Countries</caption>
@@ -1175,23 +1233,23 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Angola </td>
-   <td style="text-align:right;"> 43127 </td>
-   <td style="text-align:right;"> 1049 </td>
+   <td style="text-align:right;"> 45110 </td>
+   <td style="text-align:right;"> 1091 </td>
    <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.907 </td>
+   <td style="text-align:right;"> 1.905 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Burundi </td>
-   <td style="text-align:right;"> 10292 </td>
-   <td style="text-align:right;"> 59 </td>
+   <td style="text-align:right;"> 10774 </td>
+   <td style="text-align:right;"> 61 </td>
    <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.007 </td>
    <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.911 </td>
+   <td style="text-align:right;"> 1.929 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Benin </td>
@@ -1212,6 +1270,16 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 1.910 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Central African Republic </td>
+   <td style="text-align:right;"> 726 </td>
+   <td style="text-align:right;"> 46 </td>
+   <td style="text-align:right;"> 0.063 </td>
+   <td style="text-align:right;"> 0.047 </td>
+   <td style="text-align:right;"> 0.084 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 1.867 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Cote d'Ivoire </td>
@@ -1235,33 +1303,33 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Cameroon </td>
-   <td style="text-align:right;"> 29981 </td>
-   <td style="text-align:right;"> 926 </td>
+   <td style="text-align:right;"> 31510 </td>
+   <td style="text-align:right;"> 967 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.029 </td>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.929 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Democratic Republic of Congo </td>
-   <td style="text-align:right;"> 419069 </td>
-   <td style="text-align:right;"> 8672 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.020 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.009 </td>
    <td style="text-align:right;"> 1.916 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Democratic Republic of Congo </td>
+   <td style="text-align:right;"> 433598 </td>
+   <td style="text-align:right;"> 9103 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.009 </td>
+   <td style="text-align:right;"> 1.918 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Congo </td>
-   <td style="text-align:right;"> 1431 </td>
-   <td style="text-align:right;"> 111 </td>
-   <td style="text-align:right;"> 0.078 </td>
-   <td style="text-align:right;"> 0.064 </td>
-   <td style="text-align:right;"> 0.093 </td>
-   <td style="text-align:right;"> 0.016 </td>
-   <td style="text-align:right;"> 1.901 </td>
+   <td style="text-align:right;"> 1851 </td>
+   <td style="text-align:right;"> 126 </td>
+   <td style="text-align:right;"> 0.068 </td>
+   <td style="text-align:right;"> 0.057 </td>
+   <td style="text-align:right;"> 0.081 </td>
+   <td style="text-align:right;"> 0.015 </td>
+   <td style="text-align:right;"> 1.863 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Comoros </td>
@@ -1315,7 +1383,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Kenya </td>
-   <td style="text-align:right;"> 48656 </td>
+   <td style="text-align:right;"> 48696 </td>
    <td style="text-align:right;"> 709 </td>
    <td style="text-align:right;"> 0.015 </td>
    <td style="text-align:right;"> 0.014 </td>
@@ -1345,8 +1413,8 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Mozambique </td>
-   <td style="text-align:right;"> 99439 </td>
-   <td style="text-align:right;"> 457 </td>
+   <td style="text-align:right;"> 100084 </td>
+   <td style="text-align:right;"> 463 </td>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.005 </td>
@@ -1355,13 +1423,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Malawi </td>
-   <td style="text-align:right;"> 65556 </td>
-   <td style="text-align:right;"> 1886 </td>
-   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 66273 </td>
+   <td style="text-align:right;"> 1888 </td>
    <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.030 </td>
    <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 1.910 </td>
+   <td style="text-align:right;"> 1.891 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Namibia </td>
@@ -1385,23 +1453,23 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Nigeria </td>
-   <td style="text-align:right;"> 292418 </td>
-   <td style="text-align:right;"> 7831 </td>
-   <td style="text-align:right;"> 0.027 </td>
-   <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 355515 </td>
+   <td style="text-align:right;"> 8198 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 1.891 </td>
+   <td style="text-align:right;"> 1.911 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Rwanda </td>
-   <td style="text-align:right;"> 823 </td>
+   <td style="text-align:right;"> 1086 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0.004 </td>
-   <td style="text-align:right;"> 0.006 </td>
-   <td style="text-align:right;"> 1.920 </td>
+   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 0.005 </td>
+   <td style="text-align:right;"> 1.902 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Sudan </td>
@@ -1425,13 +1493,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> South Sudan </td>
-   <td style="text-align:right;"> 134119 </td>
-   <td style="text-align:right;"> 2346 </td>
+   <td style="text-align:right;"> 141039 </td>
+   <td style="text-align:right;"> 2393 </td>
    <td style="text-align:right;"> 0.017 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 1.926 </td>
+   <td style="text-align:right;"> 1.935 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Eswatini </td>
@@ -1445,13 +1513,13 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Chad </td>
-   <td style="text-align:right;"> 4338 </td>
-   <td style="text-align:right;"> 257 </td>
-   <td style="text-align:right;"> 0.059 </td>
+   <td style="text-align:right;"> 4904 </td>
+   <td style="text-align:right;"> 285 </td>
+   <td style="text-align:right;"> 0.058 </td>
    <td style="text-align:right;"> 0.052 </td>
-   <td style="text-align:right;"> 0.067 </td>
-   <td style="text-align:right;"> 0.014 </td>
-   <td style="text-align:right;"> 1.862 </td>
+   <td style="text-align:right;"> 0.065 </td>
+   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 1.863 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Togo </td>
@@ -1485,7 +1553,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> South Africa </td>
-   <td style="text-align:right;"> 1403 </td>
+   <td style="text-align:right;"> 1405 </td>
    <td style="text-align:right;"> 47 </td>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.025 </td>
@@ -1495,7 +1563,7 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
   </tr>
   <tr>
    <td style="text-align:left;"> Zambia </td>
-   <td style="text-align:right;"> 32784 </td>
+   <td style="text-align:right;"> 32789 </td>
    <td style="text-align:right;"> 929 </td>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.027 </td>
@@ -1520,8 +1588,8 @@ Reported cholera deaths are modelled with a parallel two-stage observation proce
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%" />
-<p class="caption">(\#fig:cfr-cases)Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.</p>
+<img src="figures/case_fatality_ratio_and_cases_total_by_country.png" alt="Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 through the last complete calendar year (a year still in progress when its WHO dashboard snapshot was taken is excluded, because its deaths lag its cases). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO." width="100%" />
+<p class="caption">(\#fig:cfr-cases)Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 through the last complete calendar year (a year still in progress when its WHO dashboard snapshot was taken is excluded, because its deaths lag its cases). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.</p>
 </div>
 
 
@@ -1849,15 +1917,18 @@ The model includes basic demographic change by using reported birth and death ra
 
 To evaluate the *intrinsic* transmission potential of *Vibrio cholerae* in each country \(j\), we compute a location‐specific basic reproductive number.  Vaccination, susceptible depletion, and cross-border travel are set to zero; only baseline contact rates and local WASH coverage remain.
 
+> **What the pipeline computes.** This basic reproductive number \(R_{0,j}\) and the mechanistic effective reproductive number \(R_{jt}^{\mathrm{mech}}\) that follows are presented here as **reference theory**. MOSAIC computes and reports only the **Cori** effective reproductive number \(R_{jt}^{\mathrm{cori}}\) (see the Cori section below), post hoc from a calibration's output with `add_reproductive_numbers()`. \(R_{0,j}\) and \(R_{jt}^{\mathrm{mech}}\) are documented for completeness and are not produced as model outputs.
+
 ### Effective removal rate
 
 The mean infectious period combines symptomatic (\(\gamma_1^{-1}\)) and asymptomatic (\(\gamma_2^{-1}\)) durations, weighted by the symptomatic proportion \(\sigma\):
 
-\[
+\begin{equation}
 \gamma_{\mathrm{eff}}
   = \left[\frac{\sigma}{\gamma_1}
           +\frac{1-\sigma}{\gamma_2}\right]^{-1}.
-\]
+(\#eq:gamma-eff)
+\end{equation}
 
 ### Worst-case environmental persistence
 
@@ -1870,6 +1941,8 @@ Following the "upper-bound" convention for \(R_0\), the pathogen-decay rate is f
 \]
 
 corresponding to a survival time of approximately 196 days in water (16-day mode of $\text{days}_{\text{short}}$ plus 180-day mode of $\text{days}_{\text{spread}}$; see Equation \@ref(eq:decay-priors)).
+
+Because \(R_{0,j}^{\text{env}}\propto 1/\widehat{\delta}_j\), fixing \(\widehat{\delta}_j\) at its **slowest** plausible value (longest persistence) **maximizes** the environmental contribution. \(R_{0,j}^{\text{env}}(\widehat{\delta}_j)\) is therefore a deliberate **sensitivity ceiling**, not the realized environmental reproduction number: the decay rate that actually governs dynamics is the time-varying, suitability-driven \(\delta_{jt}\) of Eq. \@ref(eq:delta), which is typically faster (\(\delta_{jt}\ge\widehat{\delta}_j\)) and shortens reservoir persistence below the 196-day worst case. \(R_{0,j}^{\text{env}}(\widehat{\delta}_j)\) should be presented as an upper envelope on intrinsic environmental potential, not as an operative rate.
 
 ### Decomposition of \(R_{0,j}\)
 
@@ -1892,6 +1965,8 @@ R_{0,j}^{\text{env}}
           +\zeta_2\frac{1-\sigma}{\gamma_2}\right].
 \]
 
+The \(1/\kappa\) factor here is the *linearization* of the saturating per-capita dose-response \((W/N)/(\kappa+W/N)\) (Eq. \@ref(eq:foi-environment)) evaluated at the **disease-free equilibrium**, where the reservoir is empty (\(W\!\to\!0\)) and the population is fully susceptible (\(S_j\!\approx\!N_j\)): the derivative of the dose-response is \(\partial\,[(W/N_j)/(\kappa+W/N_j)]/\partial W = 1/(\kappa N_j)\), and multiplying by the \(S_j \approx N_j\) susceptibles it acts on gives \(1/\kappa\). (Under the raw-\(W\) dose-response used before MOSAIC-pkg v0.89.0 the same linearization gave \(N_j/\kappa\).) The same cancellation applies to the mechanistic numbers below, where the susceptible fraction \(f_{jt}\) carries the \(S_{jt}/N_{jt}\) factor. Consequently \(R_{0,j}^{\text{env}}\) measures the *invasion potential* of *V. cholerae* into a pathogen-free reservoir — the secondary infections a single introduction would seed before the reservoir has accumulated. It is **not** the operative environmental transmission during an established outbreak: once \(W/N_j\) is large compared with \(\kappa\) the dose-response saturates near unity, the marginal effect of additional shedding collapses, and the effective environmental transmission is far below the \(1/\kappa\)-scaled invasion value. \(R_{0,j}^{\text{env}}\) should therefore be read as an introduction-phase quantity, not as the realised environmental reproduction number mid-epidemic.
+
 *Total basic reproductive number*
 
 \[
@@ -1899,20 +1974,35 @@ R_{0,j}
   = R_{0,j}^{\text{hum}} + R_{0,j}^{\text{env}}.
 \]
 
+This additive decomposition is **exact**, not an approximation: because both transmission routes — the human force of infection \(\Lambda\) and the environmental force of infection \(\Psi\) — deposit newly infected individuals into the *single* Exposed compartment \(E\), the next-generation transmission matrix \(F\) is rank one. The spectral radius of a rank-one matrix equals its trace, so \(R_{0,j}\) is simply the sum of the two route-specific contributions, with no square-root or dominant-eigenvalue coupling between them. This exactness is contingent on the current compartment topology (a single infection-entry compartment); if the infection-entry structure changes — e.g. separate exposed compartments per route — the next-generation matrix is no longer rank one and the decomposition must be re-derived as a dominant eigenvalue.
+
+This \(R_{0,j}\) also drops two small losses. Background mortality \(d_j\) removes individuals from \(E\), \(I_1\) and \(I_2\), and including it would scale each route by factors of order \(\iota/(\iota+d_j)\) and \(\gamma_k/(\gamma_k+d_j)\). Cholera mortality does not act as an exit rate from \(I_1\): a fatal symptomatic onset is removed at onset and never enters \(I_1\) (Eq. \@ref(eq:p-fatal)), so it would multiply the symptomatic terms \(\sigma/\gamma_1\) and \(\zeta_1\sigma/\gamma_1\) by \((1-p^{\text{fatal}}_{jt})\), a reduction of about 3% at the median default \(p^{\text{fatal}}_{jt}\) (at most about 10%). The removal terms therefore use \(\iota\) and \(\gamma_{1},\gamma_{2}\) alone, and both omitted factors are close to 1 for cholera.
+
 ### Interpretation
 
 * **\(R_{0,j}^{\text{hum}}\)** dominates in settings with high baseline contact (\(\beta_{j0}^{\text{hum}}\)) and short infectious periods.  
 * **\(R_{0,j}^{\text{env}}\)** grows when WASH access is poor (\(\theta_j\!\to\!0\)) and pathogen survival is long (\(\widehat{\delta}_j \approx 1/196\)).
   Because the WASH factor appears squared, improving basic services reduces both contamination and ingestion, driving \(R_{0,j}^{\text{env}}\) down rapidly.
 
-These patch-specific numbers provide an upper ceiling for every effective reproductive number reported later in the analysis.
+\(R_{0,j}\) is a strictly **within-patch** quantity: the stated convention zeroes cross-border travel, so each \(R_{0,j}\) describes invasion in patch \(j\) treated in isolation. The per-patch \(R_{0,j}\) values therefore **cannot be summed or averaged into a single metapopulation \(R_0\)** — that operation has no epidemiological meaning here. A true network-level \(R_0\) would be the spectral radius of the *full* multi-patch next-generation matrix, in which patches are coupled through the mobility terms \(\tau_i\pi_{ij}\) (Eq. \@ref(eq:foi-human)) and through any shared environmental exposure; that coupled eigenvalue is not computed in this spec. The \(R_{0,j}\) reported here are patch-isolated reference scales, and metapopulation-level invasion should be assessed from the coupled system directly rather than aggregated from them.
+
+These patch-specific numbers serve as a reference scale for the effective reproductive numbers reported later. They provide an upper ceiling only **conditionally** — when the susceptible fraction satisfies \(f_{jt}\le 1\) and the time-varying rates stay at or below baseline (\(\beta_{jt}\le\beta_{j0}\), \(\delta_{jt}\ge\widehat{\delta}_j\)); seasonal/suitability forcing can push \(\beta_{jt}>\beta_{j0}\) (and \(\delta_{jt}<\widehat{\delta}_j\)) at peak season, in which case the mechanistic \(R_{jt}^{\mathrm{mech}}\) can exceed \(R_{0,j}\) (see the mechanistic-number section below).
 
 
 
 
-### Intrinsic effective reproductive number \(R_{jt}^{\mathrm{intr}}\)
+## The mechanistic effective reproductive number \(R_{jt}^{\mathrm{mech}}\)
 
-The **intrinsic** reproductive number measures the secondary cases produced *within* location \(j\) when only resident–resident transmission pathways are active.
+The model spec defines **two distinct effective-reproductive-number estimands** that answer different questions and will **not** be numerically equal in general (of these, only the Cori estimator is computed by the calibration pipeline — see the note in the basic reproductive number section above):
+
+* **\(R_{jt}^{\mathrm{mech}}\)** (this section) — the *mechanistic* (next-generation-matrix–scaled) number. It is the basic reproductive number \(R_{0,j}\) re-evaluated with the current susceptible fraction \(f_{jt}=(1-\tau_j)S_{jt}/N_{jt}\), the time-varying transmission rates \(\beta_{jt}^{\text{hum}},\beta_{jt}^{\text{env}}\), and the time-varying environmental decay \(\delta_{jt}\). It is a *forward* quantity derived from the model's parameters and current state, and answers: *given the model mechanism and the present state, how many secondary infections does a typical case produce?*
+* **\(R_{jt}^{\mathrm{cori}}\)** (next section) — the *Cori* instantaneous estimator (Cori et al. 2013), computed from the realised route incidence and route-specific generation-interval kernels, as \(R_{jt}^{\mathrm{hum}} + R_{jt}^{\mathrm{env}}\). It is a *backward/observational* quantity and answers: *given the incidence trajectory and an assumed generation interval, what reproductive number is consistent with the observed growth?*
+
+The two are different estimands, not two estimators of the same number. The mechanistic form documented below comes in an **intrinsic** variant (resident–resident transmission only) and an **extrinsic** variant (adding cross-border importation); it is provided as **reference theory** and is not produced by `run_MOSAIC()`, which reports the Cori estimator of the next section.
+
+### Intrinsic mechanistic number \(R_{jt}^{\mathrm{mech,intr}}\)
+
+The **intrinsic** mechanistic number measures the secondary cases produced *within* location \(j\) when only resident–resident transmission pathways are active.
 
 *Susceptible fraction*
 \[
@@ -1936,9 +2026,9 @@ f_{jt}
               \bigl(\text{days}_{\text{long}}-\text{days}_{\text{short}}\bigr)} .
 \]
 
-*Analytic expression*  
+*Analytic expression*
 \[
-R_{jt}^{\mathrm{intr}}
+R_{jt}^{\mathrm{mech,intr}}
   = f_{jt}\Bigl[
         \beta_{jt}^{\text{hum}}
         \Bigl(\frac{\sigma}{\gamma_1}
@@ -1950,27 +2040,27 @@ R_{jt}^{\mathrm{intr}}
     \Bigr].
 \]
 
-When \(R_{jt}^{\mathrm{intr}}<1\) local transmission would fade out in the absence of new importations.
+When \(R_{jt}^{\mathrm{mech,intr}}<1\) local transmission would fade out in the absence of new importations.
 
 ---
 
-### Extrinsic effective reproductive number \(R_{jt}^{\mathrm{extr}}\)
+### Extrinsic mechanistic number \(R_{jt}^{\mathrm{mech,extr}}\)
 
-The **extrinsic** number augments the human‐to‐human term with infections sparked by visiting infectious travellers.
+The **extrinsic** mechanistic number augments the human‐to‐human term with infections sparked by visiting infectious travellers. To avoid a symbol collision with the infection-incidence series \(I^{\ast}_{jt}\) of the Cori section (Eq. \@ref(eq:I-star)), we denote the relative imported prevalence by \(\Phi_{jt}\).
 
-*Relative imported prevalence*  
+*Relative imported prevalence*
 \[
-I^{\ast}_{jt}
+\Phi_{jt}
   = \frac{\sum_{i\neq j}\tau_i\pi_{ij}\bigl(I_{1,it}+I_{2,it}\bigr)}
          {(1-\tau_j)\bigl(I_{1,jt}+I_{2,jt}\bigr)} .
 \]
 
-*Analytic expression*  
+*Analytic expression*
 \[
-R_{jt}^{\mathrm{extr}}
+R_{jt}^{\mathrm{mech,extr}}
   = f_{jt}\Bigl[
         \beta_{jt}^{\text{hum}}
-        \bigl(1+I^{\ast}_{jt}\bigr)
+        \bigl(1+\Phi_{jt}\bigr)
         \Bigl(\frac{\sigma}{\gamma_1}
               +\frac{1-\sigma}{\gamma_2}\Bigr)
       + \frac{\beta_{jt}^{\text{env}}\,(1-\theta_j)^{2}}
@@ -1982,8 +2072,9 @@ R_{jt}^{\mathrm{extr}}
 
 *Key points*
 
-* \(R_{jt}^{\mathrm{extr}} \ge R_{jt}^{\mathrm{intr}}\); equality holds when imported prevalence is negligible \((I^{\ast}_{jt}\approx0)\).
-* Both measures are bounded above by the local basic value \(R_{0,j}\); cross-border seeding accelerates observed growth but cannot raise per-case offspring beyond the worst-case ceiling set by local parameters.
+* \(R_{jt}^{\mathrm{mech,extr}} \ge R_{jt}^{\mathrm{mech,intr}}\); equality holds when imported prevalence is negligible \((\Phi_{jt}\approx0)\).
+* **The linear \((1+\Phi_{jt})\) add-in is an \(\alpha_1=1\) approximation.** In the human force of infection (Eq. \@ref(eq:foi-human)) the resident and imported infectious pressures are summed *inside* a bracket raised to the exponent \(\alpha_1\), i.e. \([(1-\tau_j)(I_{1,jt}+I_{2,jt}) + \sum_{i\neq j}\pi_{ij}\tau_i(I_{1,it}+I_{2,it})]^{\alpha_1}\). Factoring out the resident term gives a multiplier of \((1+\Phi_{jt})^{\alpha_1}\), not \((1+\Phi_{jt})\). With \(\alpha_1\) pinned at \(0.27\) the concave exponent substantially damps the import contribution, so the linear form here **overstates** it. The exact mechanistic multiplier is \((1+\Phi_{jt})^{\alpha_1}\); the linear expression above is retained only as the \(\alpha_1=1\) limiting case. For spatial settings where importation matters, note that the Cori estimator \(R_{jt}^{\mathrm{cori}}\) (next section) does not resolve this either: it reads transmission from local incidence, so imported infectiousness is not in its denominator and infections caused by visitors are credited to local infectiousness, and the \(\alpha_1\) exponent makes its human-route value depend on prevalence (see the caveats there).
+* When \(f_{jt}\le 1\) **and** \(\beta_{jt}^{\text{hum}}\le\beta_{j0}^{\text{hum}}\), \(\beta_{jt}^{\text{env}}\le\beta_{j0}^{\text{env}}\), the mechanistic numbers are bounded above by the local basic value \(R_{0,j}\). This bound is **conditional**: seasonal/suitability forcing can drive \(\beta_{jt}>\beta_{j0}\) at peak season (and \(\delta_{jt}<\widehat{\delta}_j\) raises the environmental term), so \(R_{jt}^{\mathrm{mech}}\) can *exceed* \(R_{0,j}\) during favourable periods. There is no unconditional ceiling at \(R_{0,j}\).
 
 
 
@@ -1992,140 +2083,99 @@ R_{jt}^{\mathrm{extr}}
 
 
 
-## The effective reproductive number
+## The Cori effective reproductive number \(R_{jt}^{\mathrm{cori}}\)
 
-The effective reproductive number $R_t$ quantifies epidemic growth by capturing the average number of secondary infections generated by a primary case at time $t$. We estimate $R_t$ and account for our two infectious classes *symptomatic $I_{1}$* and *asymptomatic $I_{2}$* by 
-letting $\zeta_{1}$ and $\zeta_{2}$ denote the per-capita shedding rates of *V. cholerae* for symptomatic and asymptomatic cases, respectively (see Section \@ref(sec:shedding)). To combine the two classes into a single measure of infectious individuals, we weight asymptomatic cases by the ratio of shedding rates:
+The **Cori** instantaneous effective reproductive number \(R_{jt}^{\mathrm{cori}}\) is the second of MOSAIC's two reproductive-number estimands (contrast the mechanistic \(R_{jt}^{\mathrm{mech}}\) above). It is computed from the realised incidence time series rather than from the model parameters, and will **not** in general equal \(R_{jt}^{\mathrm{mech}}\). It quantifies epidemic growth as the average number of secondary infections generated by one infection at time $t$. Because MOSAIC has two transmission routes with very different timing, it is computed **per route** and summed.
+
+The input is the **infection incidence**: the number of *new* infections per timestep at location $j$, i.e. the realised $S\!\to\!E$ flow, recorded separately for each route (the engine channels `incidence_human` and `incidence_env`):
 \begin{equation}
-I_{jt}^{\ast} \;=\; I_{1,jt} \;+\; \mathcal{z}\, I_{2,jt}
-\qquad \text{and} \qquad
-\mathcal{z} \;=\; \frac{\zeta_{2}}{\zeta_{1}}.
+I_{jt}^{\ast} \;=\; I_{jt}^{\ast,\mathrm{hum}} + I_{jt}^{\ast,\mathrm{env}}
+\;=\; \texttt{incidence\_human}_{jt} + \texttt{incidence\_env}_{jt}.
 (\#eq:I-star)
 \end{equation}
-When $\zeta_{1} = \zeta_{2}$, $\mathcal{z} = 1$ and symptomatic and asymptomatic infections contribute equally to transmission.
+Critically, $I_{jt}^{\ast}$ is a **flow** (new infections), not a compartment **stock** ($I_1,I_2$ occupancy). A stock is already a $\gamma$-convolution of past incidence, so feeding occupancy into the renewal equation would double-apply the infectious-period structure and bias $R_{jt}^{\mathrm{cori}}$ toward $1$.
 
-Following the method of [Cori et al. 2013](https://academic.oup.com/aje/article/178/9/1505/89262), the location-specific instantaneous effective reproductive number is
+### Route decomposition
+
+Every infection, whichever route produced it, becomes infectious through **both** routes (there is a single $E$ compartment), so both route denominators are driven by the total incidence $I_{j}^{\ast}$, while each numerator is that route's own incidence. Following [Cori et al. 2013](https://academic.oup.com/aje/article/178/9/1505/89262),
 \begin{equation}
-R_{jt} = \frac{I_{jt}^{\ast}}{\displaystyle\sum_{\Delta t = 1}^{t} g\left(\Delta t\right)\, I_{j,t-\Delta t}^{\ast}}
+R_{jt}^{\mathrm{hum}} = \frac{I_{jt}^{\ast,\mathrm{hum}}}{\Lambda_{jt}^{\mathrm{hum}}},\qquad
+R_{jt}^{\mathrm{env}} = \frac{I_{jt}^{\ast,\mathrm{env}}}{\Lambda_{jt}^{\mathrm{env}}},\qquad
+R_{jt}^{\mathrm{cori}} = R_{jt}^{\mathrm{hum}} + R_{jt}^{\mathrm{env}},
 (\#eq:R)
 \end{equation}
-Here, $g(\Delta t)$ is the generation-time probability mass function at lag $\Delta t$.  
-The denominator aggregates the recent infectiousness contributed by past symptomatic and asymptomatic cases—each weighted by $\mathcal{z}$ and by the generation-time distribution—so dividing the current combined incidence $I_{jt}^{\ast}$ by this weighted sum yields the time-varying effective reproductive number $R_{jt}$.
-
-
-
-
-### The generation time distribution
-
-The generation time distribution is the time between when an individual becomes infected and when they infect others. To keep the MOSAIC framework internally consistent, we derive the intrinsic generation interval $\mathcal{G}$ from the same timing parameters that govern the infectious state transitions. Where, $\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission}\, \right)$ as in [Anderson & May 1992](https://www.google.com/books/edition/Infectious_Diseases_of_Humans/HT0--xXBguQC?hl=en) and is assumed to be Gamma distributed. 
+where the route **infectiousness** is the generation-weighted past incidence
 \begin{equation}
-\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission}\, \right)\\
-\Bigg\Updownarrow \\
-\mathcal{G} = \left(\, \text{latent} + \text{time to first transmission} + \text{decay in environment}\, \right)
-(\#eq:gen-time-range)
+\Lambda_{jt}^{\mathrm{hum}} = \sum_{u<t} I_{ju}^{\ast}\, g^{\mathrm{hum}}(t-u),
+\qquad
+\Lambda_{jt}^{\mathrm{env}} = \sum_{u<t} I_{ju}^{\ast}\, g^{\mathrm{env}}_{ju}(t-u),
+(\#eq:route-infectiousness)
 \end{equation}
-We combine the latent period $\iota$ and the two infectious periods (symptomatic $I_1$ and asymptomatic $I_2$) with removal rates $\gamma_1$ and $\gamma_2$. Because only a proportion $\sigma$ of new infections become symptomatic, the mean infectious period of a randomly chosen case is the weighted harmonic mean of the two class-specific durations.
+and each generation-interval profile sums to one over a cohort's lifetime, so each $R$ is secondary infections per infection **if conditions stayed as they are at $t$** (Cori's instantaneous reproduction number). The sum is exact: it equals the Cori estimate under a mixture kernel whose route weights are $R^{\mathrm{hum}}_{jt}/R^{\mathrm{cori}}_{jt}$ and $R^{\mathrm{env}}_{jt}/R^{\mathrm{cori}}_{jt}$, so the route shares may change over time (they move with $\psi_{jt}$ and season), which a single mixed kernel with fixed weights cannot represent.
+
+### Route generation-interval kernels
+
+Both kernels are **derived from the engine's own daily transitions**, not approximated by moment matching. A cohort infected on day $u$ progresses from $E$ with daily probability $p_\iota = 1-e^{-\iota}$, becomes symptomatic with probability $\sigma$, and leaves $I_1$ ($I_2$) with daily probability $p_1 = 1-e^{-\gamma_1}$ ($p_2 = 1-e^{-\gamma_2}$). Write $P^{s}_k$, $P^{a}_k$ for the probability of being in $I_1$, $I_2$ on day $u+k$.
+
+**Human route.** Symptomatic and asymptomatic people enter the human force of infection (Eq. \@ref(eq:foi-human)) with equal weight, and people infectious on day $m$ drive infections recorded on day $m+1$, so
 \begin{equation}
-\gamma_{\mathrm{eff}}
-  = \left[\,\tfrac{\sigma}{\gamma_{1}} + \tfrac{1-\sigma}{\gamma_{2}}\right]^{-1}
-(\#eq:gamma-eff)
+g^{\mathrm{hum}}(k+1) = \frac{P^{s}_k + P^{a}_k}{D_{\mathrm{hum}}},
+\qquad D_{\mathrm{hum}} = \sum_k \bigl(P^{s}_k + P^{a}_k\bigr) = \frac{\sigma}{p_1} + \frac{1-\sigma}{p_2}.
+(\#eq:gen-time-human)
 \end{equation}
-Under these assumptions the we approximate $\mathcal{G}$ with a Gamma distribution and derive its first two moments as
+Its mean is the latent period plus the **transmission-weighted** mean infectious age,
 \begin{equation}
-\mathbb{E}[\mathcal{G}] \;=\; \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}}
-\qquad \text{and} \qquad
-\mathbb{V}[\mathcal{G}] \;=\; \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}}.
+\mathbb{E}[g^{\mathrm{hum}}] \approx \frac{1}{\iota} + \frac{\sigma/\gamma_1^{2} + (1-\sigma)/\gamma_2^{2}}{\sigma/\gamma_1 + (1-\sigma)/\gamma_2}
+\quad(\text{continuous-time limit}),
 (\#eq:generation-time-moments)
 \end{equation}
-Where the shape ($s$) and rate ($r$) parameters that match these moments are
+which is longer than the latent period plus the mean infectious *duration* $1/\gamma_{\mathrm{eff}}$ (Eq. \@ref(eq:gamma-eff)): an infectious class contributes transmission in proportion to its duration, so long infections carry more of it. The mean duration is the right quantity for total infectious person-time (as in \(R_{0,j}\)) but **not** for the timing of transmission.
+
+**Environmental route.** Infectious people shed into the reservoir in proportion to $\zeta_1 P^{s}_k + \zeta_2 P^{a}_k$ (the WASH factor $1-\theta_j$ and the absolute shedding scale cancel on normalisation), cells survive with the $\psi$-dependent daily decay $\delta_{jt}$ (Eq. \@ref(eq:delta)), and the reservoir on day $n$ drives infections recorded on day $n+1$. Because $\delta_{jt}$ varies in time, the instantaneous estimate needs care: the reservoir present at $t-1$ is built from the **actual past** decay path, while one infection's lifetime reservoir contribution is valued at **today's** decay rate, as Cori's "if conditions stayed as they are at $t$" requires:
 \begin{equation}
-s = \frac{\mathbb{E}[\mathcal{G}]^{2}}{\mathbb{V}[\mathcal{G}]}
-\qquad \text{and} \qquad
-r = \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]}.
-(\#eq:gamma-shape-rate)
+\Lambda_{jt}^{\mathrm{env}} = \widehat{W}_{j,t-1}\,\frac{\delta_{jt}}{S_w},
+\qquad
+\widehat{W}_{j,t} = \widehat{W}_{j,t-1}\,(1-\delta_{jt}) + \sum_{u<t} I^{\ast}_{ju}\bigl(w_1 P^{s}_{t-1-u} + w_2 P^{a}_{t-1-u}\bigr),
+\qquad
+S_w = \sum_{k\ge1}\bigl(w_1 P^{s}_k + w_2 P^{a}_k\bigr),
+\qquad w_i = \frac{\zeta_i}{\zeta_1+\zeta_2},
+(\#eq:gen-time-env)
 \end{equation}
-The resulting $\mathrm{Gamma}(s,r)$ kernel gives the $g(\Delta t)$ function which is tabulated at each daily time-step and employed in the renewal equation for the effective reproductive number $R_{jt}$ in Equation \@ref(eq:R). 
-
-Because $s$ and $r$ depend solely on $\iota,\,\gamma_{1},\,\gamma_{2}$, and $\sigma$, they update automatically across each sample of the model parameter space, ensuring coherence between the transmission timing in the generation time distribution and the model's epidemiological parameters.
-
-In practice we tabulate the renewal kernel as a Gamma distribution with mean equal to the prior-mean generation interval (approximately 5 days under the default $\iota, \gamma_1, \gamma_2, \sigma$ values) and rate fixed at $1/10$. With these conventions, `get_generation_time_distribution()` in MOSAIC-pkg sets the shape parameter as $\text{mean}/10$:
-\begin{equation}
-g(\cdot) \sim \text{Gamma}(\text{shape} = 0.5,\ \text{rate} = 0.1).
-(\#eq:generation-time)
-\end{equation}
-This yields a kernel with mean $\text{shape}/\text{rate} \approx 5$ days and variance $\text{shape}/\text{rate}^2 \approx 50$ days$^2$, allowing substantial mass at short delays consistent with cholera's rapid transmission. Previous cholera modelling studies have adopted similar mean values around 5 days; means of 3, 7, or 10 days have also been used in the literature (Azman 2012).
-
-
-### Generation-time distribution (latent + infectious + environmental delay)
-
-For applications that emphasise **environment-to-human transmission** we adopt a
-minimal analytic extension of the latent-plus-infectious heuristic:
-
+where $\widehat{W}$ is the reservoir (in normalised shedding units) implied by past incidence, $S_w$ one infection's expected total shedding, and $S_w/\delta_{jt}$ its lifetime cell-days at today's decay. Nothing after $t$ enters, so truncating the series (e.g. at a forecast cut-off) does not change earlier values; at constant $\delta$ Eq. \@ref(eq:gen-time-env) reduces to the convolution in Eq. \@ref(eq:route-infectiousness). Decay rates above one (possible when `decay_days_short` $<1$ day) are capped at one, as the engine clamps decay to the reservoir. Because the lifetime is valued at today's decay, $R^{\mathrm{env}}_{jt}$ moves with the day's $\delta_{jt}$: when suitability jumps and survival lengthens sharply, $R^{\mathrm{env}}_{jt}$ jumps with it (it answers what one infection would cause if the new conditions held), and per-member peak statistics pick up these switches. At constant decay $\delta$ the mean environmental interval is approximately
 \[
-\mathcal{G}=L+T+E ,
+\mathbb{E}[g^{\mathrm{env}}] \approx \frac{1}{\iota} + \frac{w_1\sigma/\gamma_1^{2} + w_2(1-\sigma)/\gamma_2^{2}}{w_1\sigma/\gamma_1 + w_2(1-\sigma)/\gamma_2} + \frac{1}{\delta},
 \]
-
-where  
-
-* \(L\sim\mathrm{Exp}(\iota)\) is the **latent (incubation) period**;  
-* \(T\) is the waiting time from onset of infectiousness to a potential secondary case **within the host**, modelled as exponential with *effective* removal rate  
-  \[
-  \gamma_{\mathrm{eff}}
-    =\Bigl[\tfrac{\sigma}{\gamma_{1}}+\tfrac{1-\sigma}{\gamma_{2}}\Bigr]^{-1};
-  \]
-* \(E\sim\mathrm{Exp}(\delta_{jt})\) is an **environmental delay** that captures the survival of *V.* *cholerae* in water at location \(j\) and day \(t\); the decay rate \(\delta_{jt}\) is given by Eq. \@ref(eq:delta) and varies with the suitability index \(\psi_{jt}\).
-
-Assuming independence of the three exponential clocks, the first two moments are
-
-\[
-\mathbb{E}[\mathcal{G}]
-   = \frac{1}{\iota} + \frac{1}{\gamma_{\mathrm{eff}}} + \frac{1}{\delta_{jt}}
-\qquad\text{and}\qquad
-\mathbb{V}[\mathcal{G}]
-   = \frac{1}{\iota^{2}} + \frac{1}{\gamma_{\mathrm{eff}}^{2}} + \frac{1}{\delta_{jt}^{2}}.
-\]
-
-Moment–matching to a Gamma distribution \(\text{Gamma}(s_{jt},r_{jt})\) yields
-
-\[
-s_{jt} \;=\; \frac{\bigl(\mathbb{E}[\mathcal{G}]\bigr)^{2}}{\mathbb{V}[\mathcal{G}]}
-\quad\text{and}\quad
-r_{jt} \;=\; \frac{\mathbb{E}[\mathcal{G}]}{\mathbb{V}[\mathcal{G}]},
-\]
-
-so both **shape** \(s_{jt}\) and **rate** \(r_{jt}\) evolve in time and space
-through \(\delta_{jt}\).  
-When suitability is **high** \((\psi_{jt}\!\to\!1 \;\Rightarrow\; \delta_{jt}\!\to\!\delta_{\min})\) the extra
-delay lengthens the mean generation interval and can inflate \(R_{jt}\);
-when suitability is **low** the term \(1/\delta_{jt}\) shrinks towards zero and the kernel converges to the purely human-to-human specification.
-
-> **Interpretation.**  
-> This formulation assumes that *every* successful transmission is mediated
-> by an environmental survival step; direct person-to-person contacts are
-> implicitly folded into \(\gamma_{\mathrm{eff}}\).
-> Empirically, it therefore provides an **upper-bound** on the true mean
-> generation time when waterborne spread dominates, and only a mild
-> adjustment (≤ ≈ 2 d) when \(\psi_{jt}\) is low.
-
-The daily table \(g_{jt}(\Delta t)\) derived from \(\text{Gamma}(s_{jt},r_{jt})\)
-is passed to the *parametric* renewal equation, enabling
-location-specific, time-varying estimates of the effective reproductive number.
-
-
-
-
-
+so the survival term $1/\delta_{jt}$ (from `decay_days_short` $\approx 16$ d at low suitability to `decay_days_long` $\approx 200$ d at high suitability) dominates: environmental generation intervals are tens to hundreds of days, against roughly a week for the human route. A single human-timed kernel applied to waterborne transmission therefore compresses $R$ strongly toward 1: the same growth rate implies a much larger $R$ under a long generation interval. (The survival bound used here, `decay_days_long` $=200$ d in the default configuration, is the value sampled around; the $R_{0,j}$ section's worst case of 196 d is the modal upper bound of the same prior.)
 
 <div class="figure" style="text-align: center">
-<img src="figures/generation_time.png" alt="Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$." width="95%" />
-<p class="caption">(\#fig:generation-time)Daily probability mass function of the cholera generation time, modeled as a Gamma distribution (shape = 0.5, rate = 0.1; mean ≈ 5 days). Blue bars give per-day probabilities, the solid red line marks the mean, and dashed red lines bound the 95 % credible intervals used to weight past infections when computing the time-varying reproductive number $R_{jt}$.</p>
+<img src="figures/generation_time_routes.png" alt="Route generation-interval kernels at the default timing parameters. Orange: human-to-human route. Teal and blue: environmental route at fast decay (low suitability, 1/decay\_days\_short) and slow decay (high suitability, 1/decay\_days\_long). Vertical lines mark each kernel mean. The square-root probability axis keeps the long environmental tail visible." width="95%" />
+<p class="caption">(\#fig:generation-time)Route generation-interval kernels at the default timing parameters. Orange: human-to-human route. Teal and blue: environmental route at fast decay (low suitability, 1/decay\_days\_short) and slow decay (high suitability, 1/decay\_days\_long). Vertical lines mark each kernel mean. The square-root probability axis keeps the long environmental tail visible.</p>
 </div>
+
+### Initial conditions and interpretation
+
+People already latent or infectious when the simulation starts cause infections that no recorded incidence explains. They are real sources of transmission, so their stocks ($E$, $I_1$, $I_2$ on the first day) are propagated through the same kernels and included in $\Lambda^{\mathrm{hum}}_{jt}$ and $\Lambda^{\mathrm{env}}_{jt}$; the engine starts with an empty reservoir, so they reach it only by shedding (the reservoir on the first recorded day already holds one day of it), and the recursion in Eq. \@ref(eq:gen-time-env) carries these initial terms alongside the incidence terms. Values in roughly the first $1/\delta$ days nevertheless describe a start from no history: the reservoir fills from empty while the dose-response is still near-linear, so $R^{\mathrm{env}}_{jt}$ is high at first and falls as the reservoir builds up. They should be read after a burn-in (`add_reproductive_numbers()` masks one, by default the calibration's `burn_in_days` or 30 days).
+
+Three caveats apply to the reported values:
+
+* $R_{jt}^{\mathrm{cori}}$ is computed on **simulated** incidence, so it describes the model trajectory (and is comparable to a surveillance-derived Cori estimate computed the same way). It is not a first-principles invasion threshold.
+* The renewal equation assumes transmission is linear in infectiousness. The human force of infection uses $I^{\alpha_1}$ with $\alpha_1\approx0.27$, so $R^{\mathrm{hum}}_{jt} \propto S_{jt}\,I_{jt}^{\alpha_1-1}/N_{jt}^{\alpha_2}$: it *rises* as prevalence falls (about sevenfold for a tenfold drop in prevalence) and peaks in inter-epidemic troughs, so it must not be compared across prevalence levels. The environmental dose saturates when $W/N$ approaches $\kappa$, which genuinely lowers $R^{\mathrm{env}}_{jt}$ during large outbreaks. Both route values are therefore trajectory descriptors, not per-contact constants.
+* Infectiousness imported through mobility ($\tau_i\pi_{ij}$) is not in $\Lambda_{jt}$ (and residents' travel away is not removed from it); the estimate uses local incidence only, so in importation-driven patches $R^{\mathrm{hum}}_{jt}$ credits visitors' transmission to local infectiousness.
+
+The pipeline reports $R^{\mathrm{hum}}_{jt}$, $R^{\mathrm{env}}_{jt}$ and their sum through `calc_Reff()` and `add_reproductive_numbers()` in MOSAIC-pkg (the latter also re-simulates the posterior members for a credible interval and a per-member peak statistic).
+
+> **Legacy kernel.** `get_generation_time_distribution()` in MOSAIC-pkg still tabulates a *fixed* $\mathrm{Gamma}(\text{shape}=0.5,\ \text{rate}=0.1)$ kernel (mean $\approx 5$ days) for the model-input tables:
+> \begin{equation}
+> g(\cdot) \sim \text{Gamma}(\text{shape} = 0.5,\ \text{rate} = 0.1).
+> (\#eq:generation-time)
+> \end{equation}
+> It is not derived from the model's parameters and is not used for $R_{jt}^{\mathrm{cori}}$. Earlier MOSAIC versions computed $R_{jt}^{\mathrm{cori}}$ with a single moment-matched Gamma kernel of mean $1/\iota + 1/\gamma_{\mathrm{eff}}$ applied to total incidence; that kernel omitted the environmental survival delay and used the mean infectious duration rather than the transmission-weighted mean infectious age, which pulled $R_{jt}^{\mathrm{cori}}$ toward $1$ wherever waterborne transmission dominates.
 
 
 
 ## Initial conditions
 
-The first MOSAIC version begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
+The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. The initial-condition priors are seeded at a data-driven epoch $t_0$ within the first year of the simulation window, the month in which the most countries report active cases (1 February 2023 for the default configuration). Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
 
 ### Vaccinated initial conditions ($V_1, V_2$)
 
@@ -2139,7 +2189,13 @@ with shape parameters $(s_1, s_2)$ derived per country (e.g. for Mozambique the 
 
 ### Susceptible and recovered initial conditions ($S, R$)
 
-The proportion in $R$ at $t = 0$ is derived from the cumulative reported cholera incidence over the years preceding 1 January 2023, scaled by $1/\sigma$ to back out the total number of true infections, then adjusted by the natural-immunity waning rate $\varepsilon$ to give the surviving immune fraction at $t = 0$. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
+The proportion in $R$ at $t = 0$ is derived from the cumulative reported cholera incidence in the WHO annual record over the years preceding $t_0$ (spread over each year with the location's seasonal pattern), converted to true infections through the same observation process the engine uses (Equation \@ref(eq:reported-cases)),
+
+$$
+\text{infections} \;=\; \text{reported cases} \times \frac{\chi^{\text{end}}}{\rho\,\sigma},
+$$
+
+then adjusted by the natural-immunity waning rate $\varepsilon$ (applied from the end of each infection) to give the surviving immune fraction at $t = 0$. Each Monte Carlo draw samples $\rho$, $\chi^{\text{end}}$, $\sigma$, $\varepsilon$ and the recovery and incubation rates from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
 
 The proportion in $S$ is then derived as the residual once the other five proportions have been placed:
 
@@ -2151,7 +2207,13 @@ and the resulting per-country values are fit to a Beta prior. Across the 40 MOSA
 
 ### Exposed and infected initial conditions ($E, I_1, I_2$)
 
-The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported case count in the weeks leading up to 1 January 2023, scaled by the observation pipeline (Equation \@ref(eq:reported-cases)) to back out the true infectious population. The $E$ and $I$ priors are placed on the log scale with relatively wide support to reflect the substantial uncertainty in the immediate pre-start state. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ using the symptomatic proportion $\sigma$.
+The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported cases in a short window before $t_0$ (three days by default) by inverting the observation pipeline (Equation \@ref(eq:reported-cases)): a case reported on day $d$ is a symptomatic onset on day $d - l_{\text{cases}}$, and all onsets, symptomatic and asymptomatic, number $\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)$. With $\lambda_j$ the resulting mean daily onset rate over the window,
+
+$$
+E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
+$$
+
+the exposed stock in balance with that onset rate under the engine's daily progression probability $1 - e^{-\iota}$ (a reported case has already left $E$, so $E$ is not built from the reports themselves). $I_j$ is the sum of the onsets that have not yet recovered by $t_0$, each surviving with daily probability $e^{-\gamma_1}$ for the symptomatic share $\sigma$ and $e^{-\gamma_2}$ for the rest; onsets the window cannot see (those in the last $l_{\text{cases}}$ days, reported on or after $t_0$, and those older than the window) are filled in at the same rate $\lambda_j$. Each Monte Carlo draw samples $\sigma$, $\iota$, $\gamma_1$, $\gamma_2$, $\rho$, $\chi^{\text{end}}$ and $l_{\text{cases}}$ from their priors. The Beta prior for each country keeps the Monte Carlo mean $m$ and is given a 95% interval of approximately $[m/10,\ 10m]$ on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times; countries whose window reports no cases receive a near-zero template prior. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ by a binomial draw with the symptomatic proportion $\sigma$ as the probability.
 
 After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country's $t = 0$ population.
 
@@ -2218,87 +2280,94 @@ Table: (\#tab:mosaic-table)List of MOSAIC Countries with Cholera News
 
 
 
-|Parameter                 |Description                                                                                                                                                                                                                       |Distribution                                          |Source                                                                        |
-|:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------|:-----------------------------------------------------------------------------|
-|$i$                       |Index representing the origin metapopulation.                                                                                                                                                                                     |                                                      |                                                                              |
-|$j$                       |Index representing the destination metapopulation.                                                                                                                                                                                |                                                      |                                                                              |
-|$t$                       |Time step (one week).                                                                                                                                                                                                             |                                                      |                                                                              |
-|$b_{jt}$                  |Birth rate of population $j$.                                                                                                                                                                                                     |                                                      |[UN World Population Prospects](https://population.un.org/wpp/)               |
-|$d_{jt}$                  |Mortality rate of population $j$.                                                                                                                                                                                                 |                                                      |[UN World Population Prospects](https://population.un.org/wpp/)               |
-|$N_{jt}$                  |Population size of destination $j$ at time $t$.                                                                                                                                                                                   |                                                      |                                                                              |
-|$S_{jt}$                  |Number of susceptible individuals in destination $j$ at time $t$.                                                                                                                                                                 |                                                      |                                                                              |
-|$V_{1,jt}$                |Number of individuals with one-dose vaccination in destination $j$ at time $t$.                                                                                                                                                   |                                                      |                                                                              |
-|$V_{2,jt}$                |Number of individuals with two-dose vaccination in destination $j$ at time $t$.                                                                                                                                                   |                                                      |                                                                              |
-|$I_{1,jt}$                |Number of symptomatic infected individuals in destination $j$ at time $t$.                                                                                                                                                        |                                                      |                                                                              |
-|$I_{2,jt}$                |Number of asymptomatic infected individuals in destination $j$ at time $t$.                                                                                                                                                       |                                                      |                                                                              |
-|$W_{jt}$                  |Amount of *V. cholerae* in the environment in destination $j$ at time $t$.                                                                                                                                                        |                                                      |                                                                              |
-|$R_{jt}$                  |Number of recovered (immune) individuals in destination $j$ at time $t$.                                                                                                                                                          |                                                      |                                                                              |
-|$\Lambda_{j,t+1}$         |Human-to-human force of infection in destination $j$ at time $t+1$.                                                                                                                                                               |                                                      |                                                                              |
-|$\Psi_{j,t+1}$            |Environment-to-human force of infection in destination $j$ at time $t+1$.                                                                                                                                                         |                                                      |                                                                              |
-|$\iota$                   |The incubation period of cholera infection                                                                                                                                                                                        |$1.4 \ \text{days} \ (1.3–1.6 \ 95\% \text{CI})$      |[Azman et al 2013](http://www.sciencedirect.com/science/article/pii/S0163445312003477)|
-|$\phi_1$                  |Vaccine effectiveness of one-dose OCV.                                                                                                                                                                                            |                                                      |                                                                              |
-|$\phi_2$                  |Vaccine effectiveness of two-dose OCV.                                                                                                                                                                                            |                                                      |                                                                              |
-|$\nu_{jt}$                |Total OCV vaccination rate in destination $j$ at time $t$. In MOSAIC v1.0 this is split into separate first-dose ($\nu_{1,jt}$) and second-dose ($\nu_{2,jt}$) rates --- see the supplementary parameter table below for details. |                                                      |                                                                              |
-|$\omega_1$                |Waning immunity rate of vaccinated individuals with one-dose OCV.                                                                                                                                                                 |                                                      |                                                                              |
-|$\omega_2$                |Waning immunity rate of vaccinated individuals with two-dose OCV.                                                                                                                                                                 |                                                      |                                                                              |
-|$\varepsilon$             |Waning immunity rate of recovered individuals.                                                                                                                                                                                    |                                                      |                                                                              |
-|$\gamma_1$                |Recovery rate of symptomatic infected individuals.                                                                                                                                                                                |                                                      |                                                                              |
-|$\gamma_2$                |Recovery rate of asymptomatic infected individuals.                                                                                                                                                                               |                                                      |                                                                              |
-|$\mu_{j,t}$               |Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}$ (see the *Case fatality rate* subsection).                                  |                                                      |                                                                              |
-|$\sigma$                  |Proportion of infections that are symptomatic.                                                                                                                                                                                    |                                                      |                                                                              |
-|$\rho$                    |Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.                                                                                                                                      |                                                      |                                                                              |
-|$\zeta_1$                 |Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.                                                                                                                                 |$\text{Lognormal}(25.65, 2.46)$                       |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
-|$\zeta_2$                 |Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as $\zeta_1/\zeta_{\text{ratio}}$.                                                                                    |Derived from $\zeta_1$ and $\zeta_{\text{ratio}}$     |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a> |
-|$\delta$                  |Environmental decay rate of *V. cholerae*.                                                                                                                                                                                        |Determined dynamically in model based on $\psi_{jt}$. |                                                                              |
-|$\delta_{\text{min}}$     |Minimum decay rate (longest *V. cholerae* survival), reached at $\psi_{jt}=1$; equals $1/\text{days}_{\text{long}}$.                                                                                                              |$\approx 0.0051 \ (196 \ \text{days})$                |                                                                              |
-|$\delta_{\text{max}}$     |Maximum decay rate (shortest *V. cholerae* survival), reached at $\psi_{jt}=0$; equals $1/\text{days}_{\text{short}}$.                                                                                                            |$\approx 0.063 \ (16 \ \text{days})$                  |                                                                              |
-|$\psi_{jt}$               |Environmental suitability of *V. cholerae* in destination $j$ at time $t$.                                                                                                                                                        |Estimated by LSTM-RNN model.                          |                                                                              |
-|$\beta_{j0}^{\text{hum}}$ |Baseline human-to-human transmission rate in destination $j$.                                                                                                                                                                     |                                                      |                                                                              |
-|$\beta_{jt}^{\text{hum}}$ |Seasonal human-to-human transmission rate in destination $j$ at time $t$.                                                                                                                                                         |                                                      |                                                                              |
-|$\beta_{j0}^{\text{env}}$ |Baseline environment-to-human transmission rate in destination $j$.                                                                                                                                                               |                                                      |                                                                              |
-|$\beta_{jt}^{\text{env}}$ |Environment-to-human transmission rate in destination $j$ at time $t$.                                                                                                                                                            |                                                      |                                                                              |
-|$a_1$                     |First Fourier cosine coefficient for seasonality.                                                                                                                                                                                 |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$b_1$                     |First Fourier sine coefficient for seasonality.                                                                                                                                                                                   |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$a_2$                     |Second Fourier cosine coefficient for seasonality.                                                                                                                                                                                |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$b_2$                     |Second Fourier sine coefficient for seasonality.                                                                                                                                                                                  |See Table \@ref(tab:seasonal-table).                  |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)|
-|$p$                       |Period of the seasonal cycle (set to days).                                                                                                                                                                                       |$365$                                                 |                                                                              |
-|$\alpha_1$                |Exponent on infectious individuals in the force of infection numerator.                                                                                                                                                           |$0.95$                                                |[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)|
-|$\alpha_2$                |Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence.                                                                                                            |$0.95$                                                |[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)              |
-|$\tau_i$                  |Probability an individual departs from origin $i$.                                                                                                                                                                                |                                                      |                                                                              |
-|$\pi_{ij}$                |Probability of travel from origin $i$ to destination $j$ given departure.                                                                                                                                                         |                                                      |                                                                              |
-|$\theta_{j}$              |Proportion with adequate WASH in destination $j$.                                                                                                                                                                                 |See Figure \@ref(fig:wash-country).                   |[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)                  |
-|$\kappa$                  |Number of *V. cholerae* cells required for 50% per-contact infection probability. In MOSAIC v1.0 expressed in absolute cells (matching the units of $W$); see [Infectious dose ($\kappa$)](#infectious-dose-kappa).               |$\text{Lognormal}(11.77, 1.82)$                       |Meta-analysis (see *Infectious dose* subsection)                              |
+|Parameter                 |Description                                                                                                                                                                                                                                                                                                                                                    |Distribution                                                                                                                                             |Source                                                                                                                                                        |
+|:-------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|$i$                       |Index representing the origin metapopulation.                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                         |                                                                                                                                                              |
+|$j$                       |Index representing the destination metapopulation.                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |                                                                                                                                                              |
+|$t$                       |Time step (one day).                                                                                                                                                                                                                                                                                                                                           |                                                                                                                                                         |                                                                                                                                                              |
+|$b_{jt}$                  |Birth rate of population $j$.                                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                         |[UN World Population Prospects](https://population.un.org/wpp/)                                                                                               |
+|$d_{jt}$                  |Mortality rate of population $j$.                                                                                                                                                                                                                                                                                                                              |                                                                                                                                                         |[UN World Population Prospects](https://population.un.org/wpp/)                                                                                               |
+|$N_{jt}$                  |Population size of destination $j$ at time $t$.                                                                                                                                                                                                                                                                                                                |                                                                                                                                                         |                                                                                                                                                              |
+|$S_{jt}$                  |Number of susceptible individuals in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                              |                                                                                                                                                         |                                                                                                                                                              |
+|$V_{1,jt}$                |Number of individuals with one-dose vaccination in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                |                                                                                                                                                         |                                                                                                                                                              |
+|$V_{2,jt}$                |Number of individuals with two-dose vaccination in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                |                                                                                                                                                         |                                                                                                                                                              |
+|$E_{jt}$                  |Number of exposed (infected, not yet infectious) individuals in destination $j$ at time $t$.                                                                                                                                                                                                                                                                   |                                                                                                                                                         |                                                                                                                                                              |
+|$I_{1,jt}$                |Number of symptomatic infected individuals in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                     |                                                                                                                                                         |                                                                                                                                                              |
+|$I_{2,jt}$                |Number of asymptomatic infected individuals in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                    |                                                                                                                                                         |                                                                                                                                                              |
+|$W_{jt}$                  |Amount of *V. cholerae* in the environment in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                     |                                                                                                                                                         |                                                                                                                                                              |
+|$R_{jt}$                  |Number of recovered (immune) individuals in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                       |                                                                                                                                                         |                                                                                                                                                              |
+|$\Lambda_{j,t+1}$         |Human-to-human force of infection in destination $j$ at time $t+1$.                                                                                                                                                                                                                                                                                            |                                                                                                                                                         |                                                                                                                                                              |
+|$\Psi_{j,t+1}$            |Environment-to-human force of infection in destination $j$ at time $t+1$.                                                                                                                                                                                                                                                                                      |                                                                                                                                                         |                                                                                                                                                              |
+|$\iota$                   |Incubation rate of cholera infection (reciprocal of the mean incubation period), per day.                                                                                                                                                                                                                                                                      |$\text{Lognormal}(-0.337, 0.4)$ $\text{day}^{-1}$ (median period $\approx 1.4$ days; 95% CI $\approx 0.64$--$3.1$ days)                                  |[Azman et al 2013](http://www.sciencedirect.com/science/article/pii/S0163445312003477)                                                                        |
+|$\phi_1$                  |Vaccine effectiveness of one-dose OCV.                                                                                                                                                                                                                                                                                                                         |                                                                                                                                                         |                                                                                                                                                              |
+|$\phi_2$                  |Vaccine effectiveness of two-dose OCV.                                                                                                                                                                                                                                                                                                                         |                                                                                                                                                         |                                                                                                                                                              |
+|$\nu_{jt}$                |Total OCV doses delivered per day in destination $j$ at time $t$ (shipped doses spread at a maximum daily rate). The engine takes first-dose ($\nu_{1,jt}$) and second-dose ($\nu_{2,jt}$) rates; the default configuration routes all doses to $\nu_{1,jt}$ --- see the supplementary parameter table below.                                                  |                                                                                                                                                         |                                                                                                                                                              |
+|$\omega_1$                |Waning immunity rate of vaccinated individuals with one-dose OCV.                                                                                                                                                                                                                                                                                              |                                                                                                                                                         |                                                                                                                                                              |
+|$\omega_2$                |Waning immunity rate of vaccinated individuals with two-dose OCV.                                                                                                                                                                                                                                                                                              |                                                                                                                                                         |                                                                                                                                                              |
+|$\varepsilon$             |Waning immunity rate of recovered individuals.                                                                                                                                                                                                                                                                                                                 |                                                                                                                                                         |                                                                                                                                                              |
+|$\gamma_1$                |Recovery rate of symptomatic infected individuals.                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |                                                                                                                                                              |
+|$\gamma_2$                |Recovery rate of asymptomatic infected individuals.                                                                                                                                                                                                                                                                                                            |                                                                                                                                                         |                                                                                                                                                              |
+|$\mu_{jt}$                |Reported case fatality ratio in destination $j$ on day $t$: expected reported deaths per reported suspected case. Converted to the per-onset fatality probability $p^{\text{fatal}}_{jt}$ (see the *Case fatality rate* subsection).                                                                                                                           |Prior centre $\mu^{0}_{jt}$ from the WHO-annual hierarchical GAM (Eq. \@ref(eq:cfr-gam)); integrated out of the deaths likelihood (Eq. \@ref(eq:mu-jt)). |WHO annual cholera record 1970 onward ([Our World in Data](https://ourworldindata.org/grapher/number-reported-cases-of-cholera), [WHO Weekly Epidemiological Record](https://www.who.int/publications/journals/weekly-epidemiological-record), [WHO Global Cholera and AWD Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/)); `est_CFR_hierarchical()`.|
+|$\sigma$                  |Proportion of infections that are symptomatic.                                                                                                                                                                                                                                                                                                                 |                                                                                                                                                         |                                                                                                                                                              |
+|$\rho$                    |Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.                                                                                                                                                                                                                                                                   |                                                                                                                                                         |                                                                                                                                                              |
+|$\zeta_1$                 |Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.                                                                                                                                                                                                                                                              |$\text{Lognormal}(25.65, 2.46)$                                                                                                                          |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>                                                                                 |
+|$\zeta_2$                 |Shedding rate (cells per asymptomatic person per day) of *V. cholerae* by asymptomatic individuals; derived as $\zeta_1/\zeta_{\text{ratio}}$.                                                                                                                                                                                                                 |Derived from $\zeta_1$ and $\zeta_{\text{ratio}}$                                                                                                        |<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>                                                                                 |
+|$\delta$                  |Environmental decay rate of *V. cholerae*.                                                                                                                                                                                                                                                                                                                     |Determined dynamically in model based on $\psi_{jt}$.                                                                                                    |                                                                                                                                                              |
+|$\delta_{\text{min}}$     |Minimum decay rate (longest *V. cholerae* survival), reached at $\psi_{jt}=1$; equals $1/\text{days}_{\text{long}}$.                                                                                                                                                                                                                                           |$\approx 0.0051 \ (196 \ \text{days})$                                                                                                                   |                                                                                                                                                              |
+|$\delta_{\text{max}}$     |Maximum decay rate (shortest *V. cholerae* survival), reached at $\psi_{jt}=0$; equals $1/\text{days}_{\text{short}}$.                                                                                                                                                                                                                                         |$\approx 0.063 \ (16 \ \text{days})$                                                                                                                     |                                                                                                                                                              |
+|$\psi_{jt}$               |Environmental suitability of *V. cholerae* in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                     |Estimated by LSTM-RNN model.                                                                                                                             |                                                                                                                                                              |
+|$\beta_{j0}^{\text{hum}}$ |Baseline human-to-human transmission rate in destination $j$ (derived: $p_\beta\,\beta_{j0}^{\text{tot}}$).                                                                                                                                                                                                                                                    |                                                                                                                                                         |                                                                                                                                                              |
+|$\beta_{jt}^{\text{hum}}$ |Seasonal human-to-human transmission rate in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                      |                                                                                                                                                         |                                                                                                                                                              |
+|$\beta_{j0}^{\text{env}}$ |Baseline environment-to-human transmission rate in destination $j$ (derived: $(1-p_\beta)\,\beta_{j0}^{\text{tot}}$).                                                                                                                                                                                                                                          |                                                                                                                                                         |                                                                                                                                                              |
+|$\beta_{jt}^{\text{env}}$ |Environment-to-human transmission rate in destination $j$ at time $t$.                                                                                                                                                                                                                                                                                         |                                                                                                                                                         |                                                                                                                                                              |
+|$\beta_{j0}^{\text{tot}}$ |Total baseline transmission rate in destination $j$; sampled in calibration, with $\beta_{j0}^{\text{hum}} = p_\beta\,\beta_{j0}^{\text{tot}}$ and $\beta_{j0}^{\text{env}} = (1-p_\beta)\,\beta_{j0}^{\text{tot}}$ derived from it.                                                                                                                           |Per-country $\text{Lognormal}$ (default median $2 \times 10^{-5}$, sdlog 1.17; recentred for countries with calibration evidence).                       |`priors_default` (`beta_j0_tot`).                                                                                                                             |
+|$p_\beta$                 |Proportion of the total baseline transmission rate that is human-to-human in destination $j$.                                                                                                                                                                                                                                                                  |$\text{Beta}(7.03, 13.24)$ (mode 0.33, 95% interval $\approx 0.1$--$0.5$) per location.                                                                  |`priors_default` (`p_beta`).                                                                                                                                  |
+|$a_1$                     |First Fourier cosine coefficient for seasonality.                                                                                                                                                                                                                                                                                                              |See Table \@ref(tab:seasonal-table).                                                                                                                     |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)                                                               |
+|$b_1$                     |First Fourier sine coefficient for seasonality.                                                                                                                                                                                                                                                                                                                |See Table \@ref(tab:seasonal-table).                                                                                                                     |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)                                                               |
+|$a_2$                     |Second Fourier cosine coefficient for seasonality.                                                                                                                                                                                                                                                                                                             |See Table \@ref(tab:seasonal-table).                                                                                                                     |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)                                                               |
+|$b_2$                     |Second Fourier sine coefficient for seasonality.                                                                                                                                                                                                                                                                                                               |See Table \@ref(tab:seasonal-table).                                                                                                                     |[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)                                                               |
+|$p$                       |Period of the seasonal cycle (set to days).                                                                                                                                                                                                                                                                                                                    |$365$                                                                                                                                                    |                                                                                                                                                              |
+|$\alpha_1$                |Exponent on infectious individuals in the force of infection numerator. Dual-mode: a single global scalar (broadcast to all metapopulations) or a per-location vector applied elementwise per patch (pinned at 0.27 by default, `sample_alpha_1 = FALSE`; a shared per-location prior $\text{Beta}(28.4, 71.6)$ is available for mixing-exponent experiments). |Pinned at $0.27$; prior $\text{Beta}(28.4, 71.6)$ per location if sampled.                                                                               |[Glass et al 2003](https://www.sciencedirect.com/science/article/abs/pii/S0022519303000316)                                                                   |
+|$\alpha_2$                |Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. A single global scalar, pinned at 0.5 by default (`sample_alpha_2 = FALSE`).                                                                                                                                                            |$0.50$                                                                                                                                                   |[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)                                                                                              |
+|$\tau_i$                  |Probability an individual departs from origin $i$.                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |                                                                                                                                                              |
+|$\pi_{ij}$                |Probability of travel from origin $i$ to destination $j$ given departure.                                                                                                                                                                                                                                                                                      |                                                                                                                                                         |                                                                                                                                                              |
+|$\omega^{\text{mob}}$     |Gravity-model exponent on destination population size (Eq. \@ref(eq:gravity)).                                                                                                                                                                                                                                                                                 |$\text{Gamma}(2.25, 2)$ (mode $0.627$)                                                                                                                   |Gravity fit to the fused origin-destination matrix.                                                                                                           |
+|$\gamma^{\text{mob}}$     |Gravity-model distance-decay exponent (Eq. \@ref(eq:gravity)).                                                                                                                                                                                                                                                                                                 |$\text{Gamma}(4.80, 2)$ (mode $1.900$)                                                                                                                   |Gravity fit to the fused origin-destination matrix.                                                                                                           |
+|$\theta_{j}$              |Proportion with adequate WASH in destination $j$.                                                                                                                                                                                                                                                                                                              |See Figure \@ref(fig:wash-country).                                                                                                                      |[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)                                                                                                  |
+|$\kappa$                  |Half-saturation constant of the environmental dose-response, applied to the per-capita load $W_{jt}/N_{jt}$ (cells per resident); anchored on volunteer ID$_{50}$ data. See [Infectious dose ($\kappa$)](#infectious-dose-kappa).                                                                                                                              |Pinned at $10^6$ by default; prior $\text{Lognormal}(11.77, 1.82)$ for sensitivity runs.                                                                 |Meta-analysis (see *Infectious dose* subsection)                                                                                                              |
 
 
 
 Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC v1.0.
 
-|Parameter                     |Description                                                                                                                                                                        |Distribution                                                    |Source                                                                                                                                                     |
-|:-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|
-|$\nu_{1,jt}$                  |First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.                                                                                               |Derived from GTFCC OCV campaign data.                           |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                                                                                     |
-|$\nu_{2,jt}$                  |Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.                                                                              |Derived from GTFCC OCV campaign data.                           |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)                                                                                     |
-|$\mathcal{V}^{\text{src}}$    |Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$).                                                                                       |Default: $\{S, E, I_1, I_2, R\}$.                               |laser-cholera issue #42.                                                                                                                                   |
-|$N^{\text{src}}_{jt}$         |Total population eligible for first-dose vaccination on day $t$: $\sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$.                                                                   |Computed.                                                       |Computed from compartment populations.                                                                                                                     |
-|$\zeta_{\text{ratio}}$        |Symptomatic-to-asymptomatic shedding ratio $\zeta_1/\zeta_2$.                                                                                                                      |$\text{Lognormal}(4.31, 4.39)$                                  |Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.)                                                                           |
-|$\text{days}_{\text{short}}$  |Survival time of *V. cholerae* at low environmental suitability ($\psi_{jt}\!\to\!0$).                                                                                             |$\text{Truncnorm}(16, 7, 0.01, 60)$                             |Literature anchor; staged calibration.                                                                                                                     |
-|$\text{days}_{\text{long}}$   |Survival time at high environmental suitability ($\psi_{jt}\!\to\!1$). Derived as $\text{days}_{\text{short}} + \text{days}_{\text{spread}}$.                                      |Derived.                                                        |Algebraic.                                                                                                                                                 |
-|$\text{days}_{\text{spread}}$ |Algebraic spread between minimum and maximum *V. cholerae* survival time.                                                                                                          |$\text{Truncnorm}(180, 95, 1, 365)$                             |Literature anchor; staged calibration.                                                                                                                     |
-|$s_1, s_2$                    |Shape parameters of the cumulative Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$ for the decay rate.                                                   |$\text{Truncnorm}(3, 5, 0.1, 10)$ each                          |Bayesian regularisation (v0.26).                                                                                                                           |
-|$\psi^{\ast}_{jt}$            |Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection). |Computed (Eq. \@ref(eq:psi-star)).                              |Computed (per-country logit calibration).                                                                                                                  |
-|$a_{\psi^{\ast},j}$           |Per-country shape/gain parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                                 |$\text{Truncnorm}(1, 1, 0, \infty)$                             |Per-country posterior (calibration).                                                                                                                       |
-|$b_{\psi^{\ast},j}$           |Per-country scale/offset parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                               |$\mathcal{N}(0, 2.5)$                                           |Per-country posterior (calibration).                                                                                                                       |
-|$z_{\psi^{\ast},j}$           |Per-country EWMA smoothing weight ($z = 1$: no smoothing).                                                                                                                         |$\text{Beta}(2, 1)$                                             |Per-country posterior; Beta(2,1) tightening from v0.28.5.                                                                                                  |
-|$k_{\psi^{\ast},j}$           |Per-country time offset in days for the $\psi \to \psi^{\ast}$ calibration.                                                                                                        |$\text{Truncnorm}(0, 25, -90, 90)$                              |Per-country posterior (calibration).                                                                                                                       |
-|$\eta_j$                      |Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).                                                                                               |$\text{Truncnorm}$ per country, capped at 0.01.                 |Per-country historical median epidemic prevalence.                                                                                                         |
-|$\chi^{\text{end}}$           |Positive predictive value of a suspected cholera case during endemic periods.                                                                                                      |$\text{Beta}(5.43, 5.01)$                                       |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)                                                        |
-|$\chi^{\text{epi}}$           |Positive predictive value of a suspected cholera case during epidemic periods.                                                                                                     |$\text{Beta}(4.79, 1.53)$                                       |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)                                                        |
-|$\rho_{\text{deaths}}$        |Probability that a true cholera death is captured by surveillance.                                                                                                                 |$\text{Beta}(36.95, 51.02)$                                     |SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.                                                                                   |
-|$l_{\text{cases}}$            |Reporting lag in days from symptom onset to case reporting.                                                                                                                        |$\text{Truncnorm}(1, 1.5, 0, 7)$ days                           |Surveillance reporting practice.                                                                                                                           |
-|$l_{\text{deaths}}$           |Reporting lag in days from a true cholera death event to its appearance in surveillance reports (symptom-onset-to-death is implicit in $\gamma_1^{-1}$).                           |$\text{Truncnorm}(4, 3, 1, 14)$ days                            |Surveillance reporting practice.                                                                                                                           |
-|$\mu_{j,0}$                   |Baseline daily mortality hazard $\mu_{j,0}$ in destination $j$.                                                                                                                    |$\text{Gamma}$ per country (e.g., AGO: $\text{Gamma}(4, 173)$). |Derived from reported CFR via $\mu_{j,0} = \text{CFR}^{\text{reported}}_j \cdot \rho / (\rho_{\text{deaths}} \cdot \chi)$ (laser-cholera v0.13+ identity). |
-|$\mu_{j,1}$                   |Proportional time-trend factor for $\mu_{j,t}$ over the simulation period.                                                                                                         |$\mathcal{N}(0, 0.05)$                                          |Weakly informative.                                                                                                                                        |
-|$\mu_{j,\text{epi}}$          |Proportional increase in $\mu_{j,t}$ during epidemic periods.                                                                                                                      |$\text{Gamma}(1, 2)$                                            |Reflects typical surge-period IFR increase.                                                                                                                |
-|$w_{\text{gibbs}}$            |Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter).                                                                                   |Calibration control parameter.                                  |[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)                                                                                                  |
+|Parameter                     |Description                                                                                                                                                                        |Distribution                                                                                                     |Source                                                                           |
+|:-----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|
+|$\nu_{1,jt}$                  |First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.                                                                                               |All shipped doses, $\nu_{jt}$ (GTFCC and WHO ICG campaign data).                                                 |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)           |
+|$\nu_{2,jt}$                  |Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients. Zero in the default configuration (no round-level data).                     |$0$ in the default configuration.                                                                                |[GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc)           |
+|$\mathcal{V}^{\text{src}}$    |Set of compartments eligible for first-dose vaccination (subset of $\{S, E, I_1, I_2, R\}$).                                                                                       |Default: $\{S, E, I_1, I_2, R\}$.                                                                                |laser-cholera issue #42.                                                         |
+|$N^{\text{src}}_{jt}$         |Total population eligible for first-dose vaccination on day $t$: $\sum_{X \in \mathcal{V}^{\text{src}}} X_{jt}$.                                                                   |Computed.                                                                                                        |Computed from compartment populations.                                           |
+|$\zeta_{\text{ratio}}$        |Symptomatic-to-asymptomatic shedding ratio $\zeta_1/\zeta_2$.                                                                                                                      |$\text{Lognormal}(4.31, 4.39)$ truncated to $[1, \infty)$                                                        |Literature meta-analysis (Smith 2026, Nelson 2009, Chao 2011, Finger 2018, etc.) |
+|$\text{days}_{\text{short}}$  |Survival time of *V. cholerae* at low environmental suitability ($\psi_{jt}\!\to\!0$).                                                                                             |$\text{Truncnorm}(16, 7, 0.01, 60)$                                                                              |Literature anchor; staged calibration.                                           |
+|$\text{days}_{\text{long}}$   |Survival time at high environmental suitability ($\psi_{jt}\!\to\!1$). Derived as $\text{days}_{\text{short}} + \text{days}_{\text{spread}}$.                                      |Derived.                                                                                                         |Algebraic.                                                                       |
+|$\text{days}_{\text{spread}}$ |Algebraic spread between minimum and maximum *V. cholerae* survival time.                                                                                                          |$\text{Truncnorm}(180, 95, 1, 365)$                                                                              |Literature anchor; staged calibration.                                           |
+|$s_1, s_2$                    |Shape parameters of the cumulative Beta transformation $f(\psi_{jt}) = \text{pbeta}(\psi_{jt}\mid s_1, s_2)$ for the decay rate.                                                   |$\text{Truncnorm}(3, 5, 0.1, 10)$ each                                                                           |Bayesian regularisation (v0.26).                                                 |
+|$\psi^{\ast}_{jt}$            |Calibrated (EWMA-smoothed, logit-affine, time-shifted) environmental suitability used in the FOI and decay rate (see the *Calibration of suitability to surveillance* subsection). |Computed (Eq. \@ref(eq:psi-star)).                                                                               |Computed (per-country logit calibration).                                        |
+|$a_{\psi^{\ast},j}$           |Per-country shape/gain parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                                 |$\text{Truncnorm}(1, 1, 0, \infty)$                                                                              |Per-country posterior (calibration).                                             |
+|$b_{\psi^{\ast},j}$           |Per-country scale/offset parameter for the $\psi \to \psi^{\ast}$ logit calibration.                                                                                               |$\mathcal{N}(1, 2.5)$                                                                                            |Per-country posterior (calibration).                                             |
+|$z_{\psi^{\ast},j}$           |Per-country EWMA smoothing weight ($z = 1$: no smoothing).                                                                                                                         |$\text{Beta}(2, 1)$                                                                                              |Per-country posterior; Beta(2,1) tightening from v0.28.5.                        |
+|$k_{\psi^{\ast},j}$           |Per-country time offset in days for the $\psi \to \psi^{\ast}$ calibration.                                                                                                        |$\text{Truncnorm}(0, 25, -90, 90)$                                                                               |Per-country posterior (calibration).                                             |
+|$\eta_j$                      |Per-country daily symptomatic-prevalence threshold for the epidemic regime (Isym/N).                                                                                               |$\text{Truncnorm}$ per country, capped at 0.01.                                                                  |Per-country historical median epidemic prevalence.                               |
+|$\chi^{\text{end}}$           |Positive predictive value of a suspected cholera case during endemic periods.                                                                                                      |$\text{Beta}(5.43, 5.01)$                                                                                        |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)|
+|$\chi^{\text{epi}}$           |Positive predictive value of a suspected cholera case during epidemic periods.                                                                                                     |$\text{Beta}(4.79, 1.53)$                                                                                        |[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)|
+|$\rho_{\text{deaths}}$        |Probability that a true cholera death is captured by surveillance.                                                                                                                 |Pinned at 0.42; prior $\text{Beta}(36.95, 51.02)$ retained for sensitivity runs.                                 |SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.         |
+|$l_{\text{cases}}$            |Reporting lag in days from symptom onset to case reporting; deaths are reported on the same lag.                                                                                   |$\text{Truncnorm}(1, 1.5, 0, 7)$ days                                                                            |Surveillance reporting practice.                                                 |
+|$p^{\text{fatal}}_{jt}$       |Probability that a symptomatic onset is fatal (decided at onset; fatal onsets never enter $I_1$).                                                                                  |Derived: $\mu_{jt}\,\rho / (\rho_{\text{deaths}}\,\chi^{\text{epi}})$ (Eq. \@ref(eq:p-fatal)).                   |Engine (MOSAIC-pkg v0.96.0).                                                     |
+|$\mu^{0}_{jt}$                |Prior centre of the reported CFR (`config$mu_jt`): WHO-annual GAM centres interpolated on the logit scale between 1 July anchors.                                                  |Computed (Eq. \@ref(eq:cfr-gam)).                                                                                |`est_CFR_hierarchical()`, `make_mu_jt()`.                                        |
+|$\xi_j$                       |Location offset of the reported CFR on the logit scale; integrated out of the deaths likelihood.                                                                                   |$\mathcal{N}(0,\ \text{sd}_{\text{product}}^2 + \overline{\text{se}^2_{j}})$, $\text{sd}_{\text{product}} = 0.3$ |`priors_default` `mu_jt` block.                                                  |
+|$e_{j,\text{yr}}$             |Calendar-year deviation of the reported CFR on the logit scale, blended across each 1 January; integrated out of the deaths likelihood.                                            |$\mathcal{N}(0,\ 0.70^2)$; forecast years $\mathcal{N}(\bar{e}_j,\ 0.70^2)$                                      |GAM country-year SD (`priors_default` `mu_jt$sd_year`).                          |
+|$\bar{e}_j$                   |Forecast shift: the ensemble's weighted mean deviation for the latest observed year, which centres every forecast year.                                                            |Computed after calibration.                                                                                      |Posterior ensemble (MOSAIC-pkg v0.99.0).                                         |
+|$\varphi_j$                   |Quasi-Poisson dispersion of weekly observed deaths in location $j$.                                                                                                                |Estimated from observed deaths and cases; $\ge 1$.                                                               |Observed surveillance.                                                           |
+|$w_{\text{gibbs}}$            |Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter).                                                                                   |Calibration control parameter.                                                                                   |[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)                        |
 
 
 
@@ -2310,52 +2379,52 @@ Table: (\#tab:params)Parameters added or substantially reparameterised in MOSAIC
 
 
 
-|Term                                                 |Description                                                                                                          |Stochastic.Transition                                                                                                                                                                                                     |
-|:----------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|**$\mathbf{S}$ (susceptible)**                       |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ b_{jt} N_{jt}$                                    |New individuals entering the susceptible class from births.                                                          |$\text{Pois}\big( N_{jt}b_{jt} \big)$                                                                                                                                                                                     |
-|$+ \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                                          |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
-|$+ \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                                                 |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
-|$+ \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                                                 |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
-|$- \phi_1 \nu_{1,jt} S_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $S$ for $V_1$.                                                                         |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot S_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \Lambda_{j,t+1}$                                  |Human-to-human force of infection on the susceptible class.                                                          |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{hum}} ((1-\tau_{j})(I_{1,jt}+I_{2,jt}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_i(I_{1,it}+I_{2,it})))^{\alpha_1} / N_{jt}^{\alpha_2}}\big)\Big)$ |
-|$- \Psi_{j,t+1}$                                     |Environment-to-human force of infection on the susceptible class.                                                    |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{env}} (1-\theta_j) W_{jt} / (\kappa+W_{jt})}\big)\Big)$                                                                                           |
-|$- d_{jt} S_{jt}$                                    |Background death among susceptible individuals.                                                                      |$\text{Binom}\big( S_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
-|**$\mathbf{V_1}$ (one-dose OCV)**                    |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \phi_1 \nu_{1,jt}$                                |Effective first doses entering $V_1$ from all source compartments.                                                   |$\text{round}\!\big( \phi_1 \nu_{1,jt} \big)$                                                                                                                                                                             |
-|$- \phi_2 \nu_{2,jt}$                                |Effective second doses leaving $V_1$ for $V_2$.                                                                      |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
-|$- \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                                                 |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
-|$- d_{jt} V_{1,jt}$                                  |Background death among one-dose vaccinated individuals.                                                              |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{V_2}$ (two-dose OCV)**                    |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \phi_2 \nu_{2,jt}$                                |Effective second doses entering $V_2$ from $V_1$.                                                                    |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
-|$- \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                                                 |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
-|$- d_{jt} V_{2,jt}$                                  |Background death among two-dose vaccinated individuals.                                                              |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{E}$ (exposed)**                           |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \Lambda_{j,t+1} + \Psi_{j,t+1}$                   |Total force of infection on the susceptible class entering the exposed class.                                        |$\Lambda_{j,t+1} + \Psi_{j,t+1}$                                                                                                                                                                                          |
-|$- \phi_1 \nu_{1,jt} E_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $E$ for $V_1$.                                                                         |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot E_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \iota E_{jt}$                                     |Progression of exposed individuals to the infectious class.                                                          |$\text{Binom}\big( E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                                      |
-|$- d_{jt} E_{jt}$                                    |Background death among exposed individuals.                                                                          |$\text{Binom}\big( E_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
-|**$\mathbf{I_1}$ (symptomatic)**                     |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \sigma\,\iota\,E_{jt}$                            |Exposed individuals progressing to symptomatic infection.                                                            |$\text{Binom}\big( \sigma E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                               |
-|$- \phi_1 \nu_{1,jt} I_{1,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_1$ for $V_1$.                                                                       |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{1,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
-|$- \gamma_1 I_{1,jt}$                                |Recovery from symptomatic infection.                                                                                 |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
-|$- \mu_{j,t} I_{1,jt}$                               |Cholera-attributable mortality among symptomatic individuals (dynamic IFR; see the *Case fatality rate* subsection). |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\mu_{j,t}) \big)$                                                                                                                                                                |
-|$- d_{jt} I_{1,jt}$                                  |Background death among individuals with symptomatic infection.                                                       |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{I_2}$ (asymptomatic)**                    |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ (1-\sigma)\,\iota\,E_{jt}$                        |Exposed individuals progressing to asymptomatic infection.                                                           |$\text{Binom}\big( (1-\sigma) E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                           |
-|$- \phi_1 \nu_{1,jt} I_{2,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_2$ for $V_1$.                                                                       |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{2,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
-|$- \gamma_2 I_{2,jt}$                                |Recovery from asymptomatic infection.                                                                                |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
-|$- d_{jt} I_{2,jt}$                                  |Background death among individuals with asymptomatic infection.                                                      |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
-|**$\mathbf{W}$ (environment)**                       |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \zeta_1 I_{1,jt}$                                 |Cells shed into the environment by symptomatic individuals.                                                          |$(1-\theta_j)\,\text{Pois}\big( \zeta_1 I_{1,jt} \big)$                                                                                                                                                                   |
-|$+ \zeta_2 I_{2,jt}$                                 |Cells shed into the environment by asymptomatic individuals.                                                         |$(1-\theta_j)\,\text{Pois}\big( \zeta_2 I_{2,jt} \big)$                                                                                                                                                                   |
-|$- \delta_{jt} W_{jt}$                               |Decay of viable *V. cholerae* in the environment.                                                                    |$\text{Pois}\big( \delta_{jt} W_{jt} \big)$                                                                                                                                                                               |
-|**$\mathbf{R}$ (recovered)**                         |                                                                                                                     |                                                                                                                                                                                                                          |
-|$+ \gamma_1 I_{1,jt}$                                |Recovery of individuals with symptomatic infection.                                                                  |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
-|$+ \gamma_2 I_{2,jt}$                                |Recovery of individuals with asymptomatic infection.                                                                 |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
-|$- \phi_1 \nu_{1,jt} R_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $R$ for $V_1$.                                                                         |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot R_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
-|$- \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                                          |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
-|$- d_{jt} R_{jt}$                                    |Background death among recovered individuals.                                                                        |$\text{Binom}\big( R_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
+|Term                                                 |Description                                                                                                                   |Stochastic.Transition                                                                                                                                                                                                     |
+|:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|**$\mathbf{S}$ (susceptible)**                       |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ b_{jt} N_{jt}$                                    |New individuals entering the susceptible class from births.                                                                   |$\text{Pois}\big( N_{jt}b_{jt} \big)$                                                                                                                                                                                     |
+|$+ \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                                                   |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
+|$+ \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                                                          |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
+|$+ \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                                                          |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
+|$- \phi_1 \nu_{1,jt} S_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $S$ for $V_1$.                                                                                  |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot S_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
+|$- \Lambda_{j,t+1}$                                  |Human-to-human force of infection on the susceptible class.                                                                   |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{hum}} ((1-\tau_{j})(I_{1,jt}+I_{2,jt}) + \sum_{\forall i \not= j} (\pi_{ij}\tau_i(I_{1,it}+I_{2,it})))^{\alpha_1} / N_{jt}^{\alpha_2}}\big)\Big)$ |
+|$- \Psi_{j,t+1}$                                     |Environment-to-human force of infection on the susceptible class.                                                             |$\text{Binom}\Big((1-\tau_{j})S_{jt},\ 1 - \exp\big({-\beta_{jt}^{\text{env}} (1-\theta_j) (W_{jt}/N_{jt}) / (\kappa+W_{jt}/N_{jt})}\big)\Big)$                                                                           |
+|$- d_{jt} S_{jt}$                                    |Background death among susceptible individuals.                                                                               |$\text{Binom}\big( S_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
+|**$\mathbf{V_1}$ (one-dose OCV)**                    |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \phi_1 \nu_{1,jt}$                                |Effective first doses entering $V_1$ from all source compartments.                                                            |$\text{round}\!\big( \phi_1 \nu_{1,jt} \big)$                                                                                                                                                                             |
+|$- \phi_2 \nu_{2,jt}$                                |Effective second doses leaving $V_1$ for $V_2$.                                                                               |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
+|$- \omega_1 V_{1,jt}$                                |Waning of one-dose vaccine immunity (return to $S$).                                                                          |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-\omega_1) \big)$                                                                                                                                                                 |
+|$- d_{jt} V_{1,jt}$                                  |Background death among one-dose vaccinated individuals.                                                                       |$\text{Binom}\big( V_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
+|**$\mathbf{V_2}$ (two-dose OCV)**                    |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \phi_2 \nu_{2,jt}$                                |Effective second doses entering $V_2$ from $V_1$.                                                                             |$\text{round}\!\big( \phi_2 \nu_{2,jt} \big)$                                                                                                                                                                             |
+|$- \omega_2 V_{2,jt}$                                |Waning of two-dose vaccine immunity (return to $S$).                                                                          |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-\omega_2) \big)$                                                                                                                                                                 |
+|$- d_{jt} V_{2,jt}$                                  |Background death among two-dose vaccinated individuals.                                                                       |$\text{Binom}\big( V_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
+|**$\mathbf{E}$ (exposed)**                           |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \Lambda_{j,t+1} + \Psi_{j,t+1}$                   |Total force of infection on the susceptible class entering the exposed class.                                                 |$\Lambda_{j,t+1} + \Psi_{j,t+1}$                                                                                                                                                                                          |
+|$- \phi_1 \nu_{1,jt} E_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $E$ for $V_1$.                                                                                  |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot E_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
+|$- \iota E_{jt}$                                     |Progression of exposed individuals to the infectious class.                                                                   |$\text{Binom}\big( E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                                      |
+|$- d_{jt} E_{jt}$                                    |Background death among exposed individuals.                                                                                   |$\text{Binom}\big( E_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
+|**$\mathbf{I_1}$ (symptomatic)**                     |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \sigma\,\iota\,E_{jt}$                            |Exposed individuals progressing to symptomatic infection.                                                                     |$\text{Binom}\big( \sigma E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                               |
+|$- p^{\text{fatal}}_{jt}\,\sigma\,\iota\,E_{jt}$     |Fatal symptomatic onsets: cholera deaths decided at onset, which never enter $I_1$ (see the *Case fatality rate* subsection). |$\text{Binom}\big( \text{symptomatic onsets},\; p^{\text{fatal}}_{jt} \big)$                                                                                                                                              |
+|$- \phi_1 \nu_{1,jt} I_{1,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_1$ for $V_1$.                                                                                |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{1,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
+|$- \gamma_1 I_{1,jt}$                                |Recovery from symptomatic infection.                                                                                          |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
+|$- d_{jt} I_{1,jt}$                                  |Background death among individuals with symptomatic infection.                                                                |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
+|**$\mathbf{I_2}$ (asymptomatic)**                    |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ (1-\sigma)\,\iota\,E_{jt}$                        |Exposed individuals progressing to asymptomatic infection.                                                                    |$\text{Binom}\big( (1-\sigma) E_{jt},\; 1 - \exp(-\iota) \big)$                                                                                                                                                           |
+|$- \phi_1 \nu_{1,jt} I_{2,jt} / N^{\text{src}}_{jt}$ |Effective first doses leaving $I_2$ for $V_1$.                                                                                |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot I_{2,jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                        |
+|$- \gamma_2 I_{2,jt}$                                |Recovery from asymptomatic infection.                                                                                         |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
+|$- d_{jt} I_{2,jt}$                                  |Background death among individuals with asymptomatic infection.                                                               |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                   |
+|**$\mathbf{W}$ (environment)**                       |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \zeta_1 I_{1,jt}$                                 |Cells shed into the environment by symptomatic individuals.                                                                   |$(1-\theta_j)\,\text{Pois}\big( \zeta_1 I_{1,jt} \big)$                                                                                                                                                                   |
+|$+ \zeta_2 I_{2,jt}$                                 |Cells shed into the environment by asymptomatic individuals.                                                                  |$(1-\theta_j)\,\text{Pois}\big( \zeta_2 I_{2,jt} \big)$                                                                                                                                                                   |
+|$- \delta_{jt} W_{jt}$                               |Decay of viable *V. cholerae* in the environment.                                                                             |$\text{Pois}\big( \delta_{jt} W_{jt} \big)$                                                                                                                                                                               |
+|**$\mathbf{R}$ (recovered)**                         |                                                                                                                              |                                                                                                                                                                                                                          |
+|$+ \gamma_1 I_{1,jt}$                                |Recovery of individuals with symptomatic infection.                                                                           |$\text{Binom}\big( I_{1,jt},\; 1 - \exp(-\gamma_1) \big)$                                                                                                                                                                 |
+|$+ \gamma_2 I_{2,jt}$                                |Recovery of individuals with asymptomatic infection.                                                                          |$\text{Binom}\big( I_{2,jt},\; 1 - \exp(-\gamma_2) \big)$                                                                                                                                                                 |
+|$- \phi_1 \nu_{1,jt} R_{jt} / N^{\text{src}}_{jt}$   |Effective first doses leaving $R$ for $V_1$.                                                                                  |$\text{round}\!\big( \phi_1 \nu_{1,jt} \cdot R_{jt} / N^{\text{src}}_{jt} \big)$                                                                                                                                          |
+|$- \varepsilon R_{jt}$                               |Loss of immunity for recovered individuals.                                                                                   |$\text{Binom}\big( R_{jt},\; 1 - \exp(-\varepsilon) \big)$                                                                                                                                                                |
+|$- d_{jt} R_{jt}$                                    |Background death among recovered individuals.                                                                                 |$\text{Binom}\big( R_{jt},\; 1 - \exp(-d_{jt}) \big)$                                                                                                                                                                     |
 
 
 
