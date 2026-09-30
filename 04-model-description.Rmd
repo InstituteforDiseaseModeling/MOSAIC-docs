@@ -708,18 +708,18 @@ We use a normalized formulation of the power law gravity model to defined the di
 
 \begin{equation}
 \pi_{ij} = \frac{
-N_j^\omega d_{ij}^{-\gamma}
+N_j^{\omega^{\text{mob}}} d_{ij}^{-\gamma^{\text{mob}}}
 }{
-\sum\limits_{\forall j \ne i} N_j^\omega d_{ij}^{-\gamma}
+\sum\limits_{\forall j \ne i} N_j^{\omega^{\text{mob}}} d_{ij}^{-\gamma^{\text{mob}}}
 }
 (\#eq:gravity)
 \end{equation}
 
-Where, $\omega$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. We fit $\omega$ and $\gamma$ to the fused origin-destination matrix described above, which gives $\hat\omega = 0.627$ and $\hat\gamma = 1.900$ (the values in the default configuration). In calibration both are sampled from Gamma priors with rate 2 whose modes equal the fitted values:
+Where, $\omega^{\text{mob}}$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma^{\text{mob}}}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. (The superscript distinguishes these gravity-model exponents, code-names `mobility_omega` and `mobility_gamma`, from the vaccine waning rates $\omega_1, \omega_2$ and the recovery rates $\gamma_1, \gamma_2$.) We fit $\omega^{\text{mob}}$ and $\gamma^{\text{mob}}$ to the fused origin-destination matrix described above, which gives $\hat\omega^{\text{mob}} = 0.627$ and $\hat\gamma^{\text{mob}} = 1.900$ (the values in the default configuration). In calibration both are sampled from Gamma priors with rate 2 whose modes equal the fitted values:
 $$
 \begin{aligned}
-\omega &\sim \text{Gamma}(2.25, 2)\\
-\gamma &\sim \text{Gamma}(4.80, 2)
+\omega^{\text{mob}} &\sim \text{Gamma}(2.25, 2)\\
+\gamma^{\text{mob}} &\sim \text{Gamma}(4.80, 2)
 \end{aligned} 
 $$
 
@@ -823,27 +823,27 @@ df <- data.frame(
                   0.787,       # Jackson et al (2013)
                   0.796,       # Bart et al (1970)
                   0.629,       # Bart et al (1970)
-                  1-0.184,     # Harris et al (2008)
+                  1-0.629,     # Harris et al (2008): 127 of 202 culture-confirmed infections symptomatic
                   1-0.0005996  # Hegde et al (2023)
      ),
      ci_lo    = c(NA,          # Nelson et al (2009)
                   0,           # Lueng and Matrajt (2021)
-                  0.4,         # Harris et al (2012)
+                  0.8,         # Harris et al (2012)
                   0.75,        # Finger et al (2024)
                   0.769,       # Jackson et al (2013)
                   NA,          # Bart et al (1970)
                   NA,          # Bart et al (1970)
-                  1-0.256,     # Harris et al (2008)
+                  1-0.558,     # Harris et al (2008): exact binomial 95% CI
                   1-0.0004998  # Hegde et al (2023)
      ),
      ci_hi    = c(NA,          # Nelson et al (2009)
                   0.75,        # Lueng and Matrajt (2021)
-                  0.8,         # Harris et al (2012)
+                  0.4,         # Harris et al (2012)
                   0.773,       # Finger et al (2024)
                   0.806,       # Jackson et al (2013)
                   NA,          # Bart et al (1970)
                   NA,          # Bart et al (1970)
-                  1-0.112,     # Harris et al (2008)
+                  1-0.695,     # Harris et al (2008): exact binomial 95% CI
                   1-0.0007994  # Hegde et al (2023)
      ),
      source   = c("[Nelson et al (2009)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3842031/)",           # Nelson et al (2009)
@@ -883,7 +883,7 @@ df <- data.frame(
                   "Cross-sectional sero-survey",                # Jackson et al (2013)
                   "Sero-survey during epidemic; El Tor Ogawa strain",      # Bart et al (1970)
                   "Sero-survey during epidemic; Inaba strain",         # Bart et al (1970)
-                  "Household cohort; mean of all age groups",    # Harris et al (2008)
+                  "Household cohort; culture-confirmed infections",    # Harris et al (2008)
                   "Sero-survey and clinical data"               # Hegde et al (2023)
      )
 )
@@ -1069,7 +1069,10 @@ The table and figures below summarise the observed WHO AFRO reported CFR from 20
 
 library(kableExtra)
 
-cholera_data_recent <- read.csv(file.path(getwd(), "tables/case_fatality_ratio_2014_2026.csv"), stringsAsFactors = FALSE)
+# process_CFR_data() names the file for its last complete year; read the latest.
+cfr_files <- list.files(file.path(getwd(), "tables"), pattern = "^case_fatality_ratio_2014_[0-9]{4}\\.csv$", full.names = TRUE)
+cfr_file <- cfr_files[which.max(as.integer(sub(".*_([0-9]{4})\\.csv$", "\\1", cfr_files)))]
+cholera_data_recent <- read.csv(cfr_file, stringsAsFactors = FALSE)
 
 filtered_data <- cholera_data_recent[!is.na(cholera_data_recent$cases_total), ]
 
@@ -1087,7 +1090,7 @@ kableExtra::kbl(cfr_table,
 ```
 
 
-```{r cfr-cases, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='100%', fig.cap='Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 onward (latest WHO surveillance data through the current year, including the partial-year snapshot). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.'}
+```{r cfr-cases, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='100%', fig.cap='Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Region from 2014 through the last complete calendar year (a year still in progress when its WHO dashboard snapshot was taken is excluded, because its deaths lag its cases). Panel A: Case Fatality Ratio (CFR) with 95% confidence intervals. Panel B: total number of cholera cases. The AFRO Region is highlighted in black; countries with fewer than 3/0.02 = 150 total reported cases are assigned the mean CFR for AFRO.'}
 knitr::include_graphics("figures/case_fatality_ratio_and_cases_total_by_country.png")
 ```
 
@@ -1475,13 +1478,14 @@ tbl <- data.frame(
      Parameter = c(
           "$i$",            # Parameter: i (origin metapopulation index)
           "$j$",            # Parameter: j (destination metapopulation index)
-          "$t$",            # Parameter: t (time step, one week)
+          "$t$",            # Parameter: t (time step, one day)
           "$b_{jt}$",          # Parameter: b_j (birth rate of population j)
           "$d_{jt}$",          # Parameter: d_j (mortality rate of population j)
           "$N_{jt}$",       # Parameter: N_{jt} (population size of destination j at time t)
           "$S_{jt}$",       # Parameter: S_{jt} (number of susceptibles in destination j at time t)
           "$V_{1,jt}$",     # Parameter: V_{1,jt} (individuals with one-dose vaccination in destination j at time t)
           "$V_{2,jt}$",     # Parameter: V_{2,jt} (individuals with two-dose vaccination in destination j at time t)
+          "$E_{jt}$",       # Parameter: E_{jt} (exposed individuals in destination j at time t)
           "$I_{1,jt}$",     # Parameter: I_{1,jt} (symptomatic infected individuals in destination j at time t)
           "$I_{2,jt}$",     # Parameter: I_{2,jt} (asymptomatic infected individuals in destination j at time t)
           "$W_{jt}$",       # Parameter: W_{jt} (amount of *V. cholerae* in the environment in destination j at time t)
@@ -1510,6 +1514,8 @@ tbl <- data.frame(
           "$\\beta_{jt}^{\\text{hum}}$",   # Parameter: beta_{jt}^{hum} (seasonal human-to-human transmission rate)
           "$\\beta_{j0}^{\\text{env}}$",   # Parameter: beta_{j0}^{env} (baseline environment-to-human transmission rate)
           "$\\beta_{jt}^{\\text{env}}$",    # Parameter: beta_{jt}^{env} (environment-to-human transmission rate at time t)
+          "$\\beta_{j0}^{\\text{tot}}$",    # Parameter: beta_{j0}^{tot} (total baseline transmission rate)
+          "$p_\\beta$",                     # Parameter: p_beta (human-to-human share of baseline transmission)
           "$a_1$",          # Parameter: a_1 (first Fourier cosine coefficient for seasonality)
           "$b_1$",          # Parameter: b_1 (first Fourier sine coefficient for seasonality)
           "$a_2$",          # Parameter: a_2 (second Fourier cosine coefficient for seasonality)
@@ -1519,26 +1525,29 @@ tbl <- data.frame(
           "$\\alpha_2$",    # Parameter: alpha_2 (exponent on population size in the denominator; 0 = density, 1 = frequency dependence)
           "$\\tau_i$",      # Parameter: tau_i (probability an individual departs from origin i)
           "$\\pi_{ij}$",    # Parameter: pi_{ij} (probability of travel from i to j given departure)
+          "$\\omega^{\\text{mob}}$",  # Parameter: mobility_omega (gravity-model population exponent)
+          "$\\gamma^{\\text{mob}}$",  # Parameter: mobility_gamma (gravity-model distance-decay exponent)
           "$\\theta_{j}$",  # Parameter: theta_j (proportion with adequate WASH in destination j)
           "$\\kappa$"       # Parameter: kappa (concentration of *V. cholerae* for 50% infection probability)
      ),
      Description = c(
           "Index representing the origin metapopulation.",                                  # i
           "Index representing the destination metapopulation.",                              # j
-          "Time step (one week).",                                                           # t
+          "Time step (one day).",                                                            # t
           "Birth rate of population $j$.",                                                   # b_j
           "Mortality rate of population $j$.",                                               # d_j
           "Population size of destination $j$ at time $t$.",                                 # N_{jt}
           "Number of susceptible individuals in destination $j$ at time $t$.",               # S_{jt}
           "Number of individuals with one-dose vaccination in destination $j$ at time $t$.",  # V_{1,jt}
           "Number of individuals with two-dose vaccination in destination $j$ at time $t$.",  # V_{2,jt}
+          "Number of exposed (infected, not yet infectious) individuals in destination $j$ at time $t$.",  # E_{jt}
           "Number of symptomatic infected individuals in destination $j$ at time $t$.",       # I_{1,jt}
           "Number of asymptomatic infected individuals in destination $j$ at time $t$.",       # I_{2,jt}
           "Amount of *V. cholerae* in the environment in destination $j$ at time $t$.",         # W_{jt}
           "Number of recovered (immune) individuals in destination $j$ at time $t$.",           # R_{jt}
           "Human-to-human force of infection in destination $j$ at time $t+1$.",                # Lambda_{j,t+1}
           "Environment-to-human force of infection in destination $j$ at time $t+1$.",          # Psi_{j,t+1}
-          "The incubation period of cholera infection",                                        # iota
+          "Incubation rate of cholera infection (reciprocal of the mean incubation period), per day.",  # iota
           "Vaccine effectiveness of one-dose OCV.",                                            # phi_1
           "Vaccine effectiveness of two-dose OCV.",                                            # phi_2
           "Total OCV doses delivered per day in destination $j$ at time $t$ (shipped doses spread at a maximum daily rate). The engine takes first-dose ($\\nu_{1,jt}$) and second-dose ($\\nu_{2,jt}$) rates; the default configuration routes all doses to $\\nu_{1,jt}$ --- see the supplementary parameter table below.",          # nu_{jt}
@@ -1556,19 +1565,23 @@ tbl <- data.frame(
           "Minimum decay rate (longest *V. cholerae* survival), reached at $\\psi_{jt}=1$; equals $1/\\text{days}_{\\text{long}}$.",                  # delta_min
           "Maximum decay rate (shortest *V. cholerae* survival), reached at $\\psi_{jt}=0$; equals $1/\\text{days}_{\\text{short}}$.",               # delta_max
           "Environmental suitability of *V. cholerae* in destination $j$ at time $t$.",         # psi_{jt}
-          "Baseline human-to-human transmission rate in destination $j$.",                     # beta_{j0}^{hum}
+          "Baseline human-to-human transmission rate in destination $j$ (derived: $p_\\beta\\,\\beta_{j0}^{\\text{tot}}$).",  # beta_{j0}^{hum}
           "Seasonal human-to-human transmission rate in destination $j$ at time $t$.",          # beta_{jt}^{hum}
-          "Baseline environment-to-human transmission rate in destination $j$.",               # beta_{j0}^{env}
+          "Baseline environment-to-human transmission rate in destination $j$ (derived: $(1-p_\\beta)\\,\\beta_{j0}^{\\text{tot}}$).",  # beta_{j0}^{env}
           "Environment-to-human transmission rate in destination $j$ at time $t$.",             # beta_{jt}^{env}
+          "Total baseline transmission rate in destination $j$; sampled in calibration, with $\\beta_{j0}^{\\text{hum}} = p_\\beta\\,\\beta_{j0}^{\\text{tot}}$ and $\\beta_{j0}^{\\text{env}} = (1-p_\\beta)\\,\\beta_{j0}^{\\text{tot}}$ derived from it.",  # beta_{j0}^{tot}
+          "Proportion of the total baseline transmission rate that is human-to-human in destination $j$.",  # p_beta
           "First Fourier cosine coefficient for seasonality.",                               # a_1
           "First Fourier sine coefficient for seasonality.",                                 # b_1
           "Second Fourier cosine coefficient for seasonality.",                              # a_2
           "Second Fourier sine coefficient for seasonality.",                                # b_2
           "Period of the seasonal cycle (set to days).",                                      # p
-          "Exponent on infectious individuals in the force of infection numerator. Dual-mode: a single global scalar (broadcast to all metapopulations) or a per-location vector applied elementwise per patch (calibrated per-location by default, with a shared informative prior).",  # alpha_1
+          "Exponent on infectious individuals in the force of infection numerator. Dual-mode: a single global scalar (broadcast to all metapopulations) or a per-location vector applied elementwise per patch (pinned at 0.27 by default, `sample_alpha_1 = FALSE`; a shared per-location prior $\\text{Beta}(28.4, 71.6)$ is available for mixing-exponent experiments).",  # alpha_1
           "Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. A single global scalar, pinned at 0.5 by default (`sample_alpha_2 = FALSE`).",  # alpha_2
           "Probability an individual departs from origin $i$.",                              # tau_i
           "Probability of travel from origin $i$ to destination $j$ given departure.",         # pi_{ij}
+          "Gravity-model exponent on destination population size (Eq. \\@ref(eq:gravity)).",  # mobility_omega
+          "Gravity-model distance-decay exponent (Eq. \\@ref(eq:gravity)).",  # mobility_gamma
           "Proportion with adequate WASH in destination $j$.",                               # theta_j
           "Half-saturation constant of the environmental dose-response, applied to the per-capita load $W_{jt}/N_{jt}$ (cells per resident); anchored on volunteer ID$_{50}$ data. See [Infectious dose ($\\kappa$)](#infectious-dose-kappa)."   # kappa
      ),
@@ -1582,13 +1595,14 @@ tbl <- data.frame(
           "",        # S_{jt}
           "",        # V_{1,jt}
           "",        # V_{2,jt}
+          "",        # E_{jt}
           "",        # I_{1,jt}
           "",        # I_{2,jt}
           "",        # W_{jt}
           "",        # R_{jt}
           "",        # Lambda_{j,t+1}
           "",        # Psi_{j,t+1}
-          "$1.4 \\ \\text{days} \\ (1.3–1.6 \\ 95\\% \\text{CI})$",  # iota
+          "$\\text{Lognormal}(-0.337, 0.4)$ $\\text{day}^{-1}$ (median period $\\approx 1.4$ days; 95% CI $\\approx 0.64$--$3.1$ days)",  # iota
           "",        # phi_1
           "",        # phi_2
           "",        # nu_{jt}
@@ -1610,15 +1624,19 @@ tbl <- data.frame(
           "",        # beta_{jt}^{hum}
           "",        # beta_{j0}^{env}
           "",        # beta_{jt}^{env}
+          "Per-country $\\text{Lognormal}$ (default median $2 \\times 10^{-5}$, sdlog 1.17; recentred for countries with calibration evidence).",  # beta_{j0}^{tot}
+          "$\\text{Beta}(7.03, 13.24)$ (mode 0.33, 95% interval $\\approx 0.1$--$0.5$) per location.",  # p_beta
           "See Table \\@ref(tab:seasonal-table).",  # a_1
           "See Table \\@ref(tab:seasonal-table).",  # b_1
           "See Table \\@ref(tab:seasonal-table).",  # a_2
           "See Table \\@ref(tab:seasonal-table).",  # b_2
           "$365$",   # p
-          "$0.27$",  # alpha_1
+          "Pinned at $0.27$; prior $\\text{Beta}(28.4, 71.6)$ per location if sampled.",  # alpha_1
           "$0.50$",  # alpha_2
           "",        # tau_i
           "",        # pi_{ij}
+          "$\\text{Gamma}(2.25, 2)$ (mode $0.627$)",  # mobility_omega
+          "$\\text{Gamma}(4.80, 2)$ (mode $1.900$)",  # mobility_gamma
           "See Figure \\@ref(fig:wash-country).",        # theta_j
           "Pinned at $10^6$ by default; prior $\\text{Lognormal}(11.77, 1.82)$ for sensitivity runs."  # kappa
      ),
@@ -1632,6 +1650,7 @@ tbl <- data.frame(
           "",        # S_{jt}
           "",        # V_{1,jt}
           "",        # V_{2,jt}
+          "",        # E_{jt}
           "",        # I_{1,jt}
           "",        # I_{2,jt}
           "",        # W_{jt}
@@ -1660,6 +1679,8 @@ tbl <- data.frame(
           "",        # beta_{jt}^{hum}
           "",        # beta_{j0}^{env}
           "",        # beta_{jt}^{env}
+          "`priors_default` (`beta_j0_tot`).",  # beta_{j0}^{tot}
+          "`priors_default` (`p_beta`).",  # p_beta
           "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # a_1
           "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # b_1
           "[Altizer et al 2006](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2005.00879.x)",  # a_2
@@ -1669,6 +1690,8 @@ tbl <- data.frame(
           "[McCallum et al 2001](https://pubmed.ncbi.nlm.nih.gov/11369107/)",  # alpha_2
           "",        # tau_i
           "",        # pi_{ij}
+          "Gravity fit to the fused origin-destination matrix.",  # mobility_omega
+          "Gravity fit to the fused origin-destination matrix.",  # mobility_gamma
           "[Sikder et al 2023](https://doi.org/10.1021/acs.est.3c01317)",        # theta_j
           "Meta-analysis (see *Infectious dose* subsection)"   # kappa
      )
