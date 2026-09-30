@@ -55,10 +55,9 @@ E_{jt}
 - d_{jt}\,E_{jt}\\[3mm]
 I_{1,j,t+1} = \ &
 I_{1,jt}
-+ \sigma\,\iota\,E_{jt}
++ \big(1 - p^{\text{fatal}}_{jt}\big)\,\sigma\,\iota\,E_{jt}
 - \frac{\phi_1\,\nu_{1,jt}\,I_{1,jt}}{N^{\text{src}}_{jt}}
 - \gamma_1\,I_{1,jt}
-- \mu_{j,t}\,I_{1,jt}
 - d_{jt}\,I_{1,jt}\\[3mm]
 I_{2,j,t+1} = \ &
 I_{2,jt}
@@ -905,7 +904,7 @@ knitr::include_graphics("figures/proportion_symptomatic.png")
 
 ### Suspected cases, reported cases, and deaths
 
-The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence in the model -- the daily inflow $\sigma\,\iota\,E_{jt}$ of newly symptomatic infections (the inflow term in the $I_1$ dynamics). We resolve this with a two-stage observation model. In the *care-seeking* stage, each incident symptomatic infection is independently presented to the surveillance system as a suspected case with probability $\rho$, a Binomial thinning of the daily incidence. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
+The clinical presentation of cholera-like illness is similar across diarrhoeal pathogens, so reported case counts are a noisy function of the true symptomatic incidence in the model -- the daily inflow $\sigma\,\iota\,E_{jt}$ of newly symptomatic infections (all symptomatic onsets, including the fatal onsets that never enter $I_1$; see the [Case fatality rate](#case-fatality-rate) subsection). We resolve this with a two-stage observation model. In the *care-seeking* stage, each incident symptomatic infection is independently presented to the surveillance system as a suspected case with probability $\rho$, a Binomial thinning of the daily incidence. In the *confirmation* stage, a suspected case is classified as true cholera with probability $\chi$, the positive predictive value (PPV) of the suspected-case definition. Combining the two stages and accounting for a reporting lag of $l_{\text{cases}}$ days from symptom onset, the modelled count of reported cases at destination $j$ on day $t+1$ is
 
 \begin{equation}
 \text{reported cases}_{j,t+1} \;=\; \text{round}\!\left[\, \frac{\text{Binom}\!\left(\sigma\,\iota\,E_{j,\,t - l_{\text{cases}}},\ \rho\right)}{\chi_{jt}^{\text{eff}}} \,\right],
@@ -957,19 +956,26 @@ $$
 
 The epidemic threshold $\eta_j$ is a per-country daily symptomatic prevalence above which the location is considered to be in an epidemic regime. It is set from each country's observed historical median outbreak prevalence with a truncated-normal prior whose mean and standard deviation are location-specific, and is bounded above by 0.01 (a hard cap of 1% daily symptomatic prevalence).
 
-A parallel observation process applies to cholera-attributable deaths. The probability that a true cholera death is captured by surveillance is $\rho_{\text{deaths}}$, and the reporting lag $l_{\text{deaths}}$ is the time from the **death event** to its appearance in surveillance reports (the symptom-onset-to-death interval is implicit in the SEIR dynamics via $\gamma_1^{-1}$ and is NOT folded into $l_{\text{deaths}}$):
+A parallel observation process applies to cholera-attributable deaths. In the current engine (MOSAIC-pkg v0.96.0 onward) the outcome of a symptomatic infection is decided **at symptom onset**: each new symptomatic onset is fatal with probability $p^{\text{fatal}}_{jt}$ (Eq. \@ref(eq:p-fatal) in the [Case fatality rate](#case-fatality-rate) subsection), and fatal onsets never enter $I_1$. Each true cholera death is then captured by surveillance with probability $\rho_{\text{deaths}}$ and reported on the *case* lag $l_{\text{cases}}$, so a death is reported on the same day as its case, as the surveillance data record it. With the same indexing as Eq. \@ref(eq:reported-cases):
+
+\begin{equation}
+\begin{aligned}
+\text{true deaths}_{jt} \ &\sim\ \text{Binom}\!\left(\sigma\,\iota\,E_{jt},\ p^{\text{fatal}}_{jt}\right),\\[3pt]
+\text{reported deaths}_{j,t+1} \ &\sim\ \text{Binom}\!\left(\text{true deaths}_{j,\,t - l_{\text{cases}}},\ \rho_{\text{deaths}}\right),
+\end{aligned}
+(\#eq:reported-deaths)
+\end{equation}
+
+where the first line thins the same symptomatic onsets $\sigma\,\iota\,E_{jt}$ that feed the reported cases. The separate death-event-to-report lag $l_{\text{deaths}}$ of earlier versions is retired, because deaths no longer occur some days after onset. The death-detection probability has a literature prior,
 
 $$
-\begin{aligned}
-\rho_{\text{deaths}} \ \sim\ & \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},\\
-l_{\text{deaths}} \ \sim\ & \text{Truncnorm}(4,\ 3,\ 1,\ 14) \ \ \text{(days, death-event to report)}.
-\end{aligned}
+\rho_{\text{deaths}} \ \sim\ \text{Beta}(36.95,\ 51.02) \quad \text{(mean} \approx 0.42,\ \text{sd} \approx 0.05\text{)},
 (\#eq:rho-deaths)
 $$
 
-The $\rho_{\text{deaths}}$ prior is fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). MOSAIC's production prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05). The deaths likelihood identifies the product $\mu_{j,0}\,\rho_{\text{deaths}}$ rather than the two factors separately, so a narrow $\rho_{\text{deaths}}$ prior keeps it pinned near 0.42 during sampling, letting the per-country $\mu_{j,0}$ posteriors carry the cross-country CFR signal cleanly. The wider variant Beta(6.30, 8.52) (fit to the 95% prediction interval) is retained as a sensitivity prior only. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*). Reported deaths are then modelled analogously to reported cases using the dynamic infection-fatality ratio described in the [Case fatality rate](#case-fatality-rate) subsection.
+fit by quantile-matching a random-effects meta-analysis (DerSimonian-Laird, logit scale) of three SSA studies that directly measure cholera-death surveillance capture: [Routh et al. 2017](https://doi.org/10.3201/eid2313.170529) (Tanzania, 0.48), [Shikanga et al. 2009](https://doi.org/10.4269/ajtmh.2009.09-0400) (Kenya, 0.34), and [Bwire et al. 2013](https://doi.org/10.1371/journal.pntd.0002545) (Uganda, 0.50). The pooled mean is 0.42 with a 95% prediction interval of [0.16, 0.73] ($\tau^2 = 0.046$, $I^2 = 32\%$); see Figure \@ref(fig:rho-deaths-prior). The prior is the **informative variant** Beta(36.95, 51.02), fit to the 95% CI of the pooled mean (ESS $\approx$ 88, sd $\approx$ 0.05); the wider variant Beta(6.30, 8.52), fit to the 95% prediction interval, documents between-study heterogeneity. Note that $\rho_{\text{deaths}}$ is **pinned at 0.42 rather than sampled** in calibration. It cancels exactly from the expected number of reported deaths: the per-onset fatality probability of Eq. \@ref(eq:p-fatal) divides by $\rho_{\text{deaths}}$ and the reporting draw of Eq. \@ref(eq:reported-deaths) multiplies by it, so $\mathbb{E}[\text{reported deaths}] = \mu_{jt}\,(\rho/\chi^{\text{epi}})\,\sigma\,\iota\,E_{jt}$ whatever value is drawn. The prior therefore fixes the *interpretation* of the true-death stage -- what fraction of true cholera deaths the surveillance product is taken to represent, and hence the scale of the modelled true deaths -- rather than being informed by the deaths data. The conceptual framework separating facility CFR from community deaths comes from [Finger et al. 2024](https://doi.org/10.1016/S1473-3099(24)00237-8) (*Lancet Infect Dis*).
 
-```{r rho-deaths-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior for the cholera death-detection probability $\\rho_{\\text{deaths}}$. (A) Production informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\\approx$ 88, sd $\\approx$ 0.05). Sensitivity variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval is retained for between-study heterogeneity checks. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\\tau^2$ = 0.046, $I^2$ = 32%)."}
+```{r rho-deaths-prior, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Prior for the cholera death-detection probability $\\rho_{\\text{deaths}}$. (A) Informative variant Beta(36.95, 51.02) (plum, solid) fit by quantile-matching the 95% CI of the pooled mean from a random-effects meta-analysis of three SSA direct-capture studies (ESS $\\approx$ 88, sd $\\approx$ 0.05); its mean, 0.42, is the value $\\rho_{\\text{deaths}}$ is pinned at. Wider variant Beta(6.30, 8.52) (blue, dashed) fit to the 95% prediction interval, shown to document between-study heterogeneity. Neither is sampled in calibration, because $\\rho_{\\text{deaths}}$ cancels from the expected reported deaths: the per-onset fatality probability divides by it and the reporting draw multiplies by it. (B) Per-study estimates and the pooled random-effects estimate (logit-scale DerSimonian-Laird, k = 3, $\\tau^2$ = 0.046, $I^2$ = 32%)."}
 knitr::include_graphics("figures/rho_deaths_prior.png")
 ```
 
@@ -980,48 +986,79 @@ knitr::include_graphics("figures/suspected_cases.png")
 
 ### Case fatality rate {#case-fatality-rate}
 
-In MOSAIC v1.0 the case fatality rate is replaced by a *dynamic infection-fatality ratio* (IFR) implemented as a per-day mortality hazard among symptomatic infections. The hazard $\mu_{j,t}$ is the rate at which a symptomatic individual in location $j$ dies from cholera on day $t$, and the corresponding per-day death-transition probability is $1 - e^{-\mu_{j,t}}$ (see the [Table of stochastic transitions](#transitions-table)). It is factored into three multiplicative components: a per-location baseline $\mu_{j,0}$, a linear time-trend factor $\mu_{j,1}$ that captures slow drift in case-management quality over the simulation period, and an epidemic-period factor $\mu_{j,\text{epi}}$ that captures higher mortality during outbreak surges (e.g. when treatment infrastructure is overwhelmed):
+We parameterise cholera mortality directly by the time-varying **reported case fatality ratio** $\mu_{jt}$: the expected number of reported deaths per reported suspected case in location $j$ on day $t$, which is the quantity that surveillance measures. It replaces the per-day mortality hazard on the symptomatic stock, with its baseline, time-trend and epidemic-escalation factors ($\mu_{j,0}$, $\mu_{j,1}$, $\mu_{j,\text{epi}}$) and the target CFR from which the baseline was derived, used by MOSAIC-pkg versions before 0.96.0; those parameters are retired. The engine converts $\mu_{jt}$ on each day into the probability that a symptomatic onset is fatal:
 
 \begin{equation}
-\mu_{j,t} \;=\; \mu_{j,0} \,\big(1 + \mu_{j,1}\, t^{\dagger}\big)\,\Big(1 + \mu_{j,\text{epi}} \cdot \mathbb{1}\!\big[\,I_{1,\,j,t - l_{\text{cases}}} \big/ N_{j,\,t - l_{\text{cases}}} > \eta_j\,\big]\Big),
+p^{\text{fatal}}_{jt} \;=\; \mu_{jt}\,\frac{\rho}{\rho_{\text{deaths}}\,\chi^{\text{epi}}}.
+(\#eq:p-fatal)
+\end{equation}
+
+Where, $\rho$ is the care-seeking probability, $\chi^{\text{epi}}$ the epidemic-period PPV and $\rho_{\text{deaths}}$ the death-detection probability defined in the previous subsection. A configuration for which $p^{\text{fatal}}_{jt} \ge 1$ at any location and day is refused rather than clamped. Because reported cases (Eq. \@ref(eq:reported-cases)) and reported deaths (Eq. \@ref(eq:reported-deaths)) are drawn from the same onsets $\sigma\,\iota\,E_{jt}$, taking expectations gives
+
+$$
+\frac{\mathbb{E}[\text{reported deaths}]}{\mathbb{E}[\text{reported cases}]} \;=\; \frac{\rho_{\text{deaths}}\,p^{\text{fatal}}_{jt}}{\rho\,/\,\chi^{\text{eff}}_{jt}} \;=\; \mu_{jt}\,\frac{\chi^{\text{eff}}_{jt}}{\chi^{\text{epi}}},
+$$
+
+up to the rounding in Eq. \@ref(eq:reported-cases). Thus, in the epidemic regime ($\chi^{\text{eff}}_{jt} = \chi^{\text{epi}}$) the modelled reported CFR equals $\mu_{jt}$ exactly, and in the endemic regime it is $\mu_{jt}\,\chi^{\text{end}}/\chi^{\text{epi}}$ (approximately $0.69\,\mu_{jt}$ at the prior means). Neither $\sigma$, $\gamma_1$ nor $\rho_{\text{deaths}}$ enters this ratio, so no derivation through the recovery dwell or the symptomatic stock is needed. At the default configuration $p^{\text{fatal}}_{jt}$ has a median of 2.8% of symptomatic onsets (range 0.2--10%). Fatal onsets leave the population at onset and never enter $I_1$, so they neither shed into $W$ nor contribute to the force of infection. (The engine's `replay` mode, which exists only to verify the R engine draw for draw against laser-cholera 0.16.1, retains that engine's daily-hazard form; the production `rng` mode is the form described here.)
+
+**Prior for $\mu_{jt}$.** The prior centre of $\mu_{jt}$ comes from a hierarchical binomial GAM (`est_CFR_hierarchical()`) fit by fREML with `mgcv::bam()` to every country-year of the WHO annual cholera record from 1970 onward, for every country in the file (not only the 40 MOSAIC locations, so that the additional countries inform the global curve). For country $j$ in calendar year $\text{yr}$, with $D_{j,\text{yr}}$ reported deaths among $C_{j,\text{yr}}$ reported cases,
+
+\begin{equation}
+D_{j,\text{yr}} \sim \text{Binom}\!\left(C_{j,\text{yr}},\ p_{j,\text{yr}}\right), \qquad
+\text{logit}\,p_{j,\text{yr}} \;=\; f(\text{yr}) + u_j + g_j(\text{yr}) + e_{j,\text{yr}},
+(\#eq:cfr-gam)
+\end{equation}
+
+where $f$ is a global smooth trend, $u_j \sim \mathcal{N}(0,\ \text{sd}_{\text{country}}^2)$ is a country random intercept, $g_j$ is a country-specific penalised trend (a factor smooth, shrunk toward the global curve), and $e_{j,\text{yr}} \sim \mathcal{N}(0,\ \text{sd}_{\text{year}}^2)$ is a country-year random effect that absorbs the large year-to-year scatter of annual CFR. A calendar year still in progress when its WHO dashboard snapshot was taken is excluded, because its deaths lag its cases. The point estimate for a country-year excludes $e_{j,\text{yr}}$, so it is the median of that year's reported CFR on the logit scale, and each estimate carries the standard error $\text{se}_{j,\text{yr}}$ of $f + u_j + g_j$. Years after the data are carried forward: the global trend is held flat after the last year in the data, and each country's trend after that country's own last WHO-annual year. In the current fit $\text{sd}_{\text{year}} \approx 0.70$ on the logit scale; $\text{sd}_{\text{country}}$ is weakly identified (the factor smooth carries its own per-country intercept) but no MOSAIC location depends on it, since all 40 appear in the WHO annual data.
+
+The annual centres are expanded to the daily \[location $\times$ day\] matrix $\mu^{0}_{jt}$ that the engine reads as `config$mu_jt` by `make_mu_jt()`: the logit-scale centres are interpolated linearly between 1 July anchors of consecutive years and held flat before the first and after the last estimated year. A simulation run from a configuration draws its deaths at $\mu_{jt} = \mu^{0}_{jt}$.
+
+**Integrating $\mu_{jt}$ out of the deaths likelihood.** In calibration $\mu_{jt}$ is not sampled. Given one simulated path, the expected reported deaths on each day are $\mu_{jt}$ times a known exposure, $(\rho/\chi^{\text{epi}})\,\sigma\,\iota\,E_{jt}$ at the onset day, so the level of the reported CFR can be solved for per path (`calc_log_likelihood_deaths_integrated()`). The reported CFR is modelled as the prior centre shifted on the logit scale by a location offset and one level per calendar year:
+
+\begin{equation}
+\text{logit}\,\mu_{jt} \;=\; \text{logit}\,\mu^{0}_{jt} \;+\; \xi_j \;+\; \sum_{\text{yr}} B_{\text{yr}}(t)\, e_{j,\text{yr}},
 (\#eq:mu-jt)
 \end{equation}
 
-where $t^{\dagger} = t / T_{\text{total}}$ is the normalised simulation time, so $\mu_{j,1}$ is interpretable as the proportional change in baseline IFR from the start to the end of the simulation. The indicator $\mathbb{1}[\cdot]$ activates the epidemic factor whenever the lagged daily symptomatic prevalence exceeds the per-location epidemic threshold $\eta_j$ defined in the previous subsection. This dynamic specification replaces the earlier static $\mu_j$ (a per-infection CFR) used in MOSAIC v0.1.
-
-The per-location baseline $\mu_{j,0}$ is derived from each country's reported CFR over the 2014-2025 surveillance window, after accounting for the full observation pipeline that converts true symptomatic infections into reported cases AND reported deaths. Reporting compresses information on three axes: $\rho$ controls the fraction of true symptomatic infections that are reported as suspected cases, $\chi$ controls the fraction of those suspected cases that are confirmed as true cholera, and $\rho_{\text{deaths}}$ controls the fraction of true cholera deaths that are captured by surveillance (laser-cholera v0.13+).
-
-Taking expectations of the engine equations relates the reported CFR to the per-day mortality hazard $\mu_{j,t}$. Reported deaths are a thinning of the daily death *flow* out of the symptomatic stock, `disease_deaths` $\sim$ Binomial($I_1$, $1-e^{-\mu_{j,t}}$) so $\mathbb{E}[\text{reported\_deaths}] = \rho_{\text{deaths}} \cdot I_1 \cdot (1-e^{-\mu_{j,t}})$. Reported cases, since laser-cholera v0.14.0 ([issue #67](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/67); see the observation-process subsection), are a thinning of the daily *incidence* of new symptomatic infections rather than of the symptomatic prevalence $I_1$. Over a window the cumulative reported cases therefore scale with the cumulative incidence, which equals the cumulative recovery flow $\big(1-e^{-\gamma_1}\big)\,I_1$ in steady state, giving $\mathbb{E}[\text{reported\_cases}] = \big(1-e^{-\gamma_1}\big)\,I_1 \cdot \rho / \chi$. The PPV $\chi$ that enters is the *effective* PPV $\chi^{\text{eff}}$, which leans to the epidemic value $\chi^{\text{epi}}$ because the reported-case signal is dominated by epidemic-regime ticks. Hence
-
 $$
-\text{CFR}^{\text{reported}}_{j} \;=\; \frac{\mathbb{E}[\text{reported\_deaths}]}{\mathbb{E}[\text{reported\_cases}]} \;=\; \frac{\rho_{\text{deaths}} \cdot I_1 \cdot \big(1-e^{-\mu_{j,t}}\big)}{\big(1-e^{-\gamma_1}\big)\,I_1 \cdot \rho / \chi^{\text{epi}}} \;\approx\; \mu_{j,t} \cdot \frac{\rho_{\text{deaths}} \cdot \chi^{\text{epi}}}{\big(1-e^{-\gamma_1}\big)\,\rho},
-$$
-
-using $1-e^{-\mu_{j,t}} \approx \mu_{j,t}$ for the small per-day hazard. Solving for the un-modulated baseline component:
-
-$$
-\mu_{j,0} \;=\; \text{CFR}^{\text{reported}}_{j} \cdot \frac{\big(1-e^{-\gamma_1}\big)\,\rho}{\rho_{\text{deaths}} \cdot \chi^{\text{epi}}},
-(\#eq:mu-baseline-derivation)
+\xi_j \sim \mathcal{N}\!\left(0,\ \text{sd}_{\text{product}}^2 + \overline{\text{se}^2_{j}}\right), \qquad
+e_{j,\text{yr}} \sim
+\begin{cases}
+\mathcal{N}\!\left(0,\ \text{sd}_{\text{year}}^2\right), & \text{yr} \le \text{yr}^{\ast}_j,\\[3pt]
+\mathcal{N}\!\left(\bar{e}_j,\ \text{sd}_{\text{year}}^2\right), & \text{yr} > \text{yr}^{\ast}_j.
+\end{cases}
 $$
 
-with units of day$^{-1}$. The symptomatic fraction $\sigma$ cancels in this identity because both observation pathways start from $I_1$, not from the underlying infections. The $\big(1-e^{-\gamma_1}\big)$ dwell factor (incidence-based reporting) and the epidemic-leaning $\chi^{\text{epi}}$ are the two corrections introduced in the B2.1 derivation revision (MOSAIC v0.50.0); the earlier B2 form used $\gamma_1$ and the endemic-epidemic blended $\chi$ and over-attributed deaths. A closed-form identity cannot capture the realized epidemic-regime fraction or the spatial-coupling residual exactly, so an irreducible $\approx$1.3--1.5$\times$ dynamics-dependent residual in the realized deaths channel remains after this correction. Country-specific reported CFRs are estimated by a hierarchical GAM (binomial(deaths, cases) $\sim$ s(year) + country random intercepts + country temporal trends) fit to the WHO AFRO annual surveillance data through 2025 with the 2026 partial-year snapshot. The estimated CFR is converted to $\mu_{j,0}$ via the identity above using the prior means of $\rho$, $\rho_{\text{deaths}}$, and the endemic-epidemic-averaged $\chi$, yielding a per-country Gamma(shape=4, rate) prior with CV=50%. For example, in Angola the GAM-estimated reported CFR is approximately 2.3% and the moment-matched prior is $\mu_{\text{AGO},0} \sim \text{Gamma}(4,\ 173)$ with mean approximately 0.023 per day, corresponding to an integrated symptomatic-period CFR of roughly 11% over a 5-day symptomatic infectious period (i.e. $1 - e^{-0.023 \times 5}$). Priors for the other 39 countries are listed in the [Table of model parameters](#parameters-table).
+Where, $\xi_j$ is the location offset, whose prior variance adds $\text{sd}_{\text{product}} = 0.3$ (the residual error of the GAM centre against the observed reported CFR in the calibration window) to $\overline{\text{se}^2_{j}}$, the mean squared GAM standard error over the years with observed deaths in the scored window; $e_{j,\text{yr}}$ is the deviation for calendar year $\text{yr}$, with the GAM's country-year SD $\text{sd}_{\text{year}}$; and $B_{\text{yr}}(t)$ equals 1 inside calendar year $\text{yr}$ and blends linearly into the next year over the 60 days centred on each 1 January (weight 0.5 on each year on 1 January), so the reported CFR has no step at a year boundary. Each deviation is a *level* for its year: a year observed only in part is fitted to the months observed and applied unchanged to the rest of that year. $\text{yr}^{\ast}_j$ is the latest year observed past its New Year blend (the year of the last scored day minus 30 days), and every later year is a *forecast year* whose deviation is centred on the forecast shift $\bar{e}_j$ described below (zero during calibration).
 
-Pre-laser-cholera-v0.13.0 versions of MOSAIC scored observed reported deaths against simulated raw `disease_deaths` (without the $\rho_{\text{deaths}}$ factor), so per-country $\mu_{j,0}$ priors prior to v0.32.1 implicitly absorbed the missing $\rho_{\text{deaths}}$ factor in their posterior. Posteriors from pre-v0.32.1 calibrations are interpretable as $\mu_{j,0}^{\text{v0.13+}} \cdot \rho_{\text{deaths}}$ under the new schema (a factor of $\approx$0.42 lower than the corrected estimate).
-
-The temporal-trend factor and the epidemic-period factor share the same prior across countries. The trend is a weak normal centred on no change, allowing for slow drift in case-management quality:
+Deaths are scored at the weekly reporting cadence with a quasi-Poisson likelihood. For location $j$ and reporting week $w$ (the week boundary is detected per location; a week cut by the edge of the scored window is scored on its own days), let $D_{jw}$ be the observed deaths and
 
 $$
-\mu_{j,1} \sim \mathcal{N}(0,\ 0.05).
+m_{jw} \;=\; \sum_{t \in w} \mu_{jt}\,\frac{\rho}{\chi^{\text{epi}}}\,\sigma\,\iota\,E_{jt} \;+\; m^{\text{bg}}_j
 $$
 
-The epidemic factor is a non-negative Gamma prior with a mean of 0.5, reflecting the approximately 50% increase in cholera CFR typically observed during outbreak surges:
+the expected reported deaths, with the CFR and onsets both taken at the onset day of the deaths reported in week $w$. The deaths log-likelihood of location $j$ given $(\xi_j, e_{j,\cdot})$ is
+
+\begin{equation}
+\ell_j \;=\; \frac{1}{\varphi_j}\sum_{w} W_{jw}\left[D_{jw}\log m_{jw} - m_{jw} - \log D_{jw}!\right].
+(\#eq:deaths-quasipoisson)
+\end{equation}
+
+Where, $W_{jw}$ is the mean scoring weight of the week's days (the per-observation confidence weights are rescaled so that they redistribute, but do not change, the location's total weight); $m^{\text{bg}}_j = \max\!\left(10^{-4},\ 0.02\,\bar{D}_j\right)$ is a small additive background, 2% of the location's mean scored weekly deaths (the cases channel's relative floor, `control$likelihood$eps_rel_cases`), so that a week with observed deaths but no simulated onsets costs a bounded amount; and $\varphi_j \ge 1$ is a per-location dispersion, the quasi-Poisson dispersion of observed weekly deaths regressed on observed weekly cases with year effects, set to 1 when a location has fewer than 10 deaths or too few weeks to estimate it. The Poisson score for the CFR level preserves totals, so given a path the fitted reported CFR reproduces the observed deaths totals; a negative-binomial score would weight low-count weeks far above the peak weeks and bias the level. For each location the offsets are fitted by Newton's method, and the deaths contribution to the calibration log-likelihood is the Laplace approximation to the marginal likelihood at the mode $(\hat\xi_j, \hat{e}_{j,\cdot})$, which has $d_j$ components,
 
 $$
-\mu_{j,\text{epi}} \sim \text{Gamma}(1,\ 2).
+\log \mathcal{L}^{\text{deaths}}_j \;\approx\; \ell_j(\hat\xi_j, \hat{e}_{j,\cdot}) + \log P(\hat\xi_j, \hat{e}_{j,\cdot}) + \tfrac{d_j}{2}\log 2\pi - \tfrac{1}{2}\log\det\!\left(-\mathbf{H}_j\right),
 $$
 
-Reported cholera deaths are modelled with a parallel two-stage observation process. Given the daily death count $\mu_{j,t}\,I_{1,jt}$ generated by the IFR above, the death-detection rate $\rho_{\text{deaths}}$ and the reporting lag $l_{\text{deaths}}$ defined in the previous subsection produce the modelled count of reported deaths: $\text{reported\_deaths}[t] = \text{Binom}(\text{disease\_deaths}[t - l_{\text{deaths}}],\ \rho_{\text{deaths}})$. The death-side equivalent of the case-reporting machinery is implemented in [laser-cholera issue #49](https://github.com/InstituteforDiseaseModeling/laser-cholera/issues/49), shipped in laser-cholera v0.13.0, and consumed by MOSAIC-pkg from version 0.32.0; laser-cholera v0.14.0 then replaced the deterministic rounding with the Binomial draw shown above (MOSAIC-pkg from version 0.41.0). Because $\text{disease\_deaths}$ is already an incident count, this changes only the stochasticity, not the expected scale.
+where $\mathbf{H}_j$ is the Hessian of the log posterior at the mode. This term replaces the per-cell negative-binomial deaths term of the calibration chapter; when the reported CFR is integrated out, the level-dependent deaths shape terms (peak magnitude, cumulative progression and WIS) are dropped, because they would score engine deaths drawn at the prior $\mu^{0}_{jt}$.
 
+**Posterior deaths and forecasts.** Because fatal onsets are the only route by which deaths feed back on transmission, the deaths of each posterior ensemble member can be redrawn after its simulation. For each member and location we fit $(\xi_j, e_{j,\cdot})$ to the observed deaths given that member's onsets, draw them from the Laplace posterior, rebuild the daily $\mu_{jt}$ with the same year basis, and draw true and reported deaths with Eqs. \@ref(eq:p-fatal) and \@ref(eq:reported-deaths). The redraw ignores the small transmission effect of the difference between the prior and posterior $p^{\text{fatal}}_{jt}$. The resulting reported CFR by location and year (the weighted median and 95% interval over members of each member's mean daily $\mu_{jt}$ in that year, beside the prior's) is written to `cfr_posterior.csv`; it is conditional on each member's modelled cases, so a year whose cases a member over-predicts receives a lower CFR. The medoid configuration's $\mu_{jt}$ is shifted per calendar year on the logit scale, with the same blend, so that each year's mean daily reported CFR matches the medoid's posterior.
+
+Forecast years carry the ensemble's latest calibrated CFR rather than reverting to the prior level. After calibration, one stochastic run of each posterior member gives its posterior-mode deviation for $\text{yr}^{\ast}_j$, and the forecast shift $\bar{e}_j$ is the weighted mean of these over members. Averaging keeps the CFR change the members share while discarding each member's own case error in $\text{yr}^{\ast}_j$, which its deviation also absorbs. The same $\bar{e}_j$ centres every forecast year's deviation in the ensemble, the medoid, `cfr_posterior.csv` and any post hoc re-run from the saved deaths integration.
+
+A configuration carrying the retired mortality fields (`mu_j_baseline`, `mu_j_epidemic_factor`, `CFR_target`, `delta_reporting_deaths`) is converted when it has a `CFR_target` (which becomes a constant $\mu_{jt}$, with a warning) and is otherwise refused.
+
+The table and figures below summarise the observed WHO AFRO reported CFR from 2014 onward. They are descriptive: the per-country Beta shapes are not used as model priors.
 
 ```{r cfr, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -1151,7 +1188,7 @@ R_{0,j}
 
 This additive decomposition is **exact**, not an approximation: because both transmission routes — the human force of infection \(\Lambda\) and the environmental force of infection \(\Psi\) — deposit newly infected individuals into the *single* Exposed compartment \(E\), the next-generation transmission matrix \(F\) is rank one. The spectral radius of a rank-one matrix equals its trace, so \(R_{0,j}\) is simply the sum of the two route-specific contributions, with no square-root or dominant-eigenvalue coupling between them. This exactness is contingent on the current compartment topology (a single infection-entry compartment); if the infection-entry structure changes — e.g. separate exposed compartments per route — the next-generation matrix is no longer rank one and the decomposition must be re-derived as a dominant eigenvalue.
 
-This \(R_{0,j}\) also drops the small \(E\)-exit and \(I\)-exit flows from background mortality \(d_j\) and (for the infectious classes) disease mortality \(\mu_{jt}\): the removal terms use \(\iota\) and \(\gamma_{1},\gamma_{2}\) alone. This is exact at the disease-free equilibrium under the stated \(R_0\) convention (vaccination \(\nu=0\), no susceptible depletion), where these competing-risk exits are negligible relative to latent progression and recovery; including them would scale each route by factors of order \(\iota/(\iota+d_j)\) and \(\gamma_k/(\gamma_k+d_j+\mu_{jt})\), both \(\approx 1\) for cholera timescales.
+This \(R_{0,j}\) also drops two small losses. Background mortality \(d_j\) removes individuals from \(E\), \(I_1\) and \(I_2\), and including it would scale each route by factors of order \(\iota/(\iota+d_j)\) and \(\gamma_k/(\gamma_k+d_j)\). Cholera mortality does not act as an exit rate from \(I_1\): a fatal symptomatic onset is removed at onset and never enters \(I_1\) (Eq. \@ref(eq:p-fatal)), so it would multiply the symptomatic terms \(\sigma/\gamma_1\) and \(\zeta_1\sigma/\gamma_1\) by \((1-p^{\text{fatal}}_{jt})\), a reduction of about 3% at the median default \(p^{\text{fatal}}_{jt}\) (at most about 10%). The removal terms therefore use \(\iota\) and \(\gamma_{1},\gamma_{2}\) alone, and both omitted factors are close to 1 for cholera.
 
 ### Interpretation
 
@@ -1443,7 +1480,7 @@ tbl <- data.frame(
           "$\\varepsilon$", # Parameter: varepsilon (waning immunity rate of recovered individuals)
           "$\\gamma_1$",    # Parameter: gamma_1 (recovery rate of symptomatic infected individuals)
           "$\\gamma_2$",    # Parameter: gamma_2 (recovery rate of asymptomatic infected individuals)
-          "$\\mu_{j,t}$",   # Parameter: mu_{j,t} (dynamic IFR; see eq:mu-jt)
+          "$\\mu_{jt}$",   # Parameter: mu_jt (reported CFR; see eq:mu-jt)
           "$\\sigma$",      # Parameter: sigma (proportion of infections that are symptomatic)
           "$\\rho$",        # Parameter: rho (proportion of suspected cases that are true infections)
           "$\\zeta_1$",     # Parameter: zeta_1 (shedding rate by symptomatic individuals)
@@ -1493,7 +1530,7 @@ tbl <- data.frame(
           "Waning immunity rate of recovered individuals.",                                  # varepsilon
           "Recovery rate of symptomatic infected individuals.",                              # gamma_1
           "Recovery rate of asymptomatic infected individuals.",                             # gamma_2
-          "Dynamic infection-fatality ratio (per-day mortality hazard) among symptomatic individuals. Decomposed into $\\mu_{j,0}, \\mu_{j,1}, \\mu_{j,\\text{epi}}$ (see the *Case fatality rate* subsection).",  # mu_jt
+          "Reported case fatality ratio in destination $j$ on day $t$: expected reported deaths per reported suspected case. Converted to the per-onset fatality probability $p^{\\text{fatal}}_{jt}$ (see the *Case fatality rate* subsection).",  # mu_jt
           "Proportion of infections that are symptomatic.",                                  # sigma
           "Care-seeking rate: probability a true symptomatic infection is reported as a suspected case.",  # rho
           "Shedding rate (cells per symptomatic person per day) of *V. cholerae* by symptomatic individuals.",  # zeta_1
@@ -1543,7 +1580,7 @@ tbl <- data.frame(
           "",        # varepsilon
           "",        # gamma_1
           "",        # gamma_2
-          "",        # mu
+          "Prior centre $\\mu^{0}_{jt}$ from the WHO-annual hierarchical GAM (Eq. \\@ref(eq:cfr-gam)); integrated out of the deaths likelihood (Eq. \\@ref(eq:mu-jt)).",        # mu
           "",        # sigma
           "",        # rho
           "$\\text{Lognormal}(25.65, 2.46)$",  # zeta_1
@@ -1593,7 +1630,7 @@ tbl <- data.frame(
           "",        # varepsilon
           "",        # gamma_1
           "",        # gamma_2
-          "",        # mu
+          "WHO annual cholera record 1970 onward ([Our World in Data](https://ourworldindata.org/grapher/number-reported-cases-of-cholera), [WHO Weekly Epidemiological Record](https://www.who.int/publications/journals/weekly-epidemiological-record), [WHO Global Cholera and AWD Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/)); `est_CFR_hierarchical()`.",        # mu
           "",        # sigma
           "",        # rho
           "<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>",  # zeta_1
@@ -1646,10 +1683,12 @@ tbl2 <- data.frame(
           "$\\chi^{\\text{epi}}$",
           "$\\rho_{\\text{deaths}}$",
           "$l_{\\text{cases}}$",
-          "$l_{\\text{deaths}}$",
-          "$\\mu_{j,0}$",
-          "$\\mu_{j,1}$",
-          "$\\mu_{j,\\text{epi}}$",
+          "$p^{\\text{fatal}}_{jt}$",
+          "$\\mu^{0}_{jt}$",
+          "$\\xi_j$",
+          "$e_{j,\\text{yr}}$",
+          "$\\bar{e}_j$",
+          "$\\varphi_j$",
           "$w_{\\text{gibbs}}$"
      ),
      Description = c(
@@ -1671,11 +1710,13 @@ tbl2 <- data.frame(
           "Positive predictive value of a suspected cholera case during endemic periods.",
           "Positive predictive value of a suspected cholera case during epidemic periods.",
           "Probability that a true cholera death is captured by surveillance.",
-          "Reporting lag in days from symptom onset to case reporting.",
-          "Reporting lag in days from a true cholera death event to its appearance in surveillance reports (symptom-onset-to-death is implicit in $\\gamma_1^{-1}$).",
-          "Baseline daily mortality hazard $\\mu_{j,0}$ in destination $j$.",
-          "Proportional time-trend factor for $\\mu_{j,t}$ over the simulation period.",
-          "Proportional increase in $\\mu_{j,t}$ during epidemic periods.",
+          "Reporting lag in days from symptom onset to case reporting; deaths are reported on the same lag.",
+          "Probability that a symptomatic onset is fatal (decided at onset; fatal onsets never enter $I_1$).",
+          "Prior centre of the reported CFR (`config$mu_jt`): WHO-annual GAM centres interpolated on the logit scale between 1 July anchors.",
+          "Location offset of the reported CFR on the logit scale; integrated out of the deaths likelihood.",
+          "Calendar-year deviation of the reported CFR on the logit scale, blended across each 1 January; integrated out of the deaths likelihood.",
+          "Forecast shift: the ensemble's weighted mean deviation for the latest observed year, which centres every forecast year.",
+          "Quasi-Poisson dispersion of weekly observed deaths in location $j$.",
           "Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter)."
      ),
      Distribution = c(
@@ -1698,10 +1739,12 @@ tbl2 <- data.frame(
           "$\\text{Beta}(4.79, 1.53)$",
           "$\\text{Beta}(36.95, 51.02)$",
           "$\\text{Truncnorm}(1, 1.5, 0, 7)$ days",
-          "$\\text{Truncnorm}(4, 3, 1, 14)$ days",
-          "$\\text{Gamma}$ per country (e.g., AGO: $\\text{Gamma}(4, 173)$).",
-          "$\\mathcal{N}(0, 0.05)$",
-          "$\\text{Gamma}(1, 2)$",
+          "Derived: $\\mu_{jt}\\,\\rho / (\\rho_{\\text{deaths}}\\,\\chi^{\\text{epi}})$ (Eq. \\@ref(eq:p-fatal)).",
+          "Computed (Eq. \\@ref(eq:cfr-gam)).",
+          "$\\mathcal{N}(0,\\ \\text{sd}_{\\text{product}}^2 + \\overline{\\text{se}^2_{j}})$, $\\text{sd}_{\\text{product}} = 0.3$",
+          "$\\mathcal{N}(0,\\ 0.70^2)$; forecast years $\\mathcal{N}(\\bar{e}_j,\\ 0.70^2)$",
+          "Computed after calibration.",
+          "Estimated from observed deaths and cases; $\\ge 1$.",
           "Calibration control parameter."
      ),
      Source = c(
@@ -1724,10 +1767,12 @@ tbl2 <- data.frame(
           "[Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286)",
           "SSA random-effects meta-analysis: Routh 2017, Shikanga 2009, Bwire 2013.",
           "Surveillance reporting practice.",
-          "Surveillance reporting practice.",
-          "Derived from reported CFR via $\\mu_{j,0} = \\text{CFR}^{\\text{reported}}_j \\cdot \\rho / (\\rho_{\\text{deaths}} \\cdot \\chi)$ (laser-cholera v0.13+ identity).",
-          "Weakly informative.",
-          "Reflects typical surge-period IFR increase.",
+          "Engine (MOSAIC-pkg v0.96.0).",
+          "`est_CFR_hierarchical()`, `make_mu_jt()`.",
+          "`priors_default` `mu_jt` block.",
+          "GAM country-year SD (`priors_default` `mu_jt$sd_year`).",
+          "Posterior ensemble (MOSAIC-pkg v0.99.0).",
+          "Observed surveillance.",
           "[Bissiri et al. 2016](https://doi.org/10.1111/rssb.12158)"
      ),
      stringsAsFactors = FALSE
@@ -1772,9 +1817,9 @@ tbl <- data.frame(
           "$- d_{jt} E_{jt}$",
           "**$\\mathbf{I_1}$ (symptomatic)**",
           "$+ \\sigma\\,\\iota\\,E_{jt}$",
+          "$- p^{\\text{fatal}}_{jt}\\,\\sigma\\,\\iota\\,E_{jt}$",
           "$- \\phi_1 \\nu_{1,jt} I_{1,jt} / N^{\\text{src}}_{jt}$",
           "$- \\gamma_1 I_{1,jt}$",
-          "$- \\mu_{j,t} I_{1,jt}$",
           "$- d_{jt} I_{1,jt}$",
           "**$\\mathbf{I_2}$ (asymptomatic)**",
           "$+ (1-\\sigma)\\,\\iota\\,E_{jt}$",
@@ -1818,9 +1863,9 @@ tbl <- data.frame(
           "Background death among exposed individuals.",
           "",
           "Exposed individuals progressing to symptomatic infection.",
+          "Fatal symptomatic onsets: cholera deaths decided at onset, which never enter $I_1$ (see the *Case fatality rate* subsection).",
           "Effective first doses leaving $I_1$ for $V_1$.",
           "Recovery from symptomatic infection.",
-          "Cholera-attributable mortality among symptomatic individuals (dynamic IFR; see the *Case fatality rate* subsection).",
           "Background death among individuals with symptomatic infection.",
           "",
           "Exposed individuals progressing to asymptomatic infection.",
@@ -1866,9 +1911,9 @@ tbl <- data.frame(
           "$\\text{Binom}\\big( E_{jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
           "",
           "$\\text{Binom}\\big( \\sigma E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",
+          "$\\text{Binom}\\big( \\text{symptomatic onsets},\\; p^{\\text{fatal}}_{jt} \\big)$",
           "$\\text{round}\\!\\big( \\phi_1 \\nu_{1,jt} \\cdot I_{1,jt} / N^{\\text{src}}_{jt} \\big)$",
           "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\gamma_1) \\big)$",
-          "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-\\mu_{j,t}) \\big)$",
           "$\\text{Binom}\\big( I_{1,jt},\\; 1 - \\exp(-d_{jt}) \\big)$",
           "",
           "$\\text{Binom}\\big( (1-\\sigma) E_{jt},\\; 1 - \\exp(-\\iota) \\big)$",

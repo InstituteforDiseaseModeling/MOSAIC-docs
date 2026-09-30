@@ -81,41 +81,35 @@ The total log-likelihood combines contributions from observed cases and deaths a
 \log \mathcal{L}(\boldsymbol{\Theta}) =
 \sum_{j=1}^{J} w_{j} \left[
 w_{\text{cases}} \sum_{t=1}^{T} w_{t}\,\log P\left(C_{j,t}^{\text{obs}} \mid C_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{cases},j}\right)
-+ w_{\text{deaths}} \sum_{t=1}^{T} w_{t}\,\log P\left(D_{j,t}^{\text{obs}} \mid D_{j,t}^{\text{est}}(\boldsymbol{\Theta}), k_{\text{deaths},j}\right)
++ w_{\text{deaths}}\,\log \mathcal{L}^{\text{deaths}}_{j}(\boldsymbol{\Theta})
 \right]
 (\#eq:total-log-likelihood-2)
 \end{equation}
 
-Note that each log-likelihood term is weighted three times — by a location weight $w_j$, a time-step weight $w_t$, and an outcome-specific weight $w_{\text{cases}}$ or $w_{\text{deaths}}$ — so that contributions reflect data reliability and public-health priorities across space, time, and outcome. The choice between Poisson and Negative Binomial for the density $P(\cdot)$ is driven by the local mean-variance relationship (VMR), ensuring that the assumed error structure mirrors the dispersion actually observed in the surveillance data. The next subsection details the parameterisation of each probability distribution and how the corresponding likelihood is computed.
+Note that each log-likelihood term is weighted three times — by a location weight $w_j$, a time-step weight $w_t$ (which, for deaths, weights the days of each reporting week inside $\log \mathcal{L}^{\text{deaths}}_{j}$), and an outcome-specific weight $w_{\text{cases}}$ or $w_{\text{deaths}}$ — so that contributions reflect data reliability and public-health priorities across space, time, and outcome. The cases term is a sum of per-day Negative Binomial log-densities. The deaths term $\log \mathcal{L}^{\text{deaths}}_{j}$ is not a per-day density: it is the marginal likelihood of the weekly observed deaths with the reported case fatality ratio integrated out for each simulated path, as defined in the [Case fatality rate](https://www.mosaicmod.org/model-description.html#case-fatality-rate) section of the model description (a weekly quasi-Poisson score with a per-location dispersion and a small background, and a Laplace approximation over a location offset and one deviation per calendar year). The next subsection details the cases density and how its dispersion is estimated.
 
 | Parameter                                   | Description                                                          |
 | ------------------------------------------- | -------------------------------------------------------------------- |
 | $J$                                         | Number of locations                                                  |
 | $T$                                         | Number of time points                                                |
 | $C_{j,t}^{\text{obs}}$                      | Observed cases at location $j$ and time $t$                          |
-| $D_{j,t}^{\text{obs}}$                      | Observed deaths at location $j$ and time $t$                         |
 | $C_{j,t}^{\text{est}}(\boldsymbol{\Theta})$ | Model-estimated mean cases at location $j$, time $t$                 |
-| $D_{j,t}^{\text{est}}(\boldsymbol{\Theta})$ | Model-estimated mean deaths at location $j$, time $t$                |
+| $\log \mathcal{L}^{\text{deaths}}_{j}(\boldsymbol{\Theta})$ | Integrated deaths log-likelihood at location $j$ (reported CFR integrated out; see the model description) |
 | $w_j$                                       | Location-specific weights (reflecting population or data confidence) |
 | $w_t$                                       | Time-specific weights (typically uniform, $w_t=1$)                   |
 | $w_{\text{cases}}$                          | Relative weight for cases                                            |
 | $w_{\text{deaths}}$                         | Relative weight for deaths                                           |
-| $k_{\text{cases}, j}$                       | Dispersion parameter for cases at location $j$                       |
-| $k_{\text{deaths}, j}$                      | Dispersion parameter for deaths at location $j$                      |
+| $k_{\text{cases}, j}$                       | Negative Binomial dispersion for cases at location $j$               |
 
 
 
 
 ## Distributional Assumptions for Likelihood Components
 
-For each location $j$ and time step $t$ the density $f\!\left(y_{jt}\mid\mu_{jt}\left(\boldsymbol{\Theta}\right)\right)$ in Equation 
-\@ref(eq:total-log-likelihood-1) is chosen to match the observed mean–variance relationship at that location, which is 
-calculated as $\mathrm{VMR}_j = \mathrm{Var}(y_{j\cdot}) / \mathrm{Mean}(y_{j\cdot})$ from the raw surveillance counts. 
-If $\mathrm{VMR}_j < 1.5$ the data are close to *equi-dispersion* and we adopt a *Poisson* distributed error model. Otherwise,
-the count data are considered to be *over-dispersed* and we use a *Negative Binomial* error model with a location-specific dispersion 
-parameter $k_j$.
+For each location $j$ and time step $t$ the cases density $f\!\left(y_{jt}\mid\mu_{jt}\left(\boldsymbol{\Theta}\right)\right)$ in Equation 
+\@ref(eq:total-log-likelihood-1) is a *Negative Binomial* with a location-specific dispersion parameter $k_j$, which reduces to the *Poisson* density when $k_j = \infty$.
 
-### Negative Binomial density  (VMR $\ge 1.5$)
+### Negative Binomial density
 \begin{equation}
 \log P_{\text{NB}}\!\left(y_{jt}\mid\mu_{jt},k_j\right)
 \,=\,
@@ -124,26 +118,18 @@ parameter $k_j$.
 +y_{jt}\log\!\left[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\right]
 (\#eq:negbin)
 \end{equation}
-The dispersion is estimated per location via the method-of-moments:
-\begin{equation}
-k_j \;=\;\frac{\mu_j^2}{\mathrm{Var}(y_{j\cdot})-\mu_j},
-(\#eq:dispersion)
-\end{equation}
-so that $\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j$. As $k_j\rightarrow\infty$ the density in 
-\@ref(eq:negbin) collapses smoothly to the Poisson form.
+so that $\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j$. Every cell is scored through this density with the predicted mean floored at $\max\!\left(10^{-4},\ 0.02\,\bar{y}_{j}\right)$, where $\bar{y}_{j}$ is the location's mean observed count (`control$likelihood$eps_rel_cases`), so a day with observed cases and a zero prediction costs a bounded, data-scaled amount.
 
-### Poisson density  (VMR $< 1.5$)
-
+The dispersion $k_j$ is a property of the observation process, so it is estimated once per calibration from the observed cases alone (`est_nb_dispersion()`), not from the model-observation mismatch. For each location we aggregate the daily series to its native weekly reporting cadence (the reporting-week boundary is detected per location), model the weekly mean with a spline trend plus seasonal harmonics following the Farrington/Noufaily convention used by the [`surveillance`](https://cran.r-project.org/package=surveillance) package, and estimate $k_j$ by conditional maximum likelihood (`MASS::glm.nb`), honouring the per-observation confidence weights. The per-location estimates are then shrunk toward a cross-location mean-dispersion trend in the style of [Love, Huber & Anders 2014](https://doi.org/10.1186/s13059-014-0550-8). All-zero and otherwise uninformative series, and dispersion estimates that run to the Poisson boundary, resolve to $k_j = \infty$, i.e. the Poisson density
 \begin{equation}
 \log P_{\text{Pois}}\!\left(y_{jt}\mid\mu_{jt}\right)
 \,=\;
 y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
 (\#eq:poisson)
 \end{equation}
+The estimates are written to `2_calibration/diagnostics/nb_dispersion.csv`. They replace an earlier method-of-moments estimate across the whole series, which measured the variance of the epidemic signal rather than the observation dispersion and was held up by a floor ($k \ge 3$) at almost every location; that floor is retired. A dispersion can still be set explicitly with `control$likelihood$nb_k_cases`, which replaces the estimate.
 
-The automatic Poisson/Negative-Binomial switch ensures that the
-error structure embedded in the likelihood replicates the empirical
-dispersion seen in the surveillance data, while the weighting scheme
+The weighting scheme
 $w_j,\,w_t,\,w_{\text{cases}},\,w_{\text{deaths}}$ (introduced in
 Equation \@ref(eq:total-log-likelihood-2)) controls the relative influence
 of each location, time step, and outcome on the overall fit.
@@ -182,9 +168,9 @@ After all $n_{\text{sim}}$ parameter vectors have been scored, the calibration p
 
 - *Ensemble forecast* --- for each of $n_{\text{iter}}^{\text{ens}}$ stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.
 
-- *Best and medioid representative models* --- two deterministic summaries of the ensemble are also produced for scenario analysis. The *best model* is the parameter vector with the highest log-likelihood, $\hat{\boldsymbol{\Theta}}^{\text{best}} = \arg\max_i\bigl[\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})\bigr]$. The *medioid model* is the parameter vector closest (in weighted Mahalanobis distance) to the importance-sampling-weighted posterior centroid, providing a statistical representative that is less affected by stochastic excursions of the maximum-likelihood point than $\hat{\boldsymbol{\Theta}}^{\text{best}}$. Both representatives are simulated for $n_{\text{iter}}^{\text{best}}$ stochastic realisations (default 100), so their reported coverage is directly comparable to the ensemble.
+- *Medoid representative model* --- a single parameter vector is also selected for scenario analysis. The *medoid model* is the ensemble member whose predicted cases trajectory (the median over its stochastic runs) is closest, in mean absolute error on the log scale, to the ensemble's central cases trajectory, so that the representative tracks the reported curve. Its configuration, with the reported case fatality ratio shifted to the medoid's own posterior, is saved as `config_medoid.json` and simulated for $n_{\text{iter}}^{\text{best}}$ stochastic realisations (default 100), so its reported coverage is directly comparable to the ensemble. A best-likelihood configuration is not produced; the highest-likelihood draw is only flagged in the sample table.
 
-All three representations report $R^2$ from the stochastic median of their respective trajectories rather than from a separate deterministic LASER call, so they are directly comparable across the prediction set. The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of $A_{\text{best}} = 0.70$ and a maximum weight coefficient of variation of $\mathrm{CV}_{\tilde w,\text{best}} = 1.0$, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.
+All three representations report $R^2$ from the central line of their respective stochastic trajectories rather than from a separate deterministic simulation, so they are directly comparable across the prediction set. The central line is the weighted mean by default (`control$predictions$central_method`; it was the weighted median before MOSAIC-pkg v0.98.0, and `"median"` restores that). In the ensemble, each member's deaths are redrawn from the posterior of the reported case fatality ratio given that member's path, and forecast years carry the ensemble's shared latest-year CFR shift (see the [Case fatality rate](https://www.mosaicmod.org/model-description.html#case-fatality-rate) section). The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of $A_{\text{best}} = 0.70$ and a maximum weight coefficient of variation of $\mathrm{CV}_{\tilde w,\text{best}} = 1.0$, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.
 
 
 ## Estimating the Posterior Distribution of Model Parameters
