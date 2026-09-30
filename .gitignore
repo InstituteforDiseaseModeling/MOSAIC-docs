@@ -23,3 +23,7 @@
 Rplots.pdf
 figures/test_posteriors/
 figures/test_posteriors_sampled/
+
+# bookdown build artifacts (some older copies are still tracked; do not stage them)
+/MOSAIC-docs.rds
+_bookdown_files/
