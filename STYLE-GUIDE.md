@@ -28,6 +28,7 @@ These are the canonical assignments used throughout the model description. Do no
 | $W$ | Environmental reservoir |
 | $N$ | Total population |
 | $C, D, y$ | Observed cases, deaths, generic counts |
+| $\hat{y}_{jt}$ | Model-predicted mean of a count in the calibration likelihood (was $\mu_{jt}$ in `05-model-calibration.Rmd`; renamed so it cannot be read as the reported CFR) |
 
 **Demographic rates:**
 
@@ -35,7 +36,7 @@ These are the canonical assignments used throughout the model description. Do no
 |---|---|
 | $b_{jt}$ | Birth rate (lowercase) |
 | $d_{jt}$ | Background mortality (lowercase) |
-| $\mu_j$ | Cholera-specific CFR (subscript $j$ only, no $t$) |
+| $\mu_{jt}$ | Reported case fatality ratio: expected reported deaths per reported suspected case, by location and day (MOSAIC-pkg v0.96.0+; code-name `mu_jt`). Replaces the static $\mu_j$ and the retired IFR decomposition below |
 
 **Parameters (Greek, fixed assignment):**
 
@@ -54,7 +55,7 @@ These are the canonical assignments used throughout the model description. Do no
 | $\theta_j$ | WASH-mediated contact (subscript $j$ only) |
 | $\tau_i$ | Departure probability (subscript $i$ = origin) |
 | $\pi_{ij}$ | Diffusion $i\!\to\!j$ |
-| $\rho$ | Proportion of suspected cases that are true infections |
+| $\rho$ | Care-seeking probability: proportion of true symptomatic infections presenting as suspected cases |
 | $\psi_{jt}$ | Environmental suitability |
 | $\kappa$ | Concentration for 50% infection probability (ID₅₀) |
 | $\alpha_1, \alpha_2$ | Force-of-infection exponents |
@@ -66,8 +67,21 @@ These are the canonical assignments used throughout the model description. Do no
 | $\chi^{\text{end}}, \chi^{\text{epi}}$ | Diagnostic / reporting rate in endemic vs. epidemic periods |
 | $\rho_{\text{deaths}}$ | Death detection rate (analogous to $\rho$ for cases) |
 | $\eta_j$ | Per-location epidemic prevalence threshold (epidemic-trigger Isym/N) |
-| $l_{\text{cases}}, l_{\text{deaths}}$ | Reporting lag in days for cases / deaths |
-| $\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}$ | Decomposed IFR: baseline, linear-trend factor, epidemic-period multiplier |
+| $l_{\text{cases}}$ | Reporting lag in days from symptom onset to report; deaths are reported on the same lag. ($l_{\text{deaths}}$ is retired as of MOSAIC-pkg v0.96.0; use it only in historical text) |
+| $\mu_{j,0}, \mu_{j,1}, \mu_{j,\text{epi}}$ | **Retired** (pre-v0.96.0 decomposed daily mortality hazard: baseline, linear-trend factor, epidemic-period multiplier). Historical text only; do not reuse |
+| $p^{\text{fatal}}_{jt}$ | Probability that a symptomatic onset is fatal, $\mu_{jt}\,\rho/(\rho_{\text{deaths}}\,\chi^{\text{epi}})$ (code-name `p_fatal_jt`) |
+| $\mu^{0}_{jt}$ | Prior centre of the reported CFR: the WHO-annual GAM centres expanded daily by `make_mu_jt()` (the `config$mu_jt` a configuration carries) |
+| $\xi_j$ | Location offset of the reported CFR on the logit scale, integrated out of the deaths likelihood (code-name `a` / `a_j`) |
+| $e_{j,\text{yr}}$ | Country-year effect of the reported CFR on the logit scale: the GAM's country-year random effect, and the calendar-year deviation integrated out of the deaths likelihood (code-name `delta_{j,y}`) |
+| $\bar{e}_j$ | Forecast shift: ensemble-weighted mean deviation for the latest observed year, centring every forecast year (code-name `forecast_shift`) |
+| $\text{yr}^{\ast}_j$ | Latest calendar year observed past its New Year blend (the anchor year for $\bar{e}_j$) |
+| $\varphi_j$ | Quasi-Poisson dispersion of weekly observed deaths (`\varphi`, distinct from vaccine effectiveness $\phi_1, \phi_2$) |
+| $\text{sd}_{\text{year}}, \text{sd}_{\text{product}}, \text{sd}_{\text{country}}$ | Logit-scale SDs of the reported-CFR prior: GAM country-year SD (0.70), residual error of the GAM centre against observed reported CFR (0.3), GAM between-country SD (code-names `sd_year`, `sd_product`, `tau`) |
+| $u_j, f, g_j$ | GAM country random intercept, global smooth trend, country factor-smooth trend (`est_CFR_hierarchical()`; local to the CFR subsection) |
+| $B_{\text{yr}}(t)$ | Calendar-year basis of the CFR deviations: 1 inside the year, linear 60-day blend across each 1 January |
+| $m_{jw}, D_{jw}, \bar{w}_{jw}$ | Expected reported deaths, observed deaths and mean scoring weight in reporting week $w$ (deaths likelihood) |
+| $K_j$ | Number of integrated CFR quantities at location $j$ (the offset plus one deviation per calendar year) |
+| $\tau^{0}_i, \text{sd}_{\tau}$ | Median and log-scale SD of the overland departure-probability prior |
 | $\text{days}_{\text{short}}, \text{days}_{\text{long}}, \text{days}_{\text{spread}}$ | Environmental survival times; $\text{days}_{\text{long}} = \text{days}_{\text{short}} + \text{days}_{\text{spread}}$ |
 | $\psi^{\ast}_{jt}$ | EWMA-smoothed environmental suitability (raw output is $\psi_{jt}$) |
 | $a_{\psi^{\ast}}, b_{\psi^{\ast}}, z_{\psi^{\ast}}, k_{\psi^{\ast}}$ | Shape parameters for the $\psi \to \psi^{\ast}$ transformation |
@@ -114,7 +128,7 @@ Use `\widehat` for multi-letter hats; `\hat` for single letters.
 - $\sim \text{Binom}(n, p)$, $\sim \text{Pois}(\lambda)$
 - $\sim \mathrm{Exp}(\lambda)$ in newer prose
 - $\sim \text{Truncnorm}(\mu, \sigma, a, b)$ when adding truncated-normal priors (mean, sd, lower, upper)
-- Density notation: $f(y \mid \mu)$, $P(\cdot \mid \cdot)$, $\log P(\cdot)$
+- Density notation: $f(y \mid \hat{y})$, $P(\cdot \mid \cdot)$, $\log P(\cdot)$
 
 ### 1.6 Functions and operators
 
