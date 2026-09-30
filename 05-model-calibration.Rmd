@@ -46,7 +46,7 @@ P(\text{data}\mid\boldsymbol{\Theta})\;
 P(\text{data}\mid\boldsymbol{\Theta}),
 (\#eq:bayes-2)
 \end{equation}
-therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood $P(\text{data}\mid\boldsymbol{\Theta})$, and we can now construct the likelihood function using the relevant probability density functions $f(y\mid\mu)$ as described below.
+therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood $P(\text{data}\mid\boldsymbol{\Theta})$, and we can now construct the likelihood function using the relevant probability density functions $f(y\mid\hat{y})$ as described below.
 
 
 
@@ -54,7 +54,7 @@ therefore maximizing the posterior (or minimizing its negative log) is equivalen
 ## Total Log-likelihood for Cases and Deaths
 
 Because the model posterior is proportional to $P(\text{data}\mid\boldsymbol{\Theta})$, we constructed the likelihood function with
-the appropriate distribution for each of the observed data types using common notation for a probability density function $f(y\mid\mu)$. The MOSAIC framework is a spatial model, so we also included the $J$ spatial locations and $T$ time points in the full
+the appropriate distribution for each of the observed data types using common notation for a probability density function $f(y\mid\hat{y})$. The MOSAIC framework is a spatial model, so we also included the $J$ spatial locations and $T$ time points in the full
 likelihood, which gives the product over both indices:
 
 \begin{equation}
@@ -65,14 +65,14 @@ P\left(\text{data}\mid\boldsymbol{\Theta}\right)
 f\!\left(
 y_{jt}\;
 \bigl|\;
-\mu_{jt}\!\left(\boldsymbol{\Theta}\right)
+\hat{y}_{jt}\!\left(\boldsymbol{\Theta}\right)
 \right),
 (\#eq:total-log-likelihood-1)
 \end{equation}
 
 where $y_{jt}$ is the observed count (cases, deaths, etc.) for location $j$ at
-time $t$, and $\mu_{jt}(\boldsymbol{\Theta})$ is the corresponding model-generated
-mean.  Substituting $f(\cdot)$ with the appropriate probability distribution
+time $t$, and $\hat{y}_{jt}(\boldsymbol{\Theta})$ is the corresponding model-generated
+mean (written $C_{j,t}^{\text{est}}$ for cases below).  Substituting $f(\cdot)$ with the appropriate probability distribution
 (Poisson, Negative Binomial, etc.) yields the explicit likelihood function used in
 calibration.
 
@@ -106,25 +106,25 @@ Note that each log-likelihood term is weighted three times — by a location wei
 
 ## Distributional Assumptions for Likelihood Components
 
-For each location $j$ and time step $t$ the cases density $f\!\left(y_{jt}\mid\mu_{jt}\left(\boldsymbol{\Theta}\right)\right)$ in Equation 
+For each location $j$ and time step $t$ the cases density $f\!\left(y_{jt}\mid\hat{y}_{jt}\left(\boldsymbol{\Theta}\right)\right)$ in Equation 
 \@ref(eq:total-log-likelihood-1) is a *Negative Binomial* with a location-specific dispersion parameter $k_j$, which reduces to the *Poisson* density when $k_j = \infty$.
 
 ### Negative Binomial density
 \begin{equation}
-\log P_{\text{NB}}\!\left(y_{jt}\mid\mu_{jt},k_j\right)
+\log P_{\text{NB}}\!\left(y_{jt}\mid\hat{y}_{jt},k_j\right)
 \,=\,
 \log\Gamma(y_{jt}+k_j)-\log\Gamma(k_j)-\log\Gamma(y_{jt}+1)
-+k_j\log\!\left[\tfrac{k_j}{k_j+\mu_{jt}}\right]
-+y_{jt}\log\!\left[\tfrac{\mu_{jt}}{k_j+\mu_{jt}}\right]
++k_j\log\!\left[\tfrac{k_j}{k_j+\hat{y}_{jt}}\right]
++y_{jt}\log\!\left[\tfrac{\hat{y}_{jt}}{k_j+\hat{y}_{jt}}\right]
 (\#eq:negbin)
 \end{equation}
-so that $\mathrm{Var}(y_{jt})=\mu_{jt}+\mu_{jt}^2/k_j$. Every cell is scored through this density with the predicted mean floored at $\max\!\left(10^{-4},\ 0.02\,\bar{y}_{j}\right)$, where $\bar{y}_{j}$ is the location's mean observed count (`control$likelihood$eps_rel_cases`), so a day with observed cases and a zero prediction costs a bounded, data-scaled amount.
+so that $\mathrm{Var}(y_{jt})=\hat{y}_{jt}+\hat{y}_{jt}^2/k_j$. Every cell is scored through this density with the predicted mean floored at $\max\!\left(10^{-4},\ 0.02\,\bar{y}_{j}\right)$, where $\bar{y}_{j}$ is the location's mean observed count (`control$likelihood$eps_rel_cases`), so a day with observed cases and a zero prediction costs a bounded, data-scaled amount.
 
-The dispersion $k_j$ is a property of the observation process, so it is estimated once per calibration from the observed cases alone (`est_nb_dispersion()`), not from the model-observation mismatch. For each location we aggregate the daily series to its native weekly reporting cadence (the reporting-week boundary is detected per location), model the weekly mean with a spline trend plus seasonal harmonics following the Farrington/Noufaily convention used by the [`surveillance`](https://cran.r-project.org/package=surveillance) package, and estimate $k_j$ by conditional maximum likelihood (`MASS::glm.nb`), honouring the per-observation confidence weights. The per-location estimates are then shrunk toward a cross-location mean-dispersion trend in the style of [Love, Huber & Anders 2014](https://doi.org/10.1186/s13059-014-0550-8). All-zero and otherwise uninformative series, and dispersion estimates that run to the Poisson boundary, resolve to $k_j = \infty$, i.e. the Poisson density
+The dispersion $k_j$ is a property of the observation process, so it is estimated once per calibration from the observed cases alone (`est_nb_dispersion()`), not from the model-observation mismatch. For each location we aggregate the daily series to its native weekly reporting cadence (the reporting-week boundary is detected per location), model the weekly mean with a spline trend plus seasonal harmonics following the Farrington/Noufaily convention used by the [`surveillance`](https://cran.r-project.org/package=surveillance) package, and estimate $k_j$ by conditional maximum likelihood (`MASS::glm.nb`), honouring the per-observation confidence weights. The per-location estimates are then shrunk toward a cross-location mean-dispersion trend in the style of [Love, Huber & Anders 2014](https://doi.org/10.1186/s13059-014-0550-8), with each location's own estimate weighted by its precision (the trend is fitted only when at least five locations carry estimates; otherwise the estimates are used as they are). Because the daily series are weekly totals spread evenly over the days of the week, the quadratic term $\hat{y}_{jt}^2/k_j$ of the variance is the same on the weekly and the daily scale, so the weekly $k_j$ applies directly to the daily cells. All-zero and otherwise uninformative series, and dispersion estimates that run to the Poisson boundary, resolve to $k_j = \infty$, i.e. the Poisson density
 \begin{equation}
-\log P_{\text{Pois}}\!\left(y_{jt}\mid\mu_{jt}\right)
+\log P_{\text{Pois}}\!\left(y_{jt}\mid\hat{y}_{jt}\right)
 \,=\;
-y_{jt}\log\mu_{jt}-\mu_{jt}-\log(y_{jt}!).
+y_{jt}\log\hat{y}_{jt}-\hat{y}_{jt}-\log(y_{jt}!).
 (\#eq:poisson)
 \end{equation}
 The estimates are written to `2_calibration/diagnostics/nb_dispersion.csv`. They replace an earlier method-of-moments estimate across the whole series, which measured the variance of the epidemic signal rather than the observation dispersion and was held up by a floor ($k \ge 3$) at almost every location; that floor is retired. A dispersion can still be set explicitly with `control$likelihood$nb_k_cases`, which replaces the estimate.
@@ -140,11 +140,11 @@ of each location, time step, and outcome on the overall fit.
 
 The MOSAIC calibration relies on a *brute-force random sampling* (BFRS) workflow with importance-sampling for estimating posterior parameter distributions. The BFRS approach is deliberately simple, fully parallelisable, and maps directly onto the informative priors which have been painstakingly estimated a priori (see the [Model Description](https://www.mosaicmod.org/model-description.html) page).  
 
-Unlike [Markov-Chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo) (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is small because the LASER modelling engine, whose fast, metapopulation implementation can evaluate each $\boldsymbol{\Theta}^{(i)}$ parameter draw in milliseconds.
+Unlike [Markov-Chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo) (MCMC) sampling methods, the BFRS workflow generates independent parameter draws, so there is no need to worry about convergence diagnostics, burn-in, or autocorrelation, and simulations can be distributed across hundreds of CPUs. The trade-off is efficiency: for a fixed computational budget MCMC can concentrate samples in the highest-posterior region, whereas BFRS spends many draws in moderately likely parts of the space. Although this wastes some compute, the penalty is acceptable because the metapopulation engine (`run_simulation()`, implemented in R) evaluates each $\boldsymbol{\Theta}^{(i)}$ parameter draw in roughly a second for the full 40-location model, and draws are embarrassingly parallel.
 
-Relative to [Latin-hypercube](https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any) or [Sobol sequence](https://en.wikipedia.org/wiki/Sobol_sequence) sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with LASER’s speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.
+Relative to [Latin-hypercube](https://en.wikipedia.org/wiki/Latin_hypercube_sampling#:~:text=Thus%2C%20orthogonal%20sampling%20ensures%20that,of%20random%20numbers%20without%20any) or [Sobol sequence](https://en.wikipedia.org/wiki/Sobol_sequence) sampling designs, which are also intended to do broad surveys of the parameter space, BFRS keeps the exact prior shape, can be extended at any time by simply adding more draws, and feeds directly into likelihood weighting without extra transformations. In combination with the engine's speed, these features make Bayesian calibration in MOSAIC both fast and easily reproducible.
 
-In practice, the BFRS workflow is executed in two phases. A *broad exploration phase* draws $n_{\text{sim}}^{(1)}$ parameter vectors directly from the prior to identify the high-likelihood region of the parameter space. A *fine-tuning phase* then refines the posterior by drawing $n_{\text{sim}}^{(2)}$ additional vectors from an updated proposal distribution centred on the retained subset of the exploration phase, repeating until the convergence diagnostics in the [Model convergence](#model-convergence) section are satisfied or a maximum number of fine-tuning batches is reached. Across both phases, the LASER simulations are dispatched to a Dask `LocalCluster` (or an Azure-style cluster for production runs), with several thousand parameter vectors evaluated in parallel. To prevent fork-related deadlocks between the Numba JIT inside laser-cholera and the Dask worker pool, the thread-count environment variables (`TBB_NUM_THREADS`, `NUMBA_NUM_THREADS`, `OMP_NUM_THREADS`, `MKL_NUM_THREADS`, `OPENBLAS_NUM_THREADS`) are pinned to 1 in each worker before the LASER engine is imported.
+In practice, the BFRS workflow is executed in two phases, and every draw in both phases comes from the prior $P(\boldsymbol{\Theta})$; the phases differ only in how many draws are run, not in where they are drawn. An *adaptive phase* runs fixed-size batches (default 500 draws; at least 5 and at most 8 batches) and after each batch recomputes the per-parameter marginal ESS described in the [Model convergence](#model-convergence) section, tracking the value reached by 95% of the parameters. It ends when a regression of that ESS on $\sqrt{n_{\text{sim}}}$ fits with $R^2 \ge 0.90$ (over at least five batches) or the batch limit is reached. A *predictive phase* then uses that regression to predict how many further draws are needed to reach the target ESS, runs them in batches (never smaller than the adaptive batch size and at most 10,000 draws each, for at most 10 batches), and re-evaluates the ESS after each until the target is met or the total budget (default 100,000 draws) is spent. Batches are dispatched to a local PSOCK cluster of R worker processes (the `parallel` package); the BLAS and OpenMP thread-count environment variables are pinned to 1 in each worker so that parallel workers do not oversubscribe the cores.
 
 The steps below summarise how this BFRS workflow is turned into a practical calibration routine—moving from prior draws, through model simulation and likelihood evaluation, to the identification of the best-fitting parameter set.
 
@@ -158,19 +158,19 @@ The transitions between most model compartments are stochastic, so for each inde
 
 3. *Evaluate the fit for every draw*
 
-For each of the $n_{\text{sim}} \times n_{\text{iter}}$ internal iterations, compute the total *negative* log-likelihood $-\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ via Equation \@ref(eq:total-log-likelihood-2).
+For each of the $n_{\text{sim}} \times n_{\text{iter}}$ internal iterations, compute the total log-likelihood via Equation \@ref(eq:total-log-likelihood-2), and combine the $n_{\text{iter}}$ values of each draw into $\log\mathcal{L}(\boldsymbol{\Theta}^{(i)})$ by their log-mean-exp, i.e. the log of the likelihood averaged over the stochastic iterations.
 
 4. *Posterior summaries and representative-model selection*
 
-After all $n_{\text{sim}}$ parameter vectors have been scored, the calibration pipeline produces three complementary representations of the posterior:
+After all $n_{\text{sim}}$ parameter vectors have been scored, the calibration pipeline produces three complementary summaries: the posterior parameter distributions and two predictive representations.
 
 - *Posterior parameter distributions* --- the saturated subset weights $\tilde w_i$ (Equation \@ref(eq:aic-weights)) are applied to the full draw set, yielding marginal posterior summaries for each model parameter (Equation \@ref(eq:weighted-posterior)). These are reported in the prior/posterior diagnostic plots and form the substrate for all downstream forecasts.
 
 - *Ensemble forecast* --- for each of $n_{\text{iter}}^{\text{ens}}$ stochastic realisations per parameter vector (default 10), the model is simulated forward and the per-trajectory predictions are aggregated by their importance weights to produce a posterior predictive ensemble. This is the default representation for probabilistic forecasts.
 
-- *Medoid representative model* --- a single parameter vector is also selected for scenario analysis. The *medoid model* is the ensemble member whose predicted cases trajectory (the median over its stochastic runs) is closest, in mean absolute error on the log scale, to the ensemble's central cases trajectory, so that the representative tracks the reported curve. Its configuration, with the reported case fatality ratio shifted to the medoid's own posterior, is saved as `config_medoid.json` and simulated for $n_{\text{iter}}^{\text{best}}$ stochastic realisations (default 100), so its reported coverage is directly comparable to the ensemble. A best-likelihood configuration is not produced; the highest-likelihood draw is only flagged in the sample table.
+- *Medoid representative model* --- a single parameter vector is also selected for scenario analysis. The *medoid model* is the ensemble member whose predicted cases trajectory (the median over its stochastic runs) is closest, in mean absolute error of $\log(1 + \text{cases})$, to the ensemble's central cases trajectory, so that the representative tracks the reported curve. The distance is computed on the first location of the configuration only, so in a multi-location calibration the medoid is chosen for that location's fit. Its configuration, with the reported case fatality ratio shifted to the medoid's own posterior, is saved as `config_medoid.json` and simulated for $n_{\text{iter}}^{\text{best}}$ stochastic realisations (default 100), so its reported coverage is directly comparable to the ensemble. A best-likelihood configuration is not produced; the highest-likelihood draw is only flagged in the sample table.
 
-All three representations report $R^2$ from the central line of their respective stochastic trajectories rather than from a separate deterministic simulation, so they are directly comparable across the prediction set. The central line is the weighted mean by default (`control$predictions$central_method`; it was the weighted median before MOSAIC-pkg v0.98.0, and `"median"` restores that). In the ensemble, each member's deaths are redrawn from the posterior of the reported case fatality ratio given that member's path, and forecast years carry the ensemble's shared latest-year CFR shift (see the [Case fatality rate](https://www.mosaicmod.org/model-description.html#case-fatality-rate) section). The retained subset of draws used for the ensemble is selected to satisfy two complementary criteria: a minimum agreement index of $A_{\text{best}} = 0.70$ and a maximum weight coefficient of variation of $\mathrm{CV}_{\tilde w,\text{best}} = 1.0$, with the fine-tuning phase increasing the subset size adaptively until both are met or the maximum number of fine-tuning batches is reached.
+Both predictive representations, the ensemble and the medoid, report $R^2$ and the bias ratio from the central line of their respective stochastic trajectories rather than from a separate deterministic simulation, so they are directly comparable across the prediction set. The central line is the weighted mean by default (`control$predictions$central_method`; it was the weighted median before MOSAIC-pkg v0.98.0, and `"median"` restores that). In the ensemble, each member's deaths are redrawn from the posterior of the reported case fatality ratio given that member's path, and forecast years carry the ensemble's shared latest-year CFR shift (see the [Case fatality rate](https://www.mosaicmod.org/model-description.html#case-fatality-rate) section). The retained subset of draws used for the ensemble is selected after sampling has finished, by a grid search over subset sizes that seeks a subset meeting the targets $\text{ESS}_{\text{best}} = 100$, $A_{\text{best}} = 0.70$ and $\mathrm{CV}_{\tilde w,\text{best}} = 1.0$, relaxing the targets through a sequence of tiers (`get_default_subset_tiers()`) until one is met (see Stage 1 below). No further simulations are run for this step.
 
 
 ## Estimating the Posterior Distribution of Model Parameters
@@ -267,10 +267,11 @@ the role that $\hat R$ does in MCMC. We employ the specification of the ESS in [
 \right]^{-1}.
 (\#eq:ess)
 \end{equation}
+Equation \@ref(eq:ess) is the Kish form (`control$targets$ESS_method = "kish"`). The default, `"perplexity"`, is the exponential of the weight entropy, $\exp\!\big(-\sum_i \tilde{w}_i \log \tilde{w}_i\big)$, which is never smaller than the Kish value; $\text{ESS}_B$, $\widehat{\text{ESS}}_{\text{IS}}$ and the marginal ESS below all use the configured form.
 Because draws outside $\mathcal{B}$ have $\tilde{w}_i=0$, $\text{ESS}_B$ reflects only the retained
 subset, and --- as noted above --- is bounded below by roughly $0.42|\mathcal{B}|$ by the saturation alone. For importance-sampling–style weighting in moderate-dimensional parameter spaces, an ESS in the low thousands is a reasonable working target for stable marginal posterior medians and 95% credible intervals ([Elvira *et al.* 2022](https://onlinelibrary.wiley.com/doi/10.1111/insr.12500); see also the MCMC-context discussion of ESS thresholds in [Gelman *et al.* 2014](https://sites.stat.columbia.edu/gelman/book/) and [Bürkner 2017](https://www.jstatsoft.org/article/view/v080i01)). The earlier MOSAIC guidance of $\widehat{\text{ESS}} \gtrsim 500$–$1000$ tracks these MCMC heuristics; for the higher-dimensional BFRS pipeline used in v1.0 we additionally inspect the marginal-parameter ESS (below) and the Pareto-$k$ diagnostic from PSIS to flag cases where the truncated-weight distribution has heavy tails.
 
-The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default implementation in MOSAIC bins each parameter's draws into 100 equally weighted bins on its prior support and applies Equation \@ref(eq:ess) within each bin, with the grid scaled adaptively to the parameter's effective range. This binned scheme replaces the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws.
+The aggregate $\widehat{\text{ESS}}$ above measures the joint information retained across the full parameter vector $\boldsymbol{\Theta}$. To diagnose whether the posterior on any *individual* parameter is well-supported, we also compute a per-parameter marginal ESS. The default (`control$targets$ESS_marginal_method = "kde"`) estimates each parameter's weighted marginal posterior by a kernel density on a grid over the range of its draws (100 grid points at the default target $\text{ESS}_{\text{param}} = 100$, more for higher targets), divides it by a uniform density on that range, applies Equation \@ref(eq:ess) to the normalised ratios and rescales the result from grid points to draws. A `"binned"` alternative sums the weights in 100 bins and applies Equation \@ref(eq:ess) to the bin totals. Both replace the bare Owen ESS used in earlier versions, which was sensitive to single highly weighted draws. This marginal ESS is the quantity that drives the adaptive and predictive phases described above.
 
 The weights in Equation \@ref(eq:aic-weights) are related to the broader *Gibbs-posterior* family ([Bissiri *et al.* 2016](https://doi.org/10.1111/rssb.12158)), though --- as noted above and for the reason given after Equation \@ref(eq:gibbs-weights) --- the implemented saturated form does **not** satisfy the coherence requirement from which Bissiri *et al.* derive that family, so it is not a Gibbs posterior. The general form is
 
@@ -283,7 +284,7 @@ where $x_i$ is a generic loss (lower is better) and $w_{\text{gibbs}} \ge 0$ is 
 
 Two caveats on the saturated default, both material. First, it is **not sample-coherent**: because $\min(\Delta_i, \Delta^{\ast})$ places the sample maximum inside a non-linear function, the additive shift no longer cancels, and the *relative* weight of two fixed draws depends on which other draws are in the sample. Concretely, two draws with $\log\mathcal{L} = -100$ and $-102$ have weight ratio $e^{2}=7.39$; adding a third, better draw at $-90$ --- changing neither of the first two --- moves that ratio to exactly $1.00$. Bissiri *et al.* derive the Gibbs form *from* a coherence requirement, which this violates. Second, the saturation level $\Delta^{\ast}=4$ is **fixed**, whereas the classical truncated-importance-sampling result of [Ionides 2008](https://doi.org/10.1198/106186008X320456) requires a truncation level that GROWS with the sample size (at $\sqrt{S}\,\bar r$) for consistency. A fixed level does not deliver it, so the estimator does not converge as $n$ grows.
 
-Note that the location, time, and outcome shape weights $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ that enter the log-likelihood in Equation \@ref(eq:total-log-likelihood-2) are normalised to make their contributions comparable across components: each shape weight is rescaled by $N_{\text{obs}} / N_{\text{component}}$, where $N_{\text{obs}}$ is the count of non-NA surveillance observations and $N_{\text{component}}$ is the number of observations contributing to that particular shape term. This rescaling ensures that countries with sparse surveillance do not dominate the calibration by virtue of having fewer non-zero entries to sum over.
+Note that the optional shape terms of the likelihood (peak timing, peak magnitude, cumulative progression and the weighted interval score, all off by default) are rescaled so that their weights are comparable with the core terms: each is multiplied by $N_{\text{obs}} / N_{\text{component}}$, where $N_{\text{obs}}$ is the number of time steps with at least one observation at the location and $N_{\text{component}}$ is the number of evaluations that shape term makes (peaks, quantiles or cumulative evaluation points). The location, time and outcome weights $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ of Equation \@ref(eq:total-log-likelihood-2) are not rescaled.
 
 
 ### Agreement index *A*
