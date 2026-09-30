@@ -561,7 +561,7 @@ $$
 \nu_{jt} = f\big(\text{reported OCV doses distributed}_{jt} \ | \ \text{daily distribution rate}\big).
 $$
 
-We separate $\nu_{jt}$ into first doses $\nu_{1,jt}$ and second doses $\nu_{2,jt}$ on the basis of the campaign-level vaccine classification reported by GTFCC: Euvichol-S deliveries contribute exclusively to $\nu_{1,jt}$ (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to $\nu_{1,jt}$ and $\nu_{2,jt}$ according to the campaign's reported dose-1 and dose-2 split. Within each day, doses are *delivered deterministically* (rather than via a Poisson draw, as in earlier MOSAIC versions): the reported number of doses for that day is rounded to the nearest integer and processed without stochastic variation. First doses are then allocated proportionally across the configurable source set $\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}$ (default: all five), so that a fraction $X_{jt} / N^{\text{src}}_{jt}$ of $\nu_{1,jt}$ is delivered to each eligible compartment $X$. Second doses are restricted to existing $V_1$ recipients and capped at the current $V_1$ population to prevent over-administration. Two patch-level counters $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ record the daily totals for comparison with reported OCV-campaign data; these are tracking-only and do not feed back into the model dynamics.
+The dose series carries shipped doses only, with no round or regimen information, so in the default configuration **all doses are routed to first doses**: $\nu_{1,jt} = \nu_{jt}$ and $\nu_{2,jt} = 0$, and $V_2$ is not entered after the simulation start. For simulation windows from 2023 onward this is close to right, because the ICG suspended the two-dose regimen for outbreak response in October 2022 during the global OCV shortage ([WHO, 19 October 2022](https://www.who.int/news/item/19-10-2022-shortage-of-cholera-vaccines-leads-to-temporary-suspension-of-two-dose-strategy--as-cases-rise-worldwide)), so reactive campaigns have been single-dose since. For earlier windows this is a known limitation: a two-dose campaign is counted as two rounds of first doses, which roughly doubles the number of distinct people immunised, and shipped-but-unused doses are counted as delivered. Splitting $\nu_{jt}$ into $\nu_{1,jt}$ and $\nu_{2,jt}$ requires round-level data in the processed vaccination inputs; pre-start campaigns do enter the two-dose compartment through the initial conditions, which pair rounds from the GTFCC campaign log (see [Vaccinated initial conditions](#initial-conditions)). Within each day, doses are *delivered deterministically* (rather than via a Poisson draw, as in earlier MOSAIC versions): the reported number of doses for that day is rounded to the nearest integer and processed without stochastic variation. First doses are then allocated proportionally across the configurable source set $\mathcal{V}^{\text{src}} \subseteq \{S, E, I_1, I_2, R\}$ (default: all five), so that a fraction $X_{jt} / N^{\text{src}}_{jt}$ of $\nu_{1,jt}$ is delivered to each eligible compartment $X$. Second doses are restricted to existing $V_1$ recipients and capped at the current $V_1$ population to prevent over-administration. Two patch-level counters $\text{doses}^{(1)}_{j,t}$ and $\text{doses}^{(2)}_{j,t}$ record the daily totals for comparison with reported OCV-campaign data; these are tracking-only and do not feed back into the model dynamics.
 
 A few features of the implementation deserve explicit mention:
 
@@ -1391,7 +1391,7 @@ The pipeline reports $R^{\mathrm{hum}}_{jt}$, $R^{\mathrm{env}}_{jt}$ and their 
 
 ## Initial conditions
 
-The first MOSAIC version begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
+The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. The initial-condition priors are seeded at a data-driven epoch $t_0$ within the first year of the simulation window, the month in which the most countries report active cases (1 February 2023 for the default configuration). Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
 
 ### Vaccinated initial conditions ($V_1, V_2$)
 
@@ -1405,7 +1405,13 @@ with shape parameters $(s_1, s_2)$ derived per country (e.g. for Mozambique the 
 
 ### Susceptible and recovered initial conditions ($S, R$)
 
-The proportion in $R$ at $t = 0$ is derived from the cumulative reported cholera incidence over the years preceding 1 January 2023, scaled by $1/\sigma$ to back out the total number of true infections, then adjusted by the natural-immunity waning rate $\varepsilon$ to give the surviving immune fraction at $t = 0$. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
+The proportion in $R$ at $t = 0$ is derived from the cumulative reported cholera incidence in the WHO annual record over the years preceding $t_0$ (spread over each year with the location's seasonal pattern), converted to true infections through the same observation process the engine uses (Equation \@ref(eq:reported-cases)),
+
+$$
+\text{infections} \;=\; \text{reported cases} \times \frac{\chi^{\text{end}}}{\rho\,\sigma},
+$$
+
+then adjusted by the natural-immunity waning rate $\varepsilon$ (applied from the end of each infection) to give the surviving immune fraction at $t = 0$. Each Monte Carlo draw samples $\rho$, $\chi^{\text{end}}$, $\sigma$, $\varepsilon$ and the recovery and incubation rates from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
 
 The proportion in $S$ is then derived as the residual once the other five proportions have been placed:
 
@@ -1417,7 +1423,13 @@ and the resulting per-country values are fit to a Beta prior. Across the 40 MOSA
 
 ### Exposed and infected initial conditions ($E, I_1, I_2$)
 
-The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported case count in the weeks leading up to 1 January 2023 by inverting the observation pipeline (Equation \@ref(eq:reported-cases)) to recover the incident symptomatic infections, which are then mapped to the initial infectious pool using the mean symptomatic infectious period $\gamma_1^{-1}$. The $E$ and $I$ priors are placed on the log scale with relatively wide support to reflect the substantial uncertainty in the immediate pre-start state. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ using the symptomatic proportion $\sigma$.
+The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported cases in a short window before $t_0$ (three days by default) by inverting the observation pipeline (Equation \@ref(eq:reported-cases)): a case reported on day $d$ is a symptomatic onset on day $d - l_{\text{cases}}$, and all onsets, symptomatic and asymptomatic, number $\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)$. With $\lambda_j$ the resulting mean daily onset rate over the window,
+
+$$
+E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
+$$
+
+the exposed stock in balance with that onset rate under the engine's daily progression probability $1 - e^{-\iota}$ (a reported case has already left $E$, so $E$ is not built from the reports themselves). $I_j$ is the sum of the onsets that have not yet recovered by $t_0$, each surviving with daily probability $e^{-\gamma_1}$ for the symptomatic share $\sigma$ and $e^{-\gamma_2}$ for the rest; onsets the window cannot see (those in the last $l_{\text{cases}}$ days, reported on or after $t_0$, and those older than the window) are filled in at the same rate $\lambda_j$. Each Monte Carlo draw samples $\sigma$, $\iota$, $\gamma_1$, $\gamma_2$, $\rho$, $\chi^{\text{end}}$ and $l_{\text{cases}}$ from their priors. The Beta prior for each country keeps the Monte Carlo mean $m$ and is given a 95% interval of approximately $[m/10,\ 10m]$ on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times; countries whose window reports no cases receive a near-zero template prior. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ by a binomial draw with the symptomatic proportion $\sigma$ as the probability.
 
 After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country's $t = 0$ population.
 
@@ -1529,7 +1541,7 @@ tbl <- data.frame(
           "The incubation period of cholera infection",                                        # iota
           "Vaccine effectiveness of one-dose OCV.",                                            # phi_1
           "Vaccine effectiveness of two-dose OCV.",                                            # phi_2
-          "Total OCV vaccination rate in destination $j$ at time $t$. In MOSAIC v1.0 this is split into separate first-dose ($\\nu_{1,jt}$) and second-dose ($\\nu_{2,jt}$) rates --- see the supplementary parameter table below for details.",          # nu_{jt}
+          "Total OCV doses delivered per day in destination $j$ at time $t$ (shipped doses spread at a maximum daily rate). The engine takes first-dose ($\\nu_{1,jt}$) and second-dose ($\\nu_{2,jt}$) rates; the default configuration routes all doses to $\\nu_{1,jt}$ --- see the supplementary parameter table below.",          # nu_{jt}
           "Waning immunity rate of vaccinated individuals with one-dose OCV.",                 # omega_1
           "Waning immunity rate of vaccinated individuals with two-dose OCV.",                 # omega_2
           "Waning immunity rate of recovered individuals.",                                  # varepsilon
@@ -1698,7 +1710,7 @@ tbl2 <- data.frame(
      ),
      Description = c(
           "First-dose vaccination rate (deterministic delivery) in destination $j$ at time $t$.",
-          "Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients.",
+          "Second-dose vaccination rate in destination $j$ at time $t$; restricted to existing $V_1$ recipients. Zero in the default configuration (no round-level data).",
           "Set of compartments eligible for first-dose vaccination (subset of $\\{S, E, I_1, I_2, R\\}$).",
           "Total population eligible for first-dose vaccination on day $t$: $\\sum_{X \\in \\mathcal{V}^{\\text{src}}} X_{jt}$.",
           "Symptomatic-to-asymptomatic shedding ratio $\\zeta_1/\\zeta_2$.",
@@ -1725,8 +1737,8 @@ tbl2 <- data.frame(
           "Inverse-temperature parameter for the Gibbs-posterior model weighting (see calibration chapter)."
      ),
      Distribution = c(
-          "Derived from GTFCC OCV campaign data.",
-          "Derived from GTFCC OCV campaign data.",
+          "All shipped doses, $\\nu_{jt}$ (GTFCC and WHO ICG campaign data).",
+          "$0$ in the default configuration.",
           "Default: $\\{S, E, I_1, I_2, R\\}$.",
           "Computed.",
           "$\\text{Lognormal}(4.31, 4.39)$ truncated to $[1, \\infty)$",
