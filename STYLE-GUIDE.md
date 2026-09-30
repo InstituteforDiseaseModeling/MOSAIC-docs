@@ -86,6 +86,12 @@ These are the canonical assignments used throughout the model description. Do no
 | $\psi^{\ast}_{jt}$ | EWMA-smoothed environmental suitability (raw output is $\psi_{jt}$) |
 | $a_{\psi^{\ast}}, b_{\psi^{\ast}}, z_{\psi^{\ast}}, k_{\psi^{\ast}}$ | Shape parameters for the $\psi \to \psi^{\ast}$ transformation |
 | $w_{\text{gibbs}}$ | Gibbs-weight inverse temperature for the calibration ensemble (code-name `eta` in MOSAIC-pkg; renamed in the docs to match the existing $w_j, w_t, w_{\text{cases}}, w_{\text{deaths}}$ weight family) |
+| $\beta_{j0}^{\text{tot}}$ | Total baseline transmission rate, sampled in calibration; $\beta_{j0}^{\text{hum}} = p_\beta\,\beta_{j0}^{\text{tot}}$ and $\beta_{j0}^{\text{env}} = (1-p_\beta)\,\beta_{j0}^{\text{tot}}$ are derived (code-name `beta_j0_tot`; MOSAIC-pkg v0.100.0 docs pass) |
+| $p_\beta$ | Human-to-human share of the total baseline transmission rate (code-name `p_beta`; already used in `05-model-calibration.Rmd`) |
+| $\omega^{\text{mob}}, \gamma^{\text{mob}}$ | Gravity-model population and distance-decay exponents of $\pi_{ij}$ (code-names `mobility_omega`, `mobility_gamma`). Replace the bare $\omega$, $\gamma$ formerly used in the gravity equation, which collided with $\omega_{1,2}$ and $\gamma_{1,2}$ |
+| $t_0$ | Initial-condition seeding epoch (code-name `ic_t0`; `04-model-description.Rmd` Initial conditions only) |
+| $\lambda_j$ | Mean daily onset rate back-calculated from reported cases in the initial-condition window (local to the E/I initial-conditions subsection) |
+| $f(t)$ | Sum of the four harmonic terms of the seasonal envelope $1 + f(t)$ (local to the Seasonality section; distinct from $f(\psi_{jt})$ in the decay-rate section) |
 
 **Rule on introducing new symbols.** When MOSAIC-pkg adds a parameter without an existing math symbol (e.g., `rho_deaths`, `nu_jt_sources`), **propose** a candidate in the editing thread and **pause for approval** before writing it into a `.Rmd`. Do not silently invent notation.
 
