@@ -646,7 +646,7 @@ knitr::include_graphics("figures/immune_decay.png")
 
 ## Spatial dynamics
 
-The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below. We fit the diffusion kernel $\pi_{ij}$ to a fused origin-destination matrix for all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)). The fused matrix is the sum of two daily person-flow matrices: average daily air passenger volume, and an overland matrix built by ensemble-averaging four bilateral sources -- migrant stock, estimated migration flows, social connectedness, and land contiguity -- and then raking each origin's row total to its overland departure estimate. We take the departure probability $\tau_i$ from those overland cross-border travel estimates rather than from the air-only fit, because air traffic captures only a minority of cross-border movement in the region.
+The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters belong to the departure-diffusion model below, but they are informed by different data. We fit the diffusion kernel $\pi_{ij}$ to a fused origin-destination matrix for all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)). The fused matrix is the sum of two daily person-flow matrices: average daily air passenger volume, and an overland matrix built by ensemble-averaging four bilateral sources -- migrant stock, estimated migration flows, social connectedness, and land contiguity -- and then raking each origin's row total to its overland departure estimate. We take the departure probability $\tau_i$ from those overland cross-border travel estimates rather than from the air-only fit, because air traffic captures only a minority of cross-border movement in the region.
 
 ```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of travelers per day among all countries in the fused origin-destination matrix, which combines air passenger volume with overland movement."}
 knitr::include_graphics("figures/mobility_flight_data_config.png")
@@ -682,17 +682,11 @@ Where, $\theta$ is a proportionality constant representing the overall number of
 
 
 ### Estimating the departure process
-The probability of travel outside the origin is estimated for each location $i$ to give the location-specific departure probability $\tau_i$.
+The daily probability of travel outside the origin, $\tau_i$, is given a per-country prior built from overland cross-border travel evidence (`est_overland_tau_prior()`) rather than fitted to air traffic. The evidence is a set of weekly outbound departure probabilities assembled from border-throughput counts, IOM Displacement Tracking Matrix flow monitoring and national overland travel statistics, which span roughly $10^{-3}$ to $5 \times 10^{-3}$ per week. Each weekly value is divided by 7 to give a daily probability and scaled by the share of the country's outbound migrant stock whose destination lies inside the 40 MOSAIC locations, so that travel to countries outside the model is not re-routed onto in-set neighbours by the row normalisation of $\pi_{ij}$. The prior is
 $$
-\tau_i \sim \text{Beta}(1+s, 1+r)
+\tau_i \sim \text{Lognormal}\!\left(\log \tau^{0}_i,\ \text{sd}_{\tau}\right),
 $$
-Binomial probabilities for each origin $\tau_i$ are drawn from a Beta distributed prior with shape ($s$) and rate ($r$) parameters.
-$$
-\begin{aligned}
-s &\sim \text{Gamma}(0.01, 0.01)\\
-r &\sim \text{Gamma}(0.01, 0.01)
-\end{aligned}
-$$  
+where $\tau^{0}_i$ is the resulting daily value (the prior median, and the value in the default configuration) and $\text{sd}_{\tau}$ gives a 95% interval spanning a factor of 10 ($\text{sd}_{\tau} = 0.587$) for the 26 countries with direct evidence and a factor of 30 ($\text{sd}_{\tau} = 0.868$) for the 14 countries without it, whose median is the median of the evidenced values. The wide band reflects that every underlying count is a floor (recorded crossings only). An earlier version fitted $\tau_i$ to air passenger volumes with a hierarchical Beta-Binomial model; air traffic captures only a small fraction of cross-border movement in the region, and that fit gave departure probabilities an order of magnitude lower.
 
 
 
@@ -710,15 +704,15 @@ N_j^\omega d_{ij}^{-\gamma}
 (\#eq:gravity)
 \end{equation}
 
-Where, $\omega$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. Prior distributions of diffusion model parameters are defined as:
+Where, $\omega$ scales the attractive force of each $j$ destination based on its population size $N_j$. The kernel function $d_{ij}^{-\gamma}$ serves as a penalty on the proportion of travel from $i$ to $j$ based on distance. We fit $\omega$ and $\gamma$ to the fused origin-destination matrix described above, which gives $\hat\omega = 0.627$ and $\hat\gamma = 1.900$ (the values in the default configuration). In calibration both are sampled from Gamma priors with rate 2 whose modes equal the fitted values:
 $$
 \begin{aligned}
-\omega &\sim \text{Gamma}(1, 1)\\
-\gamma &\sim \text{Gamma}(1, 1)
+\omega &\sim \text{Gamma}(2.25, 2)\\
+\gamma &\sim \text{Gamma}(4.80, 2)
 \end{aligned} 
 $$
 
-We fit $\pi_{ij}$ to the fused origin-destination matrix described above, which adds air traffic data from [OAG](https://www.oag.com/flight-data-sets) to the raked overland matrix, using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). The departure probability $\tau_i$ is taken from overland cross-border travel estimates. Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
+We fit $\pi_{ij}$ to the fused origin-destination matrix described above, which adds air traffic data from [OAG](https://www.oag.com/flight-data-sets) to the raked overland matrix, using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). The departure probability $\tau_i$ is taken from the overland cross-border travel estimates described above. Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
 ```{r mobility-departure, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The estimated daily probability of travel outside of each origin location $\\tau_i$ and 95% prior intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day."}
 knitr::include_graphics("figures/mobility_travel_prob_tau_config.png")
