@@ -647,13 +647,13 @@ knitr::include_graphics("figures/immune_decay.png")
 
 ## Spatial dynamics
 
-The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below which is fitted to average weekly air traffic volume between all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)).
+The parameters in the model diagram in Figure \@ref(fig:diagram) that have a $jt$ subscript denote the spatial structure of the model. Each country is modeled as an independent metapopulation that is connected to all others via the spatial force of infection $\Lambda_{jt}$ which moves contagion among metapopulations according to the connectivity provided by parameters $\tau_i$ (the probability departure) and $\pi_{ij}$ (the probability of diffusion to destination $j$). Both parameters are estimated using the departure-diffusion model below. We fit the diffusion kernel $\pi_{ij}$ to a fused origin-destination matrix for all of the 40 countries included in the MOSAIC framework (Figure \@ref(fig:mobility-data)). The fused matrix is the sum of two daily person-flow matrices: average daily air passenger volume, and an overland matrix built by ensemble-averaging four bilateral sources -- migrant stock, estimated migration flows, social connectedness, and land contiguity -- and then raking each origin's row total to its overland departure estimate. We take the departure probability $\tau_i$ from those overland cross-border travel estimates rather than from the air-only fit, because air traffic captures only a minority of cross-border movement in the region.
 
-```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of air passengers per day in 2017 among all countries."}
-knitr::include_graphics("figures/mobility_flight_data.png")
+```{r mobility-data, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The average number of travelers per day among all countries in the fused origin-destination matrix, which combines air passenger volume with overland movement."}
+knitr::include_graphics("figures/mobility_flight_data_config.png")
 ```
-```{r mobility-network, echo=FALSE, fig.align='center', out.width="100%", fig.cap="A network map showing the average number of air passengers per day in 2017."}
-knitr::include_graphics("figures/mobility_network.png")
+```{r mobility-network, echo=FALSE, fig.align='center', out.width="100%", fig.cap="A network map showing the average number of travelers per day in the fused origin-destination matrix."}
+knitr::include_graphics("figures/mobility_network_config.png")
 ```
 
 
@@ -719,15 +719,15 @@ $$
 \end{aligned} 
 $$
 
-The models for $\tau_i$ and $\pi_{ij}$ were fitted to air traffic data from [OAG](https://www.oag.com/flight-data-sets) using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
+We fit $\pi_{ij}$ to the fused origin-destination matrix described above, which adds air traffic data from [OAG](https://www.oag.com/flight-data-sets) to the raked overland matrix, using the `mobility` R package ([Giles 2020](https://covid-19-mobility-data-network.github.io/mobility/)). The departure probability $\tau_i$ is taken from overland cross-border travel estimates. Estimates for mobility model parameters are shown in Figures \@ref(fig:mobility-departure) and \@ref(fig:mobility-diffusion).
 
-```{r mobility-departure, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The estimated weekly probability of travel outside of each origin location $\\tau_i$ and 95% confidence intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day."}
-knitr::include_graphics("figures/mobility_travel_prob_tau.png")
+```{r mobility-departure, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The estimated daily probability of travel outside of each origin location $\\tau_i$ and 95% prior intervals is shown in panel A with the population mean indicated as a red dashed line. Panel B shows the estimated total number of travelers leaving origin $i$ each day."}
+knitr::include_graphics("figures/mobility_travel_prob_tau_config.png")
 ```
 
 
 ```{r mobility-diffusion, echo=FALSE, fig.align='center', out.width="100%", fig.cap="The diffusion process $\\pi_{ij}$ which gives the estimated probability of travel from origin $i$ to destination $j$ given that travel outside of origin $i$ has occurred."}
-knitr::include_graphics("figures/mobility_diffusion_pi.png")
+knitr::include_graphics("figures/mobility_diffusion_pi_config.png")
 ```
 
 ### The spatial hazard
