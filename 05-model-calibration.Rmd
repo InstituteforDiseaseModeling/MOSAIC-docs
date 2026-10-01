@@ -15,45 +15,37 @@ gtag('config', 'G-DKRGVPD7GE');
 
 The MOSAIC framework employs Bayesian inference to calibrate its spatial transmission model. As in many other algorithms that use Bayesian inference, the model systematically estimates parameters based on their ability to recreate the observed data, which is measured through a *likelihood function*. One major assumption of the Bayesian method is that all model parameters---and most importantly, the link between model and data---have a known probability distribution (e.g. Normal, Poisson, Uniform). Therefore, all parameters in the MOSAIC framework have a prior distribution (before model calibration) that is highly informed by other data sources and meta-analyses (see the [Model Description](https://www.mosaicmod.org/model-description.html) page). 
 
-To calibrate the MOSAIC model to observed cholera surveillance data, the algorithm updates prior beliefs about model parameters through the likelihood function $\mathcal{L}(\boldsymbol{\Theta})$. The likelihood is essentially a function of model parameters that measures how probable our particular model is given the observed data, or more formally, the posterior probability distribution of the parameter vector $\boldsymbol{\Theta}$. This parameter vector includes all quantities required for a single iteration of the model, which includes transmission rates, mobility parameters, and seasonal forcing coefficients for example (see the [Table of Model Parameters](https://www.mosaicmod.org/model-description.html#table-of-model-parameters)).
+To calibrate the MOSAIC model to observed cholera surveillance data, the algorithm updates prior beliefs about the model parameters through the likelihood function $\mathcal{L}(\boldsymbol{\Theta}) = P(\text{data}\mid\boldsymbol{\Theta})$, the probability of the observed data under the model with parameter vector $\boldsymbol{\Theta}$. This parameter vector includes all quantities required for a single iteration of the model, which includes transmission rates, mobility parameters, and seasonal forcing coefficients for example (see the [Table of Model Parameters](https://www.mosaicmod.org/model-description.html#table-of-model-parameters)).
 \begin{equation}
 \boldsymbol{\Theta} = \{\, \beta,\, \gamma,\, \omega,\, a_1,\, a_2,\, b_1,\, b_2,\, \dots \, \}
 (\#eq:theta)
 \end{equation}
-During model calibration, we aim to identify the best set of model parameters that maximize the log-likelihood while sampling from the large parameter space of $\boldsymbol{\Theta}$ using a brute‑force random sampling algorithm (more details below):
+During model calibration, we sample the large parameter space of $\boldsymbol{\Theta}$ with a brute‑force random sampling algorithm (more details below) and score every draw by its log-likelihood; the highest-scoring draw is
 \begin{equation}
 \hat{\boldsymbol{\Theta}} = \underset{\boldsymbol{\Theta}}{\arg\max}\big[\log \mathcal{L}(\boldsymbol{\Theta})\big].
 (\#eq:general-likelihood)
 \end{equation}
 
-To specify the likelihood function, we treat $\mathcal{L}(\boldsymbol{\Theta})$ as the posterior density of $\boldsymbol{\Theta}$ given the observed cholera surveillance data, and then use the [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) to set up the model-data link.
-\begin{equation}
-\mathcal{L}(\boldsymbol{\Theta}) \Longrightarrow P(\boldsymbol{\Theta}\mid\text{data})  
-(\#eq:bayes-1)
-\end{equation}
-Because the observed data $P(\text{data})$ does not depend on the model parameters and the prior $P(\boldsymbol{\Theta})$ is assumed to be uniform, these two terms can be treated as constants in Bayes’ theorem.  Consequently, the posterior density is proportional to the likelihood:
+[Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) links the likelihood to the posterior distribution of $\boldsymbol{\Theta}$:
 \begin{equation}
 P(\boldsymbol{\Theta}\mid\text{data})
-=\;
-\frac{\displaystyle
-P(\text{data}\mid\boldsymbol{\Theta})\;
-\overbrace{P(\boldsymbol{\Theta})}^{\text{constant}}
-}
-{\displaystyle
-\underbrace{P(\text{data})}_{\text{constant}}
-}
-\;\propto\;
-P(\text{data}\mid\boldsymbol{\Theta}),
+=
+\frac{P(\text{data}\mid\boldsymbol{\Theta})\,P(\boldsymbol{\Theta})}{P(\text{data})}.
+(\#eq:bayes-1)
+\end{equation}
+The evidence $P(\text{data})$ does not depend on the model parameters, so it is a constant. The prior $P(\boldsymbol{\Theta})$ is informative, not constant, but every draw is sampled from it, so it enters through the sampling rather than through the weights: for a draw $\boldsymbol{\Theta}^{(i)}$ taken from the prior, the importance weight that turns the set of draws into a sample from the posterior is proportional to its likelihood,
+\begin{equation}
+w_i \;\propto\; \frac{P(\boldsymbol{\Theta}^{(i)}\mid\text{data})}{P(\boldsymbol{\Theta}^{(i)})} \;\propto\; P(\text{data}\mid\boldsymbol{\Theta}^{(i)}).
 (\#eq:bayes-2)
 \end{equation}
-therefore maximizing the posterior (or minimizing its negative log) is equivalent to maximizing the likelihood $P(\text{data}\mid\boldsymbol{\Theta})$, and we can now construct the likelihood function using the relevant probability density functions $f(y\mid\hat{y})$ as described below.
+Ranking draws from the prior by their likelihood therefore ranks them by posterior support. How the weights are actually assigned, and how far they depart from these exact importance weights, is described in [Estimating the Posterior Distribution of Model Parameters](#estimating-the-posterior-distribution-of-model-parameters). The likelihood itself is built from the probability density functions $f(y\mid\hat{y})$ as described below.
 
 
 
 
 ## Total Log-likelihood for Cases and Deaths
 
-Because the model posterior is proportional to $P(\text{data}\mid\boldsymbol{\Theta})$, we constructed the likelihood function with
+Because every draw is weighted by $P(\text{data}\mid\boldsymbol{\Theta})$, we constructed the likelihood function with
 the appropriate distribution for each of the observed data types using common notation for a probability density function $f(y\mid\hat{y})$. The MOSAIC framework is a spatial model, so we also included the $J$ spatial locations and $T$ time points in the full
 likelihood, which gives the product over both indices:
 
