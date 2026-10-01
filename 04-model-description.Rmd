@@ -4,7 +4,7 @@
 
 Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of disease dynamics such as human mobility, environmental conditions, and vaccination schedules. As MOSAIC continues to evolve, future iterations will refine model components based on available data and improved model mechanisms, which we hope will increase its applicability to real-world scenarios.
 
-The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map) and the [Table of MOSAIC framework countries](#mosaic-table).
+The model operates on daily time steps and is fitted to historical incidence data. The default configuration runs from 1 January 2023 to 29 April 2027 --- surveillance data currently extend to August 2026, and the remaining days are a forecast --- and includes 40 countries in Sub-Saharan Africa (SSA), see Figure \@ref(fig:map) and the [Table of MOSAIC framework countries](#mosaic-table).
 
 ```{r map, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="100%", fig.cap="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countries included in the MOSAIC modeling framework are indicated in blue."}
 knitr::include_graphics("figures/africa_map.png")
@@ -135,7 +135,9 @@ Where, $\beta_{j0}^{\text{hum}}$ is the mean human-to-human transmission rate at
 
 Because the seasonal term multiplies $\beta_{j0}^{\text{hum}}$, the envelope $1 + f(t)$, where $f(t)$ is the sum of the four harmonic terms in Equation \@ref(eq:beta1), must stay positive; multiplicative seasonal forcing requires an amplitude below one ([Keeling & Rohani 2008](https://press.princeton.edu/books/hardcover/9780691116174/modeling-infectious-diseases-in-humans-and-animals), section 5.2). A Fourier fit to normalised case counts is not constrained this way and can dip below $-1$, which would switch human-to-human transmission off for weeks at a time. When a case-fitted envelope has $\min_t\,[1 + f(t)] < 0.1$, we multiply all four coefficients (and their standard errors) by the single factor $0.9 / \left[-\min_t f(t)\right]$, which lowers the amplitude so that the minimum of the envelope is exactly $0.1$ while keeping the phase and the relative shape of the season. The floor of $0.1$ (code-name `envelope_floor`) is a numerical positivity margin that leaves room for prior draws around the fitted means, not an estimated seasonal trough; the factor applied to each country is recorded as `envelope_scale` in the coefficient table.
 
-We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.
+The priors on $a_1$, $b_1$, $a_2$ and $b_2$ are Normal distributions centred on the fitted coefficients with standard deviations of $\sqrt{2}$ times their standard errors, so the envelope is positive at the prior means but not in every draw: when the four coefficients are drawn independently, $1 + f(t)$ falls below zero somewhere in the year in about a third of draws (averaged over the 40 countries), most often in countries whose fitted trough sits at the floor. The engine clamps a negative human force of infection to zero, so such a draw has no human-to-human transmission in the part of the low season where the envelope is negative, while environmental transmission continues. We did not shrink the prior standard deviations to prevent this, because doing so would pin each seasonal amplitude to the floor-scaled fit.
+
+We estimated the parameters in the Fourier series ($a_1$, $b_1$, $a_2$, $b_2$) using the [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) algorithm in the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values for 30 uniformly distributed points within each country from the [Open-Meteo Historical Weather Data API](https://open-meteo.com/en/docs/historical-weather-api). Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data. Both fits use the weeks from September 2010 to August 2025.
 
 ```{r seasonal-example, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series functions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines."}
 knitr::include_graphics("figures/seasonal_transmission_example_MOZ.png")
@@ -144,13 +146,13 @@ knitr::include_graphics("figures/seasonal_transmission_example_MOZ.png")
 
 For countries with no reported case data, we inferred seasonal dynamics using the fitted wave function of a neighboring country with available case data. The selected neighbor was chosen from the same cluster of countries (grouped hierarchically into four clusters based on precipitation seasonality using [Ward's method](https://en.wikipedia.org/wiki/Ward%27s_method); see Figure \@ref(fig:seasonal-cluster)) that had the highest correlation in seasonal precipitation with the country lacking case data. In the rare event that no country with reported case data was found within the same seasonal cluster, we expanded the search to the 10 nearest neighbors and continued expanding by adding the next nearest neighbor until a match was found.
 
-```{r seasonal-cluster, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases."}
+```{r seasonal-cluster, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (September 2010 to August 2025). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases."}
 knitr::include_graphics("figures/seasonal_precip_ward.D2_cluster.png")
 ```
 
 Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure \@ref(fig:seasonal-all), with the corresponding Fourier model coefficients presented in Table \@ref(tab:seasonal-table).
 
-```{r seasonal-all, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \\@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases."}
+```{r seasonal-all, echo=FALSE, warning=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \\@ref(eq:beta1). Blue lines give the Fourier series model fits for precipitation and the red lines give model fits to reported cholera cases (both September 2010 to August 2025). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering; these countries are labelled with the country they were inferred from, and their case fit is dashed. The X-axis represents the day of the year, while the Y-axis shows the Z-score of weekly precipitation and cholera cases."}
 knitr::include_graphics("figures/seasonal_transmission_all.png")
 ```
 
@@ -594,12 +596,12 @@ $$
 \text{VE}_k(t) = \phi_k \exp(-\omega_k\, t)
 $$
 
-separately to the mean, lower, and upper effectiveness curves for each dose regimen $k \in \{1,2\}$ using Levenberg--Marquardt nonlinear least squares (the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library), then moment-match the point estimate and 95% CI of each parameter to a Beta prior (for $\phi$) or a Gamma prior (for $\omega$). To enforce the biological monotonicity that two doses cannot reduce protection at the time of delivery, the two-dose fit is constrained so that $\phi_2 \ge \phi_1$; without this constraint the independent backward extrapolations from the later-starting two-dose follow-up window (12--48 months) yields $\phi_2 < \phi_1$, an artefact of the asymmetric follow-up windows rather than a feature of the underlying meta-regression. The resulting priors are:
+separately to the mean, lower, and upper effectiveness curves for each dose regimen $k \in \{1,2\}$ using Levenberg--Marquardt nonlinear least squares (the [`minpack.lm`](https://rdrr.io/cran/minpack.lm/) R library), then fit a Beta prior (for $\phi$) or a Gamma prior (for $\omega$) to each parameter, with the point estimate as its mode and its spread set from the 95% CI, slightly widened (by about 5% at each end). To enforce the biological monotonicity that two doses cannot reduce protection at the time of delivery, the two-dose fit is constrained so that $\phi_2 \ge \phi_1$; without this constraint the independent backward extrapolations from the later-starting two-dose follow-up window (12--48 months) yields $\phi_2 < \phi_1$, an artefact of the asymmetric follow-up windows rather than a feature of the underlying meta-regression. The resulting priors are:
 
 $$
 \begin{aligned}
-\phi_1 \ \sim\ & \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mode} \approx 0.79\text{)},\\
-\phi_2 \ \sim\ & \text{Beta}(206.96,\ 56.53) \quad \text{(two-dose effectiveness, mode} \approx 0.79\text{, constrained to } \ge \phi_1\text{)},\\
+\phi_1 \ \sim\ & \text{Beta}(84.37,\ 23.48) \quad \text{(one-dose effectiveness, mode} \approx 0.79\text{)},\\
+\phi_2 \ \sim\ & \text{Beta}(196.47,\ 53.70) \quad \text{(two-dose effectiveness, mode} \approx 0.79\text{, constrained to } \ge \phi_1\text{)},\\
 \omega_1 \ \sim\ & \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mode} \approx 0.00070\ \text{day}^{-1}\text{)},\\
 \omega_2 \ \sim\ & \text{Gamma}(2.69,\ 4{,}720.84) \quad \text{(two-dose waning, mode} \approx 0.00036\ \text{day}^{-1}\text{)}.
 \end{aligned}
@@ -608,9 +610,9 @@ $$
 
 After applying the constraint, the initial effectiveness is identical at the mode (both schedules reach approximately 0.79 immediately after the last dose), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is $\log(2) / \omega_1 \approx 984$ days $\approx 2.7$ years, while the modal two-dose half-life is $\log(2) / \omega_2 \approx 1939$ days $\approx 5.3$ years. The Gamma posterior for $\omega_2$ is also more positively skewed (Figure \@ref(fig:effectiveness)F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95% CI bounds at later follow-up.
 
-The $\phi_2 \ge \phi_1$ monotonicity constraint is enforced *during the data fit* — so the modes of the two Beta priors satisfy it exactly — but the priors themselves remain independent during BFRS sampling, and individual draws can therefore occasionally produce $\phi_2 < \phi_1$. In practice both Beta priors are tightly concentrated near 0.79 (Beta(91.84, 25.49) and Beta(206.96, 56.53)), so such violations are rare and the marginal posterior summaries are unaffected.
+The $\phi_2 \ge \phi_1$ monotonicity constraint is enforced *during the data fit* — so the modes of the two Beta priors satisfy it exactly — but the priors themselves remain independent during BFRS sampling, and individual draws can therefore produce $\phi_2 < \phi_1$. Because both Beta priors are concentrated near 0.79 (Beta(84.37, 23.48) and Beta(196.47, 53.70)), this happens in about half of the draws, but the differences are small; and in the default configuration, which delivers no second doses after the simulation start ($\nu_{2,jt} = 0$), $\phi_2$ has no effect on the simulation.
 
-```{r effectiveness, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\\text{VE}_k(t) = \\phi_k \\exp(-\\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\\phi_2 \\ge \\phi_1$. Panels B and E show the Beta priors for the initial effectiveness $\\phi_1, \\phi_2$; panels C and F show the Gamma priors for the daily waning rates $\\omega_1, \\omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit."}
+```{r effectiveness, echo=FALSE, fig.align='center', out.width="100%", fig.cap="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\\text{VE}_k(t) = \\phi_k \\exp(-\\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\\phi_2 \\ge \\phi_1$. Panels B and E show the Beta distributions fitted to the initial effectiveness $\\phi_1, \\phi_2$; panels C and F show the Gamma distributions fitted to the daily waning rates $\\omega_1, \\omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit. The priors of Equation \\@ref(eq:effectiveness) are fitted to the same modes with these intervals slightly widened; they are close to the distributions shown for $\\omega_1, \\omega_2$ and markedly wider for $\\phi_1, \\phi_2$."}
 knitr::include_graphics("figures/vaccine_all_combined.png")
 ```
 
@@ -806,18 +808,20 @@ The presentation of infection with *V. cholerae* can be extremely variable. The 
 
 Accounting for all of these nuances in the first version of the model is not possible, but past studies do contain useful information that can help set sensible bounds on the proportion of infections that are symptomatic ($\sigma$). We have therefore compiled a short list of sero-surveys and cohort studies that assess the likelihood of symptomatic infection in different locations, summarised in Table \@ref(tab:symptomatic-table).
 
-To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combine mean and confidence intervals of all studies in Table \@ref(tab:symptomatic-table) and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion $\sigma$ is:
+To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combined mean and confidence intervals of all studies in Table \@ref(tab:symptomatic-table) and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion $\sigma$ is:
 
 \begin{equation}
-\sigma \sim \text{Beta}(4.30, 13.51)
+\sigma \sim \text{Beta}(3.75, 7.12)
 \end{equation}
+
+which has a mean of approximately 0.35 (95% interval approximately 0.11--0.64). This prior replaces $\text{Beta}(4.30, 13.51)$ (mean 0.24), used before MOSAIC-pkg v0.100.1, which was fitted to a version of the table in which the [Harris et al. (2008)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221) row was mistranscribed as 0.184: that household cohort reports 127 of 202 culture-confirmed infections as symptomatic (0.629, exact binomial 95% CI 0.558--0.695).
 
 
 ```{r symptomatic-table, echo=FALSE, message=FALSE, warning=FALSE}
 
 df <- data.frame(
      mean     = c(0.430,       # Nelson et al (2009)
-                  NA,          # Lueng and Matrajt (2021)
+                  0.75,        # Lueng and Matrajt (2021): 0.25 symptomatic (point value)
                   NA,          # Harris et al (2012)
                   0.762,       # Finger et al (2024)
                   0.787,       # Jackson et al (2013)
@@ -827,20 +831,20 @@ df <- data.frame(
                   1-0.0005996  # Hegde et al (2023)
      ),
      ci_lo    = c(NA,          # Nelson et al (2009)
-                  0,           # Lueng and Matrajt (2021)
+                  NA,          # Lueng and Matrajt (2021)
                   0.8,         # Harris et al (2012)
-                  0.75,        # Finger et al (2024)
-                  0.769,       # Jackson et al (2013)
+                  0.773,       # Finger et al (2024)
+                  0.806,       # Jackson et al (2013)
                   NA,          # Bart et al (1970)
                   NA,          # Bart et al (1970)
                   1-0.558,     # Harris et al (2008): exact binomial 95% CI
                   1-0.0004998  # Hegde et al (2023)
      ),
      ci_hi    = c(NA,          # Nelson et al (2009)
-                  0.75,        # Lueng and Matrajt (2021)
+                  NA,          # Lueng and Matrajt (2021)
                   0.4,         # Harris et al (2012)
-                  0.773,       # Finger et al (2024)
-                  0.806,       # Jackson et al (2013)
+                  0.75,        # Finger et al (2024)
+                  0.769,       # Jackson et al (2013)
                   NA,          # Bart et al (1970)
                   NA,          # Bart et al (1970)
                   1-0.695,     # Harris et al (2008): exact binomial 95% CI
@@ -883,7 +887,7 @@ df <- data.frame(
                   "Cross-sectional sero-survey",                # Jackson et al (2013)
                   "Sero-survey during epidemic; El Tor Ogawa strain",      # Bart et al (1970)
                   "Sero-survey during epidemic; Inaba strain",         # Bart et al (1970)
-                  "Household cohort; culture-confirmed infections",    # Harris et al (2008)
+                  "Household cohort; culture-confirmed infections (high-dose exposure, rectal-swab detection under-ascertains asymptomatic infection)",    # Harris et al (2008)
                   "Sero-survey and clinical data"               # Hegde et al (2023)
      )
 )
@@ -895,7 +899,7 @@ df$ci_hi <- 1-df$ci_hi
 df <- df[, -which(names(df) == "year")]
 df <- df[,c(1:3,5,4,6)]
 
-knitr::kable(df, caption = "Summary of Studies on Cholera Immunity", digits = 3,
+knitr::kable(df, caption = "Summary of studies of the proportion of cholera infections that are symptomatic.", digits = 3,
              col.names = c("Mean", "Low CI", "High CI", "Location", "Source", "Note"))
 ```
 
@@ -942,12 +946,12 @@ $$
 (\#eq:rho)
 $$
 
-corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:
+corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of [Wiens et al. 2023](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286), which reports suspected-case PPVs of 0.52 (95% interval 0.24--0.80) across all settings and 0.78 (0.40--0.99) during outbreaks. We fit Beta distributions to these medians and 95% intervals by least squares:
 
 $$
 \begin{aligned}
-\chi^{\text{end}} \ \sim\ & \text{Beta}(5.43,\ 5.01) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
-\chi^{\text{epi}} \ \sim\ & \text{Beta}(4.79,\ 1.53) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
+\chi^{\text{end}} \ \sim\ & \text{Beta}(5.56,\ 5.10) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
+\chi^{\text{epi}} \ \sim\ & \text{Beta}(4.97,\ 1.58) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
 \end{aligned}
 (\#eq:chi-priors)
 $$
@@ -1096,7 +1100,7 @@ knitr::include_graphics("figures/case_fatality_ratio_and_cases_total_by_country.
 
 
 
-```{r cfr-beta, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue.'}
+```{r cfr-beta, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width='95%', fig.cap='Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward for the AFRO region (black) and for the countries with the highest and lowest CFR. With about 1.4 million reported cases, the AFRO distribution is a spike at about 2% that is too narrow to show at this scale.'}
 
 knitr::include_graphics("figures/case_fatality_ratio_beta_distributions.png")
 
@@ -1394,17 +1398,17 @@ The pipeline reports $R^{\mathrm{hum}}_{jt}$, $R^{\mathrm{env}}_{jt}$ and their 
 
 ## Initial conditions
 
-The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. The initial-condition priors are seeded at a data-driven epoch $t_0$ within the first year of the simulation window, the month in which the most countries report active cases (1 February 2023 for the default configuration). Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.
+The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at $t = 0$. The initial-condition priors are estimated at the simulation start, so the seeding epoch $t_0$ is the start date itself (1 January 2023 for the default configuration). Versions of MOSAIC-pkg before v0.100.1 estimated them at the month within the first year in which the most countries reported active cases (1 February 2023), which left countries whose outbreaks were already under way on 1 January without initial infections. Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the *proportions* of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location. The Monte Carlo draws behind the $E$, $I$, $R$ and $S$ priors use a seed derived from each country's code, so rebuilding the priors from the same inputs reproduces them exactly.
 
 ### Vaccinated initial conditions ($V_1, V_2$)
 
-The proportions in $V_1$ and $V_2$ at $t = 0$ are derived from each country's OCV campaign history as recorded in the [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc). Reported deliveries are classified by vaccine product: Euvichol-S deliveries contribute to the $V_1$ pool (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to $V_1$ and $V_2$ according to the campaign's reported dose-1 and dose-2 split. Each historical campaign contributes a residual immune fraction at $t = 0$, calculated as the cumulative effective coverage multiplied by an exponential waning factor $e^{-\omega_k \Delta t}$ where $\omega_k$ is the per-dose waning rate (Equation \@ref(eq:effectiveness)) and $\Delta t$ is the elapsed time since the campaign. The aggregate per-country immune fraction is capped at 70% coverage, consistent with reported maximum reachable coverage in mass-administration settings (Abubakar et al. 2018). The mean and standard deviation are then moment-matched to Beta priors with coefficient of variation 0.40 to honestly reflect campaign-record uncertainty:
+The proportions in $V_1$ and $V_2$ at $t = 0$ are derived from each country's OCV campaign history before $t_0$ as recorded in the [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc). Campaigns are classified by vaccine product: single-dose Euvichol-S campaigns contribute only to $V_1$, while for all other products (and campaigns with no recorded product) the first and second rounds of each campaign are paired. As in the engine's vaccination step (Equation \@ref(eq:system)), only effective doses enter a vaccinated compartment: the fraction $\phi_1$ of first-round doses enters $V_1$, and second-round doses, capped at the number of effective first-dose recipients, move the fraction $\phi_2$ of their recipients from $V_1$ to $V_2$, with $\phi_1$ and $\phi_2$ at their prior means. Each round then contributes a residual immune fraction at $t = 0$, its effective coverage multiplied by an exponential waning factor $e^{-\omega_k \Delta t}$ where $\omega_k$ is the per-dose waning rate (Equation \@ref(eq:effectiveness)) and $\Delta t$ is the time from the onset of protection, 14 days after the round, to $t_0$. The number of dose recipients is capped at 70% of the population, consistent with reported maximum reachable coverage in mass-administration settings (Abubakar et al. 2018). The resulting means are then moment-matched to Beta priors with coefficient of variation 0.40 to honestly reflect campaign-record uncertainty:
 
 $$
 \text{prop}V_{1,j} \sim \text{Beta}(s_{1,j}^{V_1},\ s_{2,j}^{V_1}), \quad \text{prop}V_{2,j} \sim \text{Beta}(s_{1,j}^{V_2},\ s_{2,j}^{V_2}),
 $$
 
-with shape parameters $(s_1, s_2)$ derived per country (e.g. for Mozambique the $V_1$ prior mean is approximately 0.016, reflecting the residual one-dose immunity from the 2022--2023 OCV response). Per-country prior means range from effectively zero (countries with no reported recent campaigns) to several percent of the population (countries with multiple recent reactive campaigns). This replaces the static Beta priors used in earlier MOSAIC versions, which placed identical, weakly informative shapes on $V_1$ and $V_2$ regardless of country history.
+with shape parameters $(s_1, s_2)$ derived per country (e.g. for Mozambique the prior means are approximately 0.014 for $V_1$ and 0.015 for $V_2$). Among countries with campaigns before $t_0$, the prior mean of $\text{prop}V_{1,j}$ ranges from about 0.1% to 15% of the population (Malawi) and that of $\text{prop}V_{2,j}$ reaches about 7% (Zambia). A country with no campaign before $t_0$ keeps the weakly informative template priors $\text{Beta}(0.5, 49.5)$ for $\text{prop}V_{1,j}$ and $\text{Beta}(0.5, 99.5)$ for $\text{prop}V_{2,j}$ (means 1% and 0.5%, modes at zero), as does either compartment that receives no effective doses (e.g. $V_2$ in a country whose campaigns were all single-dose). This replaces the static Beta priors used in earlier MOSAIC versions, which placed identical, weakly informative shapes on $V_1$ and $V_2$ regardless of country history.
 
 ### Susceptible and recovered initial conditions ($S, R$)
 
@@ -1414,7 +1418,7 @@ $$
 \text{infections} \;=\; \text{reported cases} \times \frac{\chi^{\text{end}}}{\rho\,\sigma},
 $$
 
-then adjusted by the natural-immunity waning rate $\varepsilon$ (applied from the end of each infection) to give the surviving immune fraction at $t = 0$. Each Monte Carlo draw samples $\rho$, $\chi^{\text{end}}$, $\sigma$, $\varepsilon$ and the recovery and incubation rates from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence.
+then adjusted by the natural-immunity waning rate $\varepsilon$ (applied from the end of each infection) to give the surviving immune fraction at $t = 0$. Each Monte Carlo draw samples $\rho$, $\chi^{\text{end}}$, $\sigma$, $\varepsilon$, the recovery and incubation rates and the seasonal coefficients from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. The Beta prior for each country keeps the Monte Carlo mean (a method-of-moments fit, with the first shape parameter floored at 1 so the density does not diverge at zero). Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger $R$ at $t = 0$ than countries with sparse historical incidence: across the 40 countries the prior mean of $\text{prop}R_{,j}$ ranges from about $10^{-5}$ to 0.035 (Somalia), with a median of about 0.002.
 
 The proportion in $S$ is then derived as the residual once the other five proportions have been placed:
 
@@ -1422,19 +1426,21 @@ $$
 \text{prop}S_{,j} = 1 - \text{prop}V_{1,j} - \text{prop}V_{2,j} - \text{prop}R_{,j} - \text{prop}E_{,j} - \text{prop}I_{,j},
 $$
 
-and the resulting per-country values are fit to a Beta prior. Across the 40 MOSAIC countries the prior mean for $\text{prop}S$ ranges from approximately 0.39 to 0.98 with a standard deviation of 0.11, with the lowest values in countries with the highest combined vaccine-derived and natural immunity.
+and the resulting per-country values are fit to a Beta prior. Across the 40 MOSAIC countries the prior mean for $\text{prop}S$ ranges from approximately 0.84 to 0.99 with a standard deviation of 0.04, with the lowest values in countries with the highest combined vaccine-derived and natural immunity. This Beta prior summarises the residual and is not itself sampled: in calibration $\text{prop}S_{,j}$ is the residual of each draw (see below).
 
 ### Exposed and infected initial conditions ($E, I_1, I_2$)
 
-The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported cases in a short window before $t_0$ (three days by default) by inverting the observation pipeline (Equation \@ref(eq:reported-cases)): a case reported on day $d$ is a symptomatic onset on day $d - l_{\text{cases}}$, and all onsets, symptomatic and asymptomatic, number $\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)$. With $\lambda_j$ the resulting mean daily onset rate over the window,
+The proportions in $E$ and the combined infectious pool $I = I_1 + I_2$ at $t = 0$ are derived from the reported cases in a 28-day window straddling $t_0$ (the 14 days before it and the 14 days from it onward) by inverting the observation pipeline (Equation \@ref(eq:reported-cases)): a case reported on day $d$ is a symptomatic onset on day $d - l_{\text{cases}}$, and all onsets, symptomatic and asymptomatic, number $\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)$. The window straddles $t_0$ because surveillance is reported weekly, and several countries whose outbreaks were under way on 1 January 2023 report no cases in the days just before it. With $\lambda_j$ the resulting mean daily onset rate over the window,
 
 $$
 E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 $$
 
-the exposed stock in balance with that onset rate under the engine's daily progression probability $1 - e^{-\iota}$ (a reported case has already left $E$, so $E$ is not built from the reports themselves). $I_j$ is the sum of the onsets that have not yet recovered by $t_0$, each surviving with daily probability $e^{-\gamma_1}$ for the symptomatic share $\sigma$ and $e^{-\gamma_2}$ for the rest; onsets the window cannot see (those in the last $l_{\text{cases}}$ days, reported on or after $t_0$, and those older than the window) are filled in at the same rate $\lambda_j$. Each Monte Carlo draw samples $\sigma$, $\iota$, $\gamma_1$, $\gamma_2$, $\rho$, $\chi^{\text{end}}$ and $l_{\text{cases}}$ from their priors. The Beta prior for each country keeps the Monte Carlo mean $m$ and is given a 95% interval of approximately $[m/10,\ 10m]$ on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times; countries whose window reports no cases receive a near-zero template prior. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ by a binomial draw with the symptomatic proportion $\sigma$ as the probability.
+the exposed stock in balance with that onset rate under the engine's daily progression probability $1 - e^{-\iota}$ (a reported case has already left $E$, so $E$ is not built from the reports themselves). $I_j$ is the sum of the onsets reported before $t_0$ that have not yet recovered by $t_0$, each surviving with daily probability $e^{-\gamma_1}$ for the symptomatic share $\sigma$ and $e^{-\gamma_2}$ for the rest; onsets the reports before $t_0$ cannot place (those in the last $l_{\text{cases}}$ days before $t_0$, which are reported on or after it, and those older than the window) are filled in at the same rate $\lambda_j$, so reports from $t_0$ onward enter only through $\lambda_j$. Each of 1000 Monte Carlo draws samples $\sigma$, $\iota$, $\gamma_1$, $\gamma_2$, $\rho$, $\chi^{\text{end}}$ and $l_{\text{cases}}$ from their priors. The Beta prior for each country keeps the Monte Carlo mean $m$ and is given a 95% interval of approximately $[m/10,\ 10m]$ on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined $I$ is split into $I_1$ and $I_2$ at $t = 0$ by a binomial draw with the symptomatic proportion $\sigma$ as the probability.
 
-After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country's $t = 0$ population.
+A country whose window reports no cases, and which reports none later in the simulation window either, receives the near-zero template prior $\text{Beta}(0.01, 99999.99)$ for both $\text{prop}E_{,j}$ and $\text{prop}I_{,j}$. A *quiet-start* country is one that reports cases later in the simulation window (after the initial-condition window, up to the end date) but either reports none in the window or so few that its window-based priors imply fewer than one expected initial infection, $N_j\,(\mathbb{E}[\text{prop}E_{,j}] + \mathbb{E}[\text{prop}I_{,j}]) < 1$, with $N_j$ the population at $t_0$. A quiet-start country instead receives the weak seeding prior $\text{Beta}(1, 10^5)$ for both $\text{prop}E_{,j}$ and $\text{prop}I_{,j}$ (mean $10^{-5}$ of the population in each compartment, mode at zero). The seed stands in for undetected circulation or importation: a single-location fit has no importation mechanism, so without it a country that starts with no infections cannot reproduce its later outbreak. In the default configuration the quiet-start countries are Burkina Faso, the Central African Republic, Chad, Congo, Côte d'Ivoire, Eswatini, Ghana, Namibia, Niger, Rwanda and Togo (Congo, with one case in the window, by the second criterion), listed in `priors_default$metadata$quiet_start_seeded`, while the 11 countries that report no cases up to the end of the simulation window keep the template.
+
+After sampling, $\text{prop}S_{,j}$ is set to one minus the sum of the other five proportions (if they sum to one or more, it is set to zero and they are rescaled to sum to unity), and the six proportions are converted to integer compartment counts that sum exactly to the country's $t = 0$ population (largest-remainder rounding).
 
 ---
 
@@ -1612,7 +1618,7 @@ tbl <- data.frame(
           "",        # gamma_1
           "",        # gamma_2
           "Prior centre $\\mu^{0}_{jt}$ from the WHO-annual hierarchical GAM (Eq. \\@ref(eq:cfr-gam)); integrated out of the deaths likelihood (Eq. \\@ref(eq:mu-jt)).",        # mu
-          "",        # sigma
+          "$\\text{Beta}(3.75, 7.12)$ (mean $\\approx 0.35$)",        # sigma
           "",        # rho
           "$\\text{Lognormal}(25.65, 2.46)$",  # zeta_1
           "Derived from $\\zeta_1$ and $\\zeta_{\\text{ratio}}$",  # zeta_2
@@ -1625,14 +1631,14 @@ tbl <- data.frame(
           "",        # beta_{j0}^{env}
           "",        # beta_{jt}^{env}
           "Per-country $\\text{Lognormal}$ (default median $2 \\times 10^{-5}$, sdlog 1.17; recentred for countries with calibration evidence).",  # beta_{j0}^{tot}
-          "$\\text{Beta}(7.03, 13.24)$ (mode 0.33, 95% interval $\\approx 0.1$--$0.5$) per location.",  # p_beta
+          "$\\text{Beta}(5.48, 10.10)$ (mode 0.33, 95% interval $\\approx 0.14$--$0.60$) per location.",  # p_beta
           "See Table \\@ref(tab:seasonal-table).",  # a_1
           "See Table \\@ref(tab:seasonal-table).",  # b_1
           "See Table \\@ref(tab:seasonal-table).",  # a_2
           "See Table \\@ref(tab:seasonal-table).",  # b_2
           "$365$",   # p
           "Pinned at $0.27$; prior $\\text{Beta}(28.4, 71.6)$ per location if sampled.",  # alpha_1
-          "$0.50$",  # alpha_2
+          "Pinned at $0.50$; prior $\\text{Beta}(6.92, 6.92)$ if sampled.",  # alpha_2
           "",        # tau_i
           "",        # pi_{ij}
           "$\\text{Gamma}(2.25, 2)$ (mode $0.627$)",  # mobility_omega
@@ -1667,7 +1673,7 @@ tbl <- data.frame(
           "",        # gamma_1
           "",        # gamma_2
           "WHO annual cholera record 1970 onward ([Our World in Data](https://ourworldindata.org/grapher/number-reported-cases-of-cholera), [WHO Weekly Epidemiological Record](https://www.who.int/publications/journals/weekly-epidemiological-record), [WHO Global Cholera and AWD Dashboard](https://who-global-cholera-and-awd-dashboard-1-who.hub.arcgis.com/)); `est_CFR_hierarchical()`.",        # mu
-          "",        # sigma
+          "See Table \\@ref(tab:symptomatic-table).",        # sigma
           "",        # rho
           "<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>",  # zeta_1
           "<a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3926264/'>Fung 2014</a>",  # zeta_2
@@ -1775,8 +1781,8 @@ tbl2 <- data.frame(
           "$\\text{Beta}(2, 1)$",
           "$\\text{Truncnorm}(0, 25, -90, 90)$",
           "$\\text{Truncnorm}$ per country, capped at 0.01.",
-          "$\\text{Beta}(5.43, 5.01)$",
-          "$\\text{Beta}(4.79, 1.53)$",
+          "$\\text{Beta}(5.56, 5.10)$",
+          "$\\text{Beta}(4.97, 1.58)$",
           "Pinned at 0.42; prior $\\text{Beta}(36.95, 51.02)$ retained for sensitivity runs.",
           "$\\text{Truncnorm}(1, 1.5, 0, 7)$ days",
           "Derived: $\\mu_{jt}\\,\\rho / (\\rho_{\\text{deaths}}\\,\\chi^{\\text{epi}})$ (Eq. \\@ref(eq:p-fatal)).",
