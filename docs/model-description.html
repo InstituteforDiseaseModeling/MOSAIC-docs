@@ -89,7 +89,7 @@
 <span class="header-section-number">3</span> Model description<a class="anchor" aria-label="anchor" href="#model-description"><i class="fas fa-link"></i></a>
 </h1>
 <p>Here we describe the methods of MOSAIC version 1.0. This model version provides a starting point for understanding cholera transmission in Sub-Saharan Africa, incorporating important drivers of disease dynamics such as human mobility, environmental conditions, and vaccination schedules. As MOSAIC continues to evolve, future iterations will refine model components based on available data and improved model mechanisms, which we hope will increase its applicability to real-world scenarios.</p>
-<p>The model operates on daily time steps and will be fitted to historical incidence data, however current development is based on data from January 2023 to August 2024 and includes 40 countries in Sub-Saharan Africa (SSA), see Figure <a href="model-description.html#fig:map">3.1</a> and the <a href="model-description.html#mosaic-table">Table of MOSAIC framework countries</a>.</p>
+<p>The model operates on daily time steps and is fitted to historical incidence data. The default configuration runs from 1 January 2023 to 29 April 2027 — surveillance data currently extend to August 2026, and the remaining days are a forecast — and includes 40 countries in Sub-Saharan Africa (SSA), see Figure <a href="model-description.html#fig:map">3.1</a> and the <a href="model-description.html#mosaic-table">Table of MOSAIC framework countries</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:map"></span>
 <img src="figures/africa_map.png" alt="A map of Sub-Saharan Africa with countries that have experienced a cholera outbreak in the past 5 and 10 years highlighted in green. The 40 countries included in the MOSAIC modeling framework are indicated in blue." width="100%"><p class="caption">
@@ -209,7 +209,8 @@ W_{jt}
 \end{equation}\]</span></p>
 <p>Where, <span class="math inline">\(\beta_{j0}^{\text{hum}}\)</span> is the mean human-to-human transmission rate at location <span class="math inline">\(j\)</span> over all time steps. Seasonal dynamics are determined by the parameters <span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span> and <span class="math inline">\(a_2\)</span>, <span class="math inline">\(b_2\)</span> which gives the amplitude of the first and second waves respectively. The periodic cycle <span class="math inline">\(p\)</span> is 365, so the function controls the temporal variation in <span class="math inline">\(\beta_{jt}^{\text{hum}}\)</span> over each day of the year. Note that <span class="math inline">\(t\)</span> in Equation <a href="model-description.html#eq:beta1">(3.4)</a> is the <em>calendar day of the year</em> (<span class="math inline">\(t = 1\)</span> on 1 January), not the simulation day: the coefficients are fitted against calendar day of year (below), and the engine evaluates the envelope on each simulated day at that day’s calendar day of the year, offsetting the simulation clock by the day of the year of the start date (code-name <code>season_t0</code>). The coefficients therefore keep their seasonal meaning whatever date a simulation starts on.</p>
 <p>Because the seasonal term multiplies <span class="math inline">\(\beta_{j0}^{\text{hum}}\)</span>, the envelope <span class="math inline">\(1 + f(t)\)</span>, where <span class="math inline">\(f(t)\)</span> is the sum of the four harmonic terms in Equation <a href="model-description.html#eq:beta1">(3.4)</a>, must stay positive; multiplicative seasonal forcing requires an amplitude below one (<a href="https://press.princeton.edu/books/hardcover/9780691116174/modeling-infectious-diseases-in-humans-and-animals">Keeling &amp; Rohani 2008</a>, section 5.2). A Fourier fit to normalised case counts is not constrained this way and can dip below <span class="math inline">\(-1\)</span>, which would switch human-to-human transmission off for weeks at a time. When a case-fitted envelope has <span class="math inline">\(\min_t\,[1 + f(t)] &lt; 0.1\)</span>, we multiply all four coefficients (and their standard errors) by the single factor <span class="math inline">\(0.9 / \left[-\min_t f(t)\right]\)</span>, which lowers the amplitude so that the minimum of the envelope is exactly <span class="math inline">\(0.1\)</span> while keeping the phase and the relative shape of the season. The floor of <span class="math inline">\(0.1\)</span> (code-name <code>envelope_floor</code>) is a numerical positivity margin that leaves room for prior draws around the fitted means, not an estimated seasonal trough; the factor applied to each country is recorded as <code>envelope_scale</code> in the coefficient table.</p>
-<p>We estimated the parameters in the Fourier series (<span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span>, <span class="math inline">\(a_2\)</span>, <span class="math inline">\(b_2\)</span>) using the <a href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm">Levenberg–Marquardt</a> algorithm in the <a href="https://rdrr.io/cran/minpack.lm/"><code>minpack.lm</code></a> R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values from 1994 to 2024 for 30 uniformly distributed points within each country from the <a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Weather Data API</a>. Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data.</p>
+<p>The priors on <span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span>, <span class="math inline">\(a_2\)</span> and <span class="math inline">\(b_2\)</span> are Normal distributions centred on the fitted coefficients with standard deviations of <span class="math inline">\(\sqrt{2}\)</span> times their standard errors, so the envelope is positive at the prior means but not in every draw: when the four coefficients are drawn independently, <span class="math inline">\(1 + f(t)\)</span> falls below zero somewhere in the year in about a third of draws (averaged over the 40 countries), most often in countries whose fitted trough sits at the floor. The engine clamps a negative human force of infection to zero, so such a draw has no human-to-human transmission in the part of the low season where the envelope is negative, while environmental transmission continues. We did not shrink the prior standard deviations to prevent this, because doing so would pin each seasonal amplitude to the floor-scaled fit.</p>
+<p>We estimated the parameters in the Fourier series (<span class="math inline">\(a_1\)</span>, <span class="math inline">\(b_1\)</span>, <span class="math inline">\(a_2\)</span>, <span class="math inline">\(b_2\)</span>) using the <a href="https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm">Levenberg–Marquardt</a> algorithm in the <a href="https://rdrr.io/cran/minpack.lm/"><code>minpack.lm</code></a> R library. Given the lack of reported cholera case data for many countries in SSA and the association between cholera transmission and the rainy season, we leveraged seasonal precipitation data to help fit the Fourier wave function to all countries. We first gathered weekly precipitation values for 30 uniformly distributed points within each country from the <a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Weather Data API</a>. Then we fit the Fourier series to the weekly precipitation data and used these parameters as the starting values when fitting the model to the more sparse cholera case data. Both fits use the weeks from September 2010 to August 2025.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:seasonal-example"></span>
 <img src="figures/seasonal_transmission_example_MOZ.png" alt="Example of a grid of 30 uniformly distributed points within Mozambique (A). The scatterplot shows weekly summed precipitation values at those 30 grid points and cholera cases plotted on the same scale of the Z-Score which shows the variance around the mean in terms of the standard deviation. Fitted Fourier series functions are shown as blue (fit precipitation data) and red (fit to cholera case data) lines." width="100%"><p class="caption">
@@ -219,15 +220,15 @@ Figure 3.3: Example of a grid of 30 uniformly distributed points within Mozambiq
 <p>For countries with no reported case data, we inferred seasonal dynamics using the fitted wave function of a neighboring country with available case data. The selected neighbor was chosen from the same cluster of countries (grouped hierarchically into four clusters based on precipitation seasonality using <a href="https://en.wikipedia.org/wiki/Ward%27s_method">Ward’s method</a>; see Figure <a href="model-description.html#fig:seasonal-cluster">3.4</a>) that had the highest correlation in seasonal precipitation with the country lacking case data. In the rare event that no country with reported case data was found within the same seasonal cluster, we expanded the search to the 10 nearest neighbors and continued expanding by adding the next nearest neighbor until a match was found.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:seasonal-cluster"></span>
-<img src="figures/seasonal_precip_ward.D2_cluster.png" alt="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases." width="100%"><p class="caption">
-Figure 3.4: A) Map showing the clustering of African countries based on their seasonal precipitation patterns (2014-2024). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.
+<img src="figures/seasonal_precip_ward.D2_cluster.png" alt="A) Map showing the clustering of African countries based on their seasonal precipitation patterns (September 2010 to August 2025). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases." width="100%"><p class="caption">
+Figure 3.4: A) Map showing the clustering of African countries based on their seasonal precipitation patterns (September 2010 to August 2025). Countries are colored according to their cluster assignments, identified using hierarchical clustering. B) Fourier series fitted to weekly precipitation for each country. Each line plot shows the seasonal pattern for countries within a given cluster. Clusters are used to infer the seasonal transmission dynamics for countries where there are no reported cholera cases.
 </p>
 </div>
 <p>Using the model fitting methods described above, and the cluster-based approach for inferring the seasonal Fourier series pattern in countries without reported cholera cases, we modeled the seasonal dynamics for all 40 countries in the MOSAIC framework. These dynamics are visualized in Figure <a href="model-description.html#fig:seasonal-all">3.5</a>, with the corresponding Fourier model coefficients presented in Table <a href="model-description.html#tab:seasonal-table">3.1</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:seasonal-all"></span>
-<img src="figures/seasonal_transmission_all.png" alt="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases." width="100%"><p class="caption">
-Figure 3.5: Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation <a href="model-description.html#eq:beta1">(3.4)</a>. Blues lines give the Fourier series model fits for precipitation (1994-2024) and the red lines give models fits to reported cholera cases (2023-2024). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering. Countries with inferred case data from neighboring locations are annotated in red. The X-axis represents the weeks of the year (1-52), while the Y-axis shows the Z-score of weekly precipitation and cholera cases.
+<img src="figures/seasonal_transmission_all.png" alt="Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation \@ref(eq:beta1). Blue lines give the Fourier series model fits for precipitation and the red lines give model fits to reported cholera cases (both September 2010 to August 2025). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering; these countries are labelled with the country they were inferred from, and their case fit is dashed. The X-axis represents the day of the year, while the Y-axis shows the Z-score of weekly precipitation and cholera cases." width="100%"><p class="caption">
+Figure 3.5: Seasonal transmission patterns for all countries modeled in MOSAIC as modeled by the truncated Fourier series in Equation <a href="model-description.html#eq:beta1">(3.4)</a>. Blue lines give the Fourier series model fits for precipitation and the red lines give model fits to reported cholera cases (both September 2010 to August 2025). For countries where reported case data were not available, the Fourier model was inferred by the nearest country with the most similar seasonal precipitation patterns as determined by the hierarchical clustering; these countries are labelled with the country they were inferred from, and their case fit is dashed. The X-axis represents the day of the year, while the Y-axis shows the Z-score of weekly precipitation and cholera cases.
 </p>
 </div>
 <div class="inline-table"><table class="table" style="font-size: 11.75px; width: auto !important; margin-left: auto; margin-right: auto;">
@@ -268,16 +269,16 @@ Country
 Angola
 </td>
 <td style="text-align:left;">
--0.26 (-0.46 to -0.06)
+-0.23 (-0.37 to -0.08)
 </td>
 <td style="text-align:left;">
--0.31 (-0.51 to -0.1)
+-0.22 (-0.37 to -0.07)
 </td>
 <td style="text-align:left;">
-1.24 (1.04 to 1.44)
+1 (0.85 to 1.15)
 </td>
 <td style="text-align:left;">
--0.26 (-0.46 to -0.06)
+-0.3 (-0.45 to -0.15)
 </td>
 </tr>
 <tr>
@@ -285,16 +286,16 @@ Angola
 Benin
 </td>
 <td style="text-align:left;">
-0.16 (-0.02 to 0.34)
+0.08 (-0.06 to 0.22)
 </td>
 <td style="text-align:left;">
--0.59 (-0.77 to -0.41)
+-0.46 (-0.6 to -0.32)
 </td>
 <td style="text-align:left;">
--1.3 (-1.48 to -1.12)
+-1.02 (-1.15 to -0.88)
 </td>
 <td style="text-align:left;">
--0.36 (-0.54 to -0.19)
+-0.23 (-0.37 to -0.09)
 </td>
 </tr>
 <tr>
@@ -302,16 +303,16 @@ Benin
 Burkina Faso
 </td>
 <td style="text-align:left;">
--1.68 (-2.12 to -1.25)
+-0.88 (-1.13 to -0.64)
 </td>
 <td style="text-align:left;">
-0.91 (0.47 to 1.35)
+0.45 (0.21 to 0.69)
 </td>
 <td style="text-align:left;">
--0.78 (-1.22 to -0.33)
+-0.44 (-0.69 to -0.2)
 </td>
 <td style="text-align:left;">
-0.87 (0.43 to 1.31)
+0.5 (0.26 to 0.74)
 </td>
 </tr>
 <tr>
@@ -319,16 +320,16 @@ Burkina Faso
 Burundi
 </td>
 <td style="text-align:left;">
--0.39 (-0.48 to -0.3)
+-0.45 (-0.54 to -0.36)
 </td>
 <td style="text-align:left;">
--0.34 (-0.43 to -0.25)
+-0.16 (-0.25 to -0.07)
 </td>
 <td style="text-align:left;">
--0.35 (-0.44 to -0.26)
+-0.21 (-0.29 to -0.12)
 </td>
 <td style="text-align:left;">
-0.1 (0.01 to 0.19)
+0.02 (-0.07 to 0.1)
 </td>
 </tr>
 <tr>
@@ -336,16 +337,16 @@ Burundi
 Cameroon
 </td>
 <td style="text-align:left;">
--0.53 (-0.62 to -0.43)
+-0.48 (-0.58 to -0.39)
 </td>
 <td style="text-align:left;">
--0.34 (-0.44 to -0.25)
+-0.36 (-0.45 to -0.26)
 </td>
 <td style="text-align:left;">
-0.07 (-0.03 to 0.16)
+0.03 (-0.07 to 0.12)
 </td>
 <td style="text-align:left;">
-0.01 (-0.09 to 0.11)
+-0.02 (-0.11 to 0.07)
 </td>
 </tr>
 <tr>
@@ -353,16 +354,16 @@ Cameroon
 Central African Republic
 </td>
 <td style="text-align:left;">
--1.64 (-2.04 to -1.23)
+-0.66 (-0.84 to -0.49)
 </td>
 <td style="text-align:left;">
-0.62 (0.22 to 1.03)
+0.18 (0 to 0.35)
 </td>
 <td style="text-align:left;">
--1.17 (-1.58 to -0.76)
+-0.52 (-0.69 to -0.34)
 </td>
 <td style="text-align:left;">
-1.71 (1.31 to 2.11)
+0.76 (0.58 to 0.93)
 </td>
 </tr>
 <tr>
@@ -370,16 +371,16 @@ Central African Republic
 Chad
 </td>
 <td style="text-align:left;">
--0.69 (-0.95 to -0.44)
+-0.39 (-0.55 to -0.24)
 </td>
 <td style="text-align:left;">
--0.78 (-1.04 to -0.52)
+-0.42 (-0.58 to -0.27)
 </td>
 <td style="text-align:left;">
--1.64 (-1.91 to -1.38)
+-0.92 (-1.07 to -0.77)
 </td>
 <td style="text-align:left;">
-0.95 (0.7 to 1.21)
+0.53 (0.37 to 0.68)
 </td>
 </tr>
 <tr>
@@ -387,16 +388,16 @@ Chad
 Congo
 </td>
 <td style="text-align:left;">
--1.31 (-1.59 to -1.03)
+-0.73 (-0.88 to -0.57)
 </td>
 <td style="text-align:left;">
-0.44 (0.15 to 0.73)
+0.28 (0.12 to 0.44)
 </td>
 <td style="text-align:left;">
--0.98 (-1.27 to -0.69)
+-0.51 (-0.67 to -0.35)
 </td>
 <td style="text-align:left;">
-1.34 (1.06 to 1.62)
+0.7 (0.55 to 0.86)
 </td>
 </tr>
 <tr>
@@ -404,16 +405,16 @@ Congo
 Côte d’Ivoire
 </td>
 <td style="text-align:left;">
--0.85 (-1.31 to -0.39)
+-0.54 (-0.84 to -0.24)
 </td>
 <td style="text-align:left;">
-1.08 (0.62 to 1.55)
+0.72 (0.42 to 1.03)
 </td>
 <td style="text-align:left;">
--0.24 (-0.71 to 0.23)
+-0.15 (-0.45 to 0.16)
 </td>
 <td style="text-align:left;">
-0.83 (0.37 to 1.3)
+0.44 (0.14 to 0.75)
 </td>
 </tr>
 <tr>
@@ -421,16 +422,16 @@ Côte d’Ivoire
 DRC
 </td>
 <td style="text-align:left;">
-0.03 (-0.01 to 0.07)
+0.04 (0.01 to 0.08)
 </td>
 <td style="text-align:left;">
--0.09 (-0.13 to -0.04)
+-0.09 (-0.13 to -0.06)
 </td>
 <td style="text-align:left;">
--0.11 (-0.15 to -0.06)
+-0.16 (-0.2 to -0.12)
 </td>
 <td style="text-align:left;">
-0.04 (0 to 0.09)
+0.07 (0.03 to 0.1)
 </td>
 </tr>
 <tr>
@@ -438,16 +439,16 @@ DRC
 Eswatini
 </td>
 <td style="text-align:left;">
--2.02 (-3.74 to -0.3)
+-0.36 (-0.66 to -0.06)
 </td>
 <td style="text-align:left;">
--2.6 (-4.56 to -0.64)
+-0.47 (-0.82 to -0.13)
 </td>
 <td style="text-align:left;">
--0.63 (-3.05 to 1.79)
+-0.12 (-0.55 to 0.32)
 </td>
 <td style="text-align:left;">
-2.05 (1.01 to 3.09)
+0.35 (0.16 to 0.54)
 </td>
 </tr>
 <tr>
@@ -455,16 +456,16 @@ Eswatini
 Ethiopia
 </td>
 <td style="text-align:left;">
--0.39 (-0.47 to -0.32)
+-0.41 (-0.48 to -0.35)
 </td>
 <td style="text-align:left;">
--0.3 (-0.38 to -0.23)
+-0.35 (-0.42 to -0.29)
 </td>
 <td style="text-align:left;">
-0.1 (0.02 to 0.17)
+-0.13 (-0.19 to -0.07)
 </td>
 <td style="text-align:left;">
-0.22 (0.14 to 0.29)
+0.27 (0.21 to 0.34)
 </td>
 </tr>
 <tr>
@@ -472,16 +473,16 @@ Ethiopia
 Ghana
 </td>
 <td style="text-align:left;">
--0.04 (-0.26 to 0.17)
+-0.01 (-0.15 to 0.13)
 </td>
 <td style="text-align:left;">
--0.6 (-0.82 to -0.39)
+-0.43 (-0.57 to -0.28)
 </td>
 <td style="text-align:left;">
--1.37 (-1.58 to -1.16)
+-0.95 (-1.1 to -0.81)
 </td>
 <td style="text-align:left;">
-0.37 (0.16 to 0.58)
+0.22 (0.08 to 0.37)
 </td>
 </tr>
 <tr>
@@ -489,16 +490,16 @@ Ghana
 Guinea
 </td>
 <td style="text-align:left;">
--1.1 (-1.41 to -0.79)
+-0.56 (-0.72 to -0.4)
 </td>
 <td style="text-align:left;">
--0.22 (-0.53 to 0.09)
+-0.17 (-0.33 to -0.01)
 </td>
 <td style="text-align:left;">
--1.23 (-1.54 to -0.92)
+-0.66 (-0.82 to -0.5)
 </td>
 <td style="text-align:left;">
-1.45 (1.14 to 1.75)
+0.73 (0.57 to 0.89)
 </td>
 </tr>
 <tr>
@@ -506,16 +507,16 @@ Guinea
 Kenya
 </td>
 <td style="text-align:left;">
-0.1 (-0.02 to 0.22)
+0.11 (0 to 0.22)
 </td>
 <td style="text-align:left;">
-0.02 (-0.1 to 0.14)
+0.07 (-0.04 to 0.19)
 </td>
 <td style="text-align:left;">
-0.61 (0.49 to 0.73)
+0.5 (0.39 to 0.61)
 </td>
 <td style="text-align:left;">
--0.21 (-0.33 to -0.1)
+-0.2 (-0.31 to -0.09)
 </td>
 </tr>
 <tr>
@@ -523,16 +524,16 @@ Kenya
 Liberia
 </td>
 <td style="text-align:left;">
-0.06 (-0.04 to 0.15)
+0.14 (0.04 to 0.23)
 </td>
 <td style="text-align:left;">
--0.39 (-0.49 to -0.3)
+-0.31 (-0.4 to -0.21)
 </td>
 <td style="text-align:left;">
-0.3 (0.21 to 0.4)
+0.28 (0.19 to 0.38)
 </td>
 <td style="text-align:left;">
--0.16 (-0.26 to -0.07)
+-0.18 (-0.27 to -0.08)
 </td>
 </tr>
 <tr>
@@ -540,16 +541,16 @@ Liberia
 Malawi
 </td>
 <td style="text-align:left;">
-1.33 (1.07 to 1.59)
+0.75 (0.61 to 0.9)
 </td>
 <td style="text-align:left;">
-0.43 (0.16 to 0.69)
+0.25 (0.1 to 0.39)
 </td>
 <td style="text-align:left;">
-1.05 (0.78 to 1.32)
+0.58 (0.43 to 0.73)
 </td>
 <td style="text-align:left;">
-1.16 (0.9 to 1.43)
+0.64 (0.49 to 0.78)
 </td>
 </tr>
 <tr>
@@ -557,16 +558,16 @@ Malawi
 Mozambique
 </td>
 <td style="text-align:left;">
-0.37 (0.21 to 0.54)
+0.15 (0.03 to 0.27)
 </td>
 <td style="text-align:left;">
--0.78 (-0.95 to -0.61)
+-0.53 (-0.64 to -0.41)
 </td>
 <td style="text-align:left;">
-1.18 (1.01 to 1.34)
+0.87 (0.76 to 0.98)
 </td>
 <td style="text-align:left;">
-0.09 (-0.08 to 0.26)
+-0.07 (-0.19 to 0.04)
 </td>
 </tr>
 <tr>
@@ -574,16 +575,16 @@ Mozambique
 Namibia
 </td>
 <td style="text-align:left;">
-2.32 (1.41 to 3.22)
+0.24 (0.15 to 0.33)
 </td>
 <td style="text-align:left;">
-2.35 (1.18 to 3.53)
+0.25 (0.14 to 0.37)
 </td>
 <td style="text-align:left;">
-5.98 (4.41 to 7.55)
+0.56 (0.41 to 0.71)
 </td>
 <td style="text-align:left;">
-4.45 (3.19 to 5.71)
+0.41 (0.29 to 0.52)
 </td>
 </tr>
 <tr>
@@ -591,16 +592,16 @@ Namibia
 Niger
 </td>
 <td style="text-align:left;">
--0.76 (-0.94 to -0.59)
+-0.49 (-0.6 to -0.38)
 </td>
 <td style="text-align:left;">
--0.61 (-0.78 to -0.44)
+-0.39 (-0.5 to -0.28)
 </td>
 <td style="text-align:left;">
--1.27 (-1.45 to -1.1)
+-0.79 (-0.9 to -0.68)
 </td>
 <td style="text-align:left;">
-0.83 (0.66 to 1.01)
+0.54 (0.43 to 0.65)
 </td>
 </tr>
 <tr>
@@ -608,16 +609,16 @@ Niger
 Nigeria
 </td>
 <td style="text-align:left;">
--0.77 (-0.87 to -0.67)
+-0.7 (-0.79 to -0.6)
 </td>
 <td style="text-align:left;">
--0.21 (-0.31 to -0.11)
+-0.19 (-0.28 to -0.1)
 </td>
 <td style="text-align:left;">
--0.66 (-0.76 to -0.56)
+-0.63 (-0.72 to -0.54)
 </td>
 <td style="text-align:left;">
-0.41 (0.31 to 0.51)
+0.41 (0.32 to 0.5)
 </td>
 </tr>
 <tr>
@@ -625,16 +626,16 @@ Nigeria
 Rwanda
 </td>
 <td style="text-align:left;">
-0.37 (-0.01 to 0.75)
+0.32 (0.02 to 0.63)
 </td>
 <td style="text-align:left;">
--0.53 (-1.02 to -0.03)
+-0.39 (-0.79 to 0.02)
 </td>
 <td style="text-align:left;">
-1.35 (0.68 to 2.01)
+1.04 (0.53 to 1.55)
 </td>
 <td style="text-align:left;">
-0.46 (-0.07 to 0.99)
+0.38 (-0.01 to 0.78)
 </td>
 </tr>
 <tr>
@@ -642,16 +643,16 @@ Rwanda
 Sierra Leone
 </td>
 <td style="text-align:left;">
--0.91 (-1.16 to -0.67)
+-0.52 (-0.67 to -0.38)
 </td>
 <td style="text-align:left;">
--0.26 (-0.5 to -0.01)
+-0.21 (-0.35 to -0.07)
 </td>
 <td style="text-align:left;">
--1.15 (-1.4 to -0.91)
+-0.67 (-0.81 to -0.53)
 </td>
 <td style="text-align:left;">
-1.35 (1.11 to 1.6)
+0.74 (0.6 to 0.89)
 </td>
 </tr>
 <tr>
@@ -659,16 +660,16 @@ Sierra Leone
 Somalia
 </td>
 <td style="text-align:left;">
--0.34 (-0.44 to -0.25)
+-0.37 (-0.46 to -0.27)
 </td>
 <td style="text-align:left;">
--0.27 (-0.37 to -0.18)
+-0.17 (-0.27 to -0.08)
 </td>
 <td style="text-align:left;">
-0.8 (0.71 to 0.9)
+0.76 (0.67 to 0.85)
 </td>
 <td style="text-align:left;">
--0.24 (-0.33 to -0.15)
+-0.24 (-0.34 to -0.15)
 </td>
 </tr>
 <tr>
@@ -676,16 +677,16 @@ Somalia
 South Africa
 </td>
 <td style="text-align:left;">
--0.99 (-2.01 to 0.03)
+-0.4 (-0.82 to 0.02)
 </td>
 <td style="text-align:left;">
--0.88 (-1.9 to 0.14)
+-0.39 (-0.81 to 0.03)
 </td>
 <td style="text-align:left;">
--1.61 (-2.63 to -0.6)
+-0.69 (-1.1 to -0.27)
 </td>
 <td style="text-align:left;">
-1.69 (0.68 to 2.71)
+0.7 (0.28 to 1.12)
 </td>
 </tr>
 <tr>
@@ -693,16 +694,16 @@ South Africa
 South Sudan
 </td>
 <td style="text-align:left;">
-0.06 (-0.07 to 0.2)
+0.16 (0.06 to 0.26)
 </td>
 <td style="text-align:left;">
-0.39 (0.25 to 0.52)
+0.42 (0.32 to 0.51)
 </td>
 <td style="text-align:left;">
-0.66 (0.52 to 0.79)
+0.46 (0.37 to 0.56)
 </td>
 <td style="text-align:left;">
--0.06 (-0.2 to 0.08)
+-0.08 (-0.18 to 0.02)
 </td>
 </tr>
 <tr>
@@ -713,13 +714,13 @@ Tanzania
 0.62 (0.54 to 0.69)
 </td>
 <td style="text-align:left;">
--0.09 (-0.17 to -0.02)
+-0.09 (-0.16 to -0.01)
 </td>
 <td style="text-align:left;">
--0.44 (-0.52 to -0.37)
+-0.46 (-0.53 to -0.39)
 </td>
 <td style="text-align:left;">
--0.11 (-0.18 to -0.04)
+-0.17 (-0.24 to -0.1)
 </td>
 </tr>
 <tr>
@@ -727,16 +728,16 @@ Tanzania
 Togo
 </td>
 <td style="text-align:left;">
-1.22 (0.99 to 1.46)
+1.03 (0.82 to 1.23)
 </td>
 <td style="text-align:left;">
-0.13 (-0.11 to 0.37)
+0.14 (-0.06 to 0.34)
 </td>
 <td style="text-align:left;">
--0.72 (-0.96 to -0.48)
+-0.6 (-0.8 to -0.4)
 </td>
 <td style="text-align:left;">
--0.45 (-0.69 to -0.22)
+-0.36 (-0.56 to -0.16)
 </td>
 </tr>
 <tr>
@@ -744,16 +745,16 @@ Togo
 Uganda
 </td>
 <td style="text-align:left;">
-0.22 (-0.02 to 0.46)
+0.32 (0.15 to 0.5)
 </td>
 <td style="text-align:left;">
--0.31 (-0.55 to -0.06)
+-0.17 (-0.34 to 0)
 </td>
 <td style="text-align:left;">
-0.92 (0.68 to 1.17)
+0.7 (0.54 to 0.87)
 </td>
 <td style="text-align:left;">
-0.79 (0.55 to 1.03)
+0.6 (0.43 to 0.77)
 </td>
 </tr>
 <tr>
@@ -761,16 +762,16 @@ Uganda
 Zambia
 </td>
 <td style="text-align:left;">
-1.41 (1.16 to 1.66)
+0.92 (0.74 to 1.1)
 </td>
 <td style="text-align:left;">
-0.7 (0.45 to 0.95)
+0.52 (0.34 to 0.7)
 </td>
 <td style="text-align:left;">
-0.71 (0.46 to 0.96)
+0.37 (0.19 to 0.55)
 </td>
 <td style="text-align:left;">
-0.73 (0.48 to 0.97)
+0.36 (0.18 to 0.54)
 </td>
 </tr>
 <tr>
@@ -778,16 +779,16 @@ Zambia
 Zimbabwe
 </td>
 <td style="text-align:left;">
-0.71 (0.55 to 0.86)
+0.75 (0.61 to 0.9)
 </td>
 <td style="text-align:left;">
--0.13 (-0.29 to 0.02)
+0.02 (-0.13 to 0.16)
 </td>
 <td style="text-align:left;">
--0.07 (-0.23 to 0.08)
+-0.1 (-0.24 to 0.04)
 </td>
 <td style="text-align:left;">
-0.08 (-0.07 to 0.24)
+0.03 (-0.11 to 0.17)
 </td>
 </tr>
 </tbody>
@@ -1400,22 +1401,22 @@ Figure 3.21: The total cumulative number of OCV doses distributed through the WH
 <p><span class="math display">\[
 \text{VE}_k(t) = \phi_k \exp(-\omega_k\, t)
 \]</span></p>
-<p>separately to the mean, lower, and upper effectiveness curves for each dose regimen <span class="math inline">\(k \in \{1,2\}\)</span> using Levenberg–Marquardt nonlinear least squares (the <a href="https://rdrr.io/cran/minpack.lm/"><code>minpack.lm</code></a> R library), then moment-match the point estimate and 95% CI of each parameter to a Beta prior (for <span class="math inline">\(\phi\)</span>) or a Gamma prior (for <span class="math inline">\(\omega\)</span>). To enforce the biological monotonicity that two doses cannot reduce protection at the time of delivery, the two-dose fit is constrained so that <span class="math inline">\(\phi_2 \ge \phi_1\)</span>; without this constraint the independent backward extrapolations from the later-starting two-dose follow-up window (12–48 months) yields <span class="math inline">\(\phi_2 &lt; \phi_1\)</span>, an artefact of the asymmetric follow-up windows rather than a feature of the underlying meta-regression. The resulting priors are:</p>
+<p>separately to the mean, lower, and upper effectiveness curves for each dose regimen <span class="math inline">\(k \in \{1,2\}\)</span> using Levenberg–Marquardt nonlinear least squares (the <a href="https://rdrr.io/cran/minpack.lm/"><code>minpack.lm</code></a> R library), then fit a Beta prior (for <span class="math inline">\(\phi\)</span>) or a Gamma prior (for <span class="math inline">\(\omega\)</span>) to each parameter, with the point estimate as its mode and its spread set from the 95% CI, slightly widened (by about 5% at each end). To enforce the biological monotonicity that two doses cannot reduce protection at the time of delivery, the two-dose fit is constrained so that <span class="math inline">\(\phi_2 \ge \phi_1\)</span>; without this constraint the independent backward extrapolations from the later-starting two-dose follow-up window (12–48 months) yields <span class="math inline">\(\phi_2 &lt; \phi_1\)</span>, an artefact of the asymmetric follow-up windows rather than a feature of the underlying meta-regression. The resulting priors are:</p>
 <p><span class="math display" id="eq:effectiveness">\[
 \begin{aligned}
-\phi_1 \ \sim\ &amp; \text{Beta}(91.84,\ 25.49) \quad \text{(one-dose effectiveness, mode} \approx 0.79\text{)},\\
-\phi_2 \ \sim\ &amp; \text{Beta}(206.96,\ 56.53) \quad \text{(two-dose effectiveness, mode} \approx 0.79\text{, constrained to } \ge \phi_1\text{)},\\
+\phi_1 \ \sim\ &amp; \text{Beta}(84.37,\ 23.48) \quad \text{(one-dose effectiveness, mode} \approx 0.79\text{)},\\
+\phi_2 \ \sim\ &amp; \text{Beta}(196.47,\ 53.70) \quad \text{(two-dose effectiveness, mode} \approx 0.79\text{, constrained to } \ge \phi_1\text{)},\\
 \omega_1 \ \sim\ &amp; \text{Gamma}(23.33,\ 31{,}693.83) \quad \text{(one-dose waning, mode} \approx 0.00070\ \text{day}^{-1}\text{)},\\
 \omega_2 \ \sim\ &amp; \text{Gamma}(2.69,\ 4{,}720.84) \quad \text{(two-dose waning, mode} \approx 0.00036\ \text{day}^{-1}\text{)}.
 \end{aligned}
 \tag{3.13}
 \]</span></p>
 <p>After applying the constraint, the initial effectiveness is identical at the mode (both schedules reach approximately 0.79 immediately after the last dose), but the two-dose schedule decays substantially more slowly: the modal one-dose half-life of effectiveness is <span class="math inline">\(\log(2) / \omega_1 \approx 984\)</span> days <span class="math inline">\(\approx 2.7\)</span> years, while the modal two-dose half-life is <span class="math inline">\(\log(2) / \omega_2 \approx 1939\)</span> days <span class="math inline">\(\approx 5.3\)</span> years. The Gamma posterior for <span class="math inline">\(\omega_2\)</span> is also more positively skewed (Figure <a href="model-description.html#fig:effectiveness">3.22</a>F), reflecting the smaller number of two-dose follow-up time points in the meta-regression and the wider 95% CI bounds at later follow-up.</p>
-<p>The <span class="math inline">\(\phi_2 \ge \phi_1\)</span> monotonicity constraint is enforced <em>during the data fit</em> — so the modes of the two Beta priors satisfy it exactly — but the priors themselves remain independent during BFRS sampling, and individual draws can therefore occasionally produce <span class="math inline">\(\phi_2 &lt; \phi_1\)</span>. In practice both Beta priors are tightly concentrated near 0.79 (Beta(91.84, 25.49) and Beta(206.96, 56.53)), so such violations are rare and the marginal posterior summaries are unaffected.</p>
+<p>The <span class="math inline">\(\phi_2 \ge \phi_1\)</span> monotonicity constraint is enforced <em>during the data fit</em> — so the modes of the two Beta priors satisfy it exactly — but the priors themselves remain independent during BFRS sampling, and individual draws can therefore produce <span class="math inline">\(\phi_2 &lt; \phi_1\)</span>. Because both Beta priors are concentrated near 0.79 (Beta(84.37, 23.48) and Beta(196.47, 53.70)), this happens in about half of the draws, but the differences are small; and in the default configuration, which delivers no second doses after the simulation start (<span class="math inline">\(\nu_{2,jt} = 0\)</span>), <span class="math inline">\(\phi_2\)</span> has no effect on the simulation.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:effectiveness"></span>
-<img src="figures/vaccine_all_combined.png" alt="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\text{VE}_k(t) = \phi_k \exp(-\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\phi_2 \ge \phi_1$. Panels B and E show the Beta priors for the initial effectiveness $\phi_1, \phi_2$; panels C and F show the Gamma priors for the daily waning rates $\omega_1, \omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit." width="100%"><p class="caption">
-Figure 3.22: Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the <a href="https://doi.org/10.1101/2024.08.13.24311930v2">Xu et al. 2024</a> meta-regression. Panels A and D show the fitted exponential decay <span class="math inline">\(\text{VE}_k(t) = \phi_k \exp(-\omega_k t)\)</span> (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that <span class="math inline">\(\phi_2 \ge \phi_1\)</span>. Panels B and E show the Beta priors for the initial effectiveness <span class="math inline">\(\phi_1, \phi_2\)</span>; panels C and F show the Gamma priors for the daily waning rates <span class="math inline">\(\omega_1, \omega_2\)</span>. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit.
+<img src="figures/vaccine_all_combined.png" alt="Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the [Xu et al. 2024](https://doi.org/10.1101/2024.08.13.24311930v2) meta-regression. Panels A and D show the fitted exponential decay $\text{VE}_k(t) = \phi_k \exp(-\omega_k t)$ (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that $\phi_2 \ge \phi_1$. Panels B and E show the Beta distributions fitted to the initial effectiveness $\phi_1, \phi_2$; panels C and F show the Gamma distributions fitted to the daily waning rates $\omega_1, \omega_2$. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit. The priors of Equation \@ref(eq:effectiveness) are fitted to the same modes with these intervals slightly widened; they are close to the distributions shown for $\omega_1, \omega_2$ and markedly wider for $\phi_1, \phi_2$." width="100%"><p class="caption">
+Figure 3.22: Vaccine-effectiveness priors for the one-dose (top row, blue) and two-dose (bottom row, green) OCV regimens, derived from the <a href="https://doi.org/10.1101/2024.08.13.24311930v2">Xu et al. 2024</a> meta-regression. Panels A and D show the fitted exponential decay <span class="math inline">\(\text{VE}_k(t) = \phi_k \exp(-\omega_k t)\)</span> (solid line) and 95% prediction envelope (dashed lines), with the Xu et al. mean estimates (filled circles) and 95% CI bars overlaid; the mode estimates from the fits are reported in the upper-right of each panel. The two-dose fit is constrained so that <span class="math inline">\(\phi_2 \ge \phi_1\)</span>. Panels B and E show the Beta distributions fitted to the initial effectiveness <span class="math inline">\(\phi_1, \phi_2\)</span>; panels C and F show the Gamma distributions fitted to the daily waning rates <span class="math inline">\(\omega_1, \omega_2\)</span>. In each density panel, the solid vertical line marks the mode and the dashed coloured lines mark the 95% CI bounds carried over from the data fit. The priors of Equation <a href="model-description.html#eq:effectiveness">(3.13)</a> are fitted to the same modes with these intervals slightly widened; they are close to the distributions shown for <span class="math inline">\(\omega_1, \omega_2\)</span> and markedly wider for <span class="math inline">\(\phi_1, \phi_2\)</span>.
 </p>
 </div>
 </div>
@@ -1635,20 +1636,21 @@ The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span> t
 </h3>
 <p>The presentation of infection with <em>V. cholerae</em> can be extremely variable. The severity of infection depends many factors such as the amount of the infectious dose, the age of the host, the level of immunity of the host either through vaccination or previous infection, and naivety to the particular strain of <em>V. cholerae</em>. Additional circumstantial factors such as nutritional status and overall pathogen burden may also impact infection severity. At the population level, the observed proportion of infections that are symptomatic is also dependent on the endemicity of cholera in the region. Highly endemic areas (e.g. parts of Bangladesh; <a href="https://www.nature.com/articles/s41591-024-02810-4">Hegde et al 2024</a>) may have a very low proportion of symptomatic infections due to many previous exposures. Inversely, populations that are largely naive to <em>V. cholerae</em> will exhibit a relatively higher proportion of symptomatic infections (e.g. Haiti; <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/">Finger et al 2024</a>).</p>
 <p>Accounting for all of these nuances in the first version of the model is not possible, but past studies do contain useful information that can help set sensible bounds on the proportion of infections that are symptomatic (<span class="math inline">\(\sigma\)</span>). We have therefore compiled a short list of sero-surveys and cohort studies that assess the likelihood of symptomatic infection in different locations, summarised in Table <a href="model-description.html#tab:symptomatic-table">3.5</a>.</p>
-<p>To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combine mean and confidence intervals of all studies in Table <a href="model-description.html#tab:symptomatic-table">3.5</a> and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion <span class="math inline">\(\sigma\)</span> is:</p>
+<p>To provide a reasonably informed prior for the proportion of infections that are symptomatic, we calculated the combined mean and confidence intervals of all studies in Table <a href="model-description.html#tab:symptomatic-table">3.5</a> and fit a Beta distribution that corresponds to these quantiles using least-squares and a Nelder-Mead algorithm. The resulting prior distribution for the symptomatic proportion <span class="math inline">\(\sigma\)</span> is:</p>
 <p><span class="math display">\[\begin{equation}
-\sigma \sim \text{Beta}(4.30, 13.51)
+\sigma \sim \text{Beta}(3.75, 7.12)
 \end{equation}\]</span></p>
+<p>which has a mean of approximately 0.35 (95% interval approximately 0.11–0.64). This prior replaces <span class="math inline">\(\text{Beta}(4.30, 13.51)\)</span> (mean 0.24), used before MOSAIC-pkg v0.100.1, which was fitted to a version of the table in which the <a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221">Harris et al. (2008)</a> row was mistranscribed as 0.184: that household cohort reports 127 of 202 culture-confirmed infections as symptomatic (0.629, exact binomial 95% CI 0.558–0.695).</p>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:symptomatic-table">Table 3.5: </span>Summary of Studies on Cholera Immunity</caption>
+<span id="tab:symptomatic-table">Table 3.5: </span>Summary of studies of the proportion of cholera infections that are symptomatic.</caption>
 <colgroup>
-<col width="5%">
-<col width="6%">
-<col width="7%">
-<col width="14%">
-<col width="21%">
-<col width="44%">
+<col width="3%">
+<col width="3%">
+<col width="4%">
+<col width="8%">
+<col width="12%">
+<col width="68%">
 </colgroup>
 <thead><tr class="header">
 <th align="right">Mean</th>
@@ -1668,9 +1670,9 @@ The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span> t
 <td align="left">Review</td>
 </tr>
 <tr class="even">
-<td align="right">NA</td>
-<td align="right">1.000</td>
 <td align="right">0.250</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
 <td align="left">NA</td>
 <td align="left"><a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0009383">Lueng &amp; Matrajt (2021)</a></td>
 <td align="left">Review</td>
@@ -1685,16 +1687,16 @@ The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span> t
 </tr>
 <tr class="even">
 <td align="right">0.238</td>
-<td align="right">0.250</td>
 <td align="right">0.227</td>
+<td align="right">0.250</td>
 <td align="left">Haiti</td>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10635253/">Finger et al (2024)</a></td>
 <td align="left">Sero-survey and clinical data</td>
 </tr>
 <tr class="odd">
 <td align="right">0.213</td>
-<td align="right">0.231</td>
 <td align="right">0.194</td>
+<td align="right">0.231</td>
 <td align="left">Haiti</td>
 <td align="left"><a href="https://www.ajtmh.org/view/journals/tpmd/89/4/article-p654.xml">Jackson et al (2013)</a></td>
 <td align="left">Cross-sectional sero-survey</td>
@@ -1721,7 +1723,7 @@ The coefficient <span class="math inline">\(\mathcal{C}_{ij}\in[-1,1]\)</span> t
 <td align="right">0.695</td>
 <td align="left">Bangladesh</td>
 <td align="left"><a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0000221">Harris et al (2008)</a></td>
-<td align="left">Household cohort; culture-confirmed infections</td>
+<td align="left">Household cohort; culture-confirmed infections (high-dose exposure, rectal-swab detection under-ascertains asymptomatic infection)</td>
 </tr>
 <tr class="odd">
 <td align="right">0.001</td>
@@ -1769,11 +1771,11 @@ P(\text{true}\cap\text{suspected}) = P(\text{true}\mid\text{suspected})\,P(\text
 \rho \sim \text{Beta}(5.38,\ 7.10),
 \tag{3.24}
 \]</span></p>
-<p>corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of <a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286">Wiens et al. 2023</a>, which reports suspected-case PPVs of approximately 0.52 across all settings and 0.76 during outbreaks. Fit to Beta distributions by least-squares:</p>
+<p>corresponding to a mean of approximately 0.42 (i.e. roughly 42% of true symptomatic infections enter the surveillance pipeline as a suspected case). The endemic and epidemic PPVs are derived from the meta-analysis of <a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286">Wiens et al. 2023</a>, which reports suspected-case PPVs of 0.52 (95% interval 0.24–0.80) across all settings and 0.78 (0.40–0.99) during outbreaks. We fit Beta distributions to these medians and 95% intervals by least squares:</p>
 <p><span class="math display" id="eq:chi-priors">\[
 \begin{aligned}
-\chi^{\text{end}} \ \sim\ &amp; \text{Beta}(5.43,\ 5.01) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
-\chi^{\text{epi}} \ \sim\ &amp; \text{Beta}(4.79,\ 1.53) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
+\chi^{\text{end}} \ \sim\ &amp; \text{Beta}(5.56,\ 5.10) \quad \text{(endemic PPV, mean} \approx 0.52\text{)},\\
+\chi^{\text{epi}} \ \sim\ &amp; \text{Beta}(4.97,\ 1.58) \quad \text{(epidemic PPV, mean} \approx 0.76\text{)}.
 \end{aligned}
 \tag{3.25}
 \]</span></p>
@@ -1915,10 +1917,10 @@ AFRO Region
 0.020
 </td>
 <td style="text-align:right;">
-0.008
+28129.179
 </td>
 <td style="text-align:right;">
-1.910
+1412325.180
 </td>
 </tr>
 <tr>
@@ -1926,13 +1928,13 @@ AFRO Region
 Angola
 </td>
 <td style="text-align:right;">
-45110
+38984
 </td>
 <td style="text-align:right;">
-1091
+969
 </td>
 <td style="text-align:right;">
-0.024
+0.025
 </td>
 <td style="text-align:right;">
 0.023
@@ -1941,36 +1943,10 @@ Angola
 0.026
 </td>
 <td style="text-align:right;">
-0.009
+953.638
 </td>
 <td style="text-align:right;">
-1.905
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Burundi
-</td>
-<td style="text-align:right;">
-10774
-</td>
-<td style="text-align:right;">
-61
-</td>
-<td style="text-align:right;">
-0.006
-</td>
-<td style="text-align:right;">
-0.004
-</td>
-<td style="text-align:right;">
-0.007
-</td>
-<td style="text-align:right;">
-0.006
-</td>
-<td style="text-align:right;">
-1.929
+37395.542
 </td>
 </tr>
 <tr>
@@ -1993,10 +1969,10 @@ Benin
 0.020
 </td>
 <td style="text-align:right;">
-0.008
+52.836
 </td>
 <td style="text-align:right;">
-1.906
+3333.368
 </td>
 </tr>
 <tr>
@@ -2019,88 +1995,36 @@ Burkina Faso
 0.020
 </td>
 <td style="text-align:right;">
+28129.179
+</td>
+<td style="text-align:right;">
+1412325.180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Burundi
+</td>
+<td style="text-align:right;">
+9186
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
 0.008
 </td>
 <td style="text-align:right;">
-1.910
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Central African Republic
+53.820
 </td>
 <td style="text-align:right;">
-726
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-0.063
-</td>
-<td style="text-align:right;">
-0.047
-</td>
-<td style="text-align:right;">
-0.084
-</td>
-<td style="text-align:right;">
-0.015
-</td>
-<td style="text-align:right;">
-1.867
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Cote d’Ivoire
-</td>
-<td style="text-align:right;">
-446
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-0.040
-</td>
-<td style="text-align:right;">
-0.024
-</td>
-<td style="text-align:right;">
-0.063
-</td>
-<td style="text-align:right;">
-0.013
-</td>
-<td style="text-align:right;">
-1.863
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Côte D’ivoire
-</td>
-<td style="text-align:right;">
-503
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-0.040
-</td>
-<td style="text-align:right;">
-0.024
-</td>
-<td style="text-align:right;">
-0.061
-</td>
-<td style="text-align:right;">
-0.013
-</td>
-<td style="text-align:right;">
-1.854
+8552.414
 </td>
 </tr>
 <tr>
@@ -2108,10 +2032,10 @@ Côte D’ivoire
 Cameroon
 </td>
 <td style="text-align:right;">
-31510
+29981
 </td>
 <td style="text-align:right;">
-967
+926
 </td>
 <td style="text-align:right;">
 0.031
@@ -2123,62 +2047,36 @@ Cameroon
 0.033
 </td>
 <td style="text-align:right;">
-0.010
+910.950
 </td>
 <td style="text-align:right;">
-1.916
+28569.445
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Democratic Republic of Congo
+Chad
 </td>
 <td style="text-align:right;">
-433598
+4338
 </td>
 <td style="text-align:right;">
-9103
+257
 </td>
 <td style="text-align:right;">
-0.021
+0.059
 </td>
 <td style="text-align:right;">
-0.021
+0.052
 </td>
 <td style="text-align:right;">
-0.021
+0.067
 </td>
 <td style="text-align:right;">
-0.009
+249.279
 </td>
 <td style="text-align:right;">
-1.918
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Congo
-</td>
-<td style="text-align:right;">
-1851
-</td>
-<td style="text-align:right;">
-126
-</td>
-<td style="text-align:right;">
-0.068
-</td>
-<td style="text-align:right;">
-0.057
-</td>
-<td style="text-align:right;">
-0.081
-</td>
-<td style="text-align:right;">
-0.015
-</td>
-<td style="text-align:right;">
-1.863
+3951.948
 </td>
 </tr>
 <tr>
@@ -2201,426 +2099,88 @@ Comoros
 0.016
 </td>
 <td style="text-align:right;">
-0.008
+147.348
 </td>
 <td style="text-align:right;">
-1.896
+10580.402
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Ethiopia
+Congo
 </td>
 <td style="text-align:right;">
-82589
+970
 </td>
 <td style="text-align:right;">
-1016
+77
 </td>
 <td style="text-align:right;">
-0.012
+0.079
 </td>
 <td style="text-align:right;">
-0.012
+0.063
 </td>
 <td style="text-align:right;">
-0.013
+0.098
 </td>
 <td style="text-align:right;">
-0.007
+73.029
 </td>
 <td style="text-align:right;">
-1.922
+842.449
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Ghana
+Cote d’Ivoire
 </td>
 <td style="text-align:right;">
-36994
+949
 </td>
 <td style="text-align:right;">
-302
+38
 </td>
 <td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-0.007
-</td>
-<td style="text-align:right;">
-0.009
-</td>
-<td style="text-align:right;">
-0.007
-</td>
-<td style="text-align:right;">
-1.921
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Guinea
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.019
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.910
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Guinea-Bissau
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.019
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.910
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Kenya
-</td>
-<td style="text-align:right;">
-48696
-</td>
-<td style="text-align:right;">
-709
-</td>
-<td style="text-align:right;">
-0.015
-</td>
-<td style="text-align:right;">
-0.014
-</td>
-<td style="text-align:right;">
-0.016
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.915
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Liberia
-</td>
-<td style="text-align:right;">
-580
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.000
-</td>
-<td style="text-align:right;">
-0.000
-</td>
-<td style="text-align:right;">
-0.006
-</td>
-<td style="text-align:right;">
-0.006
-</td>
-<td style="text-align:right;">
-1.938
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Mali
-</td>
-<td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.019
-</td>
-<td style="text-align:right;">
-0.020
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.910
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Mozambique
-</td>
-<td style="text-align:right;">
-100084
-</td>
-<td style="text-align:right;">
-463
-</td>
-<td style="text-align:right;">
-0.005
-</td>
-<td style="text-align:right;">
-0.004
-</td>
-<td style="text-align:right;">
-0.005
-</td>
-<td style="text-align:right;">
-0.006
-</td>
-<td style="text-align:right;">
-1.904
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Malawi
-</td>
-<td style="text-align:right;">
-66273
-</td>
-<td style="text-align:right;">
-1888
+0.040
 </td>
 <td style="text-align:right;">
 0.028
 </td>
 <td style="text-align:right;">
-0.027
+0.055
 </td>
 <td style="text-align:right;">
-0.030
+35.465
 </td>
 <td style="text-align:right;">
-0.010
-</td>
-<td style="text-align:right;">
-1.891
+840.642
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Namibia
+Democratic Republic of Congo
 </td>
 <td style="text-align:right;">
-791
+392319
 </td>
 <td style="text-align:right;">
-14
+7889
 </td>
 <td style="text-align:right;">
-0.018
+0.020
 </td>
 <td style="text-align:right;">
-0.010
+0.020
 </td>
 <td style="text-align:right;">
-0.030
+0.021
 </td>
 <td style="text-align:right;">
-0.010
+7843.949
 </td>
 <td style="text-align:right;">
-1.882
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Niger
-</td>
-<td style="text-align:right;">
-12705
-</td>
-<td style="text-align:right;">
-357
-</td>
-<td style="text-align:right;">
-0.028
-</td>
-<td style="text-align:right;">
-0.025
-</td>
-<td style="text-align:right;">
-0.031
-</td>
-<td style="text-align:right;">
-0.010
-</td>
-<td style="text-align:right;">
-1.897
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Nigeria
-</td>
-<td style="text-align:right;">
-355515
-</td>
-<td style="text-align:right;">
-8198
-</td>
-<td style="text-align:right;">
-0.023
-</td>
-<td style="text-align:right;">
-0.023
-</td>
-<td style="text-align:right;">
-0.024
-</td>
-<td style="text-align:right;">
-0.009
-</td>
-<td style="text-align:right;">
-1.911
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Rwanda
-</td>
-<td style="text-align:right;">
-1086
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0.000
-</td>
-<td style="text-align:right;">
-0.000
-</td>
-<td style="text-align:right;">
-0.003
-</td>
-<td style="text-align:right;">
-0.005
-</td>
-<td style="text-align:right;">
-1.902
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Sudan
-</td>
-<td style="text-align:right;">
-362
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-0.030
-</td>
-<td style="text-align:right;">
-0.015
-</td>
-<td style="text-align:right;">
-0.054
-</td>
-<td style="text-align:right;">
-0.012
-</td>
-<td style="text-align:right;">
-1.855
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Somalia
-</td>
-<td style="text-align:right;">
-134839
-</td>
-<td style="text-align:right;">
-1849
-</td>
-<td style="text-align:right;">
-0.014
-</td>
-<td style="text-align:right;">
-0.013
-</td>
-<td style="text-align:right;">
-0.014
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.906
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-South Sudan
-</td>
-<td style="text-align:right;">
-141039
-</td>
-<td style="text-align:right;">
-2393
-</td>
-<td style="text-align:right;">
-0.017
-</td>
-<td style="text-align:right;">
-0.016
-</td>
-<td style="text-align:right;">
-0.018
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.935
+382213.550
 </td>
 </tr>
 <tr>
@@ -2643,36 +2203,478 @@ Eswatini
 0.020
 </td>
 <td style="text-align:right;">
-0.008
+28129.179
 </td>
 <td style="text-align:right;">
-1.910
+1412325.180
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Chad
+Ethiopia
 </td>
 <td style="text-align:right;">
-4904
+82536
 </td>
 <td style="text-align:right;">
-285
+1015
 </td>
 <td style="text-align:right;">
-0.058
+0.012
 </td>
 <td style="text-align:right;">
-0.052
-</td>
-<td style="text-align:right;">
-0.065
+0.012
 </td>
 <td style="text-align:right;">
 0.013
 </td>
 <td style="text-align:right;">
-1.863
+999.365
+</td>
+<td style="text-align:right;">
+80230.442
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ghana
+</td>
+<td style="text-align:right;">
+36994
+</td>
+<td style="text-align:right;">
+302
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.009
+</td>
+<td style="text-align:right;">
+293.808
+</td>
+<td style="text-align:right;">
+35644.339
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Guinea
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.019
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+28129.179
+</td>
+<td style="text-align:right;">
+1412325.180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Guinea-Bissau
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.019
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+28129.179
+</td>
+<td style="text-align:right;">
+1412325.180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kenya
+</td>
+<td style="text-align:right;">
+48656
+</td>
+<td style="text-align:right;">
+709
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.016
+</td>
+<td style="text-align:right;">
+696.033
+</td>
+<td style="text-align:right;">
+47040.922
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Liberia
+</td>
+<td style="text-align:right;">
+580
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+580.500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Malawi
+</td>
+<td style="text-align:right;">
+63060
+</td>
+<td style="text-align:right;">
+1858
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+1836.401
+</td>
+<td style="text-align:right;">
+60476.465
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mali
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.019
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+28129.179
+</td>
+<td style="text-align:right;">
+1412325.180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mozambique
+</td>
+<td style="text-align:right;">
+91969
+</td>
+<td style="text-align:right;">
+392
+</td>
+<td style="text-align:right;">
+0.004
+</td>
+<td style="text-align:right;">
+0.004
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+382.590
+</td>
+<td style="text-align:right;">
+89277.356
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Namibia
+</td>
+<td style="text-align:right;">
+578
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+<td style="text-align:right;">
+12.704
+</td>
+<td style="text-align:right;">
+496.068
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Niger
+</td>
+<td style="text-align:right;">
+12705
+</td>
+<td style="text-align:right;">
+357
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+347.935
+</td>
+<td style="text-align:right;">
+12019.841
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nigeria
+</td>
+<td style="text-align:right;">
+289605
+</td>
+<td style="text-align:right;">
+7790
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+7745.079
+</td>
+<td style="text-align:right;">
+280174.350
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rwanda
+</td>
+<td style="text-align:right;">
+765
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+765.500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Somalia
+</td>
+<td style="text-align:right;">
+134839
+</td>
+<td style="text-align:right;">
+1849
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+1827.633
+</td>
+<td style="text-align:right;">
+131421.924
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+South Africa
+</td>
+<td style="text-align:right;">
+1403
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.044
+</td>
+<td style="text-align:right;">
+44.123
+</td>
+<td style="text-align:right;">
+1261.285
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+South Sudan
+</td>
+<td style="text-align:right;">
+127398
+</td>
+<td style="text-align:right;">
+2274
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+<td style="text-align:right;">
+0.017
+</td>
+<td style="text-align:right;">
+0.019
+</td>
+<td style="text-align:right;">
+2250.175
+</td>
+<td style="text-align:right;">
+123789.226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sudan
+</td>
+<td style="text-align:right;">
+362
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+9.906
+</td>
+<td style="text-align:right;">
+303.917
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tanzania
+</td>
+<td style="text-align:right;">
+50270
+</td>
+<td style="text-align:right;">
+727
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.016
+</td>
+<td style="text-align:right;">
+713.862
+</td>
+<td style="text-align:right;">
+48618.232
 </td>
 </tr>
 <tr>
@@ -2695,36 +2697,10 @@ Togo
 0.063
 </td>
 <td style="text-align:right;">
-0.013
+37.372
 </td>
 <td style="text-align:right;">
-1.868
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Tanzania
-</td>
-<td style="text-align:right;">
-50383
-</td>
-<td style="text-align:right;">
-729
-</td>
-<td style="text-align:right;">
-0.014
-</td>
-<td style="text-align:right;">
-0.013
-</td>
-<td style="text-align:right;">
-0.016
-</td>
-<td style="text-align:right;">
-0.008
-</td>
-<td style="text-align:right;">
-1.915
+749.656
 </td>
 </tr>
 <tr>
@@ -2747,36 +2723,10 @@ Uganda
 0.022
 </td>
 <td style="text-align:right;">
-0.009
+174.775
 </td>
 <td style="text-align:right;">
-1.901
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-South Africa
-</td>
-<td style="text-align:right;">
-1405
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-0.033
-</td>
-<td style="text-align:right;">
-0.025
-</td>
-<td style="text-align:right;">
-0.044
-</td>
-<td style="text-align:right;">
-0.012
-</td>
-<td style="text-align:right;">
-2.008
+8939.112
 </td>
 </tr>
 <tr>
@@ -2784,25 +2734,25 @@ South Africa
 Zambia
 </td>
 <td style="text-align:right;">
-32789
+31790
 </td>
 <td style="text-align:right;">
-929
+912
 </td>
 <td style="text-align:right;">
-0.028
+0.029
 </td>
 <td style="text-align:right;">
 0.027
 </td>
 <td style="text-align:right;">
-0.030
+0.031
 </td>
 <td style="text-align:right;">
-0.010
+897.087
 </td>
 <td style="text-align:right;">
-1.897
+30358.670
 </td>
 </tr>
 <tr>
@@ -2810,10 +2760,10 @@ Zambia
 Zimbabwe
 </td>
 <td style="text-align:right;">
-46191
+46155
 </td>
 <td style="text-align:right;">
-814
+812
 </td>
 <td style="text-align:right;">
 0.018
@@ -2825,10 +2775,10 @@ Zimbabwe
 0.019
 </td>
 <td style="text-align:right;">
-0.008
+798.052
 </td>
 <td style="text-align:right;">
-1.914
+44540.049
 </td>
 </tr>
 </tbody>
@@ -2841,8 +2791,8 @@ Figure 3.31: Case Fatality Rate (CFR) and Total Cases by Country in the AFRO Reg
 </div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cfr-beta"></span>
-<img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue." width="95%"><p class="caption">
-Figure 3.32: Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward. Examples show the overall CFR for the AFRO region (~2%) in black, the highest-CFR country in red, and the lowest-CFR country in blue.
+<img src="figures/case_fatality_ratio_beta_distributions.png" alt="Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward for the AFRO region (black) and for the countries with the highest and lowest CFR. With about 1.4 million reported cases, the AFRO distribution is a spike at about 2% that is too narrow to show at this scale." width="95%"><p class="caption">
+Figure 3.32: Beta distributions of the overall Case Fatality Rate (CFR) from 2014 onward for the AFRO region (black) and for the countries with the highest and lowest CFR. With about 1.4 million reported cases, the AFRO distribution is a spike at about 2% that is too narrow to show at this scale.
 </p>
 </div>
 </div>
@@ -3809,16 +3759,16 @@ It is not derived from the model’s parameters and is not used for <span class=
 <h2>
 <span class="header-section-number">3.12</span> Initial conditions<a class="anchor" aria-label="anchor" href="#initial-conditions"><i class="fas fa-link"></i></a>
 </h2>
-<p>The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at <span class="math inline">\(t = 0\)</span>. The initial-condition priors are seeded at a data-driven epoch <span class="math inline">\(t_0\)</span> within the first year of the simulation window, the month in which the most countries report active cases (1 February 2023 for the default configuration). Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the <em>proportions</em> of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location.</p>
+<p>The default MOSAIC configuration begins on 1 January 2023 (the earliest date for which weekly cholera surveillance is uniformly available across the AFRO region), so each compartment must be initialised at <span class="math inline">\(t = 0\)</span>. The initial-condition priors are estimated at the simulation start, so the seeding epoch <span class="math inline">\(t_0\)</span> is the start date itself (1 January 2023 for the default configuration). Versions of MOSAIC-pkg before v0.100.1 estimated them at the month within the first year in which the most countries reported active cases (1 February 2023), which left countries whose outbreaks were already under way on 1 January without initial infections. Rather than treating the initial counts as free fit parameters, we derive informative per-country priors on the <em>proportions</em> of the population in each compartment from independent data sources, then sample the priors as part of the BFRS workflow and normalise so that the six proportions sum to unity within each location. The Monte Carlo draws behind the <span class="math inline">\(E\)</span>, <span class="math inline">\(I\)</span>, <span class="math inline">\(R\)</span> and <span class="math inline">\(S\)</span> priors use a seed derived from each country’s code, so rebuilding the priors from the same inputs reproduces them exactly.</p>
 <div id="vaccinated-initial-conditions-v_1-v_2" class="section level3" number="3.12.1">
 <h3>
 <span class="header-section-number">3.12.1</span> Vaccinated initial conditions (<span class="math inline">\(V_1, V_2\)</span>)<a class="anchor" aria-label="anchor" href="#vaccinated-initial-conditions-v_1-v_2"><i class="fas fa-link"></i></a>
 </h3>
-<p>The proportions in <span class="math inline">\(V_1\)</span> and <span class="math inline">\(V_2\)</span> at <span class="math inline">\(t = 0\)</span> are derived from each country’s OCV campaign history as recorded in the <a href="https://apps.epicentre-msf.org/public/app/gtfcc">GTFCC OCV Dashboard</a>. Reported deliveries are classified by vaccine product: Euvichol-S deliveries contribute to the <span class="math inline">\(V_1\)</span> pool (single-dose schedule), while Shanchol and Euvichol deliveries contribute proportionally to <span class="math inline">\(V_1\)</span> and <span class="math inline">\(V_2\)</span> according to the campaign’s reported dose-1 and dose-2 split. Each historical campaign contributes a residual immune fraction at <span class="math inline">\(t = 0\)</span>, calculated as the cumulative effective coverage multiplied by an exponential waning factor <span class="math inline">\(e^{-\omega_k \Delta t}\)</span> where <span class="math inline">\(\omega_k\)</span> is the per-dose waning rate (Equation <a href="model-description.html#eq:effectiveness">(3.13)</a>) and <span class="math inline">\(\Delta t\)</span> is the elapsed time since the campaign. The aggregate per-country immune fraction is capped at 70% coverage, consistent with reported maximum reachable coverage in mass-administration settings (Abubakar et al. 2018). The mean and standard deviation are then moment-matched to Beta priors with coefficient of variation 0.40 to honestly reflect campaign-record uncertainty:</p>
+<p>The proportions in <span class="math inline">\(V_1\)</span> and <span class="math inline">\(V_2\)</span> at <span class="math inline">\(t = 0\)</span> are derived from each country’s OCV campaign history before <span class="math inline">\(t_0\)</span> as recorded in the <a href="https://apps.epicentre-msf.org/public/app/gtfcc">GTFCC OCV Dashboard</a>. Campaigns are classified by vaccine product: single-dose Euvichol-S campaigns contribute only to <span class="math inline">\(V_1\)</span>, while for all other products (and campaigns with no recorded product) the first and second rounds of each campaign are paired. As in the engine’s vaccination step (Equation <a href="model-description.html#eq:system">(3.1)</a>), only effective doses enter a vaccinated compartment: the fraction <span class="math inline">\(\phi_1\)</span> of first-round doses enters <span class="math inline">\(V_1\)</span>, and second-round doses, capped at the number of effective first-dose recipients, move the fraction <span class="math inline">\(\phi_2\)</span> of their recipients from <span class="math inline">\(V_1\)</span> to <span class="math inline">\(V_2\)</span>, with <span class="math inline">\(\phi_1\)</span> and <span class="math inline">\(\phi_2\)</span> at their prior means. Each round then contributes a residual immune fraction at <span class="math inline">\(t = 0\)</span>, its effective coverage multiplied by an exponential waning factor <span class="math inline">\(e^{-\omega_k \Delta t}\)</span> where <span class="math inline">\(\omega_k\)</span> is the per-dose waning rate (Equation <a href="model-description.html#eq:effectiveness">(3.13)</a>) and <span class="math inline">\(\Delta t\)</span> is the time from the onset of protection, 14 days after the round, to <span class="math inline">\(t_0\)</span>. The number of dose recipients is capped at 70% of the population, consistent with reported maximum reachable coverage in mass-administration settings (Abubakar et al. 2018). The resulting means are then moment-matched to Beta priors with coefficient of variation 0.40 to honestly reflect campaign-record uncertainty:</p>
 <p><span class="math display">\[
 \text{prop}V_{1,j} \sim \text{Beta}(s_{1,j}^{V_1},\ s_{2,j}^{V_1}), \quad \text{prop}V_{2,j} \sim \text{Beta}(s_{1,j}^{V_2},\ s_{2,j}^{V_2}),
 \]</span></p>
-<p>with shape parameters <span class="math inline">\((s_1, s_2)\)</span> derived per country (e.g. for Mozambique the <span class="math inline">\(V_1\)</span> prior mean is approximately 0.016, reflecting the residual one-dose immunity from the 2022–2023 OCV response). Per-country prior means range from effectively zero (countries with no reported recent campaigns) to several percent of the population (countries with multiple recent reactive campaigns). This replaces the static Beta priors used in earlier MOSAIC versions, which placed identical, weakly informative shapes on <span class="math inline">\(V_1\)</span> and <span class="math inline">\(V_2\)</span> regardless of country history.</p>
+<p>with shape parameters <span class="math inline">\((s_1, s_2)\)</span> derived per country (e.g. for Mozambique the prior means are approximately 0.014 for <span class="math inline">\(V_1\)</span> and 0.015 for <span class="math inline">\(V_2\)</span>). Among countries with campaigns before <span class="math inline">\(t_0\)</span>, the prior mean of <span class="math inline">\(\text{prop}V_{1,j}\)</span> ranges from about 0.1% to 15% of the population (Malawi) and that of <span class="math inline">\(\text{prop}V_{2,j}\)</span> reaches about 7% (Zambia). A country with no campaign before <span class="math inline">\(t_0\)</span> keeps the weakly informative template priors <span class="math inline">\(\text{Beta}(0.5, 49.5)\)</span> for <span class="math inline">\(\text{prop}V_{1,j}\)</span> and <span class="math inline">\(\text{Beta}(0.5, 99.5)\)</span> for <span class="math inline">\(\text{prop}V_{2,j}\)</span> (means 1% and 0.5%, modes at zero), as does either compartment that receives no effective doses (e.g. <span class="math inline">\(V_2\)</span> in a country whose campaigns were all single-dose). This replaces the static Beta priors used in earlier MOSAIC versions, which placed identical, weakly informative shapes on <span class="math inline">\(V_1\)</span> and <span class="math inline">\(V_2\)</span> regardless of country history.</p>
 </div>
 <div id="susceptible-and-recovered-initial-conditions-s-r" class="section level3" number="3.12.2">
 <h3>
@@ -3828,23 +3778,24 @@ It is not derived from the model’s parameters and is not used for <span class=
 <p><span class="math display">\[
 \text{infections} \;=\; \text{reported cases} \times \frac{\chi^{\text{end}}}{\rho\,\sigma},
 \]</span></p>
-<p>then adjusted by the natural-immunity waning rate <span class="math inline">\(\varepsilon\)</span> (applied from the end of each infection) to give the surviving immune fraction at <span class="math inline">\(t = 0\)</span>. Each Monte Carlo draw samples <span class="math inline">\(\rho\)</span>, <span class="math inline">\(\chi^{\text{end}}\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\varepsilon\)</span> and the recovery and incubation rates from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger <span class="math inline">\(R\)</span> at <span class="math inline">\(t = 0\)</span> than countries with sparse historical incidence.</p>
+<p>then adjusted by the natural-immunity waning rate <span class="math inline">\(\varepsilon\)</span> (applied from the end of each infection) to give the surviving immune fraction at <span class="math inline">\(t = 0\)</span>. Each Monte Carlo draw samples <span class="math inline">\(\rho\)</span>, <span class="math inline">\(\chi^{\text{end}}\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\varepsilon\)</span>, the recovery and incubation rates and the seasonal coefficients from their priors; the endemic PPV is used because annual totals are dominated by endemic-regime reporting. The Beta prior for each country keeps the Monte Carlo mean (a method-of-moments fit, with the first shape parameter floored at 1 so the density does not diverge at zero). Countries with extensive recent outbreaks (e.g. parts of the Horn of Africa) carry a substantially larger <span class="math inline">\(R\)</span> at <span class="math inline">\(t = 0\)</span> than countries with sparse historical incidence: across the 40 countries the prior mean of <span class="math inline">\(\text{prop}R_{,j}\)</span> ranges from about <span class="math inline">\(10^{-5}\)</span> to 0.035 (Somalia), with a median of about 0.002.</p>
 <p>The proportion in <span class="math inline">\(S\)</span> is then derived as the residual once the other five proportions have been placed:</p>
 <p><span class="math display">\[
 \text{prop}S_{,j} = 1 - \text{prop}V_{1,j} - \text{prop}V_{2,j} - \text{prop}R_{,j} - \text{prop}E_{,j} - \text{prop}I_{,j},
 \]</span></p>
-<p>and the resulting per-country values are fit to a Beta prior. Across the 40 MOSAIC countries the prior mean for <span class="math inline">\(\text{prop}S\)</span> ranges from approximately 0.39 to 0.98 with a standard deviation of 0.11, with the lowest values in countries with the highest combined vaccine-derived and natural immunity.</p>
+<p>and the resulting per-country values are fit to a Beta prior. Across the 40 MOSAIC countries the prior mean for <span class="math inline">\(\text{prop}S\)</span> ranges from approximately 0.84 to 0.99 with a standard deviation of 0.04, with the lowest values in countries with the highest combined vaccine-derived and natural immunity. This Beta prior summarises the residual and is not itself sampled: in calibration <span class="math inline">\(\text{prop}S_{,j}\)</span> is the residual of each draw (see below).</p>
 </div>
 <div id="exposed-and-infected-initial-conditions-e-i_1-i_2" class="section level3" number="3.12.3">
 <h3>
 <span class="header-section-number">3.12.3</span> Exposed and infected initial conditions (<span class="math inline">\(E, I_1, I_2\)</span>)<a class="anchor" aria-label="anchor" href="#exposed-and-infected-initial-conditions-e-i_1-i_2"><i class="fas fa-link"></i></a>
 </h3>
-<p>The proportions in <span class="math inline">\(E\)</span> and the combined infectious pool <span class="math inline">\(I = I_1 + I_2\)</span> at <span class="math inline">\(t = 0\)</span> are derived from the reported cases in a short window before <span class="math inline">\(t_0\)</span> (three days by default) by inverting the observation pipeline (Equation <a href="model-description.html#eq:reported-cases">(3.22)</a>): a case reported on day <span class="math inline">\(d\)</span> is a symptomatic onset on day <span class="math inline">\(d - l_{\text{cases}}\)</span>, and all onsets, symptomatic and asymptomatic, number <span class="math inline">\(\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)\)</span>. With <span class="math inline">\(\lambda_j\)</span> the resulting mean daily onset rate over the window,</p>
+<p>The proportions in <span class="math inline">\(E\)</span> and the combined infectious pool <span class="math inline">\(I = I_1 + I_2\)</span> at <span class="math inline">\(t = 0\)</span> are derived from the reported cases in a 28-day window straddling <span class="math inline">\(t_0\)</span> (the 14 days before it and the 14 days from it onward) by inverting the observation pipeline (Equation <a href="model-description.html#eq:reported-cases">(3.22)</a>): a case reported on day <span class="math inline">\(d\)</span> is a symptomatic onset on day <span class="math inline">\(d - l_{\text{cases}}\)</span>, and all onsets, symptomatic and asymptomatic, number <span class="math inline">\(\text{reported cases} \times \chi^{\text{end}} / (\rho\,\sigma)\)</span>. The window straddles <span class="math inline">\(t_0\)</span> because surveillance is reported weekly, and several countries whose outbreaks were under way on 1 January 2023 report no cases in the days just before it. With <span class="math inline">\(\lambda_j\)</span> the resulting mean daily onset rate over the window,</p>
 <p><span class="math display">\[
 E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 \]</span></p>
-<p>the exposed stock in balance with that onset rate under the engine’s daily progression probability <span class="math inline">\(1 - e^{-\iota}\)</span> (a reported case has already left <span class="math inline">\(E\)</span>, so <span class="math inline">\(E\)</span> is not built from the reports themselves). <span class="math inline">\(I_j\)</span> is the sum of the onsets that have not yet recovered by <span class="math inline">\(t_0\)</span>, each surviving with daily probability <span class="math inline">\(e^{-\gamma_1}\)</span> for the symptomatic share <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(e^{-\gamma_2}\)</span> for the rest; onsets the window cannot see (those in the last <span class="math inline">\(l_{\text{cases}}\)</span> days, reported on or after <span class="math inline">\(t_0\)</span>, and those older than the window) are filled in at the same rate <span class="math inline">\(\lambda_j\)</span>. Each Monte Carlo draw samples <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\iota\)</span>, <span class="math inline">\(\gamma_1\)</span>, <span class="math inline">\(\gamma_2\)</span>, <span class="math inline">\(\rho\)</span>, <span class="math inline">\(\chi^{\text{end}}\)</span> and <span class="math inline">\(l_{\text{cases}}\)</span> from their priors. The Beta prior for each country keeps the Monte Carlo mean <span class="math inline">\(m\)</span> and is given a 95% interval of approximately <span class="math inline">\([m/10,\ 10m]\)</span> on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times; countries whose window reports no cases receive a near-zero template prior. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined <span class="math inline">\(I\)</span> is split into <span class="math inline">\(I_1\)</span> and <span class="math inline">\(I_2\)</span> at <span class="math inline">\(t = 0\)</span> by a binomial draw with the symptomatic proportion <span class="math inline">\(\sigma\)</span> as the probability.</p>
-<p>After sampling, the six per-country proportions are normalised to sum to unity and converted to integer compartment counts by multiplying by the country’s <span class="math inline">\(t = 0\)</span> population.</p>
+<p>the exposed stock in balance with that onset rate under the engine’s daily progression probability <span class="math inline">\(1 - e^{-\iota}\)</span> (a reported case has already left <span class="math inline">\(E\)</span>, so <span class="math inline">\(E\)</span> is not built from the reports themselves). <span class="math inline">\(I_j\)</span> is the sum of the onsets reported before <span class="math inline">\(t_0\)</span> that have not yet recovered by <span class="math inline">\(t_0\)</span>, each surviving with daily probability <span class="math inline">\(e^{-\gamma_1}\)</span> for the symptomatic share <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(e^{-\gamma_2}\)</span> for the rest; onsets the reports before <span class="math inline">\(t_0\)</span> cannot place (those in the last <span class="math inline">\(l_{\text{cases}}\)</span> days before <span class="math inline">\(t_0\)</span>, which are reported on or after it, and those older than the window) are filled in at the same rate <span class="math inline">\(\lambda_j\)</span>, so reports from <span class="math inline">\(t_0\)</span> onward enter only through <span class="math inline">\(\lambda_j\)</span>. Each of 1000 Monte Carlo draws samples <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\iota\)</span>, <span class="math inline">\(\gamma_1\)</span>, <span class="math inline">\(\gamma_2\)</span>, <span class="math inline">\(\rho\)</span>, <span class="math inline">\(\chi^{\text{end}}\)</span> and <span class="math inline">\(l_{\text{cases}}\)</span> from their priors. The Beta prior for each country keeps the Monte Carlo mean <span class="math inline">\(m\)</span> and is given a 95% interval of approximately <span class="math inline">\([m/10,\ 10m]\)</span> on the logit scale, reflecting the combined uncertainty of the reporting chain and the dwell times. Per-country prior medians vary by orders of magnitude across the AFRO region, in line with the surveillance signal. The combined <span class="math inline">\(I\)</span> is split into <span class="math inline">\(I_1\)</span> and <span class="math inline">\(I_2\)</span> at <span class="math inline">\(t = 0\)</span> by a binomial draw with the symptomatic proportion <span class="math inline">\(\sigma\)</span> as the probability.</p>
+<p>A country whose window reports no cases, and which reports none later in the simulation window either, receives the near-zero template prior <span class="math inline">\(\text{Beta}(0.01, 99999.99)\)</span> for both <span class="math inline">\(\text{prop}E_{,j}\)</span> and <span class="math inline">\(\text{prop}I_{,j}\)</span>. A <em>quiet-start</em> country is one that reports cases later in the simulation window (after the initial-condition window, up to the end date) but either reports none in the window or so few that its window-based priors imply fewer than one expected initial infection, <span class="math inline">\(N_j\,(\mathbb{E}[\text{prop}E_{,j}] + \mathbb{E}[\text{prop}I_{,j}]) &lt; 1\)</span>, with <span class="math inline">\(N_j\)</span> the population at <span class="math inline">\(t_0\)</span>. A quiet-start country instead receives the weak seeding prior <span class="math inline">\(\text{Beta}(1, 10^5)\)</span> for both <span class="math inline">\(\text{prop}E_{,j}\)</span> and <span class="math inline">\(\text{prop}I_{,j}\)</span> (mean <span class="math inline">\(10^{-5}\)</span> of the population in each compartment, mode at zero). The seed stands in for undetected circulation or importation: a single-location fit has no importation mechanism, so without it a country that starts with no infections cannot reproduce its later outbreak. In the default configuration the quiet-start countries are Burkina Faso, the Central African Republic, Chad, Congo, Côte d’Ivoire, Eswatini, Ghana, Namibia, Niger, Rwanda and Togo (Congo, with one case in the window, by the second criterion), listed in <code>priors_default$metadata$quiet_start_seeded</code>, while the 11 countries that report no cases up to the end of the simulation window keep the template.</p>
+<p>After sampling, <span class="math inline">\(\text{prop}S_{,j}\)</span> is set to one minus the sum of the other five proportions (if they sum to one or more, it is set to zero and they are rescaled to sum to unity), and the six proportions are converted to integer compartment counts that sum exactly to the country’s <span class="math inline">\(t = 0\)</span> population (largest-remainder rounding).</p>
 <hr>
 </div>
 </div>
@@ -4303,8 +4254,9 @@ E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 <tr class="odd">
 <td align="left"><span class="math inline">\(\sigma\)</span></td>
 <td align="left">Proportion of infections that are symptomatic.</td>
-<td align="left"></td>
-<td align="left"></td>
+<td align="left">
+<span class="math inline">\(\text{Beta}(3.75, 7.12)\)</span> (mean <span class="math inline">\(\approx 0.35\)</span>)</td>
+<td align="left">See Table <a href="model-description.html#tab:symptomatic-table">3.5</a>.</td>
 </tr>
 <tr class="even">
 <td align="left"><span class="math inline">\(\rho\)</span></td>
@@ -4384,7 +4336,7 @@ E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 <td align="left"><span class="math inline">\(p_\beta\)</span></td>
 <td align="left">Proportion of the total baseline transmission rate that is human-to-human in destination <span class="math inline">\(j\)</span>.</td>
 <td align="left">
-<span class="math inline">\(\text{Beta}(7.03, 13.24)\)</span> (mode 0.33, 95% interval <span class="math inline">\(\approx 0.1\)</span>–<span class="math inline">\(0.5\)</span>) per location.</td>
+<span class="math inline">\(\text{Beta}(5.48, 10.10)\)</span> (mode 0.33, 95% interval <span class="math inline">\(\approx 0.14\)</span>–<span class="math inline">\(0.60\)</span>) per location.</td>
 <td align="left">
 <code>priors_default</code> (<code>p_beta</code>).</td>
 </tr>
@@ -4427,7 +4379,7 @@ E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 <tr class="odd">
 <td align="left"><span class="math inline">\(\alpha_2\)</span></td>
 <td align="left">Exponent on population size in the force of infection denominator; determines density (0) vs frequency (1) dependence. A single global scalar, pinned at 0.5 by default (<code>sample_alpha_2 = FALSE</code>).</td>
-<td align="left"><span class="math inline">\(0.50\)</span></td>
+<td align="left">Pinned at <span class="math inline">\(0.50\)</span>; prior <span class="math inline">\(\text{Beta}(6.92, 6.92)\)</span> if sampled.</td>
 <td align="left"><a href="https://pubmed.ncbi.nlm.nih.gov/11369107/">McCallum et al 2001</a></td>
 </tr>
 <tr class="even">
@@ -4582,13 +4534,13 @@ E_{j} \;=\; \frac{\lambda_j}{1 - e^{-\iota}},
 <tr class="even">
 <td align="left"><span class="math inline">\(\chi^{\text{end}}\)</span></td>
 <td align="left">Positive predictive value of a suspected cholera case during endemic periods.</td>
-<td align="left"><span class="math inline">\(\text{Beta}(5.43, 5.01)\)</span></td>
+<td align="left"><span class="math inline">\(\text{Beta}(5.56, 5.10)\)</span></td>
 <td align="left"><a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286">Wiens et al. 2023</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><span class="math inline">\(\chi^{\text{epi}}\)</span></td>
 <td align="left">Positive predictive value of a suspected cholera case during epidemic periods.</td>
-<td align="left"><span class="math inline">\(\text{Beta}(4.79, 1.53)\)</span></td>
+<td align="left"><span class="math inline">\(\text{Beta}(4.97, 1.58)\)</span></td>
 <td align="left"><a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004286">Wiens et al. 2023</a></td>
 </tr>
 <tr class="even">
