@@ -528,7 +528,7 @@ To achieve this, we estimate the vaccination rate over time ($\nu_{jt}$) based o
 
 To estimate the past and current vaccination rates, we combine two records of OCV shipments (see [Vaccinations](https://www.mosaicmod.org/data.html#vaccinations) on the Data page). The campaign log of the [GTFCC OCV Dashboard](https://apps.epicentre-msf.org/public/app/gtfcc) lists each vaccine request with its deliveries (date and doses) and its campaign rounds (with the doses administered in each round, where reported). It covers both reactive requests to the WHO [International Coordinating Group](https://www.who.int/groups/icg) (ICG; request identifiers with an `I`) and preventive requests to the GTFCC (identifiers with a `G`); preventive requests carry 36.1 million (43%) of the 84.0 million doses released to the 40 MOSAIC countries in 2018--2022. The ICG [Cholera vaccine dashboard](https://app.powerbi.com/view?r=eyJrIjoiYmFmZTBmM2EtYWM3Mi00NWYwLTg3YjgtN2Q0MjM5ZmE1ZjFkIiwidCI6ImY2MTBjMGI3LWJkMjQtNGIzOS04MTBiLTNkYzI4MGFmYjU5MCIsImMiOjh9) lists reactive campaigns from 2016 onward, shipment by shipment, and a shipment that it shares with the GTFCC log is counted once. The combined record holds 182.8 million doses shipped to the 40 countries between July 2014 and December 2025.
 
-To translate the reported OCV doses into the model parameter $\nu_{jt}$, we release each delivery on its own date (a shipment recorded only by the WHO on its campaign date) into a stock that is administered at up to 20,000 doses a day (`est_vaccination_rate()`); a request whose stock runs out resumes at its next delivery, and requests that overlap in a country add up. Therefore, the vaccination rate $\nu_{jt}$ is not an estimated quantity, it is defined by the reported number of OCV doses shipped with an assumption about the daily rate of distribution for an OCV campaign:
+To translate the reported OCV doses into the model parameter $\nu_{jt}$, we release each delivery on its own date (a shipment recorded only by the WHO on its campaign date) into a stock that is administered at up to 20,000 doses a day (`est_vaccination_rate()`); a request whose stock runs out resumes at its next delivery. Each identifier in the campaign log, the request number with its `D01`, `D02`, ... suffix, has its own stock and its own 20,000-dose cap, so stocks administered at the same time in a country add up, including two under one request number: Zambia's `2017-G07-D01` (2.1 million doses delivered on 6 January 2018) and `2017-G07-D02` (667,100 doses delivered on 28 March 2018) were administered together, at 40,000 doses a day, from 28 March to 20 April 2018. Therefore, the vaccination rate $\nu_{jt}$ is not an estimated quantity, it is defined by the reported number of OCV doses shipped with an assumption about the daily rate of distribution for an OCV campaign:
 
 $$
 \nu_{jt} = f\big(\text{reported OCV doses distributed}_{jt} \ | \ \text{daily distribution rate}\big).
@@ -1762,7 +1762,7 @@ tbl2 <- data.frame(
           "$\\text{Truncnorm}(1, 1, 0, \\infty)$",
           "$\\mathcal{N}(1, 2.5)$",
           "$\\text{Beta}(2, 1)$",
-          "$\\text{Truncnorm}(0, 25, -90, 90)$",
+          "$\\text{Truncnorm}(0, 25, -90, 90)$; Mozambique $\\text{Truncnorm}(-5, 20, -90, 90)$",
           "$\\text{Truncnorm}$ per country, capped at 0.01.",
           "$\\text{Beta}(5.56, 5.10)$",
           "$\\text{Beta}(4.97, 1.58)$",
