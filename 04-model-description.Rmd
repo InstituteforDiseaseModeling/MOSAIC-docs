@@ -242,15 +242,17 @@ knitr::include_graphics("figures/vibrio_decay_rate.png")
 
 #### Environmental data
 
-The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) and rate of decay of *V. cholerae* in the environment (Equation \@ref(eq:delta)) is driven by the parameter $\psi_{jt}$, which we refer to as environmental suitability. The parameter $\psi_{jt}$ is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model and a suite of 22 covariates: 17 historical and forecasted climate variables drawn from the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) climate model, 4 large-scale climate drivers (the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from three Pacific Ocean regions — Niño3, Niño3.4, and Niño4), and 1 location-specific variable giving the mean elevation for each country. See example time series of climate variables from one country (Mozambique) in Figure \@ref(fig:climate-data-moz) and DMI and ENSO variables in Figure \@ref(fig:climate-data-enso). A list of all covariates and their sources can be seen in Table \@ref(tab:climate-data-variables).
+The mechanism for environment-to-human transmission (Equation \@ref(eq:beta2)) and rate of decay of *V. cholerae* in the environment (Equation \@ref(eq:delta)) is driven by the parameter $\psi_{jt}$, which we refer to as environmental suitability. The parameter $\psi_{jt}$ is modeled as a time series for each location using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model (`est_suitability()` in MOSAIC-pkg) and 38 weekly covariates, the feature set `v7.3`, which we selected from a larger set of candidates with an ablation sweep over 6 fitting cutoffs and 22 countries (Table \@ref(tab:climate-data-variables)). Sixteen are local climate covariates built from four variables (2 m air temperature, precipitation, 2 m relative humidity and soil moisture): the variables themselves, lags of 8 to 16 weeks, 12-week totals and means, standardized anomalies from each country's week-of-year climatology, and an approximate standardized precipitation-evapotranspiration index (SPEI). They come from the ERA5 reanalysis and, after its last date, from the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) climate-model projection, both through the OpenMeteo APIs (see the [Data](https://www.mosaicmod.org/data.html#climate-data) page). Eight are flood covariates: the weekly probability that a flood recorded in the [EM-DAT](https://www.emdat.be/) database is active in the country, which a binomial generalized additive model (GAM) of local precipitation, soil moisture, humidity and wind and of the ENSO and Indian Ocean Dipole indices predicts for every country-week (`impute_flood_probability()`), its 12-week maximum, and its anomaly from the country's mean at lags of 0 to 20 weeks. Twelve are the Niño3.4 and Niño4 indices of the El Niño Southern Oscillation (ENSO), each at six lags between 0 and 36 weeks, and the last two are the annual and semi-annual cosines of the week of the year.
 
-Note that while the 19 climate variables offer forecasts up to 2030 and beyond, the forecasts of the DMI and ENSO variables are limited to 5 months into the future. So, environmental suitability model predictions are currently limited to a 5 month time horizon but future iterations may allow for longer forecasts. Additional data sources will be integrated into subsequent versions of the suitability model. For instance, flood and cyclone data will likely be incorporated later, though not in the initial version of the model.
+Note that the Indian Ocean Dipole Mode Index (DMI), the Niño3 index and mean elevation, which were inputs of the first version of the model, are not direct inputs; the DMI and Niño3 enter only through the flood model. Example time series of the raw climate variables for one country (Mozambique) are shown in Figure \@ref(fig:climate-data-moz), and the DMI and ENSO indices in Figure \@ref(fig:climate-data-enso).
 
-```{r climate-data-moz, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Climate data acquired from the OpenMeteo data API. Data were collected from 30 uniformly distributed points across each country and then aggregated to give weekly values of 17 climate variable from 1970 to 2030."}
+The ENSO indices set how far ahead $\psi_{jt}$ can be predicted. They combine NOAA observations with forecasts from NOAA's North American Multi-Model Ensemble (NMME), which end before the climate series do, so the prediction window ends at the last week with ENSO and DMI values: 29 April 2027 for the shipped series, 32 weeks after the last week of surveillance (17 September 2026). Over those weeks the model is driven by forecasts and projections rather than observations, apart from lagged covariates that still reach back into the observed record: the ENSO indices are NMME forecasts; the local climate covariates come from the MRI-AGCM3-2-S projection, which replaces ERA5 after 23 September 2026 and is not a weather forecast; and the flood covariates are the flood model's predictions from both. The NMME forecasts also take Niño3.4 above any value of the 2015--2026 training record until early March 2027, and Niño4 until late December 2026, so most of the forecast extrapolates beyond the ENSO conditions of the training record. Because NOAA's Niño4 observations end in August 2026, we took the 1 September 2026 value of Niño4 from the NMME ensemble mean, baselined to NOAA, rather than from the Bureau of Meteorology's relative Niño4 index, which runs about one degree below NOAA's and put a spurious dip into August and September 2026. Cyclone and drought covariates are available as an option (feature set `v7.4`, 42 covariates) but are not part of the default feature set or of the shipped series.
+
+```{r climate-data-moz, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Weekly values of the 17 OpenMeteo climate variables for Mozambique from January 2015, each averaged over 30 uniformly distributed points across the country, as drawn in April 2026: ERA5 reanalysis (black) and, after the vertical line marking the date the figure was drawn, the MRI-AGCM3-2-S projection (blue). The model uses four of these variables (mean 2 m temperature, precipitation, mean 2 m relative humidity and soil moisture) and covariates derived from them (Table \\@ref(tab:climate-data-variables))."}
 knitr::include_graphics("figures/climate_data_MOZ_weekly.png")
 ```
 
-```{r climate-data-enso, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Historical and forecasted values of the Indian Ocean Dipole Mode Index (DMI) and the El Niño Southern Oscillation (ENSO) from 2015 to 2025. The ENSO values come from three different regions: Niño3 (central to eastern Pacific), Niño3.4 (central Pacific), and Niño4 (western-central Pacific). Data are from National Oceanic and Atmospheric Administration (NOAA) and Bureau of Meteorology (BOM)."}
+```{r climate-data-enso, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Weekly values of the Indian Ocean Dipole Mode Index (DMI) and of the El Niño Southern Oscillation (ENSO) in three regions, Niño3 (central to eastern Pacific), Niño3.4 (central Pacific) and Niño4 (western-central Pacific), from January 2015, as drawn on 14 April 2026 (vertical line). Historical values are National Oceanic and Atmospheric Administration (NOAA) observations, and values after the line the forecasts available on that date, before MOSAIC switched to NMME forecasts in June 2026. The shipped suitability series uses NMME forecasts to 29 April 2027, and only Niño3.4 and Niño4 are direct model inputs."}
 knitr::include_graphics("figures/climate_data_ENSO_weekly.png")
 ```
 
@@ -258,98 +260,69 @@ knitr::include_graphics("figures/climate_data_ENSO_weekly.png")
 
 library(knitr)
 
-covariates <- c(
-     "temperature_2m_mean", "temperature_2m_max", "temperature_2m_min",
-     "wind_speed_10m_mean", "wind_speed_10m_max", "cloud_cover_mean",
-     "shortwave_radiation_sum", "relative_humidity_2m_mean",
-     "relative_humidity_2m_max", "relative_humidity_2m_min",
-     "dew_point_2m_mean", "dew_point_2m_min", "dew_point_2m_max",
-     "precipitation_sum", "pressure_msl_mean",
-     "soil_moisture_0_to_10cm_mean", "et0_fao_evapotranspiration_sum",
-     "DMI", "ENSO3", "ENSO34", "ENSO4", "elevation"
-)
+src_climate <- "ERA5 reanalysis, then the [MRI-AGCM3-2-S](https://www.wdc-climate.de/ui/cmip6?input=CMIP6.HighResMIP.MRI.MRI-AGCM3-2-S.highresSST-present) projection, via the OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs"
+src_flood   <- "Binomial GAM fitted to [EM-DAT](https://www.emdat.be/) flood records (`impute_flood_probability()`)"
+src_enso    <- "[NOAA](https://psl.noaa.gov/enso/) observations and [NMME](https://www.cpc.ncep.noaa.gov/products/NMME/) forecasts"
+src_season  <- "Calendar"
 
-# Define descriptions for each covariate
-descriptions <- c(
-     "Average temperature at 2 meters", 
-     "Maximum temperature at 2 meters", 
-     "Minimum temperature at 2 meters", 
-     "Average wind speed at 10 meters", 
-     "Maximum wind speed at 10 meters", 
-     "Mean cloud cover",
-     "Total shortwave radiation",
-     "Mean relative humidity at 2 meters", 
-     "Maximum relative humidity at 2 meters", 
-     "Minimum relative humidity at 2 meters", 
-     "Mean dew point at 2 meters", 
-     "Minimum dew point at 2 meters", 
-     "Maximum dew point at 2 meters", 
-     "Total precipitation", 
-     "Mean sea level pressure",
-     "Mean soil moisture at 0 to 10 cm", 
-     "Total evapotranspiration (FAO method)", 
-     "Dipole Mode Index (DMI)", 
-     "El Niño Southern Oscillation (ENSO) - Region 3", 
-     "ENSO - Region 3.4", 
-     "ENSO - Region 4", 
-     "Mean elevation"
-)
-
-# Define sources for each covariate with manual links
-source_links <- c(
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # temperature_2m_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # temperature_2m_max
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # temperature_2m_min
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # wind_speed_10m_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # wind_speed_10m_max
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # cloud_cover_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # shortwave_radiation_sum
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # relative_humidity_2m_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # relative_humidity_2m_max
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # relative_humidity_2m_min
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # dew_point_2m_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # dew_point_2m_min
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # dew_point_2m_max
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # precipitation_sum
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # pressure_msl_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # soil_moisture_0_to_10cm_mean
-     "OpenMeteo [Historical Weather](https://open-meteo.com/en/docs/historical-weather-api) and [Climate Change](https://open-meteo.com/en/docs/climate-api) APIs",  # et0_fao_evapotranspiration_sum
-     "[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)",  # DMI
-     "[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)",  # ENSO3
-     "[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)",  # ENSO34
-     "[NOAA](https://psl.noaa.gov/enso/) and [BOM](http://www.bom.gov.au/climate/ocean/outlooks/#region=NINO4&region=NINO3&region=NINO34)",  # ENSO4
-     "[Amazon Web Services Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)"  # elevation
-)
-
-# Create a data frame with covariates, descriptions, and sources with links
 covariate_table <- data.frame(
-     Covariate = covariates,
-     Description = descriptions,
-     Source = source_links,
+     Covariate = c(
+          "temperature_2m_mean", "temp_mean_12w", "temp_anom",
+          "precipitation_sum", "precip_sum_12w", "precip_anom",
+          "relative_humidity_2m_mean",
+          "soil_moisture_0_to_10cm_mean", "soil_moisture_anom", "spei_approx",
+          "emdat_flood_prob", "emdat_flood_prob_12w_max", "emdat_flood_prob_anom",
+          "ENSO34", "ENSO4",
+          "cos_annual", "cos_biannual"
+     ),
+     Lags = c(
+          "0", "0", "0",
+          "0, 8, 12, 16", "0", "0, 8, 12",
+          "0",
+          "0, 16", "16", "12",
+          "0", "0", "0, 4, 8, 12, 16, 20",
+          "0, 8, 12, 16, 24, 36", "0, 4, 8, 12, 16, 28",
+          "0", "0"
+     ),
+     Description = c(
+          "Weekly mean air temperature at 2 meters",
+          "12-week rolling mean of `temperature_2m_mean`",
+          "Standardized anomaly of `temperature_2m_mean` from the country's week-of-year climatology",
+          "Weekly total precipitation",
+          "12-week rolling total of `precipitation_sum`",
+          "Standardized anomaly of `precipitation_sum` from the country's week-of-year climatology",
+          "Weekly mean relative humidity at 2 meters",
+          "Weekly mean soil moisture (0 to 7 cm in ERA5, 0 to 10 cm in the projection)",
+          "Standardized anomaly of soil moisture from the country's week-of-year climatology",
+          "Approximate SPEI: precipitation minus FAO reference evapotranspiration, standardized by country",
+          "Modeled probability that a flood recorded in EM-DAT is active in the country that week",
+          "12-week rolling maximum of `emdat_flood_prob`",
+          "`emdat_flood_prob` minus its country mean over the EM-DAT record",
+          "El Niño Southern Oscillation, Niño3.4 region (central Pacific)",
+          "El Niño Southern Oscillation, Niño4 region (western-central Pacific)",
+          "Cosine of the week of the year with an annual period (52.18 weeks)",
+          "Cosine of the week of the year with a semi-annual period (26.09 weeks)"
+     ),
+     Source = c(
+          rep(src_climate, 10),
+          rep(src_flood, 3),
+          rep(src_enso, 2),
+          rep(src_season, 2)
+     ),
      stringsAsFactors = FALSE
 )
 
-# Create the table using knitr::kable()
-kable(covariate_table, 
-      escape = TRUE, 
-      col.names = c("Covariate", "Description", "Source"),
-      caption = "A full list of covariates and their sources used in the LSTM RNN model to predict the environmental suitability of *V. cholerae* ($\\psi_{jt}$).")
+kable(covariate_table,
+      escape = TRUE,
+      col.names = c("Covariate", "Lags (weeks)", "Description", "Source"),
+      caption = "The 38 covariates of the LSTM model of environmental suitability ($\\psi_{jt}$): feature set `v7.3`, as recorded in the manifest of the shipped series. A lag is the covariate's value that many weeks earlier (column `<covariate>_lag<weeks>`); 0 is the concurrent week.")
 ```
 
 
 
 #### Deep learning neural network model
 
-As mentioned above, we model environmental suitability $\psi_{jt}$ using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model. The LSTM model was developed using [`keras`](https://cran.r-project.org/package=keras) and [`tensorflow`](https://cran.r-project.org/package=tensorflow) in R to predict binary outcomes. Thus the modeled quantity $\psi_{jt}$ is a proportion implying unsuitable conditions at 0 and perfectly suitable conditions at 1. 
-
-The model was fitted to reported case counts that were converted to a binary variable using a threshold of 200 reported cases per week. Given delays in reporting and likely lead times for environmental suitability ahead of transmission and case reporting, we also set the preceding one week to be suitable and in cases where there were two consecutive weeks of >200 cases per week, we assumed that the preceding two weeks were also suitable. See Figure \@ref(fig:cases-binary) for an example of how reported case counts are converted to a binary variable representing presumed environmental suitability for *V. cholerae*.
-
-```{r cases-binary, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Reported cases converted to binary variable for modeling environmental suitability."}
-knitr::include_graphics("figures/cases_binary.png")
-```
-
-
-The model is a Long Short-Term Memory (LSTM) neural network designed for binary classification, where environmental suitability, $\psi_{jt}$, is modeled as a function of the hidden state $h_t$ and hidden bias term $b_h$. Specifically, $\psi_{jt}$ is defined by a sigmoid activation function applied to the linear combination of the hidden state $h_t$ and the bias $b_h$ which if given by the 3 layers of the LSTM model:
+As mentioned above, we model environmental suitability $\psi_{jt}$ using a Long Short-Term Memory (LSTM) Recurrent Neural Network (RNN) model, developed with [`keras3`](https://cran.r-project.org/package=keras3) and TensorFlow in R (`est_suitability()`, architecture `lstm_v2_hierarchical_film`) as a single network fitted jointly to all 40 countries. Environmental suitability, $\psi_{jt}$, is modeled as a function of the hidden state $h_t$ and the bias term $b_h$. Specifically, $\psi_{jt}$ is defined by a sigmoid activation function applied to the linear combination of the hidden state $h_t$ and the bias $b_h$, where $h_t$ is given by the 3 layers of the LSTM model:
 
 \begin{equation}
 \psi_{jt} \sim \text{Sigmoid}(w_h \cdot h_t + b_h)
@@ -360,33 +333,33 @@ The model is a Long Short-Term Memory (LSTM) neural network designed for binary 
 h_t = \text{LSTM}\big(\text{temperature}_{jt}, \ \text{precipitation}_{jt}, \ \text{ENSO}_{t}, \dots \big)
 \end{equation}
 
-In this formulation, $h_t$ represents the hidden state generated by the LSTM network based on input variables such as temperature, precipitation, and ENSO conditions, while $b_h$ is a bias term added to the output of the hidden state transformation.
+In this formulation, $h_t$ represents the hidden state generated by the LSTM network from the 13 most recent weeks of the 38 covariates (input variables such as temperature, precipitation, and ENSO conditions), $w_h$ is the vector of output weights, and $b_h$ is a bias term added to the output of the hidden state transformation. Each covariate is standardized by its mean and standard deviation over the training weeks. The three stacked LSTM layers have 128, 64 and 32 units, and the 32 values of the last layer form a climate response shared by all countries. Before the output layer, we rescale and shift each of these values by amounts learned for the location's region and then for its country (feature-wise linear modulation, FiLM; [Perez et al. 2018](https://doi.org/10.1609/aaai.v32i1.11671)), so $h_t$ is the hidden state after this modulation. The rescaling factors are bounded between 0 and 2, and the country terms are deviations from the region's that start at zero and are shrunk toward zero by an L2 penalty of 0.1, so countries with little data essentially take their region's modulation. The five regions are a similarity-network-fusion clustering of the 40 countries (`region_map = "snf_k5"`), broadly southern, eastern (with the Democratic Republic of the Congo), coastal West African, Sahelian and far-western, and central African groups.
 
-The deep learning LSTM model consists of three stacked LSTM-RNN layers. The first LSTM layer has 500 units and the second and third LSTM layers have 250 and 100 units respectively. The architecture the LSTM model is configured to pass node values to subsequent LSTM layers allowing deep learning of more the complex interactions among the climate variable over time. We enforced model sparsity for each LSTM layer using L2 regularization (penalty = 0.001) and used a dropout rate of 0.5 for each LSTM layer to further prevent overfitting on the limited amount of data. The final output layer was a dense layer with a single unit and a sigmoid activation function to produce a probability value for binary classification, i.e. a prediction of environmental suitability $\psi_{jt}$ on a scale of 0 to 1.
+We fit the network to a continuous measure of reported incidence rather than to a binary outbreak indicator (`target_D_rate_per_country_floored`, computed by `compile_suitability_data()`). For each country and week, the target is the logarithm of one plus the number of reported cases per 100,000 population, divided by the same quantity at the country's 99th-percentile weekly rate and capped at 1. The 99th percentile is taken over the country's directly reported weeks, leaving out AI-extracted and imputed weeks, and is floored at the rate equivalent to 5 cases per week. On this scale 0 is a week without reported cases and 1 a week at or above that anchor, and $\psi_{jt}$ is the model's prediction of the target. Weeks without a case report have no target and are left out of training. The loss is the binary cross-entropy between the network output and the target. We weight weeks with and without reported cases to contribute equally to the loss (in the shipped fit about half of the training weeks have no cases), and multiply each week's weight by the confidence weight of its surveillance record (1 for counts reported directly by WHO, JHU and supplementary sources, less for AI-extracted, spread or reconstructed counts), rescaled so that the total weight is unchanged.
 
-To fit the LSTM model to data, we modified the learning rate by applying an exponential decay schedule that started at 0.001 and decayed by a factor of 0.9 every 10,000 steps to enable smoother convergence. The model was compiled using the Adam optimizer with this learning rate schedule, along with binary cross-entropy as the loss function and accuracy as the evaluation metric. The model was trained for a maximum of 200 epochs with a batch size of 1024. We allowed model fitting to stop early with a patience parameter of 10 which halts training if no improvement is observed in validation accuracy for 10 consecutive epochs. To train the model we set aside 20% of the observed data for validation and also used 20% of the training data for model fitting. The training history, including loss and accuracy, was monitored over the course of training and gave a final test accuracy of 0.73 and a final test loss of 0.56 (see Figure \@ref(fig:lstm-model-fit)).
+We train the network with expanding-window rolling-origin cross-validation, which validates strictly forward in time. The shipped fit has 12 origins, six months apart from 8 November 2020 to 8 May 2026 (a monthly grid over the second half of the fitting window, thinned to every sixth origin). At each origin the network is trained on the weeks up to the origin and validated on the five months that begin four weeks after it; the four-week gap is an embargo between the last training target and the first validation target. Training at each origin runs for up to 200 epochs and stops early when the validation loss has not improved for 10 epochs, keeping the best weights. We then train the final network on the whole fitting window for the median best epoch across origins, without early stopping (6 to 16 epochs across the seeds of the shipped fit). The optimizer is Adam with a learning rate of 0.001, which during cross-validation is halved after 8 epochs without improvement (down to $10^{-6}$), on batches of 128 windows; regularization is an L2 penalty of 0.0005 on the input weights of the LSTM layers and of 0.0001 on the learned region terms, dropout of 0.3 after each LSTM layer and recurrent dropout of 0.1.
 
-```{r lstm-model-fit, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Model performance on training and validation data."}
-knitr::include_graphics("figures/suitability_LSTM_fit.png")
-```
+We run the whole procedure, cross-validation and final fit, for 10 random seeds (11, 22, ..., 110). Each seed's weekly predictions are bounded to $[0.01, 0.99]$, carried forward to days and smoothed on the logit scale with a LOESS (span 0.025, local quadratic) to give a more stable value of $\psi_{jt}$, and we combine the ten smoothed series by their median on the logit scale. The spread across seeds is kept as a diagnostic (columns `q025` to `q975` of the prediction files), not as a prediction interval.
 
-After model training was completed, we predicted the values of environmental suitability $\psi_{jt}$ across all time steps for each location. The series shipped with MOSAIC-pkg v0.103.0 (`model/input/psi_suitability_config.json`) is fitted to the weekly record from 1 January 2015 to 17 September 2026, the last week of surveillance, and predicts $\psi_{jt}$ from 1 January 2018 to 29 April 2027, the window of the default configuration and the last week with ENSO and Indian Ocean Dipole forecasts; its final 32 weeks, after the fitting window, are a forecast. Given the amount of noise in the model predictions, we added a simple LOESS spline with logit transformation to smooth model predictions over time and give a more stable value of $\psi_{jt}$ when incorporating it into other model features (e.g. Equations \@ref(eq:beta2) and \@ref(eq:delta)). The resulting model predictions are shown for an example country such as Mozambique in Figure \@ref(fig:psi-prediction-data) which compares model predictions to the original case counts and the binary classification. Predictions for all model locations are shown in a simplified view in Figure \@ref(fig:psi-prediction-countries). Both figures are from an earlier fit, with its forecast starting after 12 March 2026, not from the shipped series.
+Finally, we correct the level and contrast of each country's series without retraining the network (`calibrate_psi_predictions()`). For each country, we regress the logit of the target on the logit of the pooled, smoothed prediction by least squares over the country's outbreak weeks (weeks with a positive target) in the fitting window, and apply the fitted slope and intercept on the logit scale to the whole series. The correction is guarded: a country with fewer than 8 outbreak weeks, too little variation in its prediction or a rank-deficient fit keeps the uncorrected series (the identity map); the slope is bounded to $[0.25, 4]$ and the intercept to $[-4, 4]$; a map that would more than double the series' standard deviation on the logit scale is blended toward the identity until it about doubles it; and, since MOSAIC-pkg v0.102.0, a map whose bounded slope is below 0.5, which would shrink that standard deviation to less than half, is not applied and the country keeps the identity map. In the shipped series 22 countries carry a fitted map (slopes 0.93 to 1.72), 5 a blended one (Burkina Faso, the Central African Republic, Eswatini, Liberia and South Africa) and 13 the identity, 4 of them (Côte d'Ivoire, the Gambia, Togo and Uganda) under the v0.102.0 rule. Note that this rule is a cutoff on the slope rather than a test that the slope is identified, and Togo sits on the threshold: of the seven refits made in 2026, only the shipped one put its slope below 0.5. This correction is part of the shipped $\psi_{jt}$; it is distinct from the calibration of $\psi^{\ast}_{jt}$ within the transmission model described below.
 
-*Note that the architecture described above is the original v0.1 suitability model. The current default in MOSAIC-pkg (`est_suitability()`, architecture `lstm_v2_hierarchical_film`) is a hierarchical LSTM with region- and country-level modulation, trained with expanding-window rolling-origin cross-validation; it is fitted with several random seeds, and the seed-level predictions are pooled by their median on the logit scale (not averaged). When suitability is estimated retrospectively (a fitting cutoff earlier than the end of the surveillance record, e.g. for forecast cross-validation), the default pre-computed response is scaled by anchors computed over the whole data panel unless the panel was compiled with a matching anchor cutoff, so out-of-sample skill measured from such a fit is optimistic; the frozen `lstm_v1_legacy` path is never leak-free for a retrospective cutoff. The production refresh, which fits up to the end of surveillance, is not affected.*
+After model training was completed, we predicted the values of environmental suitability $\psi_{jt}$ across all time steps for each location. The series shipped with MOSAIC-pkg v0.103.0 (`model/input/psi_suitability_config.json`) is fitted to the weekly record from 1 January 2015 to 17 September 2026, the last week of surveillance, and predicts $\psi_{jt}$ from 1 January 2018 to 29 April 2027, the window of the default configuration and the last week with ENSO and Indian Ocean Dipole forecasts; its final 32 weeks, after the fitting window, are a forecast. It is the production fit C3, with its bias correction re-applied under the v0.102.0 rule, and `config_default` v7.0 carries it unchanged as `psi_jt`. Its provenance (training panel, ENSO input, scripts, checksums and repository revisions) is recorded in MOSAIC-data `processed/psi_provenance/v0.101.0_C3/` and `processed/psi_provenance/v0.102.0_C3_recorrected/`, and summarized in MOSAIC-pkg `model/README_psi_provenance.md`. Predictions for an example country, Mozambique, are compared with its reported cases in Figure \@ref(fig:psi-prediction-data), and predictions for all model locations are shown in Figure \@ref(fig:psi-prediction-countries). Both figures come from an April 2026 fit of the earlier model, an LSTM without region or country terms, fitted to 19 March 2026, not from the shipped series.
 
-*Also, please note that this initial version of the model is fitted to a rather small amount of data. Model hyper parameters were specifically chosen to reduce overfitting. Therefore, we recommend to not over-interpret the time series predictions of the model at this early stage since they are likely to change and improve as more historical incidence data is included in future versions.*
+*Note that $\psi_{jt}$ is a weak signal out of sample. On the held-out cross-validation windows, a quasi-binomial regression of the target on the logit of the uncorrected network output, over all weeks, has a median slope of 0.34 across the 26 countries with at least five outbreak and five quiet weeks, against 1.15 in sample, where a calibrated predictor would have a slope of 1: out of sample, the series swings about three times more on the logit scale than the target supports. The out-of-sample value of the per-country correction is unproven. Its fitted slopes, 21 of 22 above 1 and about 2 for the five blended maps, steepen a series that is already too steep out of sample, and in a forward-chaining check on the same windows the uncorrected series scored better than the fitted corrections. Even these windows are not a strict forecast test, because they share target anchors, covariate scaling, climate anomalies and a flood model computed over the whole record. When suitability is estimated retrospectively (a fitting cutoff earlier than the end of the surveillance record, e.g. for forecast cross-validation), the default target is scaled by anchors computed over the whole data panel unless the panel was compiled with a matching anchor cutoff, so out-of-sample skill measured from such a fit is optimistic; the frozen `lstm_v1_legacy` path is never leak-free for a retrospective cutoff. The shipped series, fitted up to the end of surveillance, is not affected.*
 
-```{r psi-prediction-data, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="The LSTM model predictions over time and reported cases for an example country such as Mozambique. Reported cases are shown in the top panel and the shaded areas show the binary classification used to characterize environmental suitability. Raw model predictions are shown in the transparent brown line with the solid black line showing the LOESS smoothing. Forecasted values beyond the current time point are shown in orange and are limited to 5 month time horizon."}
+*Also note that keras training is not bitwise reproducible across processes, because recurrent dropout is not deterministic, so a refit reproduces the series statistically rather than exactly: a replicate of the production fit with ten other seeds (121 to 220) agrees with it over 2023 onward at a median per-country correlation of 0.972 and a median per-country mean absolute difference of 0.024. We therefore recommend reading $\psi_{jt}$ as a weak, climate-driven indicator of the timing of reported transmission, not as a forecast of cases.*
+
+```{r psi-prediction-data, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Reported cases (top) and predicted environmental suitability $\\psi_{jt}$ (bottom) for Mozambique, from an April 2026 fit of the earlier model, an LSTM without region or country terms (fitted to 19 March 2026), not from the shipped series. Raw predictions are the light lines and their LOESS smoothing the solid lines; values after the dashed line, Mozambique's last reported case in that fit's data (12 March 2026), are shown in orange."}
 knitr::include_graphics("figures/suitability_cases_MOZ.png")
 ```
 
-```{r psi-prediction-countries, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="The smoothed LSTM model predictions (lines) and binary suitability classification (shaded areas) over time for all countries in the MOSAIC framework. Orange lines show forecasts beyond the current date. With ENSO and DMI covariates included in the model, forecasts are limited to 5 months."}
+```{r psi-prediction-countries, echo=FALSE, cache=TRUE, fig.align='center', out.width="100%", fig.cap="Weekly predicted environmental suitability $\\psi_{jt}$ for all countries in the MOSAIC framework from 2021, from the same April 2026 fit of the earlier model as Figure \\@ref(fig:psi-prediction-data), not from the shipped series. Orange lines show predictions beyond the date the figure was drawn (April 2026)."}
 knitr::include_graphics("figures/suitability_by_country.png")
 ```
 
 #### Calibration of suitability to surveillance ($\psi^{\ast}_{jt}$)
 
-The raw LSTM output $\psi_{jt}$ captures the climate-driven *potential* for *V. cholerae* survival and transmission, but the relationship between this potential and the observed surveillance signal varies by location. In some countries epidemics peak shortly after suitability peaks, while in others there is a lag of several weeks; in some countries the climate-driven seasonality is sharper than the cholera-case signal, while in others it is flatter. Re-training the LSTM to fit case data directly would overfit the sparse surveillance record, so we instead apply a per-location *logit affine calibration* with an optional time offset and causal exponential moving average:
+The suitability series $\psi_{jt}$ captures the climate-driven *potential* for *V. cholerae* survival and transmission, but the relationship between this potential and the observed surveillance signal varies by location. In some countries epidemics peak shortly after suitability peaks, while in others there is a lag of several weeks; in some countries the climate-driven seasonality is sharper than the cholera-case signal, while in others it is flatter. Fitting a separate LSTM to each country's case record would overfit the sparse surveillance data, so within the calibration of the transmission model we instead apply a per-location *logit affine calibration* with an optional time offset and causal exponential moving average:
 
 \begin{equation}
 \psi^{\ast}_{jt} = z_{\psi^{\ast},j}\, \sigma\!\big(a_{\psi^{\ast},j}\, \text{logit}\big(\psi_{j,\,t - k_{\psi^{\ast},j}}\big) + b_{\psi^{\ast},j}\big) + (1 - z_{\psi^{\ast},j})\, \psi^{\ast}_{j,t-1},
@@ -405,7 +378,7 @@ k_{\psi^{\ast},j} \ \sim\ & \text{Truncnorm}(0,\ 25,\ -90,\ 90).
 (\#eq:psi-star-priors)
 $$
 
-The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior is centred at $+1$ (baseline odds multiplied by $e \approx 2.7$), which matches the low level of the per-capita suitability response adopted in `priors_default` v15.11 and moves the environmental decay rate of Equation \@ref(eq:delta), which reads $\psi^{\ast}_{jt}$ on its absolute level, off the $\text{days}_{\text{short}}$ floor, while its standard deviation of 2.5 allows the odds to shift by a further factor of approximately $e^{2.5} \approx 12$ in either direction; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever the raw LSTM output $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
+The one exception is Mozambique, whose time-offset prior, carried over from an earlier calibration, is $\text{Truncnorm}(-5,\ 20,\ -90,\ 90)$. The shape prior is centred on the identity transformation $a_{\psi^{\ast},j} = 1$; the offset prior is centred at $+1$ (baseline odds multiplied by $e \approx 2.7$), which matches the low level of the per-capita suitability response adopted in `priors_default` v15.11 and moves the environmental decay rate of Equation \@ref(eq:delta), which reads $\psi^{\ast}_{jt}$ on its absolute level, off the $\text{days}_{\text{short}}$ floor, while its standard deviation of 2.5 allows the odds to shift by a further factor of approximately $e^{2.5} \approx 12$ in either direction; the smoothing prior $z_{\psi^{\ast},j} \sim \text{Beta}(2, 1)$ has its mode at $z = 1$ (no smoothing) and discourages aggressive over-smoothing during the staged calibration; and the time offset $k_{\psi^{\ast},j}$ permits both a forward lag of up to 90 days (e.g. epidemics that trail suitability) and a backward advance of up to 90 days (e.g. epidemics that precede suitability peaks). The calibrated quantity $\psi^{\ast}_{jt}$ enters the model wherever $\psi_{jt}$ would otherwise be used (Equations \@ref(eq:beta2) and \@ref(eq:delta)). Note that the calibration can also flatten $\psi^{\ast}_{jt}$: as $a_{\psi^{\ast},j} \to 0$ or $z_{\psi^{\ast},j} \to 0$ the calibrated series loses the timing of $\psi_{jt}$, so a fitted model may make little use of the suitability signal. A diagnostic plot comparing $\psi_{jt}$ and $\psi^{\ast}_{jt}$ for each location is produced by `plot_psi_star_diagnostic()` in the calibration pipeline.
 
 
 ### Infectious dose ($\kappa$) {#infectious-dose-kappa}
